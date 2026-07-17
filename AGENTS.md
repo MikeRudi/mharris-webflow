@@ -36,6 +36,8 @@ Use `sites/_template/webflow-custom-code.txt` as the maintained copy-paste start
 
 Use `libraries.md` as the quick reference for library CDN links.
 
+After pushing changes to any Webflow-linked `script.js` or `styles.css`, purge the matching jsDelivr URLs and verify they return the new file before telling the user Webflow is updated.
+
 Development or quick testing:
 
 ```html
