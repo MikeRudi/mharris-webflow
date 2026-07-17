@@ -64,6 +64,7 @@ Production preference after stable releases:
 - Use the local `onDesktop(fn)` and `onMobile(fn)` helpers for desktop/mobile-specific behavior:
   `const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 992px)", fn);`
   `const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);`
+- Put global function calls directly inside `initSite()`, and put desktop/mobile calls directly inside the `onDesktop()` and `onMobile()` blocks.
 - Guard against missing Webflow elements before running animations.
 - Keep GSAP and Lenis setup explicit inside each site folder.
 - Use class names and attributes that match the Webflow project.

@@ -81,27 +81,15 @@ function gitTestMobile() {
 const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 992px)", fn);
 const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 
-function globalScripts() {
-  initLenis();
-}
-
-function desktopScripts() {
-  gitTestDesktop();
-}
-
-function mobileScripts() {
-  gitTestMobile();
-}
-
 function initSite() {
-  globalScripts();
+  initLenis();
 
   onDesktop(() => {
-    desktopScripts();
+    gitTestDesktop();
   });
 
   onMobile(() => {
-    mobileScripts();
+    gitTestMobile();
   });
 }
 
