@@ -1,0 +1,8 @@
+.git-test {
+  background-color: red;
+  transition: transform 0.4s ease;
+}
+
+.git-test.is-moved {
+  transform: translateX(50%);
+}

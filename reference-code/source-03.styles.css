@@ -1,0 +1,145 @@
+/* BUTTON HOVER */
+
+.btn-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-inner {
+  position: relative;
+  z-index: 2;
+}
+
+/* Hide enter button by default */
+.loader-enter {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .btn-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: #ff263b;
+    z-index: 1;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Hover in — instantly show red and switch text + underline to black */
+  .btn-wrap:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
+    transition: none;
+  }
+
+  .btn-wrap:hover .btn-inner {
+    color: black;
+  }
+
+  .btn-wrap:hover .btn-underline {
+    background-color: black;
+  }
+
+  /* Hover out — animate red back and reset text + underline to white */
+  .btn-wrap:not(:hover)::before {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-wrap:not(:hover) .btn-inner {
+    color: white;
+    transition: color 0.3s ease;
+  }
+
+  .btn-wrap:not(:hover) .btn-underline {
+    background-color: white;
+    transition: background-color 0.1s ease;
+  }
+}
+
+@media (max-width: 991px) {
+  /* Reveal enter button when ready */
+  .loader-enter.is-visible {
+    display: flex !important;
+  }
+}
+
+/* page main opacity 0 on load */
+
+.page-main {
+  opacity: 0;
+}
+
+/* Preloader is hidden by default */
+.preloader-wrap {
+  display: none !important;
+}
+
+/* Show preloader only on first visit */
+body[data-has-visited="false"] .preloader-wrap {
+  display: block !important;
+}
+
+[cursor-follow] {
+  cursor: pointer;
+}
+
+/* LANDER HEADER*/
+/*
+preload-header-word
+preloader-header-t
+preloader-header-e
+preloader-header-twenty
+preloader-header-eighteen
+preloader-header-wrap
+*/
+
+[lander-vid-holder] {
+  will-change: clip-path;
+}
+
+/*animate small letters away*/
+/* [preloader-header-wrap] {
+  transition: all 2s ease;
+}
+[preloader-header-wrap].is-lander [preload-header-word] {
+  opacity: 0;
+}
+
+[preloader-header-wrap].is-lander [preload-header-word] {
+} */
+
+/*animate bring T and E together and add negative margins*/
+/* [preloader-header-wrap].is-lander [preloader-header-twenty],
+[preloader-header-wrap].is-lander [preloader-header-eighteen] {
+  width: 5rem;
+  min-width: 0px;
+  transition-delay: 5s;
+} */
+
+/* [preloader-header-wrap].is-lander [preloader-header-twenty] {
+  margin-right: -3.9em;
+  transition-delay: 5s;
+}
+
+[preloader-header-wrap].is-lander [preloader-header-e] {
+  margin-right: -0.41em;
+  transition-delay: 5s;
+} */
+
+/*animate letter S reveal*/
+/* [preloader-header-wrap].is-lander [preloader-header-s] {
+  display: block !important;
+  transition-delay: 5s;
+} */
+
+/*animate letter height*/
+/* [preloader-header-wrap].is-lander [preloader-header-e],
+[preloader-header-wrap].is-lander [preloader-header-s],
+[preloader-header-wrap].is-lander [preloader-header-t] {
+  height: 8.5em !important;
+  transition-delay: 5s;
+} */

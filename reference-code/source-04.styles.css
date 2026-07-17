@@ -1,0 +1,56 @@
+:root {
+  --transition-smooth: all 400ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+a[href^="tel"],
+a[href^="mailto"] {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+  color: inherit;
+}
+
+.accordian-grow {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: var(--transition-smooth);
+}
+
+.accordian-reveal {
+  overflow: hidden; /* keeps smooth collapse */
+}
+
+.accordian-wrap.is-open .accordian-grow {
+  grid-template-rows: 1fr;
+}
+
+[line-shrink] {
+  transition: var(--transition-smooth);
+}
+
+.accordian-wrap.is-open [line-shrink] {
+  height: 0%;
+}
+
+.copy-clipboard {
+  transition: var(--transition-smooth);
+}
+
+/* Desktop CSS */
+@media only screen and (min-width: 992px) and (pointer: fine) {
+  .copy-clipboard:hover {
+    color: #c7b5f1;
+  }
+}
+
+/* Mobile CSS */
+@media only screen and (max-width: 991px) and (pointer: coarse) {
+}
+
+[data-email-address].is-clicked {
+  pointer-events: none;
+  color: #808c8e;
+}

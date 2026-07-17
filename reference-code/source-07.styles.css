@@ -1,0 +1,138 @@
+/* [preloader] {
+  display: flex;
+} */
+
+/* body .transition { 
+  display: block;
+}
+.w-editor .transition {
+  display: none;
+}
+.no-scroll-transition {
+  overflow: hidden;
+  position: relative;
+} */
+/* 
+.home-wrap {
+  opacity: 0;
+} */
+
+/* [page-wrap-home] {
+  opacity: 0;
+} */
+
+.page-wrap {
+  opacity: 0;
+}
+
+.lightbox-nav-wrap {
+  opacity: 1 !important;
+}
+
+[fade-in] {
+  opacity: 0;
+}
+
+.gallery-wrap {
+  background-color: transparent !important;
+}
+
+.menu.show .menu-left {
+  opacity: 1;
+}
+
+.works-item.hovered .thumb-vid {
+  opacity: 1;
+}
+
+.show-slider .is-slider-main {
+  max-height: none;
+  margin-top: -0.4375em;
+}
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.w-webflow-badge {
+  display: none !important;
+}
+
+[move-img-text] {
+  flex-grow: 0;
+  transition: flex-grow 0.3s ease;
+}
+
+/* .allworks-list_item {
+  transition: color 0ms ease;
+}
+
+.allworks-list_item:hover {
+  color: black;
+  transition: color 0ms ease;
+} */
+
+/* .allworks-list_item .cs-list-item {
+  transition: background-color 150ms ease;
+} */
+
+/* .allworks-list_item:hover .cs-list-item {
+  background-color: white;
+  transition: background-color 0ms ease;
+} */
+
+/* .list-bg {
+  clip-path: inset(0% 0% 100% 0%);
+  transition: clip-path 300ms ease;
+}
+.allworks-list_item:hover .list-bg {
+  clip-path: inset(0% 0% 0% 0%);
+  transition: clip-path 300ms ease;
+} */
+
+[mcon-img] {
+  opacity: 0;
+}
+/* mcon css */
+[mcon-bg] {
+  opacity: 0;
+}
+
+[mcon-grow] {
+  width: 1em;
+}
+
+@media (min-width: 992px) {
+  .is-long {
+    min-width: 0;
+    width: 0;
+    overflow: hidden;
+  }
+  body:has([illustration-hover]:hover) .illustrate-wrap {
+    display: block;
+  }
+  [hover-img-text]:hover [move-img-text] {
+    flex-grow: 1;
+  }
+
+  .new-logo:hover .new-logo-text {
+    opacity: 0;
+  }
+
+  .new-logo:hover .new-logo-svg {
+    opacity: 1;
+  }
+}
+
+.home-hero_text {
+  opacity: 1;
+}
+
+.footer-list {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.footer-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}

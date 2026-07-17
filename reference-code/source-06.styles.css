@@ -1,0 +1,604 @@
+.w-webflow-badge {
+  display: none !important;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch] {
+  overscroll-behavior: contain;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.loader-tim {
+  display: flex;
+}
+html.w-editor .loader-tim {
+  display: none;
+}
+
+.p-filter-item,
+.p-filter-all {
+  will-change: opacity, transform;
+}
+.nav_link_wrap:has(.nav_link.w--current) .nav_current_dot {
+  display: block;
+}
+
+.footer_menu_link.w--current .footer-current-dot {
+  opacity: 1;
+}
+
+.menu_section.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.story_content {
+  will-change: true;
+}
+
+.journal_item_content {
+  transition: transform 200ms ease;
+}
+
+.journal_description_hide {
+  opacity: 0;
+}
+
+[awards-img] {
+  display: none;
+}
+
+.wedo_grid_item {
+  user-select: none;
+}
+
+.page_main.grid-view {
+  .project_btn_link-left {
+    opacity: 1;
+  }
+  .project_btn_link {
+    opacity: 0.3;
+  }
+  .scroll_wrap {
+    display: block;
+  }
+  .project_section {
+    display: none;
+  }
+}
+
+.page_main.list-view {
+  .project_btn_link-left {
+    opacity: 0.3;
+  }
+  .project_btn_link {
+    opacity: 1;
+  }
+  .scroll_wrap {
+    display: none;
+  }
+  .project_section {
+    display: block;
+  }
+  .project_header {
+    display: none;
+  }
+  .project_section {
+    position: static;
+  }
+  .scroll-top-wrap {
+    display: none;
+  }
+  project_section {
+    position: relative;
+  }
+}
+
+.p-layout {
+  width: max-content !important;
+}
+
+.horizontal-section {
+  overflow: hidden;
+  /* touch-action: none; */
+}
+
+.page_wrap {
+  opacity: 0;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--light-secondary) inset;
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: #fff !important;
+}
+
+.form_close {
+  display: none;
+}
+
+/* .project-list-top {
+  visibility: hidden;
+  height: 0rem;
+} */
+
+.menu-img.big {
+  flex-grow: 2;
+}
+
+.w-editor-publish-node.w-editor-publish-node-fade-out {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.project-detail-info .project-detail-text:last-child .project-comma {
+  display: none;
+}
+
+figure div {
+  width: 100%;
+}
+
+[unmask] {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%);
+  opacity: 0;
+}
+
+@media (min-width: 992px) {
+  .team-gallery_scrollable {
+    overflow-x: scroll;
+    overflow-y: hidden;
+  }
+
+  [hover-color]:hover {
+    color: #636363;
+  }
+
+  .article-link:hover .read-article {
+    display: flex;
+  }
+
+  .article-link:hover .article-img-overlay {
+    opacity: 0.2;
+  }
+
+  .project-item:hover .article-img-overlay {
+    opacity: 0.5;
+  }
+
+  [feature-content] {
+    transition: transform 200ms ease;
+    transform: translateY(100%);
+  }
+
+  [feature-item]:hover [feature-content] {
+    transform: translateY(0);
+  }
+
+  .article-link:hover .article_text-discription {
+    opacity: 0.5;
+    transition: opacity 400ms ease-out 50ms;
+  }
+
+  .stats_grid_item:hover .stats_grid_border {
+    opacity: 0;
+  }
+
+  [global-btn]:hover [btn-txt] {
+    color: var(--theme--text-inverted) !important;
+  }
+
+  [global-btn]:hover {
+    background-color: var(--theme--background-inverted) !important;
+  }
+
+  .logo_dhk_img:hover .dhk_hover-show {
+    opacity: 1;
+  }
+
+  .logo_dhk_img:hover .dhk_hover-hide {
+    opacity: 0;
+  }
+
+  .leader_grid_item:hover .leader_role {
+    display: block;
+  }
+
+  .leader_grid_item:hover .leader_btn {
+    display: flex;
+  }
+
+  .leader_grid_item:hover .leader_name {
+    opacity: 1;
+    transition: opacity 0s ease;
+  }
+
+  .leader_grid_item:hover .leader_img {
+    width: var(--size--12rem);
+    z-index: 15;
+    transition: transform 0.3s ease;
+  }
+
+  /* .team_gallery_item:hover .gallery_img {
+    opacity: 0;
+  } */
+
+  .team_gallery_item:hover .team_gallery_content {
+    opacity: 1;
+    display: block;
+    position: absolute;
+    right: calc(99% + 0.625rem);
+  }
+
+  .team_gallery_item:hover .gallery_img {
+    filter: none;
+  }
+
+  .footer_menu_link:hover {
+    opacity: 0.5;
+  }
+
+  .track-media-enquiry:hover {
+    opacity: 0.5;
+  }
+
+  .track-general-enquiry:hover {
+    opacity: 0.5;
+  }
+
+  [opacity-trigger]:hover [opacity-item] {
+    opacity: 1;
+  }
+
+  [opacity-trigger]:hover [reveal-item] {
+    display: block;
+  }
+
+  .project_list_item:hover .project-list-cms {
+    display: block;
+  }
+
+  /* .project_list_item:hover .project-list-top {
+    height: 5.5rem;
+  } */
+
+  .project_list_item:hover .list-view-btn {
+    display: flex;
+  }
+
+  .project_list_item:hover .project-num {
+    display: none;
+  }
+
+  .p-filter-item:hover {
+    opacity: 1 !important;
+  }
+
+  .p-filter-all {
+    opacity: 1 !important;
+  }
+
+  .nav-link:hover {
+    color: #636363;
+  }
+
+  .project-img-wrap {
+    min-height: 100vh;
+    height: 100%;
+  }
+
+  .awards_list_cms .awards_item .awards_text-thin {
+    display: none;
+  }
+  .awards_list_cms .awards_item:hover .awards_text-thin {
+    display: block;
+  }
+}
+.p-filter-item {
+  opacity: 1 !important;
+}
+
+@media (max-width: 991px) {
+  .team_gallery_item:hover .gallery_img {
+    filter: none;
+  }
+
+  .awards_item.is-active [awards-mobile-opacity] {
+    opacity: 1;
+  }
+
+  .awards_item.is-active [awards-mobile-show] {
+    display: block;
+  }
+
+  .awards_item.is-active .mobile-cross-minus {
+    display: block;
+  }
+  .awards_item.is-active .mobile-cross-plus {
+    display: none;
+  }
+
+  .wedo_grid_item.u-grid-desktop.is-active .wedo-mobile-revel {
+    display: block;
+  }
+
+  .wedo_grid_item.u-grid-desktop.is-active .wedo-cross {
+    opacity: 1;
+  }
+
+  .wedo_grid_item.u-grid-desktop.is-active .mobile-cross-minus {
+    display: block;
+  }
+  .wedo_grid_item.u-grid-desktop.is-active .mobile-cross-plus {
+    display: none;
+  }
+}
+
+.journal-rich img {
+  width: 100%; /* Make images take full width of .journal-rich */
+  height: auto; /* Maintain aspect ratio */
+  display: block; /* Removes extra spacing below inline images */
+  object-fit: contain; /* Ensures the whole image is visible */
+}
+
+.journal-rich figure {
+  max-width: none !important;
+  width: 100%;
+}
+
+@media (pointer: fine) {
+  .gallery_sticky {
+    display: block;
+  }
+  .gallery-mobile {
+    display: none;
+  }
+
+  .team-gallery_item:hover .team-img {
+    filter: none;
+  }
+
+  .team-img {
+    transition: filter 300ms ease;
+  }
+
+  .team-clickable_wrap {
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .team-gallery_item:hover .team-clickable_wrap {
+    opacity: 1;
+  }
+}
+
+@media (pointer: coarse) {
+  .gallery_sticky {
+    display: none;
+  }
+  .gallery-mobile {
+    display: block;
+  }
+  /* tim check */
+  .gallery-cms-one {
+    flex: none !important;
+  }
+  .gallery-cms-two {
+    flex: none !important;
+  }
+  /* tim check */
+  .studio_project_grid-right {
+    margin-top: 0% !important;
+  }
+
+  .studio_project_content.u-grid-desktop {
+    padding-top: 18rem;
+  }
+
+  .member-content {
+    height: 60svh;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .project_btn_wrap.u-column-3 {
+    z-index: 5;
+  }
+}
+
+.full-height-fix {
+  height: 100lvh;
+  height: 100dvh; /* fallback for older devices */
+  height: 100vh; /* final fallback for really old ones */
+}
+
+.journal-rich figcaption {
+  overflow-wrap: anywhere;
+  max-width: 50%;
+  margin-top: 0.6rem;
+  font-style: italic;
+  text-align: left;
+  opacity: 50%;
+}
+
+.journal-rich figcaption strong {
+  font-size: 1em;
+}
+
+.journal-rich p strong {
+  font-size: 1em;
+}
+
+.footer_contact.u-column-2 {
+  position: relative;
+}
+
+@media screen and (min-width: 991px) {
+  .journal-rich h6:before {
+    top: 0 !important;
+    transform: translateY(100%) !important;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .project_btn_wrap.u-column-3 {
+    z-index: 5;
+  }
+
+  .footer-form-layout .field-text::placeholder {
+    font-size: 1rem;
+  }
+
+  .journal-rich figcaption {
+    max-width: none;
+    padding: 0 0.95rem !important;
+  }
+
+  .menu-contact-layout .socials-wrap .socials-item:last-child {
+    padding-bottom: 0;
+  }
+}
+
+@media only screen and (min-width: 992px) and (pointer: fine) {
+  /* [feature-item] .journal_description_hide {
+    transition: all 450ms ease-out;
+  }
+*/
+  .project_img_wrap {
+    border-bottom: 2px solid #000;
+  }
+  .load-more-btn:hover {
+    background-color: #000;
+  }
+
+  .load-more-btn:hover [btn-txt] {
+    color: #fff;
+  }
+
+  [copy-el] {
+    cursor: pointer;
+  }
+
+  [feature-item] .journal_description_hide {
+    transition: grid-template-rows 300ms ease-out, opacity 500ms ease-in;
+  }
+
+  [feature-item]:hover .journal_description_hide {
+    opacity: 1;
+    grid-template-rows: 1fr;
+  }
+}
+
+.team-nav_item {
+  pointer-events: none;
+}
+
+.team-nav_item.is-clickable {
+  pointer-events: auto;
+}
+
+.sharing .journal-arrow {
+  visibility: hidden;
+}
+.team-top_layout {
+  position: relative;
+  z-index: 26;
+}
+
+.member-overlay {
+  z-index: 30;
+}
+
+@media only screen and (min-width: 992px) and (pointer: coarse) {
+  .project-img-wrap {
+    height: 100svh;
+  }
+}
+
+.team-gallery_top {
+  user-select: none;
+}
+
+@media screen and (max-width: 768px) {
+  .journal-rich p,
+  .journal-rich a {
+    font-size: 1rem;
+  }
+
+  .member-content {
+    overflow: hidden;
+    height: auto;
+  }
+
+  .journal-header,
+  .journal-rich p,
+  .journal-navigation {
+    padding-left: 1rem;
+  }
+
+  .journal-tag {
+    left: 1rem;
+  }
+
+  /* .member-overlay-layout {
+    overscroll-behavior: contain;
+  } */
+
+  .team-filters_item.is-active:hover {
+    opacity: 1;
+  }
+
+  .team-filters_component {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
+    );
+  }
+}
+
+.studio-nav-btn.w--current {
+  color: white;
+}
+
+/* project pages filter system*/
+
+.p-filter-wrapper .p-arrow {
+  transform: rotateX(0deg) !important;
+  transition: transform 0.3s ease;
+}
+
+.p-filter-wrapper.is-expanded .p-arrow {
+  transform: rotateX(180deg) !important;
+}

@@ -1,0 +1,88 @@
+body .transition {
+  display: block;
+}
+.w-editor .transition {
+  display: none;
+}
+.no-scroll-transition {
+  overflow: hidden;
+  position: relative;
+}
+
+[fade-in] {
+  opacity: 0;
+}
+
+.gallery-wrap {
+  background-color: transparent !important;
+}
+
+.menu.show .menu-left {
+  opacity: 1;
+}
+
+.works-item.hovered .thumb-vid {
+  opacity: 1;
+}
+
+.show-slider .is-slider-main {
+  max-height: none;
+  margin-top: -0.4375em;
+}
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.w-webflow-badge {
+  display: none !important;
+}
+
+[hover-img-text]:hover [move-img-text] {
+  flex-grow: 1;
+}
+
+[move-img-text] {
+  flex-grow: 0;
+  transition: flex-grow 0.3s ease;
+}
+
+/* .allworks-list_item {
+  transition: color 0ms ease;
+}
+
+.allworks-list_item:hover {
+  color: black;
+  transition: color 0ms ease;
+} */
+
+/* .allworks-list_item .cs-list-item {
+  transition: background-color 150ms ease;
+} */
+
+/* .allworks-list_item:hover .cs-list-item {
+  background-color: white;
+  transition: background-color 0ms ease;
+} */
+
+/* .list-bg {
+  clip-path: inset(0% 0% 100% 0%);
+  transition: clip-path 300ms ease;
+}
+.allworks-list_item:hover .list-bg {
+  clip-path: inset(0% 0% 0% 0%);
+  transition: clip-path 300ms ease;
+} */
+
+/* mcon css */
+[mcon-bg] {
+  opacity: 0;
+}
+
+[mcon-img] {
+  opacity: 0;
+}
+
+[mcon-grow] {
+  width: 1em;
+}

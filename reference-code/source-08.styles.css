@@ -1,0 +1,139 @@
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* ACCORDIAN SLIDER start */
+[aa-item-bottom] {
+  --r: 0fr;
+  display: grid;
+  grid-template-rows: minmax(0, var(--r));
+  overflow: hidden;
+  min-height: 0;
+  transition: grid-template-rows 0.6s ease, margin 0.35s ease-out;
+  will-change: grid-template-rows, margin;
+  contain: layout paint;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+[aa-item] {
+  transition: grid-template-rows 0.6s ease, margin 0.35s ease-out;
+}
+
+[aa-item-bottom] > * {
+  overflow: hidden;
+  min-height: 0;
+  will-change: clip-path;
+  transition: clip-path 0.35s ease-out;
+}
+
+[aa-item].is-open [aa-item-bottom] {
+  --r: 1fr;
+  grid-template-rows: minmax(0, var(--r));
+  margin-top: 1em;
+}
+
+[aa-img] {
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+/* ACCORDIAN SLIDER end */
+/* GRADIENT BG start */
+.gradient-1 {
+  background-color: rgba(0, 0, 0, 1);
+  overflow: hidden;
+}
+
+.gradient-1::before {
+  content: "";
+  position: absolute;
+
+  width: 120vmax;
+  height: 120vmax;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(130, 113, 39, 0.3) 0%,
+    rgba(130, 113, 39, 0) 55%
+  );
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: gradient-orbit 28s infinite linear;
+  opacity: 0.9;
+}
+
+@keyframes gradient-orbit {
+  0% {
+    transform: translate(-50%, -50%) translate(-22%, -18%);
+  }
+  8% {
+    transform: translate(-50%, -50%) translate(18%, -27%);
+  }
+  16% {
+    transform: translate(-50%, -50%) translate(32%, -5%);
+  }
+  25% {
+    transform: translate(-50%, -50%) translate(20%, 22%);
+  }
+  33% {
+    transform: translate(-50%, -50%) translate(-8%, 30%);
+  }
+  41% {
+    transform: translate(-50%, -50%) translate(-28%, 18%);
+  }
+  50% {
+    transform: translate(-50%, -50%) translate(-35%, -4%);
+  }
+  58% {
+    transform: translate(-50%, -50%) translate(-12%, -28%);
+  }
+  66% {
+    transform: translate(-50%, -50%) translate(14%, -32%);
+  }
+  75% {
+    transform: translate(-50%, -50%) translate(30%, -10%);
+  }
+  83% {
+    transform: translate(-50%, -50%) translate(25%, 18%);
+  }
+  91% {
+    transform: translate(-50%, -50%) translate(0%, 28%);
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(-22%, -18%);
+  }
+}
+/* GRADIENT BG end */
+
+/* [link-underline] {
+  width: 0%;
+  transition: width 150ms ease-out;
+}
+
+[link-underline-hover]:hover [link-underline] {
+  width: 100%;
+} */
+
+/* default */
+.m-h-line {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.ham-close {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* when menu is open */
+.mobile-hamburger.is-closed .m-h-line {
+  opacity: 0 !important;
+}
+
+.mobile-hamburger.is-closed .ham-close {
+  opacity: 1;
+}
