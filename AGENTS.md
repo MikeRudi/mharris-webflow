@@ -40,6 +40,8 @@ For development links, prefer the GitHub API loader pattern in `sites/_template/
 
 Do not rely on jsDelivr `@main` URLs for active development. They can cache old files and purge requests can be throttled. Use jsDelivr for stable production links later, once code is less frequently changing.
 
+Keep Flowplay optional in new-site templates. Loading it on pages without video players can create noisy counter errors in the console.
+
 Development or quick testing:
 
 ```html

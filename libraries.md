@@ -24,12 +24,12 @@ SplitType
 <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
 ```
 
+## Optional
+
 Flowplay
 ```html
 <script src="https://cdn.jsdelivr.net/gh/videsigns/webflow-tools@latest/Media%20Player/flowplay.js"></script>
 ```
-
-## Optional
 
 Flowplay+
 ```html
