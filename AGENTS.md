@@ -61,7 +61,9 @@ Production preference after stable releases:
 - Use plain JavaScript unless a site specifically needs a build tool.
 - Wrap site code in a clear initialization function.
 - Prefer small named functions for each behavior, then call those functions from the site initializer.
-- Use GSAP `matchMedia()` for desktop/mobile-specific behavior when GSAP is available.
+- Use the local `onDesktop(fn)` and `onMobile(fn)` helpers for desktop/mobile-specific behavior:
+  `const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 992px)", fn);`
+  `const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);`
 - Guard against missing Webflow elements before running animations.
 - Keep GSAP and Lenis setup explicit inside each site folder.
 - Use class names and attributes that match the Webflow project.
