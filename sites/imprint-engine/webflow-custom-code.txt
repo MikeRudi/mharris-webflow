@@ -1,0 +1,65 @@
+WEBFLOW CUSTOM CODE
+
+Repo: MikeRudi/mharris-webflow
+
+
+HEAD CODE
+
+<script>
+  window.mhLoad = async function (path, type) {
+    const url = "https://api.github.com/repos/MikeRudi/mharris-webflow/contents/" + path + "?ref=main&v=" + Date.now();
+    const response = await fetch(url, { cache: "no-store" });
+    const file = await response.json();
+    const code = atob(file.content.replace(/\s/g, ""));
+    const el = document.createElement(type === "css" ? "style" : "script");
+
+    el.textContent = code;
+    document[type === "css" ? "head" : "body"].appendChild(el);
+  };
+
+  mhLoad("sites/imprint-engine/src/styles.css", "css");
+</script>
+
+
+BEFORE </BODY> CODE
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+<script>
+  if (window.mhLoad) mhLoad("sites/imprint-engine/src/script.js", "js");
+</script>
+
+
+OPTIONAL
+
+Swiper CSS
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@14.0.5/swiper-bundle.min.css">
+
+Plyr CSS
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.css">
+
+Flowplay
+<script src="https://cdn.jsdelivr.net/gh/videsigns/webflow-tools@latest/Media%20Player/flowplay.js"></script>
+
+Flowplay+
+<script src="https://cdn.jsdelivr.net/gh/videsigns/webflow-tools@latest/Media%20Player/flowplayplus.js"></script>
+
+GSAP Observer
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Observer.min.js"></script>
+
+GSAP Flip
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
+
+GSAP ScrambleText
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrambleTextPlugin.min.js"></script>
+
+Swiper JS
+<script src="https://cdn.jsdelivr.net/npm/swiper@14.0.5/swiper-bundle.min.js"></script>
+
+Lottie
+<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.13.0/build/player/lottie.min.js"></script>
+
+Plyr JS
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.min.js"></script>
