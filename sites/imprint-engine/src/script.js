@@ -84,11 +84,11 @@ function initSite() {
   initLenis();
 
   onDesktop(() => {
-    gitTestDesktop();
+    // gitTestDesktop();
   });
 
   onMobile(() => {
-    gitTestMobile();
+    // gitTestMobile();
   });
 }
 
