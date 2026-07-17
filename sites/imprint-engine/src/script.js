@@ -19,9 +19,8 @@ function initLenis() {
     gsap.registerPlugin(ScrollTrigger);
   }
 
-  document.querySelectorAll("[data-lenis-prevent]").forEach((el) => {
-    el.addEventListener("wheel", (event) => event.stopPropagation());
-    el.addEventListener("touchmove", (event) => event.stopPropagation());
+  $("[data-lenis-prevent]").on("wheel touchmove", function (event) {
+    event.stopPropagation();
   });
 
   if (window.ScrollTrigger) {
@@ -47,34 +46,34 @@ function initLenis() {
 }
 
 function gitTestDesktop() {
-  const gitTest = document.querySelector(".git-test");
-  if (!gitTest) return null;
+  const $gitTest = $(".git-test");
+  if (!$gitTest.length) return null;
 
   const handleClick = () => {
-    gitTest.classList.toggle("is-moved-right");
+    $gitTest.toggleClass("is-moved-right");
   };
 
-  gitTest.addEventListener("click", handleClick);
+  $gitTest.on("click.gitTestDesktop", handleClick);
 
   return () => {
-    gitTest.removeEventListener("click", handleClick);
-    gitTest.classList.remove("is-moved-right");
+    $gitTest.off("click.gitTestDesktop");
+    $gitTest.removeClass("is-moved-right");
   };
 }
 
 function gitTestMobile() {
-  const gitTest = document.querySelector(".git-test");
-  if (!gitTest) return null;
+  const $gitTest = $(".git-test");
+  if (!$gitTest.length) return null;
 
   const handleClick = () => {
-    gitTest.classList.toggle("is-moved-down");
+    $gitTest.toggleClass("is-moved-down");
   };
 
-  gitTest.addEventListener("click", handleClick);
+  $gitTest.on("click.gitTestMobile", handleClick);
 
   return () => {
-    gitTest.removeEventListener("click", handleClick);
-    gitTest.classList.remove("is-moved-down");
+    $gitTest.off("click.gitTestMobile");
+    $gitTest.removeClass("is-moved-down");
   };
 }
 
@@ -93,8 +92,4 @@ function initSite() {
   });
 }
 
-if (window.jQuery) {
-  $(initSite);
-} else {
-  initSite();
-}
+$(initSite);
