@@ -105,8 +105,8 @@ function initSite() {
   });
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initSite);
+if (window.jQuery) {
+  $(initSite);
 } else {
   initSite();
 }

@@ -68,6 +68,7 @@ Production preference after stable releases:
 - Keep GSAP and Lenis setup explicit inside each site folder.
 - Use class names and attributes that match the Webflow project.
 - Do not assume a class exists unless it is documented in `webflow-notes.md` or visible in the current site code.
+- Prefer jQuery ready shorthand `$(initSite)` for Webflow startup when jQuery is available, with a small plain-JS fallback only if needed.
 - Add comments only where they help explain site-specific behavior.
 
 ## Before Editing a Site
