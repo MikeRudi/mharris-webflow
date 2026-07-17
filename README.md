@@ -50,3 +50,12 @@ For production, prefer a version tag once a site is stable:
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@v1.0.0/sites/site-name/src/styles.css">
 <script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@v1.0.0/sites/site-name/src/script.js"></script>
 ```
+## Dev Sync
+
+To auto-commit and push a site's `src` files while working in VS Code:
+
+```sh
+node scripts/watch-push.js imprint-engine
+```
+
+Save in VS Code, wait for the push message, then refresh Webflow. Stop the watcher with `Ctrl+C`.

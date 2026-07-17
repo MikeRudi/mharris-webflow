@@ -42,6 +42,8 @@ Do not rely on jsDelivr `@main` URLs for active development. They can cache old 
 
 Keep Flowplay optional in new-site templates. Loading it on pages without video players can create noisy counter errors in the console.
 
+For fast Webflow testing, `scripts/watch-push.js` can watch a site's `src` folder and auto-commit/push saved changes.
+
 Development or quick testing:
 
 ```html
