@@ -7,15 +7,31 @@ HEAD CODE
 
 <script>
   (function () {
-    window.mhWebflowVersion = Date.now();
+    window.mhLoadGithubFile = async function (path) {
+      const url =
+        "https://api.github.com/repos/MikeRudi/mharris-webflow/contents/" +
+        path +
+        "?ref=main&v=" +
+        Date.now();
 
-    const mhStyles = document.createElement("link");
-    mhStyles.rel = "stylesheet";
-    mhStyles.href =
-      "https://cdn.jsdelivr.net/gh/MikeRudi/mharris-webflow@main/sites/_template/src/styles.css?v=" +
-      window.mhWebflowVersion;
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("GitHub load failed: " + path);
 
-    document.head.appendChild(mhStyles);
+      const file = await response.json();
+      return atob(file.content.replace(/\s/g, ""));
+    };
+
+    window.mhLoadGithubFile("sites/_template/src/styles.css")
+      .then(function (css) {
+        const style = document.createElement("style");
+        style.setAttribute("data-mh-source", "styles.css");
+        style.textContent = css;
+
+        document.head.appendChild(style);
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
   })();
 </script>
 
@@ -29,12 +45,17 @@ BEFORE </BODY> CODE
 <script src="https://cdn.jsdelivr.net/gh/videsigns/webflow-tools@latest/Media%20Player/flowplay.js"></script>
 <script>
   (function () {
-    const mhScript = document.createElement("script");
-    mhScript.src =
-      "https://cdn.jsdelivr.net/gh/MikeRudi/mharris-webflow@main/sites/_template/src/script.js?v=" +
-      (window.mhWebflowVersion || Date.now());
+    window.mhLoadGithubFile("sites/_template/src/script.js")
+      .then(function (js) {
+        const script = document.createElement("script");
+        script.setAttribute("data-mh-source", "script.js");
+        script.textContent = js;
 
-    document.body.appendChild(mhScript);
+        document.body.appendChild(script);
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
   })();
 </script>
 

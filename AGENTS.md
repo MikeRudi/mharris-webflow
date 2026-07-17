@@ -36,9 +36,9 @@ Use `sites/_template/webflow-custom-code.txt` as the maintained copy-paste start
 
 Use `libraries.md` as the quick reference for library CDN links.
 
-For development links, prefer the cache-busted loader pattern in `sites/_template/webflow-custom-code.txt` so Webflow refreshes can pick up pushed `@main` changes without manually changing the URL.
+For development links, prefer the GitHub API loader pattern in `sites/_template/webflow-custom-code.txt` so Webflow refreshes can pick up pushed `main` changes without jsDelivr branch cache getting in the way.
 
-After pushing changes to any Webflow-linked `script.js` or `styles.css`, purge the matching jsDelivr URLs and verify they return the new file before telling the user Webflow is updated. Browser cache can still hold old static URLs, so use the cache-busted loader for active development.
+Do not rely on jsDelivr `@main` URLs for active development. They can cache old files and purge requests can be throttled. Use jsDelivr for stable production links later, once code is less frequently changing.
 
 Development or quick testing:
 
