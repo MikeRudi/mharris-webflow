@@ -85,7 +85,7 @@ function initResponsiveScripts() {
   function run() {
     if (typeof cleanup === "function") cleanup();
 
-    cleanup = desktopQuery.matches ? gitTestDesktop() : gitTestMobile();
+    cleanup = desktopQuery.matches ? gitTestMobile() : gitTestDesktop();
   }
 
   run();

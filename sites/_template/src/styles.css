@@ -1,18 +1,18 @@
 .git-test {
-  background-color: red;
+  background-color: green;
   transition: transform 0.4s ease;
 }
 
-.git-test.is-moved-right {
-  transform: translateX(50%);
+.git-test.is-moved-down {
+  transform: translateY(50%);
 }
 
 @media screen and (max-width: 991px) {
   .git-test {
-    background-color: green;
+    background-color: red;
   }
 
-  .git-test.is-moved-down {
-    transform: translateY(50%);
+  .git-test.is-moved-right {
+    transform: translateX(50%);
   }
 }
