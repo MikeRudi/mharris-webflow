@@ -79,23 +79,22 @@ function gitTestMobile() {
 }
 
 function initResponsiveScripts() {
-  if (!window.gsap) {
-    gitTestDesktop();
-    return;
+  const desktopQuery = window.matchMedia("(min-width: 992px)");
+  let cleanup = null;
+
+  function run() {
+    if (typeof cleanup === "function") cleanup();
+
+    cleanup = desktopQuery.matches ? gitTestDesktop() : gitTestMobile();
   }
 
-  const mm = gsap.matchMedia();
-
-  mm.add("(min-width: 992px)", () => {
-    return gitTestDesktop();
-  });
-
-  mm.add("(max-width: 991px)", () => {
-    return gitTestMobile();
-  });
+  run();
+  desktopQuery.addEventListener("change", run);
 }
 
 function initSite() {
+  window.mhTemplateLoaded = true;
+
   initLenis();
   initResponsiveScripts();
 }
