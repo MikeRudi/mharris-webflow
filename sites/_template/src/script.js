@@ -50,14 +50,14 @@ function gitTestDesktop() {
   if (!$gitTest.length) return null;
 
   const handleClick = () => {
-    $gitTest.toggleClass("is-moved-right");
+    $gitTest.toggleClass("is-moved-down");
   };
 
   $gitTest.on("click.gitTestDesktop", handleClick);
 
   return () => {
     $gitTest.off("click.gitTestDesktop");
-    $gitTest.removeClass("is-moved-right");
+    $gitTest.removeClass("is-moved-down");
   };
 }
 
@@ -66,14 +66,14 @@ function gitTestMobile() {
   if (!$gitTest.length) return null;
 
   const handleClick = () => {
-    $gitTest.toggleClass("is-moved-down");
+    $gitTest.toggleClass("is-moved-right");
   };
 
   $gitTest.on("click.gitTestMobile", handleClick);
 
   return () => {
     $gitTest.off("click.gitTestMobile");
-    $gitTest.removeClass("is-moved-down");
+    $gitTest.removeClass("is-moved-right");
   };
 }
 
