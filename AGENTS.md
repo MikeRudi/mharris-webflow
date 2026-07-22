@@ -44,6 +44,15 @@ Keep Flowplay optional in new-site templates. Loading it on pages without video 
 
 For fast Webflow testing, `scripts/watch-push.js` can watch a site's `src` folder and auto-commit/push saved changes.
 
+## Webflow Designer Access
+
+- The user mainly works directly in Webflow.
+- Use the Webflow plugin primarily to inspect context, selected elements, pages, classes, structure, and what the user is referring to.
+- Do not edit, create, move, delete, style, publish, upload, or otherwise change anything inside Webflow unless the user explicitly asks for that specific Webflow action.
+- Before making any Webflow change, ask for confirmation that editing Webflow is allowed for that action.
+- This restriction does not apply to local repo files in `sites/*/src/script.js` and `sites/*/src/styles.css`; continue editing those files normally when asked.
+- Current connected site: `Imprint Engine v1` (`siteId: 6a59f919cc325da48eff4d6d`).
+
 Development or quick testing:
 
 ```html
