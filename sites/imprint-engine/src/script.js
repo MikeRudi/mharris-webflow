@@ -142,6 +142,7 @@ function footerEnginePixels() {
     insideColor: "#000000",
     pixelGap: 9,
     pixelSize: 1.6,
+    outsideSpread: 1,
     insideSpread: 1.5,
     lightRadius: 150,
     lightLevels: 10,
@@ -341,7 +342,7 @@ function footerEnginePixels() {
 
     outsideLevel.appendChild(
       createSvgElement("path", {
-        d: createCirclePath(pixelRadius),
+        d: createCirclePath(pixelRadius * settings.outsideSpread),
         fill: settings.outsideColor,
       })
     );
