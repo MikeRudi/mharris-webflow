@@ -142,7 +142,6 @@ function footerEnginePixels() {
     insideColor: "#000000",
     pixelGap: 9,
     pixelSize: 1.6,
-    outsideSpread: 16,
     insideSpread: 1.5,
     lightRadius: 150,
     lightLevels: 10,
@@ -165,6 +164,7 @@ function footerEnginePixels() {
   const originalPaths = $svg.children("path").toArray();
   const effectId = `footer-pixels-${Date.now()}`;
   const lightGradients = [];
+  const pixelCenters = [];
   const lightPosition = {
     x: viewBox.x + viewBox.width / 2,
     y: viewBox.y + viewBox.height / 2,
@@ -173,6 +173,24 @@ function footerEnginePixels() {
   if (!originalPaths.length) return null;
 
   $svg.children(".footer-pixels-defs, .footer-svg-pixel-layer").remove();
+
+  for (
+    let y = viewBox.y + settings.pixelGap / 2;
+    y < viewBox.y + viewBox.height;
+    y += settings.pixelGap
+  ) {
+    for (
+      let x = viewBox.x + settings.pixelGap / 2;
+      x < viewBox.x + viewBox.width;
+      x += settings.pixelGap
+    ) {
+      const point = new DOMPoint(x, y);
+
+      if (originalPaths.some((path) => path.isPointInFill(point))) {
+        pixelCenters.push({ x, y });
+      }
+    }
+  }
 
   function createSvgElement(tag, attributes = {}) {
     const element = document.createElementNS(svgNamespace, tag);
@@ -184,13 +202,26 @@ function footerEnginePixels() {
     return element;
   }
 
-  function createPixelPath(path, patternId, spread) {
+  function createCirclePath(radius) {
+    const diameter = radius * 2;
+
+    return pixelCenters
+      .map(
+        ({ x, y }) =>
+          `M ${x - radius} ${y}` +
+          `a ${radius} ${radius} 0 1 0 ${diameter} 0` +
+          `a ${radius} ${radius} 0 1 0 ${-diameter} 0`
+      )
+      .join(" ");
+  }
+
+  function createPixelPath(path, patternId) {
     const pixelPath = path.cloneNode(false);
 
     pixelPath.removeAttribute("id");
     pixelPath.setAttribute("fill", `url(#${patternId})`);
     pixelPath.setAttribute("stroke", `url(#${patternId})`);
-    pixelPath.setAttribute("stroke-width", spread);
+    pixelPath.setAttribute("stroke-width", settings.insideSpread);
     pixelPath.setAttribute("stroke-linejoin", "round");
 
     return pixelPath;
@@ -237,16 +268,9 @@ function footerEnginePixels() {
       (1 + level * (settings.maxPixelScale - 1));
     const revealRadius =
       settings.lightRadius * (1 - level * settings.scaleFalloff);
-    const outsidePatternId = `${effectId}-outside-${index}`;
     const insidePatternId = `${effectId}-inside-${index}`;
     const gradientId = `${effectId}-gradient-${index}`;
     const maskId = `${effectId}-mask-${index}`;
-    const outsidePattern = createSvgElement("pattern", {
-      id: outsidePatternId,
-      patternUnits: "userSpaceOnUse",
-      width: settings.pixelGap,
-      height: settings.pixelGap,
-    });
     const insidePattern = createSvgElement("pattern", {
       id: insidePatternId,
       patternUnits: "userSpaceOnUse",
@@ -254,14 +278,6 @@ function footerEnginePixels() {
       height: settings.pixelGap,
     });
 
-    outsidePattern.appendChild(
-      createSvgElement("circle", {
-        cx: settings.pixelGap / 2,
-        cy: settings.pixelGap / 2,
-        r: pixelRadius,
-        fill: settings.outsideColor,
-      })
-    );
     insidePattern.appendChild(
       createSvgElement("circle", {
         cx: settings.pixelGap / 2,
@@ -323,16 +339,18 @@ function footerEnginePixels() {
       opacity: settings.insideOpacity,
     });
 
+    outsideLevel.appendChild(
+      createSvgElement("path", {
+        d: createCirclePath(pixelRadius),
+        fill: settings.outsideColor,
+      })
+    );
+
     originalPaths.forEach((path) => {
-      outsideLevel.appendChild(
-        createPixelPath(path, outsidePatternId, settings.outsideSpread)
-      );
-      insideLevel.appendChild(
-        createPixelPath(path, insidePatternId, settings.insideSpread)
-      );
+      insideLevel.appendChild(createPixelPath(path, insidePatternId));
     });
 
-    defs.append(outsidePattern, insidePattern, gradient, mask);
+    defs.append(insidePattern, gradient, mask);
     outsideLayer.appendChild(outsideLevel);
     insideLayer.appendChild(insideLevel);
     lightGradients.push(gradient);
