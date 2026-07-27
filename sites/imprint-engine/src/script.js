@@ -163,8 +163,10 @@ function footerCursor() {
   });
 
   function moveCursor(event) {
-    xTo(event.clientX);
-    yTo(event.clientY);
+    const cursorRect = $cursor[0].getBoundingClientRect();
+
+    xTo(event.clientX - cursorRect.left);
+    yTo(event.clientY - cursorRect.top);
   }
 
   $trigger
