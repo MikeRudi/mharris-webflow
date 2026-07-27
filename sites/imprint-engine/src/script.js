@@ -86,7 +86,7 @@ function initSite() {
   onDesktop(() => {
     // gitTestDesktop();
     lineHover();
-    return footerCursor();
+    footerCursor();
   });
 
   onMobile(() => {
