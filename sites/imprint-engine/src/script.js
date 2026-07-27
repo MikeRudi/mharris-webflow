@@ -143,7 +143,7 @@ function footerCursor() {
 
   if (!$trigger.length || !$cursor.length || !$footerCursor.length) return null;
 
-  gsap.set($cursor, {
+  gsap.set($footerCursor, {
     xPercent: -50,
     yPercent: -50,
   });
@@ -152,12 +152,12 @@ function footerCursor() {
     display: "none",
   });
 
-  const xTo = gsap.quickTo($cursor, "x", {
+  const xTo = gsap.quickTo($footerCursor, "x", {
     duration: 0.2,
     ease: "power3.out",
   });
 
-  const yTo = gsap.quickTo($cursor, "y", {
+  const yTo = gsap.quickTo($footerCursor, "y", {
     duration: 0.2,
     ease: "power3.out",
   });
@@ -193,4 +193,3 @@ function footerCursor() {
     });
   };
 }
-
