@@ -85,6 +85,7 @@ function initSite() {
 
   onDesktop(() => {
     // gitTestDesktop();
+    lineHover();
   });
 
   onMobile(() => {
@@ -93,3 +94,45 @@ function initSite() {
 }
 
 $(initSite);
+
+function lineHover() {
+  $("[line-hover-item]").each(function () {
+    const $item = $(this);
+    const $line = $item.find("[line-hover]").first();
+
+    if (!$line.length) return;
+
+    gsap.set($line, {
+      clipPath: "inset(0% 100% 0% 0%)",
+    });
+
+    $item
+      .off(".lineHover")
+      .on("mouseenter.lineHover", function () {
+        gsap.killTweensOf($line);
+
+        gsap.fromTo(
+          $line,
+          {
+            clipPath: "inset(0% 100% 0% 0%)",
+          },
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            duration: 0.3,
+            ease: "power3.out",
+          }
+        );
+      })
+      .on("mouseleave.lineHover", function () {
+        gsap.killTweensOf($line);
+
+        gsap.to($line, {
+          clipPath: "inset(0% 0% 0% 100%)",
+          duration: 0.3,
+          ease: "power3.out",
+        });
+      });
+  });
+}
+
+
