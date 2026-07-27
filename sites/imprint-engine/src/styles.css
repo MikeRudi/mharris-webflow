@@ -23,7 +23,7 @@
   overflow: visible;
 }
 
-.footer-svg-engine {
+.footer-svg > svg.footer-svg-engine {
   position: relative;
   z-index: 1;
   overflow: visible;
