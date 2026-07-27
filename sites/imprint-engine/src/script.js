@@ -143,7 +143,7 @@ function footerEnginePixels() {
     pixelGap: 9,
     pixelSize: 1.6,
     outsideSpread: 6,
-    insideSpread: 10.5,
+    insideSpread: 0.5,
     lightRadius: 150,
     lightLevels: 10,
     maxPixelScale: 4,
