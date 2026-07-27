@@ -166,6 +166,7 @@ function footerEnginePixels() {
     .map((path) => path.getAttribute("d"))
     .filter(Boolean)
     .map((pathData) => new Path2D(pathData));
+  const svgMask = new Path2D();
   const pixels = [];
   const lightPosition = {
     x: viewBox.x + viewBox.width / 2,
@@ -177,10 +178,13 @@ function footerEnginePixels() {
     scaleX: 1,
     scaleY: 1,
     pixelRadius: 1,
+    dpr: 1,
   };
   let renderFrame = null;
 
   if (!sampleContext || !context || !svgPaths.length) return null;
+
+  svgPaths.forEach((path) => svgMask.addPath(path));
 
   for (
     let y = viewBox.y + settings.pixelGap / 2;
@@ -208,6 +212,7 @@ function footerEnginePixels() {
     const rect = svg.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
+    canvasSize.dpr = dpr;
     canvasSize.width = rect.width + settings.canvasPadding * 2;
     canvasSize.height = rect.height + settings.canvasPadding * 2;
     canvasSize.scaleX = rect.width / viewBox.width;
@@ -282,6 +287,33 @@ function footerEnginePixels() {
       context.fill(path);
     });
 
+    context.save();
+    context.globalCompositeOperation = "source-over";
+    context.shadowBlur = 0;
+    context.translate(settings.canvasPadding, settings.canvasPadding);
+    context.scale(canvasSize.scaleX, canvasSize.scaleY);
+    context.translate(-viewBox.x, -viewBox.y);
+    context.clip(svgMask);
+    context.setTransform(
+      canvasSize.dpr,
+      0,
+      0,
+      canvasSize.dpr,
+      0,
+      0
+    );
+
+    lightLevels.forEach((path, index) => {
+      const level = index / (lightLevels.length - 1);
+      const opacity =
+        settings.minOpacity +
+        (settings.maxOpacity - settings.minOpacity) * level;
+
+      context.fillStyle = `rgb(0 0 0 / ${opacity})`;
+      context.fill(path);
+    });
+
+    context.restore();
     context.globalCompositeOperation = "source-over";
     context.shadowBlur = 0;
   }
