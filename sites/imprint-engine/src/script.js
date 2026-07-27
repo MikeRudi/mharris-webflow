@@ -141,18 +141,7 @@ function footerCursor() {
   const $cursor = $(".cursor");
   const $footerCursor = $cursor.find(".footer-cursor").first();
 
-  console.log("[footerCursor] init", {
-    triggers: $trigger.length,
-    cursorHolders: $cursor.length,
-    footerCursors: $footerCursor.length,
-  });
-
-  if (!$trigger.length || !$cursor.length || !$footerCursor.length) {
-    console.warn("[footerCursor] missing element");
-    return null;
-  }
-
-  let hasLoggedMove = false;
+  if (!$trigger.length || !$cursor.length || !$footerCursor.length) return null;
 
   gsap.set($footerCursor, {
     xPercent: -50,
@@ -178,19 +167,6 @@ function footerCursor() {
     const x = event.clientX - cursorRect.left;
     const y = event.clientY - cursorRect.top;
 
-    if (!hasLoggedMove) {
-      console.log("[footerCursor] first move", {
-        clientX: event.clientX,
-        clientY: event.clientY,
-        holderLeft: cursorRect.left,
-        holderTop: cursorRect.top,
-        x,
-        y,
-      });
-
-      hasLoggedMove = true;
-    }
-
     xTo(x);
     yTo(y);
   }
@@ -198,7 +174,6 @@ function footerCursor() {
   $trigger
     .off(".footerCursor")
     .on("mouseenter.footerCursor", function (event) {
-      console.log("[footerCursor] enter");
       moveCursor(event);
 
       gsap.set($footerCursor, {
@@ -207,15 +182,12 @@ function footerCursor() {
     })
     .on("mousemove.footerCursor", moveCursor)
     .on("mouseleave.footerCursor", function () {
-      console.log("[footerCursor] leave");
-
       gsap.set($footerCursor, {
         display: "none",
       });
     });
 
   return () => {
-    console.log("[footerCursor] cleanup");
     $trigger.off(".footerCursor");
     xTo.tween.kill();
     yTo.tween.kill();
