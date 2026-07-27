@@ -86,7 +86,7 @@ function initSite() {
   onDesktop(() => {
     // gitTestDesktop();
     lineHover();
-    footerCursor();
+    footerEngineLight();
   });
 
   onMobile(() => {
@@ -136,64 +136,121 @@ function lineHover() {
   });
 }
 
-function footerCursor() {
-  const $trigger = $(".footer-svg-engine");
-  const $cursor = $(".cursor");
-  const $footerCursor = $cursor.find(".footer-cursor").first();
+function footerEngineLight() {
+  const $svg = $(".footer-svg-engine").first();
+  if (!$svg.length) return null;
 
-  if (!$trigger.length || !$cursor.length || !$footerCursor.length) return null;
+  const svg = $svg[0];
+  const svgNamespace = "http://www.w3.org/2000/svg";
+  const gradientId = `footer-engine-light-${Date.now()}`;
+  const lightSvg = svg.cloneNode(true);
+  const $lightSvg = $(lightSvg);
 
-  gsap.set($footerCursor, {
-    xPercent: -50,
-    yPercent: -50,
+  $svg.siblings(".footer-svg-light").remove();
+
+  $lightSvg
+    .removeClass("footer-svg-engine")
+    .addClass("footer-svg-light")
+    .attr({
+      "aria-hidden": "true",
+      focusable: "false",
+    });
+
+  const defs = document.createElementNS(svgNamespace, "defs");
+  const gradient = document.createElementNS(svgNamespace, "radialGradient");
+  const stops = [
+    ["0%", "#ffffff", "1"],
+    ["20%", "#ffffff", "1"],
+    ["45%", "#dffaff", "0.95"],
+    ["70%", "#79dcff", "0.8"],
+    ["100%", "#4a9bff", "0"],
+  ];
+
+  gradient.setAttribute("id", gradientId);
+  gradient.setAttribute("gradientUnits", "userSpaceOnUse");
+  gradient.setAttribute("r", "170");
+
+  stops.forEach(([offset, color, opacity]) => {
+    const stop = document.createElementNS(svgNamespace, "stop");
+
+    stop.setAttribute("offset", offset);
+    stop.setAttribute("stop-color", color);
+    stop.setAttribute("stop-opacity", opacity);
+    gradient.appendChild(stop);
   });
 
-  gsap.set($footerCursor, {
-    display: "none",
-  });
+  defs.appendChild(gradient);
+  lightSvg.insertBefore(defs, lightSvg.firstChild);
 
-  const xTo = gsap.quickTo($footerCursor, "x", {
-    duration: 0.2,
-    ease: "power3.out",
-  });
+  $lightSvg.find("path").attr("fill", `url(#${gradientId})`);
+  $svg.after($lightSvg);
 
-  const yTo = gsap.quickTo($footerCursor, "y", {
-    duration: 0.2,
-    ease: "power3.out",
-  });
+  const lightPosition = { x: 0, y: 0 };
 
-  function moveCursor(event) {
-    const cursorRect = $cursor[0].getBoundingClientRect();
-    const x = event.clientX - cursorRect.left;
-    const y = event.clientY - cursorRect.top;
-
-    xTo(x);
-    yTo(y);
+  function renderLight() {
+    gradient.setAttribute("cx", lightPosition.x);
+    gradient.setAttribute("cy", lightPosition.y);
   }
 
-  $trigger
-    .off(".footerCursor")
-    .on("mouseenter.footerCursor", function (event) {
-      moveCursor(event);
+  const xTo = gsap.quickTo(lightPosition, "x", {
+    duration: 0.18,
+    ease: "power3.out",
+    onUpdate: renderLight,
+  });
 
-      gsap.set($footerCursor, {
-        display: "block",
+  const yTo = gsap.quickTo(lightPosition, "y", {
+    duration: 0.18,
+    ease: "power3.out",
+    onUpdate: renderLight,
+  });
+
+  function moveLight(event, immediate = false) {
+    const matrix = svg.getScreenCTM();
+    if (!matrix) return;
+
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+
+    const svgPoint = point.matrixTransform(matrix.inverse());
+
+    if (immediate) {
+      lightPosition.x = svgPoint.x;
+      lightPosition.y = svgPoint.y;
+      renderLight();
+      return;
+    }
+
+    xTo(svgPoint.x);
+    yTo(svgPoint.y);
+  }
+
+  $svg
+    .off(".footerEngineLight")
+    .on("mouseenter.footerEngineLight", function (event) {
+      moveLight(event, true);
+      gsap.to(lightSvg, {
+        opacity: 1,
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: true,
       });
     })
-    .on("mousemove.footerCursor", moveCursor)
-    .on("mouseleave.footerCursor", function () {
-      gsap.set($footerCursor, {
-        display: "none",
+    .on("mousemove.footerEngineLight", moveLight)
+    .on("mouseleave.footerEngineLight", function () {
+      gsap.to(lightSvg, {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        overwrite: true,
       });
     });
 
   return () => {
-    $trigger.off(".footerCursor");
+    $svg.off(".footerEngineLight");
     xTo.tween.kill();
     yTo.tween.kill();
-
-    gsap.set($footerCursor, {
-      display: "none",
-    });
+    gsap.killTweensOf(lightSvg);
+    $lightSvg.remove();
   };
 }
