@@ -28,9 +28,7 @@
   z-index: 1;
 }
 
-.footer-svg-pixels {
-  position: absolute;
-  z-index: 2;
+.footer-svg-pixel-layer {
   pointer-events: none;
   opacity: 0;
   will-change: opacity;
