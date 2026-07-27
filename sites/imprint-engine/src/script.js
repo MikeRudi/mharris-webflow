@@ -142,7 +142,7 @@ function footerEnginePixels() {
     insideColor: "#000000",
     pixelGap: 9,
     pixelSize: 1.6,
-    outsideSpread: 1,
+    outsideSpread: 3,
     insideSpread: 1.5,
     lightRadius: 150,
     lightLevels: 10,
