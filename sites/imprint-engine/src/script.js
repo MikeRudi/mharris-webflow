@@ -86,7 +86,7 @@ function initSite() {
   onDesktop(() => {
     // gitTestDesktop();
     lineHover();
-    footerEngineLight();
+    return footerEnginePixels();
   });
 
   onMobile(() => {
@@ -136,72 +136,163 @@ function lineHover() {
   });
 }
 
-function footerEngineLight() {
+function footerEnginePixels() {
   const $svg = $(".footer-svg-engine").first();
-  if (!$svg.length) return null;
+  if (!$svg.length || !window.Path2D) return null;
 
   const svg = $svg[0];
-  const svgNamespace = "http://www.w3.org/2000/svg";
-  const gradientId = `footer-engine-light-${Date.now()}`;
-  const lightSvg = svg.cloneNode(true);
-  const $lightSvg = $(lightSvg);
+  const $wrap = $svg.parent();
+  const viewBox = svg.viewBox.baseVal;
+  const sampleCanvas = document.createElement("canvas");
+  const sampleContext = sampleCanvas.getContext("2d");
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  const pixelGap = 9;
+  const lightRadius = 150;
+  const canvasPadding = 48;
+  const svgPaths = [...svg.querySelectorAll("path")]
+    .map((path) => path.getAttribute("d"))
+    .filter(Boolean)
+    .map((pathData) => new Path2D(pathData));
+  const pixels = [];
+  const lightPosition = {
+    x: viewBox.x + viewBox.width / 2,
+    y: viewBox.y + viewBox.height / 2,
+  };
+  const canvasSize = {
+    width: 0,
+    height: 0,
+    scaleX: 1,
+    scaleY: 1,
+    pixelRadius: 1,
+  };
+  let dimPixels = new Path2D();
+  let renderFrame = null;
 
-  $svg.siblings(".footer-svg-light").remove();
+  if (!sampleContext || !context || !svgPaths.length) return null;
 
-  $lightSvg
-    .removeClass("footer-svg-engine")
-    .addClass("footer-svg-light")
-    .attr({
-      "aria-hidden": "true",
-      focusable: "false",
+  for (
+    let y = viewBox.y + pixelGap / 2;
+    y < viewBox.y + viewBox.height;
+    y += pixelGap
+  ) {
+    for (
+      let x = viewBox.x + pixelGap / 2;
+      x < viewBox.x + viewBox.width;
+      x += pixelGap
+    ) {
+      if (svgPaths.some((path) => sampleContext.isPointInPath(path, x, y))) {
+        pixels.push({ x, y });
+      }
+    }
+  }
+
+  $wrap.find(".footer-svg-light, .footer-svg-pixels").remove();
+
+  canvas.className = "footer-svg-pixels";
+  canvas.setAttribute("aria-hidden", "true");
+  $svg.after(canvas);
+
+  function resizeCanvas() {
+    const rect = svg.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvasSize.width = rect.width + canvasPadding * 2;
+    canvasSize.height = rect.height + canvasPadding * 2;
+    canvasSize.scaleX = rect.width / viewBox.width;
+    canvasSize.scaleY = rect.height / viewBox.height;
+    canvasSize.pixelRadius =
+      Math.max(1, Math.min(canvasSize.scaleX, canvasSize.scaleY) * 1.6);
+
+    canvas.style.left = `${-canvasPadding}px`;
+    canvas.style.top = `${-canvasPadding}px`;
+    canvas.style.width = `${canvasSize.width}px`;
+    canvas.style.height = `${canvasSize.height}px`;
+    canvas.width = Math.round(canvasSize.width * dpr);
+    canvas.height = Math.round(canvasSize.height * dpr);
+
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    dimPixels = new Path2D();
+
+    pixels.forEach((pixel) => {
+      const x =
+        canvasPadding + (pixel.x - viewBox.x) * canvasSize.scaleX;
+      const y =
+        canvasPadding + (pixel.y - viewBox.y) * canvasSize.scaleY;
+
+      dimPixels.moveTo(x + canvasSize.pixelRadius, y);
+      dimPixels.arc(x, y, canvasSize.pixelRadius, 0, Math.PI * 2);
     });
 
-  const defs = document.createElementNS(svgNamespace, "defs");
-  const gradient = document.createElementNS(svgNamespace, "radialGradient");
-  const stops = [
-    ["0%", "#ffffff", "1"],
-    ["20%", "#ffffff", "1"],
-    ["45%", "#dffaff", "0.95"],
-    ["70%", "#79dcff", "0.8"],
-    ["100%", "#4a9bff", "0"],
-  ];
+    requestRender();
+  }
 
-  gradient.setAttribute("id", gradientId);
-  gradient.setAttribute("gradientUnits", "userSpaceOnUse");
-  gradient.setAttribute("r", "170");
+  function requestRender() {
+    if (renderFrame) return;
+    renderFrame = requestAnimationFrame(renderPixels);
+  }
 
-  stops.forEach(([offset, color, opacity]) => {
-    const stop = document.createElementNS(svgNamespace, "stop");
+  function renderPixels() {
+    renderFrame = null;
 
-    stop.setAttribute("offset", offset);
-    stop.setAttribute("stop-color", color);
-    stop.setAttribute("stop-opacity", opacity);
-    gradient.appendChild(stop);
-  });
+    context.clearRect(0, 0, canvasSize.width, canvasSize.height);
+    context.globalCompositeOperation = "source-over";
+    context.shadowBlur = 0;
+    context.fillStyle = "rgb(218 235 247 / 28%)";
+    context.fill(dimPixels);
 
-  defs.appendChild(gradient);
-  lightSvg.insertBefore(defs, lightSvg.firstChild);
+    const lightLevels = Array.from({ length: 4 }, () => new Path2D());
 
-  $lightSvg.find("path").attr("fill", `url(#${gradientId})`);
-  $svg.after($lightSvg);
+    pixels.forEach((pixel) => {
+      const distance = Math.hypot(
+        pixel.x - lightPosition.x,
+        pixel.y - lightPosition.y
+      );
 
-  const lightPosition = { x: 0, y: 0 };
+      if (distance >= lightRadius) return;
 
-  function renderLight() {
-    gradient.setAttribute("cx", lightPosition.x);
-    gradient.setAttribute("cy", lightPosition.y);
+      const strength = 1 - distance / lightRadius;
+      const level = Math.min(3, Math.floor(strength * 4));
+      const x =
+        canvasPadding + (pixel.x - viewBox.x) * canvasSize.scaleX;
+      const y =
+        canvasPadding + (pixel.y - viewBox.y) * canvasSize.scaleY;
+      const radius = canvasSize.pixelRadius * (1 + strength * 0.9);
+
+      lightLevels[level].moveTo(x + radius, y);
+      lightLevels[level].arc(x, y, radius, 0, Math.PI * 2);
+    });
+
+    const colors = [
+      "rgb(79 169 255 / 55%)",
+      "rgb(97 202 255 / 72%)",
+      "rgb(173 236 255 / 90%)",
+      "rgb(255 255 255)",
+    ];
+
+    context.globalCompositeOperation = "lighter";
+
+    lightLevels.forEach((path, index) => {
+      context.fillStyle = colors[index];
+      context.shadowColor = colors[index];
+      context.shadowBlur = 5 + index * 5;
+      context.fill(path);
+    });
+
+    context.globalCompositeOperation = "source-over";
+    context.shadowBlur = 0;
   }
 
   const xTo = gsap.quickTo(lightPosition, "x", {
     duration: 0.18,
     ease: "power3.out",
-    onUpdate: renderLight,
+    onUpdate: requestRender,
   });
 
   const yTo = gsap.quickTo(lightPosition, "y", {
     duration: 0.18,
     ease: "power3.out",
-    onUpdate: renderLight,
+    onUpdate: requestRender,
   });
 
   function moveLight(event, immediate = false) {
@@ -217,7 +308,7 @@ function footerEngineLight() {
     if (immediate) {
       lightPosition.x = svgPoint.x;
       lightPosition.y = svgPoint.y;
-      renderLight();
+      requestRender();
       return;
     }
 
@@ -226,31 +317,52 @@ function footerEngineLight() {
   }
 
   $svg
-    .off(".footerEngineLight")
-    .on("mouseenter.footerEngineLight", function (event) {
+    .off(".footerEnginePixels")
+    .on("mouseenter.footerEnginePixels", function (event) {
       moveLight(event, true);
-      gsap.to(lightSvg, {
+
+      gsap.to(canvas, {
         opacity: 1,
-        duration: 0.25,
+        duration: 0.35,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(svg, {
+        opacity: 0.18,
+        duration: 0.35,
         ease: "power2.out",
         overwrite: true,
       });
     })
-    .on("mousemove.footerEngineLight", moveLight)
-    .on("mouseleave.footerEngineLight", function () {
-      gsap.to(lightSvg, {
+    .on("mousemove.footerEnginePixels", moveLight)
+    .on("mouseleave.footerEnginePixels", function () {
+      gsap.to(canvas, {
         opacity: 0,
-        duration: 0.5,
+        duration: 0.45,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(svg, {
+        opacity: 1,
+        duration: 0.45,
         ease: "power2.out",
         overwrite: true,
       });
     });
 
+  $(window).on("resize.footerEnginePixels", resizeCanvas);
+  resizeCanvas();
+
   return () => {
-    $svg.off(".footerEngineLight");
+    $svg.off(".footerEnginePixels");
+    $(window).off("resize.footerEnginePixels");
     xTo.tween.kill();
     yTo.tween.kill();
-    gsap.killTweensOf(lightSvg);
-    $lightSvg.remove();
+
+    if (renderFrame) cancelAnimationFrame(renderFrame);
+
+    gsap.killTweensOf([svg, canvas]);
+    gsap.set(svg, { clearProps: "opacity" });
+    canvas.remove();
   };
 }
