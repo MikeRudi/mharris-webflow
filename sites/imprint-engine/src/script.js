@@ -142,13 +142,14 @@ function footerEnginePixels() {
     insideColor: "#000000",
     pixelGap: 9,
     pixelSize: 1.6,
-    pixelSpread: 1.5,
+    outsideSpread: 8,
+    insideSpread: 1.5,
     lightRadius: 150,
     lightLevels: 10,
     maxPixelScale: 4,
-    outsideOpacity: 0.22,
+    outsideOpacity: 0.28,
     insideOpacity: 0.3,
-    outsideBlur: 2.5,
+    outsideBlur: 0.8,
     scaleFalloff: 0.78,
     cursorSmoothing: 0.18,
     fadeIn: 0.35,
@@ -183,13 +184,13 @@ function footerEnginePixels() {
     return element;
   }
 
-  function createPixelPath(path, patternId) {
+  function createPixelPath(path, patternId, spread) {
     const pixelPath = path.cloneNode(false);
 
     pixelPath.removeAttribute("id");
     pixelPath.setAttribute("fill", `url(#${patternId})`);
     pixelPath.setAttribute("stroke", `url(#${patternId})`);
-    pixelPath.setAttribute("stroke-width", settings.pixelSpread);
+    pixelPath.setAttribute("stroke-width", spread);
     pixelPath.setAttribute("stroke-linejoin", "round");
 
     return pixelPath;
@@ -323,8 +324,12 @@ function footerEnginePixels() {
     });
 
     originalPaths.forEach((path) => {
-      outsideLevel.appendChild(createPixelPath(path, outsidePatternId));
-      insideLevel.appendChild(createPixelPath(path, insidePatternId));
+      outsideLevel.appendChild(
+        createPixelPath(path, outsidePatternId, settings.outsideSpread)
+      );
+      insideLevel.appendChild(
+        createPixelPath(path, insidePatternId, settings.insideSpread)
+      );
     });
 
     defs.append(outsidePattern, insidePattern, gradient, mask);
