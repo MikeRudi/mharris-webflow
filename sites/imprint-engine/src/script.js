@@ -140,7 +140,14 @@ function footerEnginePixels() {
   const settings = {
     pixelGap: 9,
     pixelSize: 1.6,
-    pixelPathScale: 1.004,
+    pathPadding: {
+      firstE: { top: 4.5, right: 0, bottom: 0, left: 4.5 },
+      firstN: { top: 4.5, right: 0, bottom: 0, left: 4.5 },
+      g: { top: 3, right: 3, bottom: 3, left: 3 },
+      i: { top: 4.5, right: 4.5, bottom: 0, left: 0 },
+      secondN: { top: 4, right: 4, bottom: 4, left: 4 },
+      finalE: { top: 4, right: 4, bottom: 4, left: 4 },
+    },
     lightRadius: 150,
     lightLevels: 16,
     maxPixelScale: 4,
@@ -165,17 +172,30 @@ function footerEnginePixels() {
   const sampleContext = sampleCanvas.getContext("2d");
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
+  const pathNames = ["firstE", "firstN", "g", "i", "secondN", "finalE"];
   const svgPaths = [...svg.querySelectorAll("path")]
-    .map((element) => {
+    .map((element, index) => {
       const pathData = element.getAttribute("d");
       if (!pathData) return null;
 
       const bounds = element.getBBox();
+      const padding = settings.pathPadding[pathNames[index]] || {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      };
+      const scaleX =
+        (bounds.width + padding.left + padding.right) / bounds.width;
+      const scaleY =
+        (bounds.height + padding.top + padding.bottom) / bounds.height;
 
       return {
         path: new Path2D(pathData),
-        centerX: bounds.x + bounds.width / 2,
-        centerY: bounds.y + bounds.height / 2,
+        bounds,
+        padding,
+        scaleX,
+        scaleY,
       };
     })
     .filter(Boolean);
@@ -201,11 +221,11 @@ function footerEnginePixels() {
 
   if (!sampleContext || !context || !svgPaths.length) return null;
 
-  svgPaths.forEach(({ path, centerX, centerY }) => {
+  svgPaths.forEach(({ path, bounds, padding, scaleX, scaleY }) => {
     const matrix = new DOMMatrix()
-      .translate(centerX, centerY)
-      .scale(settings.pixelPathScale)
-      .translate(-centerX, -centerY);
+      .translate(bounds.x - padding.left, bounds.y - padding.top)
+      .scale(scaleX, scaleY)
+      .translate(-bounds.x, -bounds.y);
 
     svgMask.addPath(path, matrix);
   });
@@ -284,11 +304,13 @@ function footerEnginePixels() {
     pixels.forEach((pixel) => {
       const svgPath = svgPaths[pixel.pathIndex];
       const pixelX =
-        svgPath.centerX +
-        (pixel.x - svgPath.centerX) * settings.pixelPathScale;
+        svgPath.bounds.x -
+        svgPath.padding.left +
+        (pixel.x - svgPath.bounds.x) * svgPath.scaleX;
       const pixelY =
-        svgPath.centerY +
-        (pixel.y - svgPath.centerY) * settings.pixelPathScale;
+        svgPath.bounds.y -
+        svgPath.padding.top +
+        (pixel.y - svgPath.bounds.y) * svgPath.scaleY;
       const distance = Math.hypot(
         pixelX - lightPosition.x,
         pixelY - lightPosition.y
