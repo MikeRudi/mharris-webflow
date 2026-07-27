@@ -1,0 +1,12 @@
+<style>
+  body {
+    font-size: 1.1111111111111112vw;
+  }
+
+  /* Max Font Size */
+  @media screen and (min-width: 1920px) {
+    body {
+      font-size: 21.333333333333332px;
+    }
+  }
+</style>
