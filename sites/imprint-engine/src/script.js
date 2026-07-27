@@ -149,7 +149,7 @@ function footerEnginePixels() {
     maxPixelScale: 4,
     outsideOpacity: 0.1,
     insideOpacity: 0.3,
-    outsideBlur: 0.8,
+    outsideBlur: 0.95,
     scaleFalloff: 0.78,
     cursorSmoothing: 0.18,
     fadeIn: 0.35,
