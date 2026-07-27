@@ -236,10 +236,6 @@ function footerEnginePixels() {
     renderFrame = null;
 
     context.clearRect(0, 0, canvasSize.width, canvasSize.height);
-    context.globalCompositeOperation = "source-over";
-    context.shadowBlur = 0;
-    context.fillStyle = "rgb(218 235 247 / 28%)";
-    context.fill(dimPixels);
 
     const lightLevels = Array.from({ length: 4 }, () => new Path2D());
 
@@ -257,16 +253,16 @@ function footerEnginePixels() {
         canvasPadding + (pixel.x - viewBox.x) * canvasSize.scaleX;
       const y =
         canvasPadding + (pixel.y - viewBox.y) * canvasSize.scaleY;
-      const radius = canvasSize.pixelRadius * (1 + strength * 0.9);
+      const radius = canvasSize.pixelRadius * (1 + strength * 3);
 
       lightLevels[level].moveTo(x + radius, y);
       lightLevels[level].arc(x, y, radius, 0, Math.PI * 2);
     });
 
     const colors = [
-      "rgb(79 169 255 / 55%)",
-      "rgb(97 202 255 / 72%)",
-      "rgb(173 236 255 / 90%)",
+      "rgb(255 255 255 / 18%)",
+      "rgb(255 255 255 / 40%)",
+      "rgb(255 255 255 / 70%)",
       "rgb(255 255 255)",
     ];
 
@@ -327,23 +323,11 @@ function footerEnginePixels() {
         ease: "power2.out",
         overwrite: true,
       });
-      gsap.to(svg, {
-        opacity: 0.18,
-        duration: 0.35,
-        ease: "power2.out",
-        overwrite: true,
-      });
     })
     .on("mousemove.footerEnginePixels", moveLight)
     .on("mouseleave.footerEnginePixels", function () {
       gsap.to(canvas, {
         opacity: 0,
-        duration: 0.45,
-        ease: "power2.out",
-        overwrite: true,
-      });
-      gsap.to(svg, {
-        opacity: 1,
         duration: 0.45,
         ease: "power2.out",
         overwrite: true,
@@ -361,8 +345,7 @@ function footerEnginePixels() {
 
     if (renderFrame) cancelAnimationFrame(renderFrame);
 
-    gsap.killTweensOf([svg, canvas]);
-    gsap.set(svg, { clearProps: "opacity" });
+    gsap.killTweensOf(canvas);
     canvas.remove();
   };
 }
