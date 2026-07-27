@@ -140,12 +140,15 @@ function footerEnginePixels() {
   const settings = {
     pixelGap: 9,
     pixelSize: 1.6,
+    pixelShapeScale: 1.004,
     lightRadius: 150,
+    lightLevels: 16,
     maxPixelScale: 4,
-    minOpacity: 0.18,
+    minOpacity: 0,
     maxOpacity: 1,
     minGlowBlur: 5,
     maxGlowBlur: 20,
+    innerBlendBlur: 2,
     cursorSmoothing: 0.18,
     fadeIn: 0.35,
     fadeOut: 0.45,
@@ -168,9 +171,13 @@ function footerEnginePixels() {
     .map((pathData) => new Path2D(pathData));
   const svgMask = new Path2D();
   const pixels = [];
-  const lightPosition = {
+  const shapeCenter = {
     x: viewBox.x + viewBox.width / 2,
     y: viewBox.y + viewBox.height / 2,
+  };
+  const lightPosition = {
+    x: shapeCenter.x,
+    y: shapeCenter.y,
   };
   const canvasSize = {
     width: 0,
@@ -210,6 +217,7 @@ function footerEnginePixels() {
 
   function resizeCanvas() {
     const rect = svg.getBoundingClientRect();
+    const wrapRect = $wrap[0].getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     canvasSize.dpr = dpr;
@@ -223,8 +231,10 @@ function footerEnginePixels() {
         Math.min(canvasSize.scaleX, canvasSize.scaleY) * settings.pixelSize
       );
 
-    canvas.style.left = `${-settings.canvasPadding}px`;
-    canvas.style.top = `${-settings.canvasPadding}px`;
+    canvas.style.left =
+      `${rect.left - wrapRect.left - settings.canvasPadding}px`;
+    canvas.style.top =
+      `${rect.top - wrapRect.top - settings.canvasPadding}px`;
     canvas.style.width = `${canvasSize.width}px`;
     canvas.style.height = `${canvasSize.height}px`;
     canvas.width = Math.round(canvasSize.width * dpr);
@@ -245,22 +255,36 @@ function footerEnginePixels() {
 
     context.clearRect(0, 0, canvasSize.width, canvasSize.height);
 
-    const lightLevels = Array.from({ length: 4 }, () => new Path2D());
+    const lightLevels = Array.from(
+      { length: settings.lightLevels },
+      () => new Path2D()
+    );
 
     pixels.forEach((pixel) => {
+      const pixelX =
+        shapeCenter.x +
+        (pixel.x - shapeCenter.x) * settings.pixelShapeScale;
+      const pixelY =
+        shapeCenter.y +
+        (pixel.y - shapeCenter.y) * settings.pixelShapeScale;
       const distance = Math.hypot(
-        pixel.x - lightPosition.x,
-        pixel.y - lightPosition.y
+        pixelX - lightPosition.x,
+        pixelY - lightPosition.y
       );
 
       if (distance >= settings.lightRadius) return;
 
-      const strength = 1 - distance / settings.lightRadius;
-      const level = Math.min(3, Math.floor(strength * 4));
+      const distanceStrength = 1 - distance / settings.lightRadius;
+      const strength =
+        distanceStrength * distanceStrength * (3 - 2 * distanceStrength);
+      const level = Math.min(
+        settings.lightLevels - 1,
+        Math.floor(strength * settings.lightLevels)
+      );
       const x =
-        settings.canvasPadding + (pixel.x - viewBox.x) * canvasSize.scaleX;
+        settings.canvasPadding + (pixelX - viewBox.x) * canvasSize.scaleX;
       const y =
-        settings.canvasPadding + (pixel.y - viewBox.y) * canvasSize.scaleY;
+        settings.canvasPadding + (pixelY - viewBox.y) * canvasSize.scaleY;
       const radius =
         canvasSize.pixelRadius *
         (1 + strength * (settings.maxPixelScale - 1));
@@ -293,6 +317,9 @@ function footerEnginePixels() {
     context.translate(settings.canvasPadding, settings.canvasPadding);
     context.scale(canvasSize.scaleX, canvasSize.scaleY);
     context.translate(-viewBox.x, -viewBox.y);
+    context.translate(shapeCenter.x, shapeCenter.y);
+    context.scale(settings.pixelShapeScale, settings.pixelShapeScale);
+    context.translate(-shapeCenter.x, -shapeCenter.y);
     context.clip(svgMask);
     context.setTransform(
       canvasSize.dpr,
@@ -310,6 +337,8 @@ function footerEnginePixels() {
         (settings.maxOpacity - settings.minOpacity) * level;
 
       context.fillStyle = `rgb(0 0 0 / ${opacity})`;
+      context.shadowColor = `rgb(0 0 0 / ${opacity})`;
+      context.shadowBlur = settings.innerBlendBlur;
       context.fill(path);
     });
 
