@@ -166,7 +166,6 @@ function footerEnginePixels() {
     scaleY: 1,
     pixelRadius: 1,
   };
-  let dimPixels = new Path2D();
   let renderFrame = null;
 
   if (!sampleContext || !context || !svgPaths.length) return null;
@@ -212,17 +211,6 @@ function footerEnginePixels() {
     canvas.height = Math.round(canvasSize.height * dpr);
 
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    dimPixels = new Path2D();
-
-    pixels.forEach((pixel) => {
-      const x =
-        canvasPadding + (pixel.x - viewBox.x) * canvasSize.scaleX;
-      const y =
-        canvasPadding + (pixel.y - viewBox.y) * canvasSize.scaleY;
-
-      dimPixels.moveTo(x + canvasSize.pixelRadius, y);
-      dimPixels.arc(x, y, canvasSize.pixelRadius, 0, Math.PI * 2);
-    });
 
     requestRender();
   }
