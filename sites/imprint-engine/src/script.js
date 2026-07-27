@@ -86,6 +86,7 @@ function initSite() {
   onDesktop(() => {
     // gitTestDesktop();
     lineHover();
+    return footerCursor();
   });
 
   onMobile(() => {
@@ -135,4 +136,61 @@ function lineHover() {
   });
 }
 
+function footerCursor() {
+  const $trigger = $(".footer-svg-engine");
+  const $cursor = $(".cursor");
+  const $footerCursor = $cursor.find(".footer-cursor").first();
+
+  if (!$trigger.length || !$cursor.length || !$footerCursor.length) return null;
+
+  gsap.set($cursor, {
+    xPercent: -50,
+    yPercent: -50,
+  });
+
+  gsap.set($footerCursor, {
+    display: "none",
+  });
+
+  const xTo = gsap.quickTo($cursor, "x", {
+    duration: 0.2,
+    ease: "power3.out",
+  });
+
+  const yTo = gsap.quickTo($cursor, "y", {
+    duration: 0.2,
+    ease: "power3.out",
+  });
+
+  function moveCursor(event) {
+    xTo(event.clientX);
+    yTo(event.clientY);
+  }
+
+  $trigger
+    .off(".footerCursor")
+    .on("mouseenter.footerCursor", function (event) {
+      moveCursor(event);
+
+      gsap.set($footerCursor, {
+        display: "block",
+      });
+    })
+    .on("mousemove.footerCursor", moveCursor)
+    .on("mouseleave.footerCursor", function () {
+      gsap.set($footerCursor, {
+        display: "none",
+      });
+    });
+
+  return () => {
+    $trigger.off(".footerCursor");
+    xTo.tween.kill();
+    yTo.tween.kill();
+
+    gsap.set($footerCursor, {
+      display: "none",
+    });
+  };
+}
 
