@@ -147,7 +147,7 @@ function footerEnginePixels() {
     lightRadius: 150,
     lightLevels: 10,
     maxPixelScale: 4,
-    outsideOpacity: 0.28,
+    outsideOpacity: 0.1,
     insideOpacity: 0.3,
     outsideBlur: 0.8,
     scaleFalloff: 0.78,
