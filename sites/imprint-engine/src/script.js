@@ -82,6 +82,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 
 function initSite() {
   initLenis();
+  accordionOne();
 
   onDesktop(() => {
     // gitTestDesktop();
@@ -134,6 +135,22 @@ function lineHover() {
         });
       });
   });
+}
+
+function accordionOne() {
+  const $items = $(".accordian-1-item");
+  if (!$items.length) return null;
+
+  $items
+    .off("click.accordionOne")
+    .on("click.accordionOne", function () {
+      $items.removeClass("active");
+      $(this).addClass("active");
+    });
+
+  return () => {
+    $items.off("click.accordionOne");
+  };
 }
 
 function footerEnginePixels() {
