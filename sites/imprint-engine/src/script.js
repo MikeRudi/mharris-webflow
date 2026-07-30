@@ -170,8 +170,8 @@ function accordionOne() {
 
       if (markerState) {
         Flip.from(markerState, {
-          duration: 0.5,
-          ease: "none",
+          duration: 0.3,
+          ease: "ease.in",
           absolute: true,
         });
       }
