@@ -141,15 +141,48 @@ function accordionOne() {
   const $items = $(".accordian-1-item");
   if (!$items.length) return null;
 
+  const $marker = $items.find(".active-marker").first();
+
+  if (window.Flip) {
+    gsap.registerPlugin(Flip);
+  }
+
   $items
     .off("click.accordionOne")
     .on("click.accordionOne", function () {
+      const $activeItem = $(this);
+      if ($activeItem.hasClass("active")) return;
+
+      const marker = $marker[0];
+      let markerState = null;
+
+      if (window.Flip && marker) {
+        Flip.killFlipsOf(marker);
+        markerState = Flip.getState(marker);
+      }
+
       $items.removeClass("active");
-      $(this).addClass("active");
+      $activeItem.addClass("active");
+
+      if (marker) {
+        $activeItem.append(marker);
+      }
+
+      if (markerState) {
+        Flip.from(markerState, {
+          duration: 0.5,
+          ease: "none",
+          absolute: true,
+        });
+      }
     });
 
   return () => {
     $items.off("click.accordionOne");
+
+    if (window.Flip && $marker.length) {
+      Flip.killFlipsOf($marker[0]);
+    }
   };
 }
 
