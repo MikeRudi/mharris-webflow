@@ -138,10 +138,25 @@ function lineHover() {
 }
 
 function accordionOne() {
-  const $items = $(".accordian-1-item");
+  const $layout = $(".accord-1-layout").first();
+  const $items = $layout.find(".accordian-1-item");
+  const $children = $layout.find(".accordian-1-child");
   if (!$items.length) return null;
 
   const $marker = $items.find(".active-marker").first();
+  let activeIndex = $items.index($items.filter(".active").first());
+
+  if (activeIndex < 0) activeIndex = 0;
+
+  gsap.set($children, {
+    autoAlpha: 0,
+    pointerEvents: "none",
+  });
+
+  gsap.set($children.eq(activeIndex), {
+    autoAlpha: 1,
+    pointerEvents: "auto",
+  });
 
   if (window.Flip) {
     gsap.registerPlugin(Flip);
@@ -153,6 +168,9 @@ function accordionOne() {
       const $activeItem = $(this);
       if ($activeItem.hasClass("active")) return;
 
+      const nextIndex = $items.index(this);
+      const $currentChild = $children.eq(activeIndex);
+      const $nextChild = $children.eq(nextIndex);
       const marker = $marker[0];
       let markerState = null;
 
@@ -175,10 +193,33 @@ function accordionOne() {
           absolute: true,
         });
       }
+
+      if ($nextChild.length) {
+        gsap.killTweensOf([$currentChild[0], $nextChild[0]]);
+
+        gsap.to($currentChild, {
+          autoAlpha: 0,
+          pointerEvents: "none",
+          duration: 0.3,
+          ease: "none",
+          overwrite: true,
+        });
+
+        gsap.to($nextChild, {
+          autoAlpha: 1,
+          pointerEvents: "auto",
+          duration: 0.3,
+          ease: "none",
+          overwrite: true,
+        });
+
+        activeIndex = nextIndex;
+      }
     });
 
   return () => {
     $items.off("click.accordionOne");
+    gsap.killTweensOf($children);
 
     if (window.Flip && $marker.length) {
       Flip.killFlipsOf($marker[0]);
