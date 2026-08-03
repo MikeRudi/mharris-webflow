@@ -138,92 +138,106 @@ function lineHover() {
 }
 
 function accordionOne() {
-  const $layout = $(".accord-1-layout").first();
-  const $items = $layout.find(".accordian-1-item");
-  const $children = $layout.find(".accordian-1-child");
-  if (!$items.length) return null;
-
-  const $marker = $items.find(".active-marker").first();
-  let activeIndex = $items.index($items.filter(".active").first());
-
-  if (activeIndex < 0) activeIndex = 0;
-
-  gsap.set($children, {
-    autoAlpha: 0,
-    pointerEvents: "none",
-  });
-
-  gsap.set($children.eq(activeIndex), {
-    autoAlpha: 1,
-    pointerEvents: "auto",
-  });
-
   if (window.Flip) {
     gsap.registerPlugin(Flip);
   }
 
-  $items
-    .off("click.accordionOne")
-    .on("click.accordionOne", function () {
-      const $activeItem = $(this);
-      if ($activeItem.hasClass("active")) return;
+  const cleanups = [];
 
-      const nextIndex = $items.index(this);
-      const $currentChild = $children.eq(activeIndex);
-      const $nextChild = $children.eq(nextIndex);
-      const marker = $marker[0];
-      let markerState = null;
+  $("[accord-wrap]").each(function () {
+    const $wrap = $(this);
+    const $items = $wrap.find("[accord-item]");
+    const $children = $wrap.find("[accord-reveal]");
+    if (!$items.length) return;
 
-      if (window.Flip && marker) {
-        Flip.killFlipsOf(marker);
-        markerState = Flip.getState(marker);
-      }
+    const $marker = $items.find(".active-marker").first();
+    const $currentItem = $items.filter(".active").first();
+    const $initialItem = $currentItem.length ? $currentItem : $items.first();
+    let activeValue = $initialItem.attr("accord-item");
 
-      $items.removeClass("active");
-      $activeItem.addClass("active");
-
-      if (marker) {
-        $activeItem.append(marker);
-      }
-
-      if (markerState) {
-        Flip.from(markerState, {
-          duration: 0.3,
-          ease: "ease.in",
-          absolute: true,
-        });
-      }
-
-      if ($nextChild.length) {
-        gsap.killTweensOf([$currentChild[0], $nextChild[0]]);
-
-        gsap.to($currentChild, {
-          autoAlpha: 0,
-          pointerEvents: "none",
-          duration: 0.3,
-          ease: "none",
-          overwrite: true,
-        });
-
-        gsap.to($nextChild, {
-          autoAlpha: 1,
-          pointerEvents: "auto",
-          duration: 0.3,
-          ease: "none",
-          overwrite: true,
-        });
-
-        activeIndex = nextIndex;
-      }
+    gsap.set($children, {
+      autoAlpha: 0,
+      pointerEvents: "none",
     });
 
-  return () => {
-    $items.off("click.accordionOne");
-    gsap.killTweensOf($children);
+    gsap.set($children.filter(`[accord-reveal="${activeValue}"]`).first(), {
+      autoAlpha: 1,
+      pointerEvents: "auto",
+    });
 
-    if (window.Flip && $marker.length) {
-      Flip.killFlipsOf($marker[0]);
-    }
+    $items
+      .off("click.accordionOne")
+      .on("click.accordionOne", function () {
+        const $activeItem = $(this);
+        if ($activeItem.hasClass("active")) return;
+
+        const nextValue = $activeItem.attr("accord-item");
+        const $currentChild = $children
+          .filter(`[accord-reveal="${activeValue}"]`)
+          .first();
+        const $nextChild = $children
+          .filter(`[accord-reveal="${nextValue}"]`)
+          .first();
+        const marker = $marker[0];
+        let markerState = null;
+
+        if (window.Flip && marker) {
+          Flip.killFlipsOf(marker);
+          markerState = Flip.getState(marker);
+        }
+
+        $items.removeClass("active");
+        $activeItem.addClass("active");
+
+        if (marker) {
+          $activeItem.append(marker);
+        }
+
+        if (markerState) {
+          Flip.from(markerState, {
+            duration: 0.3,
+            ease: "ease.in",
+            absolute: true,
+          });
+        }
+
+        if ($nextChild.length) {
+          gsap.killTweensOf([$currentChild[0], $nextChild[0]]);
+
+          gsap.to($currentChild, {
+            autoAlpha: 0,
+            pointerEvents: "none",
+            duration: 0.3,
+            ease: "none",
+            overwrite: true,
+          });
+
+          gsap.to($nextChild, {
+            autoAlpha: 1,
+            pointerEvents: "auto",
+            duration: 0.3,
+            ease: "none",
+            overwrite: true,
+          });
+
+          activeValue = nextValue;
+        }
+      });
+
+    cleanups.push(() => {
+      $items.off("click.accordionOne");
+      gsap.killTweensOf($children);
+
+      if (window.Flip && $marker.length) {
+        Flip.killFlipsOf($marker[0]);
+      }
+    });
+  });
+
+  if (!cleanups.length) return null;
+
+  return () => {
+    cleanups.forEach((cleanup) => cleanup());
   };
 }
 
