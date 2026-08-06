@@ -307,8 +307,9 @@ function filterOne() {
       },
     });
 
-    $visibleReveals.each(function () {
+    $visibleReveals.each(function (index) {
       const headingTargets = getHeadingTargets(this);
+      const startTime = index * settings.itemStagger;
 
       gsap.set(headingTargets, {
         x: settings.wordAnimation.hide.fromX,
@@ -327,7 +328,7 @@ function filterOne() {
             from: "end",
           },
         },
-        0
+        startTime
       );
 
       filterTimeline.to(
@@ -342,8 +343,9 @@ function filterOne() {
             from: "end",
           },
         },
-        settings.wordAnimation.hide.duration *
-          (1 - settings.wordAnimation.hide.fade)
+        startTime +
+          settings.wordAnimation.hide.duration *
+            (1 - settings.wordAnimation.hide.fade)
       );
     });
 
