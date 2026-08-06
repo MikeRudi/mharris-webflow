@@ -157,8 +157,8 @@ function filterOne() {
     enterX: -24,
     exitDuration: 0.24,
     enterDuration: 0.42,
-    exitStagger: 0.006,
-    enterStagger: 0.008,
+    exitStagger: 0.035,
+    enterStagger: 0.05,
     itemFadeDuration: 0.14,
     itemFadeInDuration: 0.3,
     itemStagger: 0.03,
@@ -186,7 +186,7 @@ function filterOne() {
     $reveals.find(".accord-heading").each(function () {
       splitInstances.push(
         new SplitType(this, {
-          types: "words, chars",
+          types: "words",
         })
       );
     });
@@ -194,9 +194,9 @@ function filterOne() {
 
   function getHeadingTargets(item) {
     const $heading = $(item).find(".accord-heading").first();
-    const chars = $heading.find(".char").toArray();
+    const words = $heading.find(".word").toArray();
 
-    return chars.length ? chars : $heading.toArray();
+    return words.length ? words : $heading.toArray();
   }
 
   function setActiveTab($nextTab, immediate = false) {
