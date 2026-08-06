@@ -156,12 +156,12 @@ function filterOne() {
     itemAnimation: {
       hide: {
         fromX: 0,
-        toX: 30,
+        toX: -30,
         duration: 0.5,
         ease: "power1.inOut",
       },
       reveal: {
-        fromX: -30,
+        fromX: 30,
         toX: 0,
         duration: 0.4,
         ease: "power1.inOut",
@@ -170,7 +170,7 @@ function filterOne() {
     wordAnimation: {
       hide: {
         fromX: 0,
-        toX: 200,
+        toX: 100,
         duration: 0.3,
         ease: "power1.inOut",
         stagger: 0.02,
@@ -178,7 +178,7 @@ function filterOne() {
         fadeEase: "power1.in",
       },
       reveal: {
-        fromX: -200,
+        fromX: -100,
         toX: 0,
         duration: 0.3,
         ease: "power1.inOut",
