@@ -153,18 +153,21 @@ function filterOne() {
   if (!$tabs.length || !$reveals.length) return null;
 
   const settings = {
-    exitX: 28,
-    enterX: -24,
+    exitX: 56,
+    enterX: -48,
     exitDuration: 0.24,
     enterDuration: 0.42,
     exitStagger: 0.035,
     enterStagger: 0.05,
-    itemFadeDuration: 0.14,
-    itemFadeInDuration: 0.3,
     itemStagger: 0.03,
+    lineExitDuration: 0.3,
+    lineEnterDuration: 0.45,
+    heightDuration: 0.55,
   };
 
   const $lines = $tabs.find("[line-hover]");
+  const $revealLines = $reveals.find(".h-line");
+  const $revealParent = $reveals.first().parent();
   const $initialTab = $tabs.filter('[filter-tab="all"]').first();
   const $activeTab = $initialTab.length ? $initialTab : $tabs.first();
   let splitInstances = [];
@@ -229,12 +232,18 @@ function filterOne() {
     }
 
     gsap.killTweensOf($reveals);
-    gsap.set(
-      $reveals.filter(function () {
-        return $(this).css("display") !== "none";
-      }),
-      { autoAlpha: 1 }
-    );
+    gsap.killTweensOf($revealLines);
+    gsap.killTweensOf($revealParent);
+
+    const $visibleReveals = $reveals.filter(function () {
+      return $(this).css("display") !== "none";
+    });
+
+    gsap.set($visibleReveals, { autoAlpha: 1 });
+    gsap.set($visibleReveals.find(".h-line"), {
+      clipPath: "inset(0% 0% 0% 0%)",
+    });
+    gsap.set($revealParent, { clearProps: "height,overflow" });
     revertHeadings();
   }
 
@@ -252,6 +261,9 @@ function filterOne() {
       gsap.set($reveals, {
         display: "block",
         autoAlpha: 1,
+      });
+      gsap.set($revealLines, {
+        clipPath: "inset(0% 0% 0% 0%)",
       });
       return;
     }
@@ -272,6 +284,7 @@ function filterOne() {
     filterTimeline = gsap.timeline({
       onComplete: () => {
         gsap.set($matches, { clearProps: "opacity,visibility" });
+        gsap.set($revealParent, { clearProps: "height,overflow" });
         revertHeadings();
         filterTimeline = null;
       },
@@ -290,7 +303,6 @@ function filterOne() {
         headingTargets,
         {
           x: settings.exitX,
-          autoAlpha: 0,
           duration: settings.exitDuration,
           ease: "power2.in",
           stagger: {
@@ -300,27 +312,47 @@ function filterOne() {
         },
         0
       );
+
+      filterTimeline.to(
+        headingTargets,
+        {
+          autoAlpha: 0,
+          duration: settings.exitDuration * 0.1,
+          ease: "none",
+          stagger: {
+            each: settings.exitStagger,
+            from: "start",
+          },
+        },
+        settings.exitDuration * 0.9
+      );
     });
+
+    filterTimeline.to(
+      $visibleReveals.find(".h-line"),
+      {
+        clipPath: "inset(0% 0% 0% 100%)",
+        duration: settings.lineExitDuration,
+        ease: "power3.in",
+      },
+      0
+    );
 
     const exitEnd = filterTimeline.duration();
 
-    filterTimeline.to(
-      $visibleReveals,
-      {
-        autoAlpha: 0,
-        duration: settings.itemFadeDuration,
-        ease: "power1.in",
-      },
-      Math.max(0, exitEnd - 0.08)
-    );
-
-    filterTimeline.addLabel("switch");
+    filterTimeline.addLabel("switch", exitEnd);
 
     filterTimeline.add(() => {
+      const currentHeight = $revealParent.outerHeight();
+
+      gsap.set($revealParent, {
+        height: currentHeight,
+        overflow: "hidden",
+      });
       gsap.set($reveals, { display: "none" });
       gsap.set($matches, {
         display: "block",
-        autoAlpha: 0,
+        autoAlpha: 1,
       });
 
       $matches.each(function () {
@@ -330,25 +362,40 @@ function filterOne() {
           willChange: "transform,opacity",
         });
       });
+
+      gsap.set($matches.find(".h-line"), {
+        clipPath: "inset(0% 100% 0% 0%)",
+      });
     }, "switch");
 
     filterTimeline.to(
-      $matches,
+      $revealParent,
       {
-        autoAlpha: 1,
-        duration: settings.itemFadeInDuration,
-        ease: "power2.out",
-        stagger: settings.itemStagger,
+        height: "auto",
+        duration: settings.heightDuration,
+        ease: "power2.inOut",
       },
-      "switch"
+      "switch+=0.001"
+    );
+
+    filterTimeline.to(
+      $matches.find(".h-line"),
+      {
+        clipPath: "inset(0% 0% 0% 0%)",
+        duration: settings.lineEnterDuration,
+        ease: "power3.out",
+      },
+      "switch+=0.04"
     );
 
     $matches.each(function (index) {
+      const headingTargets = getHeadingTargets(this);
+      const startTime = 0.04 + index * settings.itemStagger;
+
       filterTimeline.to(
-        getHeadingTargets(this),
+        headingTargets,
         {
           x: 0,
-          autoAlpha: 1,
           duration: settings.enterDuration,
           ease: "power3.out",
           stagger: {
@@ -356,7 +403,21 @@ function filterOne() {
             from: "start",
           },
         },
-        `switch+=${0.04 + index * settings.itemStagger}`
+        `switch+=${startTime}`
+      );
+
+      filterTimeline.to(
+        headingTargets,
+        {
+          autoAlpha: 1,
+          duration: settings.enterDuration * 0.1,
+          ease: "none",
+          stagger: {
+            each: settings.enterStagger,
+            from: "start",
+          },
+        },
+        `switch+=${startTime}`
       );
     });
   }
