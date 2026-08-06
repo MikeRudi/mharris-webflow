@@ -347,17 +347,17 @@ function filterOne() {
           settings.wordAnimation.hide.duration *
             (1 - settings.wordAnimation.hide.fade)
       );
-    });
 
-    filterTimeline.to(
-      $visibleReveals.find(".h-line"),
-      {
-        clipPath: "inset(0% 0% 0% 100%)",
-        duration: settings.lineExitDuration,
-        ease: "power3.in",
-      },
-      0
-    );
+      filterTimeline.to(
+        $(this).find(".h-line"),
+        {
+          clipPath: "inset(0% 0% 0% 100%)",
+          duration: settings.lineExitDuration,
+          ease: "power3.in",
+        },
+        startTime
+      );
+    });
 
     const exitEnd = filterTimeline.duration();
 
@@ -399,19 +399,19 @@ function filterOne() {
       "switch+=0.001"
     );
 
-    filterTimeline.to(
-      $itemsToShow.find(".h-line"),
-      {
-        clipPath: "inset(0% 0% 0% 0%)",
-        duration: settings.lineEnterDuration,
-        ease: "power3.out",
-      },
-      "switch+=0.04"
-    );
-
     $itemsToShow.each(function (index) {
       const headingTargets = getHeadingTargets(this);
       const startTime = 0.04 + index * settings.itemStagger;
+
+      filterTimeline.to(
+        $(this).find(".h-line"),
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: settings.lineEnterDuration,
+          ease: "power3.out",
+        },
+        `switch+=${startTime}`
+      );
 
       filterTimeline.to(
         headingTargets,
