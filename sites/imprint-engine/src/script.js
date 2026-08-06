@@ -83,6 +83,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   initLenis();
   accordionOne();
+  filterOne();
 
   onDesktop(() => {
     // gitTestDesktop();
@@ -105,13 +106,20 @@ function lineHover() {
     if (!$line.length) return;
 
     gsap.set($line, {
-      clipPath: "inset(0% 100% 0% 0%)",
+      clipPath: $item.hasClass("is-active")
+        ? "inset(0% 0% 0% 0%)"
+        : "inset(0% 100% 0% 0%)",
     });
 
     $item
       .off(".lineHover")
       .on("mouseenter.lineHover", function () {
         gsap.killTweensOf($line);
+
+        if ($item.hasClass("is-active")) {
+          gsap.set($line, { clipPath: "inset(0% 0% 0% 0%)" });
+          return;
+        }
 
         gsap.fromTo(
           $line,
@@ -129,12 +137,112 @@ function lineHover() {
         gsap.killTweensOf($line);
 
         gsap.to($line, {
-          clipPath: "inset(0% 0% 0% 100%)",
+          clipPath: $item.hasClass("is-active")
+            ? "inset(0% 0% 0% 0%)"
+            : "inset(0% 0% 0% 100%)",
           duration: 0.3,
           ease: "power3.out",
         });
       });
   });
+}
+
+function filterOne() {
+  const $tabs = $("[filter-tab]");
+  const $reveals = $("[filter-reveal]");
+  if (!$tabs.length || !$reveals.length) return null;
+
+  const $lines = $tabs.find("[line-hover]");
+  const $initialTab = $tabs.filter('[filter-tab="all"]').first();
+  const $activeTab = $initialTab.length ? $initialTab : $tabs.first();
+
+  function normalizeValue(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function setActiveTab($nextTab, immediate = false) {
+    const $nextLine = $nextTab.find("[line-hover]").first();
+    const $otherLines = $tabs.not($nextTab).find("[line-hover]");
+    const duration = immediate ? 0 : 0.3;
+
+    $tabs.removeClass("is-active");
+    $nextTab.addClass("is-active");
+
+    gsap.killTweensOf($lines);
+    gsap.to($otherLines, {
+      clipPath: "inset(0% 0% 0% 100%)",
+      duration,
+      ease: "power3.out",
+      overwrite: true,
+    });
+    gsap.to($nextLine, {
+      clipPath: "inset(0% 0% 0% 0%)",
+      duration,
+      ease: "power3.out",
+      overwrite: true,
+    });
+  }
+
+  function showFilter(value, immediate = false) {
+    const filterValue = normalizeValue(value);
+    const $matches =
+      filterValue === "all"
+        ? $reveals
+        : $reveals.filter(function () {
+            return normalizeValue($(this).attr("filter-reveal")) === filterValue;
+          });
+
+    gsap.killTweensOf($reveals);
+
+    if (immediate) {
+      gsap.set($reveals, {
+        display: "block",
+        autoAlpha: 1,
+      });
+      return;
+    }
+
+    gsap.to($reveals, {
+      autoAlpha: 0,
+      duration: 0.2,
+      ease: "power2.out",
+      overwrite: true,
+      onComplete: () => {
+        gsap.set($reveals, { display: "none" });
+        gsap.set($matches, {
+          display: "block",
+          autoAlpha: 0,
+        });
+
+        gsap.to($matches, {
+          autoAlpha: 1,
+          duration: 0.35,
+          ease: "power2.out",
+          stagger: 0.04,
+          overwrite: true,
+        });
+      },
+    });
+  }
+
+  setActiveTab($activeTab, true);
+  showFilter("all", true);
+
+  $tabs
+    .off("click.filterOne")
+    .on("click.filterOne", function () {
+      const $nextTab = $(this);
+      if ($nextTab.hasClass("is-active")) return;
+
+      setActiveTab($nextTab);
+      showFilter($nextTab.attr("filter-tab"));
+    });
+
+  return () => {
+    $tabs.off("click.filterOne");
+    gsap.killTweensOf($reveals);
+    gsap.killTweensOf($lines);
+  };
 }
 
 function accordionOne() {
