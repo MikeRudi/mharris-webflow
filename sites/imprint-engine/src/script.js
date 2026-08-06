@@ -239,9 +239,12 @@ function filterOne() {
     });
   }
 
-  function stopFilterAnimation() {
-    if (filterTimeline) {
-      filterTimeline.kill();
+  function finishFilterAnimation() {
+    const activeTimeline = filterTimeline;
+
+    if (activeTimeline) {
+      activeTimeline.progress(1);
+      activeTimeline.kill();
       filterTimeline = null;
     }
 
@@ -263,7 +266,7 @@ function filterOne() {
 
   function showFilter(value, immediate = false) {
     const filterValue = normalizeValue(value);
-    const $matches =
+    const $itemsToShow =
       filterValue === "all"
         ? $reveals
         : $reveals.filter(function () {
@@ -271,7 +274,7 @@ function filterOne() {
           });
 
     if (immediate) {
-      stopFilterAnimation();
+      finishFilterAnimation();
       gsap.set($reveals, {
         display: "block",
         autoAlpha: 1,
@@ -282,7 +285,7 @@ function filterOne() {
       return;
     }
 
-    stopFilterAnimation();
+    finishFilterAnimation();
     splitHeadings();
 
     const $visibleReveals = $reveals.filter(function () {
@@ -297,7 +300,7 @@ function filterOne() {
 
     filterTimeline = gsap.timeline({
       onComplete: () => {
-        gsap.set($matches, { clearProps: "opacity,visibility" });
+        gsap.set($itemsToShow, { clearProps: "opacity,visibility" });
         gsap.set($revealParent, { clearProps: "height,overflow" });
         revertHeadings();
         filterTimeline = null;
@@ -366,12 +369,12 @@ function filterOne() {
         overflow: "hidden",
       });
       gsap.set($reveals, { display: "none" });
-      gsap.set($matches, {
+      gsap.set($itemsToShow, {
         display: "block",
         autoAlpha: 1,
       });
 
-      $matches.each(function () {
+      $itemsToShow.each(function () {
         gsap.set(getHeadingTargets(this), {
           x: settings.wordAnimation.reveal.fromX,
           autoAlpha: 0,
@@ -379,7 +382,7 @@ function filterOne() {
         });
       });
 
-      gsap.set($matches.find(".h-line"), {
+      gsap.set($itemsToShow.find(".h-line"), {
         clipPath: "inset(0% 100% 0% 0%)",
       });
     }, "switch");
@@ -395,7 +398,7 @@ function filterOne() {
     );
 
     filterTimeline.to(
-      $matches.find(".h-line"),
+      $itemsToShow.find(".h-line"),
       {
         clipPath: "inset(0% 0% 0% 0%)",
         duration: settings.lineEnterDuration,
@@ -404,7 +407,7 @@ function filterOne() {
       "switch+=0.04"
     );
 
-    $matches.each(function (index) {
+    $itemsToShow.each(function (index) {
       const headingTargets = getHeadingTargets(this);
       const startTime = 0.04 + index * settings.itemStagger;
 
@@ -454,7 +457,7 @@ function filterOne() {
     });
 
   return () => {
-    stopFilterAnimation();
+    finishFilterAnimation();
 
     $tabs.off("click.filterOne");
     gsap.killTweensOf($lines);
