@@ -83,6 +83,9 @@ Production preference after stable releases:
 - Prefer jQuery for DOM selection, events, and class changes when Webflow already provides jQuery.
 - Use jQuery ready shorthand `$(initSite)` for Webflow startup.
 - Add comments only where they help explain site-specific behavior.
+- When the user asks to isolate an animation, return only that animation's controls and behavior. Prefer a focused code snippet when possible.
+- Group animation controls by feature and state, such as `wordAnimation.hide` and `wordAnimation.reveal`.
+- Include movement values, duration, ease, stagger, fade timing, and fade ease in grouped animation controls.
 
 ## Before Editing a Site
 

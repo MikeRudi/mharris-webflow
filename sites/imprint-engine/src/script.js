@@ -153,12 +153,26 @@ function filterOne() {
   if (!$tabs.length || !$reveals.length) return null;
 
   const settings = {
-    exitX: 56,
-    enterX: -48,
-    exitDuration: 0.24,
-    enterDuration: 0.42,
-    exitStagger: 0.035,
-    enterStagger: 0.05,
+    wordAnimation: {
+      hide: {
+        fromX: 0,
+        toX: 100,
+        duration: 0.5,
+        ease: "power1.inOut",
+        stagger: 0.01,
+        fade: 0.2,
+        fadeEase: "power1.in",
+      },
+      reveal: {
+        fromX: -100,
+        toX: 0,
+        duration: 0.4,
+        ease: "power1.inOut",
+        stagger: 0.01,
+        fade: 0.2,
+        fadeEase: "power1.out",
+      },
+    },
     itemStagger: 0.03,
     lineExitDuration: 0.7,
     lineEnterDuration: 0.7,
@@ -294,7 +308,7 @@ function filterOne() {
       const headingTargets = getHeadingTargets(this);
 
       gsap.set(headingTargets, {
-        x: 0,
+        x: settings.wordAnimation.hide.fromX,
         autoAlpha: 1,
         willChange: "transform,opacity",
       });
@@ -302,11 +316,11 @@ function filterOne() {
       filterTimeline.to(
         headingTargets,
         {
-          x: settings.exitX,
-          duration: settings.exitDuration,
-          ease: "power2.in",
+          x: settings.wordAnimation.hide.toX,
+          duration: settings.wordAnimation.hide.duration,
+          ease: settings.wordAnimation.hide.ease,
           stagger: {
-            each: settings.exitStagger,
+            each: settings.wordAnimation.hide.stagger,
             from: "end",
           },
         },
@@ -317,14 +331,16 @@ function filterOne() {
         headingTargets,
         {
           autoAlpha: 0,
-          duration: settings.exitDuration * 0.1,
-          ease: "none",
+          duration:
+            settings.wordAnimation.hide.duration * settings.wordAnimation.hide.fade,
+          ease: settings.wordAnimation.hide.fadeEase,
           stagger: {
-            each: settings.exitStagger,
+            each: settings.wordAnimation.hide.stagger,
             from: "end",
           },
         },
-        settings.exitDuration * 0.9
+        settings.wordAnimation.hide.duration *
+          (1 - settings.wordAnimation.hide.fade)
       );
     });
 
@@ -357,7 +373,7 @@ function filterOne() {
 
       $matches.each(function () {
         gsap.set(getHeadingTargets(this), {
-          x: settings.enterX,
+          x: settings.wordAnimation.reveal.fromX,
           autoAlpha: 0,
           willChange: "transform,opacity",
         });
@@ -395,11 +411,11 @@ function filterOne() {
       filterTimeline.to(
         headingTargets,
         {
-          x: 0,
-          duration: settings.enterDuration,
-          ease: "power3.out",
+          x: settings.wordAnimation.reveal.toX,
+          duration: settings.wordAnimation.reveal.duration,
+          ease: settings.wordAnimation.reveal.ease,
           stagger: {
-            each: settings.enterStagger,
+            each: settings.wordAnimation.reveal.stagger,
             from: "end",
           },
         },
@@ -410,10 +426,12 @@ function filterOne() {
         headingTargets,
         {
           autoAlpha: 1,
-          duration: settings.enterDuration * 0.1,
-          ease: "none",
+          duration:
+            settings.wordAnimation.reveal.duration *
+            settings.wordAnimation.reveal.fade,
+          ease: settings.wordAnimation.reveal.fadeEase,
           stagger: {
-            each: settings.enterStagger,
+            each: settings.wordAnimation.reveal.stagger,
             from: "end",
           },
         },
