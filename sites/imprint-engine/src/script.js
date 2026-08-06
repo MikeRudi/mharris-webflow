@@ -155,10 +155,8 @@ function filterOne() {
   const settings = {
     itemAnimation: {
       hide: {
-        fromX: 0,
-        toX: 100,
-        duration: 0.5,
-        ease: "power1.inOut",
+        duration: 0.2,
+        ease: "power1.out",
       },
       reveal: {
         fromX: -100,
@@ -168,15 +166,6 @@ function filterOne() {
       },
     },
     wordAnimation: {
-      hide: {
-        fromX: 0,
-        toX: 100,
-        duration: 0.3,
-        ease: "power1.inOut",
-        stagger: 0.02,
-        fade: 0.2,
-        fadeEase: "power1.in",
-      },
       reveal: {
         fromX: -100,
         toX: 0,
@@ -188,7 +177,6 @@ function filterOne() {
       },
     },
     itemStagger: 0.03,
-    lineExitDuration: 0.5,
     lineEnterDuration: 0.5,
     heightDuration: 0.5,
   };
@@ -325,67 +313,19 @@ function filterOne() {
 
     $visibleReveals.each(function (index) {
       const $item = $(this);
-      const headingTargets = getHeadingTargets(this);
       const startTime = index * settings.itemStagger;
 
       gsap.set($item, {
-        x: settings.itemAnimation.hide.fromX,
-        willChange: "transform",
-      });
-
-      gsap.set(headingTargets, {
-        x: settings.wordAnimation.hide.fromX,
         autoAlpha: 1,
-        willChange: "transform,opacity",
+        willChange: "opacity",
       });
 
       filterTimeline.to(
         $item,
         {
-          x: settings.itemAnimation.hide.toX,
+          autoAlpha: 0,
           duration: settings.itemAnimation.hide.duration,
           ease: settings.itemAnimation.hide.ease,
-        },
-        startTime
-      );
-
-      filterTimeline.to(
-        headingTargets,
-        {
-          x: settings.wordAnimation.hide.toX,
-          duration: settings.wordAnimation.hide.duration,
-          ease: settings.wordAnimation.hide.ease,
-          stagger: {
-            each: settings.wordAnimation.hide.stagger,
-            from: "end",
-          },
-        },
-        startTime
-      );
-
-      filterTimeline.to(
-        headingTargets,
-        {
-          autoAlpha: 0,
-          duration:
-            settings.wordAnimation.hide.duration * settings.wordAnimation.hide.fade,
-          ease: settings.wordAnimation.hide.fadeEase,
-          stagger: {
-            each: settings.wordAnimation.hide.stagger,
-            from: "end",
-          },
-        },
-        startTime +
-          settings.wordAnimation.hide.duration *
-            (1 - settings.wordAnimation.hide.fade)
-      );
-
-      filterTimeline.to(
-        $(this).find(".h-line"),
-        {
-          clipPath: "inset(0% 0% 0% 100%)",
-          duration: settings.lineExitDuration,
-          ease: "power3.in",
         },
         startTime
       );
