@@ -181,7 +181,6 @@ function filterOne() {
 
   const $lines = $tabs.find("[line-hover]");
   const $revealLines = $reveals.find(".h-line");
-  const $revealParent = $reveals.first().parent();
   const $initialTab = $tabs.filter('[filter-tab="all"]').first();
   const $activeTab = $initialTab.length ? $initialTab : $tabs.first();
   let splitInstances = [];
@@ -216,6 +215,40 @@ function filterOne() {
     return words.length ? words : $heading.toArray();
   }
 
+  function addWordAnimation(timeline, targets, animation, position, isHiding) {
+    const fadePosition = isHiding
+      ? position + animation.duration * (1 - animation.fade)
+      : position;
+
+    timeline.to(
+      targets,
+      {
+        x: animation.toX,
+        duration: animation.duration,
+        ease: animation.ease,
+        stagger: {
+          each: animation.stagger,
+          from: "end",
+        },
+      },
+      position
+    );
+
+    timeline.to(
+      targets,
+      {
+        autoAlpha: isHiding ? 0 : 1,
+        duration: animation.duration * animation.fade,
+        ease: animation.fadeEase,
+        stagger: {
+          each: animation.stagger,
+          from: "end",
+        },
+      },
+      fadePosition
+    );
+  }
+
   function setActiveTab($nextTab, immediate = false) {
     const $nextLine = $nextTab.find("[line-hover]").first();
     const $otherLines = $tabs.not($nextTab).find("[line-hover]");
@@ -247,17 +280,18 @@ function filterOne() {
 
     gsap.killTweensOf($reveals);
     gsap.killTweensOf($revealLines);
-    gsap.killTweensOf($revealParent);
 
     const $visibleReveals = $reveals.filter(function () {
       return $(this).css("display") !== "none";
     });
 
-    gsap.set($visibleReveals, { autoAlpha: 1 });
+    gsap.set($visibleReveals, {
+      autoAlpha: 1,
+      clearProps: "height,overflow",
+    });
     gsap.set($visibleReveals.find(".h-line"), {
       clipPath: "inset(0% 0% 0% 0%)",
     });
-    gsap.set($revealParent, { clearProps: "height,overflow" });
     revertHeadings();
   }
 
@@ -275,6 +309,7 @@ function filterOne() {
       gsap.set($reveals, {
         display: "block",
         autoAlpha: 1,
+        clearProps: "height,overflow",
       });
       gsap.set($revealLines, {
         clipPath: "inset(0% 0% 0% 0%)",
@@ -288,24 +323,35 @@ function filterOne() {
     const $visibleReveals = $reveals.filter(function () {
       return $(this).css("display") !== "none";
     });
+    const $leaving = $visibleReveals.not($matches);
+    const $entering = $matches.not($visibleReveals);
     const allHeadingTargets = $reveals
       .toArray()
       .flatMap((item) => getHeadingTargets(item));
+    const overlapStart = Math.min(2, $leaving.length) * settings.itemStagger;
 
     gsap.killTweensOf(allHeadingTargets);
     gsap.set($visibleReveals, { autoAlpha: 1 });
 
     filterTimeline = gsap.timeline({
       onComplete: () => {
+        gsap.set($leaving, { display: "none" });
         gsap.set($matches, { clearProps: "opacity,visibility" });
-        gsap.set($revealParent, { clearProps: "height,overflow" });
+        gsap.set($matches, { clearProps: "height,overflow" });
         revertHeadings();
         filterTimeline = null;
       },
     });
 
-    $visibleReveals.each(function () {
+    $leaving.each(function (index) {
+      const $item = $(this);
       const headingTargets = getHeadingTargets(this);
+      const itemStart = index * settings.itemStagger;
+      const wordEnd =
+        settings.wordAnimation.hide.duration +
+        Math.max(0, headingTargets.length - 1) * settings.wordAnimation.hide.stagger;
+      const collapseStart =
+        itemStart + Math.max(wordEnd, settings.lineExitDuration);
 
       gsap.set(headingTargets, {
         x: settings.wordAnimation.hide.fromX,
@@ -313,65 +359,55 @@ function filterOne() {
         willChange: "transform,opacity",
       });
 
-      filterTimeline.to(
+      addWordAnimation(
+        filterTimeline,
         headingTargets,
-        {
-          x: settings.wordAnimation.hide.toX,
-          duration: settings.wordAnimation.hide.duration,
-          ease: settings.wordAnimation.hide.ease,
-          stagger: {
-            each: settings.wordAnimation.hide.stagger,
-            from: "end",
-          },
-        },
-        0
+        settings.wordAnimation.hide,
+        itemStart,
+        true
       );
 
       filterTimeline.to(
-        headingTargets,
+        $item.find(".h-line"),
         {
-          autoAlpha: 0,
-          duration:
-            settings.wordAnimation.hide.duration * settings.wordAnimation.hide.fade,
-          ease: settings.wordAnimation.hide.fadeEase,
-          stagger: {
-            each: settings.wordAnimation.hide.stagger,
-            from: "end",
-          },
+          clipPath: "inset(0% 0% 0% 100%)",
+          duration: settings.lineExitDuration,
+          ease: "power3.in",
         },
-        settings.wordAnimation.hide.duration *
-          (1 - settings.wordAnimation.hide.fade)
+        itemStart
       );
+
+      filterTimeline.set(
+        $item,
+        {
+          height: () => $item.outerHeight(),
+          overflow: "hidden",
+        },
+        collapseStart
+      );
+
+      filterTimeline.to(
+        $item,
+        {
+          height: 0,
+          duration: settings.heightDuration,
+          ease: "power2.inOut",
+        },
+        collapseStart
+      );
+
+      filterTimeline.set($item, { display: "none" });
     });
 
-    filterTimeline.to(
-      $visibleReveals.find(".h-line"),
-      {
-        clipPath: "inset(0% 0% 0% 100%)",
-        duration: settings.lineExitDuration,
-        ease: "power3.in",
-      },
-      0
-    );
-
-    const exitEnd = filterTimeline.duration();
-
-    filterTimeline.addLabel("switch", exitEnd);
-
     filterTimeline.add(() => {
-      const currentHeight = $revealParent.outerHeight();
-
-      gsap.set($revealParent, {
-        height: currentHeight,
-        overflow: "hidden",
-      });
-      gsap.set($reveals, { display: "none" });
-      gsap.set($matches, {
+      gsap.set($entering, {
         display: "block",
+        height: 0,
+        overflow: "hidden",
         autoAlpha: 1,
       });
 
-      $matches.each(function () {
+      $entering.each(function () {
         gsap.set(getHeadingTargets(this), {
           x: settings.wordAnimation.reveal.fromX,
           autoAlpha: 0,
@@ -379,63 +415,42 @@ function filterOne() {
         });
       });
 
-      gsap.set($matches.find(".h-line"), {
+      gsap.set($entering.find(".h-line"), {
         clipPath: "inset(0% 100% 0% 0%)",
       });
-    }, "switch");
+    }, overlapStart);
 
-    filterTimeline.to(
-      $revealParent,
-      {
-        height: "auto",
-        duration: settings.heightDuration,
-        ease: "power2.inOut",
-      },
-      "switch+=0.001"
-    );
-
-    filterTimeline.to(
-      $matches.find(".h-line"),
-      {
-        clipPath: "inset(0% 0% 0% 0%)",
-        duration: settings.lineEnterDuration,
-        ease: "power3.out",
-      },
-      "switch+=0.04"
-    );
-
-    $matches.each(function (index) {
+    $entering.each(function (index) {
+      const $item = $(this);
       const headingTargets = getHeadingTargets(this);
-      const startTime = 0.04 + index * settings.itemStagger;
+      const itemStart = overlapStart + index * settings.itemStagger;
 
       filterTimeline.to(
-        headingTargets,
+        $item,
         {
-          x: settings.wordAnimation.reveal.toX,
-          duration: settings.wordAnimation.reveal.duration,
-          ease: settings.wordAnimation.reveal.ease,
-          stagger: {
-            each: settings.wordAnimation.reveal.stagger,
-            from: "end",
-          },
+          height: "auto",
+          duration: settings.heightDuration,
+          ease: "power2.inOut",
         },
-        `switch+=${startTime}`
+        itemStart
       );
 
       filterTimeline.to(
-        headingTargets,
+        $item.find(".h-line"),
         {
-          autoAlpha: 1,
-          duration:
-            settings.wordAnimation.reveal.duration *
-            settings.wordAnimation.reveal.fade,
-          ease: settings.wordAnimation.reveal.fadeEase,
-          stagger: {
-            each: settings.wordAnimation.reveal.stagger,
-            from: "end",
-          },
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: settings.lineEnterDuration,
+          ease: "power3.out",
         },
-        `switch+=${startTime}`
+        itemStart
+      );
+
+      addWordAnimation(
+        filterTimeline,
+        headingTargets,
+        settings.wordAnimation.reveal,
+        itemStart,
+        false
       );
     });
   }
