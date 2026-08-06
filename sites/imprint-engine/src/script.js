@@ -152,12 +152,44 @@ function filterOne() {
   const $reveals = $("[filter-reveal]");
   if (!$tabs.length || !$reveals.length) return null;
 
+  const settings = {
+    exitX: 28,
+    enterX: -24,
+    exitDuration: 0.24,
+    enterDuration: 0.42,
+    exitStagger: 0.14,
+    enterStagger: 0.2,
+    itemFadeDuration: 0.14,
+    itemFadeInDuration: 0.3,
+    itemStagger: 0.03,
+    switchTime: 0.38,
+  };
+
   const $lines = $tabs.find("[line-hover]");
   const $initialTab = $tabs.filter('[filter-tab="all"]').first();
   const $activeTab = $initialTab.length ? $initialTab : $tabs.first();
+  const splitInstances = [];
+  let filterTimeline = null;
+
+  if (window.SplitType) {
+    $reveals.find(".accord-heading").each(function () {
+      splitInstances.push(
+        new SplitType(this, {
+          types: "chars",
+        })
+      );
+    });
+  }
 
   function normalizeValue(value) {
     return String(value || "").trim().toLowerCase();
+  }
+
+  function getHeadingTargets(item) {
+    const $heading = $(item).find(".accord-heading").first();
+    const chars = $heading.find(".char").toArray();
+
+    return chars.length ? chars : $heading.toArray();
   }
 
   function setActiveTab($nextTab, immediate = false) {
@@ -191,37 +223,129 @@ function filterOne() {
         : $reveals.filter(function () {
             return normalizeValue($(this).attr("filter-reveal")) === filterValue;
           });
+    const allHeadingTargets = $reveals
+      .toArray()
+      .flatMap((item) => getHeadingTargets(item));
+
+    if (filterTimeline) {
+      filterTimeline.kill();
+      filterTimeline = null;
+    }
 
     gsap.killTweensOf($reveals);
+    gsap.killTweensOf(allHeadingTargets);
 
     if (immediate) {
       gsap.set($reveals, {
         display: "block",
         autoAlpha: 1,
       });
+      gsap.set(allHeadingTargets, {
+        x: 0,
+        autoAlpha: 1,
+      });
       return;
     }
 
-    gsap.to($reveals, {
-      autoAlpha: 0,
-      duration: 0.2,
-      ease: "power2.out",
-      overwrite: true,
+    const $visibleReveals = $reveals.filter(function () {
+      return $(this).css("display") !== "none";
+    });
+
+    gsap.set($visibleReveals, { autoAlpha: 1 });
+
+    filterTimeline = gsap.timeline({
       onComplete: () => {
-        gsap.set($reveals, { display: "none" });
-        gsap.set($matches, {
-          display: "block",
-          autoAlpha: 0,
+        $matches.each(function () {
+          gsap.set(getHeadingTargets(this), {
+            clearProps: "transform,opacity,visibility,willChange",
+          });
         });
 
-        gsap.to($matches, {
-          autoAlpha: 1,
-          duration: 0.35,
-          ease: "power2.out",
-          stagger: 0.04,
-          overwrite: true,
-        });
+        gsap.set($matches, { clearProps: "opacity,visibility" });
+        filterTimeline = null;
       },
+    });
+
+    $visibleReveals.each(function () {
+      const headingTargets = getHeadingTargets(this);
+
+      gsap.set(headingTargets, {
+        x: 0,
+        autoAlpha: 1,
+        willChange: "transform,opacity",
+      });
+
+      filterTimeline.to(
+        headingTargets,
+        {
+          x: settings.exitX,
+          autoAlpha: 0,
+          duration: settings.exitDuration,
+          ease: "power2.in",
+          stagger: {
+            amount: settings.exitStagger,
+            from: "start",
+          },
+        },
+        0
+      );
+    });
+
+    filterTimeline.to(
+      $visibleReveals,
+      {
+        autoAlpha: 0,
+        duration: settings.itemFadeDuration,
+        ease: "power1.in",
+      },
+      settings.switchTime - settings.itemFadeDuration
+    );
+
+    filterTimeline.add(() => {
+      gsap.set($reveals, { display: "none" });
+      gsap.set(allHeadingTargets, {
+        clearProps: "transform,opacity,visibility,willChange",
+      });
+      gsap.set($matches, {
+        display: "block",
+        autoAlpha: 0,
+      });
+
+      $matches.each(function () {
+        gsap.set(getHeadingTargets(this), {
+          x: settings.enterX,
+          autoAlpha: 0,
+          willChange: "transform,opacity",
+        });
+      });
+    }, settings.switchTime);
+
+    filterTimeline.to(
+      $matches,
+      {
+        autoAlpha: 1,
+        duration: settings.itemFadeInDuration,
+        ease: "power2.out",
+        stagger: settings.itemStagger,
+      },
+      settings.switchTime
+    );
+
+    $matches.each(function (index) {
+      filterTimeline.to(
+        getHeadingTargets(this),
+        {
+          x: 0,
+          autoAlpha: 1,
+          duration: settings.enterDuration,
+          ease: "power3.out",
+          stagger: {
+            amount: settings.enterStagger,
+            from: "start",
+          },
+        },
+        settings.switchTime + 0.04 + index * settings.itemStagger
+      );
     });
   }
 
@@ -239,9 +363,12 @@ function filterOne() {
     });
 
   return () => {
+    if (filterTimeline) filterTimeline.kill();
+
     $tabs.off("click.filterOne");
     gsap.killTweensOf($reveals);
     gsap.killTweensOf($lines);
+    splitInstances.forEach((instance) => instance.revert());
   };
 }
 
