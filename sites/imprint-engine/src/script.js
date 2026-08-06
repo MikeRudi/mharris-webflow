@@ -156,7 +156,7 @@ function filterOne() {
     wordAnimation: {
       hide: {
         fromX: 0,
-        toX: 300,
+        toX: 200,
         duration: 0.5,
         ease: "power1.in",
         stagger: 0.01,
@@ -164,7 +164,7 @@ function filterOne() {
         fadeEase: "power1.in",
       },
       reveal: {
-        fromX: -300,
+        fromX: -200,
         toX: 0,
         duration: 0.4,
         ease: "power1.in",
@@ -173,7 +173,7 @@ function filterOne() {
         fadeEase: "power1.in",
       },
     },
-    itemStagger: 0.1,
+    itemStagger: 0.05,
     lineExitDuration: 0.7,
     lineEnterDuration: 0.7,
     heightDuration: 0.55,
