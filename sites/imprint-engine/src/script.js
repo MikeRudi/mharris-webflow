@@ -311,9 +311,8 @@ function filterOne() {
       },
     });
 
-    $visibleReveals.each(function (index) {
+    $visibleReveals.each(function () {
       const $item = $(this);
-      const startTime = index * settings.itemStagger;
 
       gsap.set($item, {
         autoAlpha: 1,
@@ -327,7 +326,7 @@ function filterOne() {
           duration: settings.itemAnimation.hide.duration,
           ease: settings.itemAnimation.hide.ease,
         },
-        startTime
+        0
       );
     });
 
