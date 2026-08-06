@@ -196,11 +196,11 @@ function filterOne() {
     splitInstances = [];
   }
 
-  function splitHeadings($items) {
+  function splitHeadings() {
     revertHeadings();
     if (!window.SplitType) return;
 
-    $items.find(".accord-heading").each(function () {
+    $reveals.find(".accord-heading").each(function () {
       splitInstances.push(
         new SplitType(this, {
           types: "words",
@@ -283,33 +283,28 @@ function filterOne() {
     }
 
     stopFilterAnimation();
+    splitHeadings();
 
     const $visibleReveals = $reveals.filter(function () {
       return $(this).css("display") !== "none";
     });
-    const $leaving = $visibleReveals.not($matches);
-    const $entering = $matches.not($visibleReveals);
-    const $animatedReveals = $leaving.add($entering);
-
-    splitHeadings($animatedReveals);
-
-    const allHeadingTargets = $animatedReveals
+    const allHeadingTargets = $reveals
       .toArray()
       .flatMap((item) => getHeadingTargets(item));
 
     gsap.killTweensOf(allHeadingTargets);
-    gsap.set($leaving, { autoAlpha: 1 });
+    gsap.set($visibleReveals, { autoAlpha: 1 });
 
     filterTimeline = gsap.timeline({
       onComplete: () => {
-        gsap.set($entering, { clearProps: "opacity,visibility" });
+        gsap.set($matches, { clearProps: "opacity,visibility" });
         gsap.set($revealParent, { clearProps: "height,overflow" });
         revertHeadings();
         filterTimeline = null;
       },
     });
 
-    $leaving.each(function () {
+    $visibleReveals.each(function () {
       const headingTargets = getHeadingTargets(this);
 
       gsap.set(headingTargets, {
@@ -350,7 +345,7 @@ function filterOne() {
     });
 
     filterTimeline.to(
-      $leaving.find(".h-line"),
+      $visibleReveals.find(".h-line"),
       {
         clipPath: "inset(0% 0% 0% 100%)",
         duration: settings.lineExitDuration,
@@ -370,13 +365,13 @@ function filterOne() {
         height: currentHeight,
         overflow: "hidden",
       });
-      gsap.set($leaving, { display: "none" });
-      gsap.set($entering, {
+      gsap.set($reveals, { display: "none" });
+      gsap.set($matches, {
         display: "block",
         autoAlpha: 1,
       });
 
-      $entering.each(function () {
+      $matches.each(function () {
         gsap.set(getHeadingTargets(this), {
           x: settings.wordAnimation.reveal.fromX,
           autoAlpha: 0,
@@ -384,7 +379,7 @@ function filterOne() {
         });
       });
 
-      gsap.set($entering.find(".h-line"), {
+      gsap.set($matches.find(".h-line"), {
         clipPath: "inset(0% 100% 0% 0%)",
       });
     }, "switch");
@@ -400,7 +395,7 @@ function filterOne() {
     );
 
     filterTimeline.to(
-      $entering.find(".h-line"),
+      $matches.find(".h-line"),
       {
         clipPath: "inset(0% 0% 0% 0%)",
         duration: settings.lineEnterDuration,
@@ -409,7 +404,7 @@ function filterOne() {
       "switch+=0.04"
     );
 
-    $entering.each(function (index) {
+    $matches.each(function (index) {
       const headingTargets = getHeadingTargets(this);
       const startTime = 0.04 + index * settings.itemStagger;
 
