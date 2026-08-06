@@ -153,6 +153,20 @@ function filterOne() {
   if (!$tabs.length || !$reveals.length) return null;
 
   const settings = {
+    itemAnimation: {
+      hide: {
+        fromX: 0,
+        toX: 30,
+        duration: 0.5,
+        ease: "power1.inOut",
+      },
+      reveal: {
+        fromX: -30,
+        toX: 0,
+        duration: 0.4,
+        ease: "power1.inOut",
+      },
+    },
     wordAnimation: {
       hide: {
         fromX: 0,
@@ -300,7 +314,9 @@ function filterOne() {
 
     filterTimeline = gsap.timeline({
       onComplete: () => {
-        gsap.set($itemsToShow, { clearProps: "opacity,visibility" });
+        gsap.set($itemsToShow, {
+          clearProps: "transform,opacity,visibility",
+        });
         gsap.set($revealParent, { clearProps: "height,overflow" });
         revertHeadings();
         filterTimeline = null;
@@ -308,14 +324,30 @@ function filterOne() {
     });
 
     $visibleReveals.each(function (index) {
+      const $item = $(this);
       const headingTargets = getHeadingTargets(this);
       const startTime = index * settings.itemStagger;
+
+      gsap.set($item, {
+        x: settings.itemAnimation.hide.fromX,
+        willChange: "transform",
+      });
 
       gsap.set(headingTargets, {
         x: settings.wordAnimation.hide.fromX,
         autoAlpha: 1,
         willChange: "transform,opacity",
       });
+
+      filterTimeline.to(
+        $item,
+        {
+          x: settings.itemAnimation.hide.toX,
+          duration: settings.itemAnimation.hide.duration,
+          ease: settings.itemAnimation.hide.ease,
+        },
+        startTime
+      );
 
       filterTimeline.to(
         headingTargets,
@@ -374,6 +406,8 @@ function filterOne() {
       gsap.set($itemsToShow, {
         display: "block",
         autoAlpha: 1,
+        x: settings.itemAnimation.reveal.fromX,
+        willChange: "transform",
       });
 
       $itemsToShow.each(function () {
@@ -400,8 +434,19 @@ function filterOne() {
     );
 
     $itemsToShow.each(function (index) {
+      const $item = $(this);
       const headingTargets = getHeadingTargets(this);
       const startTime = 0.04 + index * settings.itemStagger;
+
+      filterTimeline.to(
+        $item,
+        {
+          x: settings.itemAnimation.reveal.toX,
+          duration: settings.itemAnimation.reveal.duration,
+          ease: settings.itemAnimation.reveal.ease,
+        },
+        `switch+=${startTime}`
+      );
 
       filterTimeline.to(
         $(this).find(".h-line"),
