@@ -198,11 +198,11 @@ function filterOne() {
     splitInstances = [];
   }
 
-  function splitHeadings() {
+  function splitHeadings($items) {
     revertHeadings();
     if (!window.SplitType) return;
 
-    $reveals.find(".accord-heading").each(function () {
+    $items.find(".accord-heading").each(function () {
       splitInstances.push(
         new SplitType(this, {
           types: "words",
@@ -288,16 +288,16 @@ function filterOne() {
     }
 
     finishFilterAnimation();
-    splitHeadings();
+    splitHeadings($itemsToShow);
 
     const $visibleReveals = $reveals.filter(function () {
       return $(this).css("display") !== "none";
     });
-    const allHeadingTargets = $reveals
+    const incomingHeadingTargets = $itemsToShow
       .toArray()
       .flatMap((item) => getHeadingTargets(item));
 
-    gsap.killTweensOf(allHeadingTargets);
+    gsap.killTweensOf(incomingHeadingTargets);
     gsap.set($visibleReveals, { autoAlpha: 1 });
 
     filterTimeline = gsap.timeline({
