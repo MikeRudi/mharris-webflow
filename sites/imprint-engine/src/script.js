@@ -156,12 +156,12 @@ function filterOne() {
     itemAnimation: {
       hide: {
         fromX: 0,
-        toX: -30,
+        toX: 100,
         duration: 0.5,
         ease: "power1.inOut",
       },
       reveal: {
-        fromX: 30,
+        fromX: -100,
         toX: 0,
         duration: 0.4,
         ease: "power1.inOut",
