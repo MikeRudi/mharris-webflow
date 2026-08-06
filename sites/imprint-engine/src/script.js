@@ -160,7 +160,7 @@ function filterOne() {
     exitStagger: 0.035,
     enterStagger: 0.05,
     itemStagger: 0.03,
-    lineExitDuration: 0.4,
+    lineExitDuration: 0.7,
     lineEnterDuration: 0.7,
     heightDuration: 0.55,
   };
