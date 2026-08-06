@@ -173,7 +173,7 @@ function filterOne() {
         fadeEase: "power1.in",
       },
     },
-    itemStagger: 0.07,
+    itemStagger: 0.1,
     lineExitDuration: 0.7,
     lineEnterDuration: 0.7,
     heightDuration: 0.55,
