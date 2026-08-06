@@ -307,7 +307,7 @@ function filterOne() {
           ease: "power2.in",
           stagger: {
             each: settings.exitStagger,
-            from: "start",
+            from: "end",
           },
         },
         0
@@ -321,7 +321,7 @@ function filterOne() {
           ease: "none",
           stagger: {
             each: settings.exitStagger,
-            from: "start",
+            from: "end",
           },
         },
         settings.exitDuration * 0.9
@@ -400,7 +400,7 @@ function filterOne() {
           ease: "power3.out",
           stagger: {
             each: settings.enterStagger,
-            from: "start",
+            from: "end",
           },
         },
         `switch+=${startTime}`
@@ -414,7 +414,7 @@ function filterOne() {
           ease: "none",
           stagger: {
             each: settings.enterStagger,
-            from: "start",
+            from: "end",
           },
         },
         `switch+=${startTime}`
