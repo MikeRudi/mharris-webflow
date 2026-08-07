@@ -82,6 +82,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 
 function initSite() {
   initLenis();
+  navTheme();
   accordionOne();
   filterOne();
 
@@ -97,6 +98,58 @@ function initSite() {
 }
 
 $(initSite);
+
+function navTheme() {
+  const $nav = $(".nav-block").first();
+  const $sections = $("[nav-light], [nav-dark]");
+  if (!$nav.length || !$sections.length || !window.ScrollTrigger) return null;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const initialMode = $nav.hasClass("nav-light") ? "nav-light" : "nav-dark";
+  const sections = $sections.toArray().map((element) => ({
+    element,
+    mode: $(element).is("[nav-light]") ? "nav-light" : "nav-dark",
+  }));
+
+  function setNavMode(mode) {
+    $nav
+      .toggleClass("nav-light", mode === "nav-light")
+      .toggleClass("nav-dark", mode === "nav-dark");
+  }
+
+  function syncNavMode() {
+    let mode = initialMode;
+
+    sections.forEach((section) => {
+      if (section.element.getBoundingClientRect().top <= 0) {
+        mode = section.mode;
+      }
+    });
+
+    setNavMode(mode);
+  }
+
+  const triggers = sections.map((section, index) =>
+    ScrollTrigger.create({
+      trigger: section.element,
+      start: "top top",
+      onEnter: () => setNavMode(section.mode),
+      onLeaveBack: () =>
+        setNavMode(index > 0 ? sections[index - 1].mode : initialMode),
+      invalidateOnRefresh: true,
+    })
+  );
+
+  ScrollTrigger.addEventListener("refresh", syncNavMode);
+  syncNavMode();
+
+  return () => {
+    triggers.forEach((trigger) => trigger.kill());
+    ScrollTrigger.removeEventListener("refresh", syncNavMode);
+    setNavMode(initialMode);
+  };
+}
 
 function lineHover() {
   $("[line-hover-item]").each(function () {
