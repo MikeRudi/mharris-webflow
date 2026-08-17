@@ -34,3 +34,86 @@
   opacity: 0;
   will-change: opacity;
 }
+
+[lander-fluid-mark] {
+  --drop-top: #c9b0ff;
+  --drop-middle: #9857ff;
+  --drop-bottom: #7a26de;
+  position: relative;
+  z-index: 0;
+  display: flex;
+  width: min(100%, 90rem);
+  height: 13rem;
+  align-items: center;
+  justify-content: center;
+  margin-right: auto;
+  margin-left: auto;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+[lander-symbol] {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 9rem;
+  height: auto;
+  overflow: visible;
+}
+
+[lander-bracket],
+[lander-droplet] {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+[lander-drop-stop="top"] {
+  stop-color: var(--drop-top);
+}
+
+[lander-drop-stop="middle"] {
+  stop-color: var(--drop-middle);
+}
+
+[lander-drop-stop="bottom"] {
+  stop-color: var(--drop-bottom);
+}
+
+[lander-ripples] {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: min(112rem, 120vw);
+  aspect-ratio: 2.7 / 1;
+  transform: translate(-50%, -42%);
+}
+
+[ripple-ring] {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border: 1px solid rgb(104 150 230 / 38%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 2rem rgb(118 156 224 / 16%),
+    inset 0 0 2rem rgb(118 156 224 / 10%);
+  opacity: 0;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+@media screen and (max-width: 767px) {
+  [lander-fluid-mark] {
+    height: 10rem;
+  }
+
+  [lander-symbol] {
+    width: 7rem;
+  }
+
+  [lander-ripples] {
+    width: 150vw;
+  }
+}

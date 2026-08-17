@@ -85,6 +85,7 @@ function initSite() {
   navTheme();
   accordionOne();
   filterOne();
+  landerFluidMark();
 
   onDesktop(() => {
     // gitTestDesktop();
@@ -98,6 +99,157 @@ function initSite() {
 }
 
 $(initSite);
+
+function landerFluidMark() {
+  const $marks = $("[lander-fluid-mark]");
+  if (!$marks.length || !window.gsap) return null;
+
+  const settings = {
+    droplet: {
+      startY: "-65vh",
+      startSize: 0.12,
+      endSize: 1,
+      duration: 1.35,
+      ease: "power2.in",
+      startColors: ["#c9b0ff", "#9857ff", "#7a26de"],
+      endColors: ["#9c60ff", "#6f20cd", "#3d0b73"],
+    },
+    brackets: {
+      openDistance: 12,
+      openDuration: 0.22,
+      closeDuration: 0.55,
+    },
+    ripple: {
+      enabled: true,
+      duration: 1.6,
+      pace: 0.16,
+      ease: "power2.out",
+    },
+  };
+
+  const timelines = [];
+
+  $marks.each(function () {
+    const mark = this;
+    const $mark = $(mark);
+    const droplet = $mark.find("[lander-droplet]")[0];
+    const bracketLeft = $mark.find('[lander-bracket="left"]')[0];
+    const bracketRight = $mark.find('[lander-bracket="right"]')[0];
+    const rings = $mark.find("[ripple-ring]").toArray();
+    if (!droplet || !bracketLeft || !bracketRight) return;
+
+    const rippleEnabled =
+      settings.ripple.enabled && $mark.attr("ripple") !== "off";
+
+    gsap.set(mark, {
+      "--drop-top": settings.droplet.startColors[0],
+      "--drop-middle": settings.droplet.startColors[1],
+      "--drop-bottom": settings.droplet.startColors[2],
+    });
+    gsap.set(droplet, {
+      y: settings.droplet.startY,
+      scale: settings.droplet.startSize,
+      transformOrigin: "50% 70%",
+    });
+    gsap.set([bracketLeft, bracketRight], { x: 0 });
+    gsap.set(rings, { scale: 0.08, autoAlpha: 0 });
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(mark, {
+        "--drop-top": settings.droplet.endColors[0],
+        "--drop-middle": settings.droplet.endColors[1],
+        "--drop-bottom": settings.droplet.endColors[2],
+      });
+      gsap.set(droplet, { y: 0, scale: settings.droplet.endSize });
+      return;
+    }
+
+    const timeline = gsap.timeline({
+      defaults: { overwrite: "auto" },
+    });
+
+    timeline
+      .to(
+        mark,
+        {
+          "--drop-top": settings.droplet.endColors[0],
+          "--drop-middle": settings.droplet.endColors[1],
+          "--drop-bottom": settings.droplet.endColors[2],
+          duration: settings.droplet.duration,
+          ease: "none",
+        },
+        0
+      )
+      .to(
+        droplet,
+        {
+          y: 0,
+          scale: settings.droplet.endSize,
+          duration: settings.droplet.duration,
+          ease: settings.droplet.ease,
+        },
+        0
+      )
+      .to(
+        bracketLeft,
+        {
+          x: -settings.brackets.openDistance,
+          duration: settings.brackets.openDuration,
+          ease: "power2.out",
+        },
+        settings.droplet.duration - settings.brackets.openDuration
+      )
+      .to(
+        bracketRight,
+        {
+          x: settings.brackets.openDistance,
+          duration: settings.brackets.openDuration,
+          ease: "power2.out",
+        },
+        "<"
+      )
+      .to(droplet, {
+        scaleX: settings.droplet.endSize * 1.12,
+        scaleY: settings.droplet.endSize * 0.88,
+        duration: 0.12,
+        ease: "power1.out",
+      })
+      .to(droplet, {
+        scaleX: settings.droplet.endSize,
+        scaleY: settings.droplet.endSize,
+        duration: 0.42,
+        ease: "elastic.out(1, 0.55)",
+      })
+      .to(
+        [bracketLeft, bracketRight],
+        {
+          x: 0,
+          duration: settings.brackets.closeDuration,
+          ease: "power2.inOut",
+        },
+        "<-0.28"
+      );
+
+    if (rippleEnabled && rings.length) {
+      timeline.fromTo(
+        rings,
+        { scale: 0.08, autoAlpha: 0.42 },
+        {
+          scale: 1,
+          autoAlpha: 0,
+          duration: settings.ripple.duration,
+          stagger: settings.ripple.pace,
+          ease: settings.ripple.ease,
+        },
+        settings.droplet.duration - 0.02
+      );
+    }
+
+    timelines.push(timeline);
+  });
+
+  return () => timelines.forEach((timeline) => timeline.kill());
+}
 
 function navTheme() {
   const $nav = $(".nav-block").first();
