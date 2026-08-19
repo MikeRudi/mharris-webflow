@@ -149,7 +149,7 @@ function homeAnimation() {
 
   homeTimeline
     .addLabel("resting", 0)
-    .addLabel("startExit", 10)
+    .addLabel("startExit", 5)
     .to(
       $("[home-start-up]"),
       {
