@@ -159,38 +159,6 @@ function homeAnimation() {
     },
   });
 
-  const secondRestingTimeline = gsap.timeline({ paused: true });
-
-  secondRestingTimeline.to($("[home-second-up]"), {
-    xPercent: (index) => (index % 2 === 0 ? 1 : -1),
-    yPercent: (index) => (index % 3 === 0 ? -2 : 2),
-    duration: 3.2,
-    ease: "circ.inOut",
-    repeat: -1,
-    repeatDelay: 0,
-    yoyo: true,
-    stagger: {
-      each: 0.14,
-      from: "random",
-    },
-  });
-
-  const thirdRestingTimeline = gsap.timeline({ paused: true });
-
-  thirdRestingTimeline.to($("[home-third-up]"), {
-    xPercent: (index) => (index % 2 === 0 ? 1 : -1),
-    yPercent: (index) => (index % 3 === 0 ? -2 : 2),
-    duration: 3.2,
-    ease: "circ.inOut",
-    repeat: -1,
-    repeatDelay: 0,
-    yoyo: true,
-    stagger: {
-      each: 0.14,
-      from: "random",
-    },
-  });
-
   const homeLoadTimeline = gsap.timeline();
 
   homeLoadTimeline
@@ -345,17 +313,6 @@ function homeAnimation() {
       restingTimeline.pause();
     }
 
-    if (progress >= 0.375 && progress < 0.525) {
-      secondRestingTimeline.resume();
-    } else {
-      secondRestingTimeline.pause();
-    }
-
-    if (progress >= 0.675 && progress < 0.9) {
-      thirdRestingTimeline.resume();
-    } else {
-      thirdRestingTimeline.pause();
-    }
   }
 
   const homeScrollTrigger = ScrollTrigger.create({
@@ -377,8 +334,6 @@ function homeAnimation() {
     homeLoadTimeline.kill();
     homeTimeline.kill();
     restingTimeline.kill();
-    secondRestingTimeline.kill();
-    thirdRestingTimeline.kill();
     gsap.set(
       $(
         "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
