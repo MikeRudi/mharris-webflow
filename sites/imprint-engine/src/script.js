@@ -136,8 +136,8 @@ function homeAnimation() {
   });
 
   restingTimeline.to($("[home-resting] > *"), {
-    x: "random(-1rem, 1rem)",
-    y: "random(-1rem, 1rem)",
+    x: () => `${gsap.utils.random(-1, 1, 0.01)}rem`,
+    y: () => `${gsap.utils.random(-1, 1, 0.01)}rem`,
     duration: 4,
     ease: "sine.inOut",
     stagger: 0.14,
