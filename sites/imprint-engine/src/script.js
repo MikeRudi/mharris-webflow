@@ -126,7 +126,7 @@ function homeAnimation() {
     { willChange: "transform" }
   );
   gsap.set($("[home-second-up], [home-third-up]"), {
-    y: () => window.innerHeight,
+    y: "100vh",
   });
 
   const restingTimeline = gsap.timeline({
@@ -153,7 +153,7 @@ function homeAnimation() {
     .to(
       $("[home-start-up]"),
       {
-        y: () => -window.innerHeight,
+        y: "-100vh",
         duration: 24,
         ease: "power2.inOut",
         stagger: {
@@ -179,7 +179,7 @@ function homeAnimation() {
       ease: "none",
     })
     .to($("[home-second-up]"), {
-      y: () => -window.innerHeight,
+      y: "-100vh",
       duration: 9,
       ease: "power2.in",
     })
@@ -199,7 +199,7 @@ function homeAnimation() {
       ease: "none",
     })
     .to($("[home-third-up]"), {
-      y: () => -window.innerHeight,
+      y: "-100vh",
       duration: 9,
       ease: "power2.in",
     })
