@@ -107,14 +107,10 @@ function initSite() {
 $(initSite);
 
 function homeAnimation() {
-  const $lander = $(".lander-wrap").first();
-  const $layoutStart = $lander.find(".layout-start").first();
-  const $homeStart = $layoutStart.find(".home-start").first();
-
   if (
-    !$lander.length ||
-    !$layoutStart.length ||
-    !$homeStart.length ||
+    !$(".lander-wrap").length ||
+    !$(".layout-start").length ||
+    !$(".home-start").length ||
     !window.gsap ||
     !window.ScrollTrigger
   ) {
@@ -123,132 +119,90 @@ function homeAnimation() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const settings = {
-    resting: {
-      xPercent: 1,
-      yPercent: 2,
-      duration: 3.2,
-      ease: "sine.inOut",
-      stagger: 0.14,
-    },
-    startExit: {
-      y: () => -window.innerHeight,
-      duration: 24,
-      ease: "power2.inOut",
-      staggerAmount: 6,
-    },
-    scenes: {
-      enterY: () => window.innerHeight,
-      centerY: 0,
-      exitY: () => -window.innerHeight,
-      enterDuration: 9,
-      holdDuration: 12,
-      exitDuration: 9,
-      enterEase: "power2.out",
-      holdEase: "none",
-      exitEase: "power2.in",
-    },
-    scroll: {
-      start: "top top",
-      end: "bottom bottom",
-      scrub: true,
-    },
-  };
-
-  const $restingItems = $homeStart.find("[home-resting]");
-  const $startItems = $homeStart.find("[home-start-up]");
-  const $secondItems = $homeStart.find("[home-second-up]");
-  const $thirdItems = $homeStart.find("[home-third-up]");
-  const $sceneItems = $secondItems.add($thirdItems);
-  const $animatedItems = $restingItems
-    .add($startItems)
-    .add($sceneItems);
-
-  gsap.set($animatedItems, { willChange: "transform" });
-  gsap.set($sceneItems, { y: settings.scenes.enterY });
+  gsap.set(
+    $(
+      "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
+    ),
+    { willChange: "transform" }
+  );
+  gsap.set($("[home-second-up], [home-third-up]"), {
+    y: () => window.innerHeight,
+  });
 
   const restingTimeline = gsap.timeline({
     repeat: -1,
     yoyo: true,
   });
 
-  restingTimeline.to($restingItems, {
-    xPercent: (index) =>
-      index % 2 === 0
-        ? settings.resting.xPercent
-        : -settings.resting.xPercent,
-    yPercent: (index) =>
-      index % 3 === 0
-        ? -settings.resting.yPercent
-        : settings.resting.yPercent,
-    duration: settings.resting.duration,
-    ease: settings.resting.ease,
+  restingTimeline.to($("[home-resting]"), {
+    xPercent: (index) => (index % 2 === 0 ? 1 : -1),
+    yPercent: (index) => (index % 3 === 0 ? -2 : 2),
+    duration: 3.2,
+    ease: "sine.inOut",
     stagger: {
-      each: settings.resting.stagger,
+      each: 0.14,
       from: "random",
     },
   });
 
-  const startExitTimeline = gsap.timeline();
+  const homeTimeline = gsap.timeline({ paused: true });
 
-  startExitTimeline.to($startItems, {
-    y: settings.startExit.y,
-    duration: settings.startExit.duration,
-    ease: settings.startExit.ease,
-    stagger: {
-      amount: settings.startExit.staggerAmount,
-      from: "start",
-    },
-  });
-
-  const secondTimeline = gsap.timeline();
-
-  secondTimeline
-    .to($secondItems, {
-      y: settings.scenes.centerY,
-      duration: settings.scenes.enterDuration,
-      ease: settings.scenes.enterEase,
-    })
-    .to($secondItems, {
-      y: settings.scenes.centerY,
-      duration: settings.scenes.holdDuration,
-      ease: settings.scenes.holdEase,
-    })
-    .to($secondItems, {
-      y: settings.scenes.exitY,
-      duration: settings.scenes.exitDuration,
-      ease: settings.scenes.exitEase,
-    });
-
-  const thirdTimeline = gsap.timeline();
-
-  thirdTimeline
-    .to($thirdItems, {
-      y: settings.scenes.centerY,
-      duration: settings.scenes.enterDuration,
-      ease: settings.scenes.enterEase,
-    })
-    .to($thirdItems, {
-      y: settings.scenes.centerY,
-      duration: settings.scenes.holdDuration,
-      ease: settings.scenes.holdEase,
-    })
-    .to($thirdItems, {
-      y: settings.scenes.exitY,
-      duration: settings.scenes.exitDuration,
-      ease: settings.scenes.exitEase,
-    });
-
-  const homeScrollTimeline = gsap.timeline({ paused: true });
-
-  homeScrollTimeline
+  homeTimeline
     .addLabel("resting", 0)
     .addLabel("startExit", 10)
-    .add(startExitTimeline, "startExit")
+    .to(
+      $("[home-start-up]"),
+      {
+        y: () => -window.innerHeight,
+        duration: 24,
+        ease: "power2.inOut",
+        stagger: {
+          amount: 6,
+          from: "start",
+        },
+      },
+      "startExit"
+    )
     .addLabel("second", 40)
-    .add(secondTimeline, "second")
+    .to(
+      $("[home-second-up]"),
+      {
+        y: 0,
+        duration: 9,
+        ease: "power2.out",
+      },
+      "second"
+    )
+    .to($("[home-second-up]"), {
+      y: 0,
+      duration: 12,
+      ease: "none",
+    })
+    .to($("[home-second-up]"), {
+      y: () => -window.innerHeight,
+      duration: 9,
+      ease: "power2.in",
+    })
     .addLabel("third", 70)
-    .add(thirdTimeline, "third")
+    .to(
+      $("[home-third-up]"),
+      {
+        y: 0,
+        duration: 9,
+        ease: "power2.out",
+      },
+      "third"
+    )
+    .to($("[home-third-up]"), {
+      y: 0,
+      duration: 12,
+      ease: "none",
+    })
+    .to($("[home-third-up]"), {
+      y: () => -window.innerHeight,
+      duration: 9,
+      ease: "power2.in",
+    })
     .addLabel("complete", 100);
 
   function syncRestingTimeline(progress) {
@@ -261,11 +215,11 @@ function homeAnimation() {
   }
 
   const homeScrollTrigger = ScrollTrigger.create({
-    trigger: $layoutStart[0],
-    animation: homeScrollTimeline,
-    start: settings.scroll.start,
-    end: settings.scroll.end,
-    scrub: settings.scroll.scrub,
+    trigger: $(".layout-start")[0],
+    animation: homeTimeline,
+    start: "top top",
+    end: "bottom bottom",
+    scrub: true,
     invalidateOnRefresh: true,
     onUpdate: (self) => syncRestingTimeline(self.progress),
     onLeave: () => restingTimeline.pause(),
@@ -276,14 +230,14 @@ function homeAnimation() {
 
   return () => {
     homeScrollTrigger.kill();
-    homeScrollTimeline.kill();
+    homeTimeline.kill();
     restingTimeline.kill();
-    startExitTimeline.kill();
-    secondTimeline.kill();
-    thirdTimeline.kill();
-    gsap.set($animatedItems, {
-      clearProps: "transform,will-change",
-    });
+    gsap.set(
+      $(
+        "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
+      ),
+      { clearProps: "transform,will-change" }
+    );
   };
 }
 
