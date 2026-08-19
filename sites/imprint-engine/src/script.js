@@ -137,7 +137,11 @@ function homeAnimation() {
     $(
       "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
     ),
-    { willChange: "transform" }
+    {
+      y: "10rem",
+      opacity: 0,
+      willChange: "transform, opacity",
+    }
   );
   const restingTimeline = gsap.timeline();
 
@@ -189,15 +193,33 @@ function homeAnimation() {
 
   const homeLoadTimeline = gsap.timeline();
 
-  homeLoadTimeline.to($("[home-start-up]"), {
-    y: 0,
-    duration: 1.2,
-    ease: "power2.out",
-    stagger: {
-      amount: 0.6,
-      from: "end",
-    },
-  });
+  homeLoadTimeline
+    .to(
+      $("[home-start-up]"),
+      {
+        y: 0,
+        duration: 1.2,
+        ease: "power2.out",
+        stagger: {
+          amount: 0.6,
+          from: "end",
+        },
+      },
+      0
+    )
+    .to(
+      $("[home-start-up]"),
+      {
+        opacity: 1,
+        duration: 0.6,
+        ease: "power1.out",
+        stagger: {
+          amount: 0.6,
+          from: "end",
+        },
+      },
+      0
+    );
 
   const homeTimeline = gsap.timeline({ paused: true });
 
@@ -206,7 +228,7 @@ function homeAnimation() {
     .to(
       $("[home-start-up]"),
       {
-        y: "-100vh",
+        y: "-10rem",
         duration: 24,
         ease: "power2.inOut",
         stagger: {
@@ -216,7 +238,20 @@ function homeAnimation() {
       },
       "startExit"
     )
-    .addLabel("second", 30)
+    .to(
+      $("[home-start-up]"),
+      {
+        opacity: 0,
+        duration: 12,
+        ease: "power1.in",
+        stagger: {
+          amount: 6,
+          from: "end",
+        },
+      },
+      "startExit+=12"
+    )
+    .addLabel("secondEnter", 30)
     .to(
       $("[home-second-up]"),
       {
@@ -224,19 +259,47 @@ function homeAnimation() {
         duration: 7.5,
         ease: "power2.out",
       },
-      "second"
+      "secondEnter"
     )
-    .to($("[home-second-up]"), {
-      y: 0,
-      duration: 15,
-      ease: "none",
-    })
-    .to($("[home-second-up]"), {
-      y: "-100vh",
-      duration: 7.5,
-      ease: "power2.in",
-    })
-    .addLabel("third", 60)
+    .to(
+      $("[home-second-up]"),
+      {
+        opacity: 1,
+        duration: 3.75,
+        ease: "power1.out",
+      },
+      "secondEnter"
+    )
+    .addLabel("secondResting", 37.5)
+    .to(
+      $("[home-second-up]"),
+      {
+        y: 0,
+        duration: 15,
+        ease: "none",
+      },
+      "secondResting"
+    )
+    .addLabel("secondExit", 52.5)
+    .to(
+      $("[home-second-up]"),
+      {
+        y: "-10rem",
+        duration: 7.5,
+        ease: "power2.in",
+      },
+      "secondExit"
+    )
+    .to(
+      $("[home-second-up]"),
+      {
+        opacity: 0,
+        duration: 3.75,
+        ease: "power1.in",
+      },
+      "secondExit+=3.75"
+    )
+    .addLabel("thirdEnter", 60)
     .to(
       $("[home-third-up]"),
       {
@@ -244,17 +307,35 @@ function homeAnimation() {
         duration: 7.5,
         ease: "power2.out",
       },
-      "third"
+      "thirdEnter"
     )
-    .to($("[home-third-up]"), {
-      y: 0,
-      duration: 22.5,
-      ease: "none",
-    })
-    .to({}, {
-      duration: 10,
-      ease: "none",
-    })
+    .to(
+      $("[home-third-up]"),
+      {
+        opacity: 1,
+        duration: 3.75,
+        ease: "power1.out",
+      },
+      "thirdEnter"
+    )
+    .addLabel("thirdResting", 67.5)
+    .to(
+      $("[home-third-up]"),
+      {
+        y: 0,
+        duration: 22.5,
+        ease: "none",
+      },
+      "thirdResting"
+    )
+    .to(
+      {},
+      {
+        duration: 10,
+        ease: "none",
+      },
+      90
+    )
     .addLabel("complete", 100);
 
   function syncRestingTimelines(progress) {
