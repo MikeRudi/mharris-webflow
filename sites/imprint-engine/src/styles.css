@@ -35,15 +35,6 @@
   will-change: opacity;
 }
 
-@media screen and (min-width: 992px) {
-  [home-start-up],
-  [home-second-up],
-  [home-third-up] {
-    opacity: 1;
-    transform: translate3d(0, 100vh, 0);
-  }
-}
-
 [lander-fluid-mark] {
   --drop-top: #c9b0ff;
   --drop-middle: #9857ff;
