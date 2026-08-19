@@ -121,7 +121,7 @@ function homeAnimation() {
 
   gsap.set(
     $(
-      "[home-resting] > *, [home-start-up], [home-second-up], [home-third-up]"
+      "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
     ),
     { willChange: "transform" }
   );
@@ -129,18 +129,20 @@ function homeAnimation() {
     y: "100vh",
   });
 
-  const restingTimeline = gsap.timeline({
-    repeat: -1,
-    repeatRefresh: true,
-    yoyo: true,
-  });
+  const restingTimeline = gsap.timeline();
 
-  restingTimeline.to($("[home-resting] > *"), {
-    x: () => `${gsap.utils.random(-1, 1, 0.01)}rem`,
-    y: () => `${gsap.utils.random(-1, 1, 0.01)}rem`,
-    duration: 4,
+  restingTimeline.to($("[home-resting]"), {
+    xPercent: (index) => (index % 2 === 0 ? 1 : -1),
+    yPercent: (index) => (index % 3 === 0 ? -2 : 2),
+    duration: 3.2,
     ease: "sine.inOut",
-    stagger: 0.14,
+    repeat: -1,
+    repeatDelay: 0,
+    yoyo: true,
+    stagger: {
+      each: 0.14,
+      from: "random",
+    },
   });
 
   const homeTimeline = gsap.timeline({ paused: true });
