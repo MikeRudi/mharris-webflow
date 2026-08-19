@@ -312,7 +312,6 @@ function homeAnimation() {
     } else {
       restingTimeline.pause();
     }
-
   }
 
   const homeScrollTrigger = ScrollTrigger.create({
