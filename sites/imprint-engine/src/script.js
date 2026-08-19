@@ -175,19 +175,19 @@ function homeAnimation() {
       $("[home-second-up]"),
       {
         y: 0,
-        duration: 9,
+        // duration: 9,
         ease: "power2.out",
       },
       "second"
     )
     .to($("[home-second-up]"), {
       y: 0,
-      duration: 12,
+      // duration: 12,
       ease: "none",
     })
     .to($("[home-second-up]"), {
       y: "-100vh",
-      duration: 9,
+      // duration: 9,
       ease: "power2.in",
     })
     .addLabel("third", 60)
@@ -195,23 +195,23 @@ function homeAnimation() {
       $("[home-third-up]"),
       {
         y: 0,
-        duration: 9,
+        // duration: 9,
         ease: "power2.out",
       },
       "third"
     )
     .to($("[home-third-up]"), {
       y: 0,
-      duration: 12,
+      // duration: 12,
       ease: "none",
     })
     .to($("[home-third-up]"), {
       y: "-100vh",
-      duration: 9,
+      // duration: 9,
       ease: "power2.in",
     })
     .to({}, {
-      duration: 10,
+      // duration: 10,
       ease: "none",
     })
     .addLabel("complete", 100);
