@@ -125,10 +125,6 @@ function homeAnimation() {
     ),
     { willChange: "transform" }
   );
-  gsap.set($("[home-second-up], [home-third-up]"), {
-    y: "100vh",
-  });
-
   const restingTimeline = gsap.timeline();
 
   restingTimeline.to($("[home-resting]"), {
@@ -145,11 +141,22 @@ function homeAnimation() {
     },
   });
 
+  const homeLoadTimeline = gsap.timeline();
+
+  homeLoadTimeline.to($("[home-start-up]"), {
+    y: 0,
+    duration: 1.2,
+    ease: "power2.out",
+    stagger: {
+      amount: 0.6,
+      from: "end",
+    },
+  });
+
   const homeTimeline = gsap.timeline({ paused: true });
 
   homeTimeline
-    .addLabel("resting", 0)
-    .addLabel("startExit", 5)
+    .addLabel("startExit", 0)
     .to(
       $("[home-start-up]"),
       {
@@ -158,12 +165,12 @@ function homeAnimation() {
         ease: "power2.inOut",
         stagger: {
           amount: 6,
-          from: "start",
+          from: "end",
         },
       },
       "startExit"
     )
-    .addLabel("second", 40)
+    .addLabel("second", 30)
     .to(
       $("[home-second-up]"),
       {
@@ -183,7 +190,7 @@ function homeAnimation() {
       duration: 9,
       ease: "power2.in",
     })
-    .addLabel("third", 70)
+    .addLabel("third", 60)
     .to(
       $("[home-third-up]"),
       {
@@ -203,10 +210,14 @@ function homeAnimation() {
       duration: 9,
       ease: "power2.in",
     })
+    .to({}, {
+      duration: 10,
+      ease: "none",
+    })
     .addLabel("complete", 100);
 
   function syncRestingTimeline(progress) {
-    if (progress <= 0.1) {
+    if (progress === 0) {
       restingTimeline.resume();
       return;
     }
@@ -230,11 +241,12 @@ function homeAnimation() {
 
   return () => {
     homeScrollTrigger.kill();
+    homeLoadTimeline.kill();
     homeTimeline.kill();
     restingTimeline.kill();
     gsap.set(
       $(
-        "[home-resting] > *, [home-start-up], [home-second-up], [home-third-up]"
+        "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
       ),
       { clearProps: "transform,will-change" }
     );
