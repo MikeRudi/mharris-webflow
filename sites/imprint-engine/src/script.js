@@ -119,6 +119,20 @@ function homeAnimation() {
 
   gsap.registerPlugin(ScrollTrigger);
 
+  if ("scrollRestoration" in window.history) {
+    window.history.scrollRestoration = "manual";
+  }
+
+  ScrollTrigger.clearScrollMemory();
+  window.scrollTo(0, 0);
+
+  if (window.lenis) {
+    window.lenis.scrollTo(0, {
+      immediate: true,
+      force: true,
+    });
+  }
+
   gsap.set(
     $(
       "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
@@ -128,6 +142,38 @@ function homeAnimation() {
   const restingTimeline = gsap.timeline();
 
   restingTimeline.to($("[home-resting]"), {
+    xPercent: (index) => (index % 2 === 0 ? 1 : -1),
+    yPercent: (index) => (index % 3 === 0 ? -2 : 2),
+    duration: 3.2,
+    ease: "circ.inOut",
+    repeat: -1,
+    repeatDelay: 0,
+    yoyo: true,
+    stagger: {
+      each: 0.14,
+      from: "random",
+    },
+  });
+
+  const secondRestingTimeline = gsap.timeline({ paused: true });
+
+  secondRestingTimeline.to($("[home-second-up]"), {
+    xPercent: (index) => (index % 2 === 0 ? 1 : -1),
+    yPercent: (index) => (index % 3 === 0 ? -2 : 2),
+    duration: 3.2,
+    ease: "circ.inOut",
+    repeat: -1,
+    repeatDelay: 0,
+    yoyo: true,
+    stagger: {
+      each: 0.14,
+      from: "random",
+    },
+  });
+
+  const thirdRestingTimeline = gsap.timeline({ paused: true });
+
+  thirdRestingTimeline.to($("[home-third-up]"), {
     xPercent: (index) => (index % 2 === 0 ? 1 : -1),
     yPercent: (index) => (index % 3 === 0 ? -2 : 2),
     duration: 3.2,
@@ -175,19 +221,19 @@ function homeAnimation() {
       $("[home-second-up]"),
       {
         y: 0,
-        duration: 9,
+        duration: 7.5,
         ease: "power2.out",
       },
       "second"
     )
     .to($("[home-second-up]"), {
       y: 0,
-      duration: 12,
+      duration: 15,
       ease: "none",
     })
     .to($("[home-second-up]"), {
       y: "-100vh",
-      duration: 9,
+      duration: 7.5,
       ease: "power2.in",
     })
     .addLabel("third", 60)
@@ -195,20 +241,15 @@ function homeAnimation() {
       $("[home-third-up]"),
       {
         y: 0,
-        duration: 9,
+        duration: 7.5,
         ease: "power2.out",
       },
       "third"
     )
     .to($("[home-third-up]"), {
       y: 0,
-      duration: 12,
+      duration: 22.5,
       ease: "none",
-    })
-    .to($("[home-third-up]"), {
-      y: "-100vh",
-      duration: 9,
-      ease: "power2.in",
     })
     .to({}, {
       duration: 10,
@@ -216,13 +257,24 @@ function homeAnimation() {
     })
     .addLabel("complete", 100);
 
-  function syncRestingTimeline(progress) {
+  function syncRestingTimelines(progress) {
     if (progress === 0) {
       restingTimeline.resume();
-      return;
+    } else {
+      restingTimeline.pause();
     }
 
-    restingTimeline.pause();
+    if (progress >= 0.375 && progress < 0.525) {
+      secondRestingTimeline.resume();
+    } else {
+      secondRestingTimeline.pause();
+    }
+
+    if (progress >= 0.675 && progress < 0.9) {
+      thirdRestingTimeline.resume();
+    } else {
+      thirdRestingTimeline.pause();
+    }
   }
 
   const homeScrollTrigger = ScrollTrigger.create({
@@ -232,18 +284,20 @@ function homeAnimation() {
     end: "bottom bottom",
     scrub: true,
     invalidateOnRefresh: true,
-    onUpdate: (self) => syncRestingTimeline(self.progress),
-    onLeave: () => restingTimeline.pause(),
-    onLeaveBack: () => restingTimeline.resume(),
+    onUpdate: (self) => syncRestingTimelines(self.progress),
+    onLeave: () => syncRestingTimelines(1),
+    onLeaveBack: () => syncRestingTimelines(0),
   });
 
-  syncRestingTimeline(homeScrollTrigger.progress);
+  syncRestingTimelines(homeScrollTrigger.progress);
 
   return () => {
     homeScrollTrigger.kill();
     homeLoadTimeline.kill();
     homeTimeline.kill();
     restingTimeline.kill();
+    secondRestingTimeline.kill();
+    thirdRestingTimeline.kill();
     gsap.set(
       $(
         "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
