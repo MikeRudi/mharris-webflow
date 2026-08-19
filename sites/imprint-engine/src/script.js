@@ -306,7 +306,7 @@ function homeAnimation() {
     )
     .addLabel("complete", 100);
 
-  function syncRestingTimelines(progress) {
+  function syncRestingTimeline(progress) {
     if (progress === 0) {
       restingTimeline.resume();
     } else {
@@ -322,12 +322,12 @@ function homeAnimation() {
     end: "bottom bottom",
     scrub: true,
     invalidateOnRefresh: true,
-    onUpdate: (self) => syncRestingTimelines(self.progress),
-    onLeave: () => syncRestingTimelines(1),
-    onLeaveBack: () => syncRestingTimelines(0),
+    onUpdate: (self) => syncRestingTimeline(self.progress),
+    onLeave: () => syncRestingTimeline(1),
+    onLeaveBack: () => syncRestingTimeline(0),
   });
 
-  syncRestingTimelines(homeScrollTrigger.progress);
+  syncRestingTimeline(homeScrollTrigger.progress);
 
   return () => {
     homeScrollTrigger.kill();
@@ -338,7 +338,7 @@ function homeAnimation() {
       $(
         "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
       ),
-      { clearProps: "transform,will-change" }
+      { clearProps: "transform,opacity,will-change" }
     );
   };
 }
