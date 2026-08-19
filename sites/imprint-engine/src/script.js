@@ -90,7 +90,13 @@ function initSite() {
   onDesktop(() => {
     // gitTestDesktop();
     lineHover();
-    return footerEnginePixels();
+    const homeAnimationCleanup = homeAnimation();
+    const footerEnginePixelsCleanup = footerEnginePixels();
+
+    return () => {
+      if (homeAnimationCleanup) homeAnimationCleanup();
+      if (footerEnginePixelsCleanup) footerEnginePixelsCleanup();
+    };
   });
 
   onMobile(() => {
@@ -99,6 +105,187 @@ function initSite() {
 }
 
 $(initSite);
+
+function homeAnimation() {
+  const $lander = $(".lander-wrap").first();
+  const $layoutStart = $lander.find(".layout-start").first();
+  const $homeStart = $layoutStart.find(".home-start").first();
+
+  if (
+    !$lander.length ||
+    !$layoutStart.length ||
+    !$homeStart.length ||
+    !window.gsap ||
+    !window.ScrollTrigger
+  ) {
+    return null;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const settings = {
+    resting: {
+      xPercent: 1,
+      yPercent: 2,
+      duration: 3.2,
+      ease: "sine.inOut",
+      stagger: 0.14,
+    },
+    startExit: {
+      y: () => -window.innerHeight,
+      duration: 24,
+      ease: "power2.inOut",
+      staggerAmount: 6,
+    },
+    scenes: {
+      enterY: () => window.innerHeight,
+      centerY: 0,
+      exitY: () => -window.innerHeight,
+      enterDuration: 9,
+      holdDuration: 12,
+      exitDuration: 9,
+      enterEase: "power2.out",
+      holdEase: "none",
+      exitEase: "power2.in",
+    },
+    scroll: {
+      start: "top top",
+      end: "bottom bottom",
+      scrub: true,
+    },
+  };
+
+  const $restingItems = $homeStart.find("[home-resting]");
+  const $startItems = $homeStart.find("[home-start-up]");
+  const $secondItems = $homeStart.find("[home-second-up]");
+  const $thirdItems = $homeStart.find("[home-third-up]");
+  const $sceneItems = $secondItems.add($thirdItems);
+  const $animatedItems = $restingItems
+    .add($startItems)
+    .add($sceneItems);
+
+  gsap.set($animatedItems, { willChange: "transform" });
+  gsap.set($sceneItems, { y: settings.scenes.enterY });
+
+  const restingTimeline = gsap.timeline({
+    repeat: -1,
+    yoyo: true,
+  });
+
+  restingTimeline.to($restingItems, {
+    xPercent: (index) =>
+      index % 2 === 0
+        ? settings.resting.xPercent
+        : -settings.resting.xPercent,
+    yPercent: (index) =>
+      index % 3 === 0
+        ? -settings.resting.yPercent
+        : settings.resting.yPercent,
+    duration: settings.resting.duration,
+    ease: settings.resting.ease,
+    stagger: {
+      each: settings.resting.stagger,
+      from: "random",
+    },
+  });
+
+  const startExitTimeline = gsap.timeline();
+
+  startExitTimeline.to($startItems, {
+    y: settings.startExit.y,
+    duration: settings.startExit.duration,
+    ease: settings.startExit.ease,
+    stagger: {
+      amount: settings.startExit.staggerAmount,
+      from: "start",
+    },
+  });
+
+  const secondTimeline = gsap.timeline();
+
+  secondTimeline
+    .to($secondItems, {
+      y: settings.scenes.centerY,
+      duration: settings.scenes.enterDuration,
+      ease: settings.scenes.enterEase,
+    })
+    .to($secondItems, {
+      y: settings.scenes.centerY,
+      duration: settings.scenes.holdDuration,
+      ease: settings.scenes.holdEase,
+    })
+    .to($secondItems, {
+      y: settings.scenes.exitY,
+      duration: settings.scenes.exitDuration,
+      ease: settings.scenes.exitEase,
+    });
+
+  const thirdTimeline = gsap.timeline();
+
+  thirdTimeline
+    .to($thirdItems, {
+      y: settings.scenes.centerY,
+      duration: settings.scenes.enterDuration,
+      ease: settings.scenes.enterEase,
+    })
+    .to($thirdItems, {
+      y: settings.scenes.centerY,
+      duration: settings.scenes.holdDuration,
+      ease: settings.scenes.holdEase,
+    })
+    .to($thirdItems, {
+      y: settings.scenes.exitY,
+      duration: settings.scenes.exitDuration,
+      ease: settings.scenes.exitEase,
+    });
+
+  const homeScrollTimeline = gsap.timeline({ paused: true });
+
+  homeScrollTimeline
+    .addLabel("resting", 0)
+    .addLabel("startExit", 10)
+    .add(startExitTimeline, "startExit")
+    .addLabel("second", 40)
+    .add(secondTimeline, "second")
+    .addLabel("third", 70)
+    .add(thirdTimeline, "third")
+    .addLabel("complete", 100);
+
+  function syncRestingTimeline(progress) {
+    if (progress <= 0.1) {
+      restingTimeline.resume();
+      return;
+    }
+
+    restingTimeline.pause();
+  }
+
+  const homeScrollTrigger = ScrollTrigger.create({
+    trigger: $layoutStart[0],
+    animation: homeScrollTimeline,
+    start: settings.scroll.start,
+    end: settings.scroll.end,
+    scrub: settings.scroll.scrub,
+    invalidateOnRefresh: true,
+    onUpdate: (self) => syncRestingTimeline(self.progress),
+    onLeave: () => restingTimeline.pause(),
+    onLeaveBack: () => restingTimeline.resume(),
+  });
+
+  syncRestingTimeline(homeScrollTrigger.progress);
+
+  return () => {
+    homeScrollTrigger.kill();
+    homeScrollTimeline.kill();
+    restingTimeline.kill();
+    startExitTimeline.kill();
+    secondTimeline.kill();
+    thirdTimeline.kill();
+    gsap.set($animatedItems, {
+      clearProps: "transform,will-change",
+    });
+  };
+}
 
 function landerFluidMark() {
   const $marks = $("[lander-fluid-mark]");
