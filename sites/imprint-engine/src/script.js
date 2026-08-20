@@ -130,7 +130,11 @@ function homeAnimation() {
       immediate: true,
       force: true,
     });
+
+    window.lenis.stop();
   }
+
+  let homeLoadScrollLocked = Boolean(window.lenis);
 
   gsap.set(
     $(
@@ -395,7 +399,14 @@ function homeAnimation() {
     },
   });
 
-  const homeLoadTimeline = gsap.timeline();
+  const homeLoadTimeline = gsap.timeline({
+    onComplete: () => {
+      if (!homeLoadScrollLocked || !window.lenis) return;
+
+      window.lenis.start();
+      homeLoadScrollLocked = false;
+    },
+  });
 
   homeLoadTimeline
     .to(
@@ -763,15 +774,6 @@ function homeAnimation() {
     )
     .addLabel("gradientLand", 80)
     .to(
-      $("[home-drop-purple-base], [home-drop-colors]"),
-      {
-        opacity: 1,
-        duration: 4,
-        ease: "power1.inOut",
-      },
-      "gradientLand"
-    )
-    .to(
       $("[home-gradient-line]"),
       {
         attr: { "stroke-dashoffset": 780 },
@@ -782,6 +784,15 @@ function homeAnimation() {
       "gradientLand"
     )
     .addLabel("lineMeetsDrop", 85)
+    .to(
+      $("[home-drop-purple-base], [home-drop-colors]"),
+      {
+        opacity: 1,
+        duration: 4,
+        ease: "power1.inOut",
+      },
+      "lineMeetsDrop"
+    )
     .to(
       $("[home-final-drop-blur]"),
       {
@@ -824,9 +835,9 @@ function homeAnimation() {
     .to(
       $("[home-drop-star]"),
       {
-        rotation: 180,
-        duration: 8,
-        ease: "sine.inOut",
+        rotation: 360,
+        duration: 30,
+        ease: "none",
       },
       "lineMeetsDrop+=5"
     )
@@ -946,6 +957,11 @@ function homeAnimation() {
   syncRippleTimeline();
 
   return () => {
+    if (homeLoadScrollLocked && window.lenis) {
+      window.lenis.start();
+      homeLoadScrollLocked = false;
+    }
+
     homeScrollTrigger.kill();
     homeLoadTimeline.kill();
     homeTimeline.kill();
