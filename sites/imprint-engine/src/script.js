@@ -836,10 +836,10 @@ function homeAnimation() {
       $("[home-drop-star]"),
       {
         rotation: 360,
-        duration: 30,
+        duration: 34,
         ease: "none",
       },
-      "lineMeetsDrop+=5"
+      "lineMeetsDrop+=1"
     )
     .to(
       $("[home-drop-star]"),
