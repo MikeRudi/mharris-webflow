@@ -731,20 +731,20 @@ function homeAnimation() {
     .to(
       $("[home-gradient-line]"),
       {
-        attr: { "stroke-dashoffset": 0 },
+        attr: { "stroke-dashoffset": 780 },
         opacity: 1,
-        duration: 10,
+        duration: 5,
         ease: "power2.inOut",
       },
       "gradientLand"
     )
-    .addLabel("layoutReveal", 90)
+    .addLabel("lineMeetsDrop", 85)
     .set(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("closed"),
       },
-      "layoutReveal"
+      "lineMeetsDrop"
     )
     .to(
       $(".home-start"),
@@ -753,7 +753,7 @@ function homeAnimation() {
         duration: 2,
         ease: "power2.inOut",
       },
-      "layoutReveal"
+      "lineMeetsDrop"
     )
     .to(
       $(".home-start"),
@@ -762,32 +762,32 @@ function homeAnimation() {
         duration: 3,
         ease: "power2.inOut",
       },
-      "layoutReveal+=2"
+      "lineMeetsDrop+=2"
     )
     .set(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("sweep"),
       },
-      "layoutReveal+=5"
+      "lineMeetsDrop+=5"
     )
     .to(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("left"),
-        duration: 8,
+        duration: 10,
         ease: "power1.inOut",
       },
-      "layoutReveal+=5"
+      "lineMeetsDrop+=5"
     )
     .to(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("complete"),
-        duration: 5,
+        duration: 8,
         ease: "power1.inOut",
       },
-      "layoutReveal+=13"
+      "lineMeetsDrop+=15"
     )
     .to(
       {},
