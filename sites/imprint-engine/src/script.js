@@ -327,7 +327,7 @@ function homeAnimation() {
   });
 
   gsap.set($("[home-drop-circle]"), {
-    x: -75,
+    x: -40,
   });
 
   gsap.set($('[home-drop-circle="yellow"]'), {
