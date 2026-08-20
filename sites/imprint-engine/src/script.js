@@ -678,7 +678,7 @@ function homeAnimation() {
       },
       "gradientRise+=2"
     )
-    .addLabel("gradientDrops", 60)
+    .addLabel("gradientDropMerge", 60)
     .to(
       $(
         '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
@@ -688,7 +688,7 @@ function homeAnimation() {
         duration: 7,
         ease: "power1.in",
       },
-      "gradientDrops"
+      "gradientDropMerge"
     )
     .to(
       $("[home-gradient-drop]"),
@@ -697,71 +697,34 @@ function homeAnimation() {
         duration: 7,
         ease: "power1.out",
       },
-      "gradientDrops"
+      "gradientDropMerge"
     )
     .to(
-      $('[home-gradient-drop="1"]'),
+      $("[home-gradient-drop]"),
       {
-        attr: { transform: "translate(234 102) scale(0.5)" },
-        duration: 7,
+        attr: { transform: "translate(640 59) scale(0.72)" },
+        duration: 20,
         ease: "power2.inOut",
       },
-      "gradientDrops"
-    )
-    .to(
-      $('[home-gradient-drop="2"]'),
-      {
-        attr: { transform: "translate(665 102) scale(0.5)" },
-        duration: 7,
-        ease: "power2.inOut",
-      },
-      "gradientDrops"
-    )
-    .to(
-      $('[home-gradient-drop="3"]'),
-      {
-        attr: { transform: "translate(1096 102) scale(0.5)" },
-        duration: 7,
-        ease: "power2.inOut",
-      },
-      "gradientDrops"
+      "gradientDropMerge"
     )
     .to(
       $("[home-gradient-drop-blur], [home-final-drop-blur]"),
       {
         attr: { stdDeviation: 22 },
-        duration: 7,
+        duration: 20,
         ease: "power1.inOut",
       },
-      "gradientDrops"
-    )
-    .addLabel("gradientMerge", 67)
-    .to(
-      $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
-      {
-        attr: { transform: "translate(640 59) scale(0.72)" },
-        duration: 8,
-        ease: "power2.inOut",
-      },
-      "gradientMerge"
-    )
-    .to(
-      $('[home-gradient-drop="2"]'),
-      {
-        attr: { transform: "translate(640 59) scale(0.72)" },
-        duration: 8,
-        ease: "power2.inOut",
-      },
-      "gradientMerge"
+      "gradientDropMerge"
     )
     .to(
       $("[home-gradient-drops]"),
       {
         y: 150,
-        duration: 13,
+        duration: 20,
         ease: "power2.in",
       },
-      "gradientMerge"
+      "gradientDropMerge"
     )
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
@@ -770,7 +733,7 @@ function homeAnimation() {
         duration: 3,
         ease: "power1.in",
       },
-      "gradientMerge+=5"
+      "gradientDropMerge+=7"
     )
     .addLabel("gradientLand", 80)
     .to(
