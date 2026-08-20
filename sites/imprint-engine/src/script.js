@@ -1003,14 +1003,21 @@ function homeEndAnimation() {
   const bracketsRect = $(".home-end-brackets")[0].getBoundingClientRect();
   const bracketsCenter =
     bracketsRect.top - layoutEndRect.top + bracketsRect.height / 2;
+  const naturalDropLandingProgress =
+    (window.innerHeight + bracketsCenter - homeEndDropPosition.y) /
+    $(".layout-end")[0].offsetHeight;
   const dropLandingProgress = gsap.utils.clamp(
     0.55,
-    0.94,
-    (window.innerHeight + bracketsCenter - homeEndDropPosition.y) /
-      $(".layout-end")[0].offsetHeight
+    1,
+    naturalDropLandingProgress
   );
   const dropLandingTime = dropLandingProgress * 100;
   const dropApproachTime = dropLandingTime - 18;
+  const bracketsLandingY =
+    naturalDropLandingProgress > 1
+      ? homeEndDropPosition.y -
+        (window.innerHeight - $(".layout-end")[0].offsetHeight + bracketsCenter)
+      : 0;
 
   gsap.set($(".home-end-drop-stage"), { autoAlpha: 1 });
 
@@ -1027,6 +1034,10 @@ function homeEndAnimation() {
 
   gsap.set($(".home-end-bracket-shape"), {
     x: 0,
+  });
+
+  gsap.set($(".home-end-brackets"), {
+    y: 0,
   });
 
   gsap.set($(".home-end-ripple"), {
@@ -1112,6 +1123,15 @@ function homeEndAnimation() {
       },
       "dropApproach"
     )
+    .to(
+      $(".home-end-brackets"),
+      {
+        y: bracketsLandingY,
+        duration: 18,
+        ease: "power2.inOut",
+      },
+      "dropApproach"
+    )
     .addLabel("dropLands", dropLandingTime)
     .to(
       $(".home-end-target-svg"),
@@ -1158,7 +1178,7 @@ function homeEndAnimation() {
     homeEndRippleTimeline.kill();
     gsap.set(
       $(
-        ".home-end-drop-stage, .home-end-target-svg, .home-end-captured-drop, .home-end-bracket-shape, .home-end-ripple"
+        ".home-end-drop-stage, .home-end-target-svg, .home-end-captured-drop, .home-end-brackets, .home-end-bracket-shape, .home-end-ripple"
       ),
       {
         clearProps: "left,top,transform,opacity,visibility,will-change",
