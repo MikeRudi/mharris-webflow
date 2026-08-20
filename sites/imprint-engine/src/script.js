@@ -875,10 +875,10 @@ function homeAnimation() {
     .to(
       {},
       {
-        duration: 12,
+        duration: 2.4,
         ease: "none",
       },
-      108
+      117.6
     );
 
   function syncRestingTimeline(progress) {
