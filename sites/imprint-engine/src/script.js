@@ -253,7 +253,7 @@ function homeAnimation() {
       {
         y: "-20rem",
         duration: 7.5,
-        ease: "power1.out",
+        ease: "power1.in",
       },
       "secondExit"
     )
@@ -261,10 +261,10 @@ function homeAnimation() {
       $("[home-second-up]"),
       {
         opacity: 0,
-        duration: 3.75,
+        duration: 6,
         ease: "power1.out",
       },
-      "secondExit+=3.75"
+      "secondExit"
     )
     .addLabel("thirdEnter", 60)
     .to(
@@ -280,7 +280,7 @@ function homeAnimation() {
       $("[home-third-up]"),
       {
         opacity: 1,
-        duration: 3.75,
+        duration: 6,
         ease: "power1.out",
       },
       "thirdEnter"
