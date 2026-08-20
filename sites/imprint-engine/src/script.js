@@ -232,7 +232,7 @@ function homeAnimation() {
       $("[home-second-up]"),
       {
         opacity: 1,
-        duration: 3.75,
+        duration: 6,
         ease: "power1.out",
       },
       "secondEnter"
