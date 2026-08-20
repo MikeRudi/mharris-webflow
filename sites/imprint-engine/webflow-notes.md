@@ -14,7 +14,7 @@
 ## Classes and Attributes
 
 ```txt
-Add key classes, IDs, and data attributes here.
+[lander-ripples] with [ripple-ring]: preserved ripple for homeAnimation()
 ```
 
 ## Libraries
