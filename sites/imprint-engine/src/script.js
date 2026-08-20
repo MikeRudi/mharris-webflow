@@ -322,19 +322,31 @@ function homeAnimation() {
     attr: { transform: "translate(1029 7) scale(1.1)" },
   });
 
-  gsap.set($("[home-gradient-drop-blur]"), {
+  gsap.set($("[home-gradient-drop-blur], [home-final-drop-blur]"), {
     attr: { stdDeviation: 52 },
   });
 
-  gsap.set($("[home-drop-circle]"), {
-    x: 260,
+  gsap.set($('[home-drop-circle="yellow"]'), {
+    x: -320,
+  });
+
+  gsap.set($('[home-drop-circle="white"]'), {
+    x: -360,
+  });
+
+  gsap.set($('[home-drop-circle="blue"]'), {
+    x: -400,
+  });
+
+  gsap.set($('[home-drop-circle="purple"]'), {
+    x: -440,
   });
 
   gsap.set($("[home-drop-star]"), {
     opacity: 0,
     scale: 0.15,
     rotation: -35,
-    transformOrigin: "50% 50%",
+    transformOrigin: "0 0",
   });
 
   gsap.set($("[home-gradient-line]"), {
@@ -696,7 +708,7 @@ function homeAnimation() {
       "gradientDrops"
     )
     .to(
-      $("[home-gradient-drop-blur]"),
+      $("[home-gradient-drop-blur], [home-final-drop-blur]"),
       {
         attr: { stdDeviation: 22 },
         duration: 7,
@@ -754,6 +766,15 @@ function homeAnimation() {
     )
     .addLabel("lineMeetsDrop", 85)
     .to(
+      $("[home-final-drop-blur]"),
+      {
+        attr: { stdDeviation: 16 },
+        duration: 4,
+        ease: "power1.out",
+      },
+      "lineMeetsDrop"
+    )
+    .to(
       $("[home-drop-circle]"),
       {
         x: 0,
@@ -777,10 +798,10 @@ function homeAnimation() {
       $("[home-drop-star]"),
       {
         rotation: 180,
-        duration: 5,
-        ease: "power1.inOut",
+        duration: 8,
+        ease: "sine.inOut",
       },
-      "lineMeetsDrop+=3"
+      "lineMeetsDrop+=5"
     )
     .to(
       $("[home-drop-star]"),
@@ -789,7 +810,7 @@ function homeAnimation() {
         duration: 3,
         ease: "power2.inOut",
       },
-      "lineMeetsDrop+=8"
+      "lineMeetsDrop+=13"
     )
     .set(
       $(".home-start"),
