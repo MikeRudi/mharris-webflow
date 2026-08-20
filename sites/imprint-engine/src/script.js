@@ -155,13 +155,15 @@ function homeAnimation() {
     (Math.PI * 5) / 4,
   ];
 
-  function layoutClipPath(state) {
+  function layoutClipPath(state, timelineTime) {
     const layout = $(".layout-start")[0];
-    const width = layout.offsetWidth;
-    const height = layout.offsetHeight;
-    const centerX = width * 0.5;
-    const centerY = height * 0.4;
-    const half = Math.max(width, height);
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const scrollRange = Math.max(layout.offsetHeight - viewportHeight, 0);
+    const centerX = layout.offsetWidth * 0.5;
+    const centerY =
+      scrollRange * (timelineTime / 120) + viewportHeight * 0.4;
+    const half = Math.max(viewportWidth, viewportHeight);
     const left = centerX - half;
     const right = centerX + half;
     const top = centerY - half;
@@ -332,7 +334,7 @@ function homeAnimation() {
   });
 
   gsap.set($(".layout-start"), {
-    clipPath: layoutClipPath("closed"),
+    clipPath: "none",
     willChange: "clip-path",
   });
 
@@ -739,10 +741,17 @@ function homeAnimation() {
       "gradientLand"
     )
     .addLabel("layoutReveal", 90)
+    .set(
+      $(".layout-start"),
+      {
+        clipPath: () => layoutClipPath("closed", 90),
+      },
+      "layoutReveal"
+    )
     .to(
       $(".layout-start"),
       {
-        clipPath: () => layoutClipPath("slit"),
+        clipPath: () => layoutClipPath("slit", 92),
         duration: 2,
         ease: "power2.inOut",
       },
@@ -751,7 +760,7 @@ function homeAnimation() {
     .to(
       $(".layout-start"),
       {
-        clipPath: () => layoutClipPath("open"),
+        clipPath: () => layoutClipPath("open", 95),
         duration: 3,
         ease: "power2.inOut",
       },
@@ -760,14 +769,14 @@ function homeAnimation() {
     .set(
       $(".layout-start"),
       {
-        clipPath: () => layoutClipPath("sweep"),
+        clipPath: () => layoutClipPath("sweep", 95),
       },
       "layoutReveal+=5"
     )
     .to(
       $(".layout-start"),
       {
-        clipPath: () => layoutClipPath("left"),
+        clipPath: () => layoutClipPath("left", 103),
         duration: 8,
         ease: "power1.inOut",
       },
@@ -776,7 +785,7 @@ function homeAnimation() {
     .to(
       $(".layout-start"),
       {
-        clipPath: () => layoutClipPath("complete"),
+        clipPath: () => layoutClipPath("complete", 108),
         duration: 5,
         ease: "power1.inOut",
       },
