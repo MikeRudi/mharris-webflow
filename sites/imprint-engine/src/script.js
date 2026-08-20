@@ -326,20 +326,12 @@ function homeAnimation() {
     attr: { stdDeviation: 52 },
   });
 
-  gsap.set($('[home-drop-circle="yellow"]'), {
-    x: -320,
+  gsap.set($("[home-drop-circle]"), {
+    x: -75,
   });
 
-  gsap.set($('[home-drop-circle="white"]'), {
-    x: -360,
-  });
-
-  gsap.set($('[home-drop-circle="blue"]'), {
-    x: -400,
-  });
-
-  gsap.set($('[home-drop-circle="purple"]'), {
-    x: -440,
+  gsap.set($("[home-drop-colors]"), {
+    opacity: 0.45,
   });
 
   gsap.set($("[home-drop-star]"), {
@@ -774,13 +766,21 @@ function homeAnimation() {
       },
       "lineMeetsDrop"
     )
+  .to(
+    $("[home-drop-circle]"),
+    {
+      x: 0,
+      duration: 7,
+      ease: "power2.inOut",
+    },
+    "lineMeetsDrop"
+  )
     .to(
-      $("[home-drop-circle]"),
+      $("[home-drop-colors]"),
       {
-        x: 0,
+        opacity: 1,
         duration: 7,
-        ease: "power2.inOut",
-        stagger: 0.25,
+        ease: "power1.inOut",
       },
       "lineMeetsDrop"
     )
@@ -932,7 +932,7 @@ function homeAnimation() {
     );
     gsap.set(
       $(
-        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [home-drop-circle], [home-drop-star], [ripple-ring]"
+        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [home-drop-colors], [home-drop-circle], [home-drop-star], [ripple-ring]"
       ),
       { clearProps: "transform,opacity,visibility,will-change" }
     );
