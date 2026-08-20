@@ -178,7 +178,11 @@ function homeAnimation() {
       rx: 900,
       ry: 225,
     },
-    opacity: 0.12,
+    opacity: 0,
+  });
+
+  gsap.set($('[home-gradient-piece="1"]'), {
+    opacity: 0.85,
   });
 
   gsap.set($("[home-gradient-drop]"), {
@@ -583,18 +587,18 @@ function homeAnimation() {
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
-        attr: { transform: "translate(640 67) scale(0.72)" },
+        attr: { transform: "translate(640 87) scale(0.72)" },
         duration: 10,
-        ease: "power2.inOut",
+        ease: "power2.in",
       },
       "gradientMerge"
     )
     .to(
       $('[home-gradient-drop="2"]'),
       {
-        attr: { transform: "translate(640 67) scale(0.72)" },
+        attr: { transform: "translate(640 87) scale(0.72)" },
         duration: 10,
-        ease: "power2.inOut",
+        ease: "power2.in",
       },
       "gradientMerge"
     )
@@ -613,7 +617,7 @@ function homeAnimation() {
       {
         attr: { transform: "translate(640 217) scale(0.72)" },
         duration: 8,
-        ease: "power2.in",
+        ease: "power3.in",
       },
       "gradientLand"
     )
