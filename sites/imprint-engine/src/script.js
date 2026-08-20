@@ -685,16 +685,25 @@ function homeAnimation() {
       ),
       {
         opacity: 0,
-        duration: 7,
+        duration: 10,
         ease: "power1.in",
       },
       "gradientDropMerge"
     )
     .to(
-      $("[home-gradient-drop]"),
+      $('[home-gradient-drop="2"]'),
       {
         opacity: 1,
         duration: 7,
+        ease: "power1.out",
+      },
+      "gradientDropMerge"
+    )
+    .to(
+      $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
+      {
+        opacity: 0.8,
+        duration: 3,
         ease: "power1.out",
       },
       "gradientDropMerge"
@@ -704,7 +713,7 @@ function homeAnimation() {
       {
         attr: { transform: "translate(640 59) scale(0.72)" },
         duration: 20,
-        ease: "power2.inOut",
+        ease: "power2.out",
       },
       "gradientDropMerge"
     )
@@ -722,7 +731,7 @@ function homeAnimation() {
       {
         y: 150,
         duration: 20,
-        ease: "power2.in",
+        ease: "power1.inOut",
       },
       "gradientDropMerge"
     )
@@ -730,10 +739,10 @@ function homeAnimation() {
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
         opacity: 0,
-        duration: 3,
+        duration: 10,
         ease: "power1.in",
       },
-      "gradientDropMerge+=7"
+      "gradientDropMerge+=3"
     )
     .addLabel("gradientLand", 80)
     .to(
