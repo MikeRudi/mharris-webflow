@@ -143,46 +143,62 @@ function homeAnimation() {
     }
   );
 
+  const gradientOrbit = { angle: 0 };
+  const gradientAngles = [
+    -Math.PI / 2,
+    -Math.PI / 4,
+    0,
+    Math.PI / 4,
+    Math.PI / 2,
+    (Math.PI * 3) / 4,
+    Math.PI,
+    (Math.PI * 5) / 4,
+  ];
+
+  function moveGradientDots() {
+    $("[home-gradient-piece]").each(function (index) {
+      const angle = gradientAngles[index] + gradientOrbit.angle;
+
+      $(this).attr({
+        cx: 720 + Math.cos(angle) * 610,
+        cy: 416 + Math.sin(angle) * 610,
+      });
+    });
+  }
+
   gsap.set($("[home-gradient-orbit]"), {
     x: 0,
     y: 0,
-    rotation: 0,
-    svgOrigin: "720 416",
   });
 
   gsap.set($("[home-gradient-piece]"), {
     attr: {
-      x: -120,
-      y: 700,
-      width: 1680,
-      height: 260,
-      rx: 130,
-      ry: 130,
+      cx: 720,
+      cy: 900,
+      rx: 900,
+      ry: 225,
     },
-    opacity: 0.2,
+    opacity: 0.12,
   });
 
   gsap.set($("[home-gradient-drop]"), {
     opacity: 0,
-    transformOrigin: "0 0",
   });
 
   gsap.set($('[home-gradient-drop="1"]'), {
-    x: 122,
-    y: -15,
-    scale: 0.8,
+    attr: { transform: "translate(145 143) scale(1.3)" },
   });
 
   gsap.set($('[home-gradient-drop="2"]'), {
-    x: 631,
-    y: 92,
-    scale: 0.8,
+    attr: { transform: "translate(576 322) scale(1.3)" },
   });
 
   gsap.set($('[home-gradient-drop="3"]'), {
-    x: 1140,
-    y: -15,
-    scale: 0.8,
+    attr: { transform: "translate(1007 143) scale(1.3)" },
+  });
+
+  gsap.set($("[home-gradient-drop-blur]"), {
+    attr: { stdDeviation: 52 },
   });
 
   gsap.set($("[home-gradient-line]"), {
@@ -362,12 +378,12 @@ function homeAnimation() {
       $("[home-gradient-piece]"),
       {
         attr: {
-          y: 310,
-          height: 720,
-          rx: 360,
-          ry: 360,
+          cx: 720,
+          cy: 660,
+          rx: 700,
+          ry: 600,
         },
-        opacity: 0.28,
+        opacity: 0.16,
         duration: 8,
         ease: "power2.inOut",
       },
@@ -377,7 +393,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="1"]'),
       {
-        attr: { x: 540, y: -140, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 720, cy: -194, rx: 210, ry: 210 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -387,7 +403,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="2"]'),
       {
-        attr: { x: 978, y: -16, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 1151, cy: -15, rx: 185, ry: 185 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -397,7 +413,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="3"]'),
       {
-        attr: { x: 1260, y: 236, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 1330, cy: 416, rx: 205, ry: 205 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -407,7 +423,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="4"]'),
       {
-        attr: { x: 978, y: 488, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 1151, cy: 847, rx: 180, ry: 180 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -417,7 +433,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="5"]'),
       {
-        attr: { x: 540, y: 612, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 720, cy: 1026, rx: 215, ry: 215 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -427,7 +443,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="6"]'),
       {
-        attr: { x: 102, y: 488, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 289, cy: 847, rx: 190, ry: 190 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -437,7 +453,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="7"]'),
       {
-        attr: { x: -180, y: 236, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 110, cy: 416, rx: 205, ry: 205 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -447,7 +463,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-piece="8"]'),
       {
-        attr: { x: 102, y: -16, width: 360, height: 360, rx: 180, ry: 180 },
+        attr: { cx: 289, cy: -15, rx: 180, ry: 180 },
         opacity: 0.85,
         duration: 22,
         ease: "power2.inOut",
@@ -455,11 +471,12 @@ function homeAnimation() {
       "gradientSplit"
     )
     .to(
-      $("[home-gradient-orbit]"),
+      gradientOrbit,
       {
-        rotation: 360,
+        angle: Math.PI * 2,
         duration: 30,
         ease: "none",
+        onUpdate: moveGradientDots,
       },
       "secondEnter"
     )
@@ -467,7 +484,7 @@ function homeAnimation() {
     .to(
       $("[home-gradient-orbit]"),
       {
-        y: -520,
+        y: -500,
         duration: 12,
         ease: "power2.inOut",
       },
@@ -484,14 +501,14 @@ function homeAnimation() {
       },
       "gradientRise+=4"
     )
-    .addLabel("gradientDrops", 68)
+    .addLabel("gradientDrops", 72)
     .to(
       $(
         '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
       ),
       {
         opacity: 0,
-        duration: 6,
+        duration: 8,
         ease: "power1.in",
       },
       "gradientDrops"
@@ -500,18 +517,53 @@ function homeAnimation() {
       $("[home-gradient-drop]"),
       {
         opacity: 1,
-        duration: 6,
+        duration: 8,
         ease: "power1.out",
       },
       "gradientDrops"
     )
-    .addLabel("gradientMerge", 74)
+    .to(
+      $('[home-gradient-drop="1"]'),
+      {
+        attr: { transform: "translate(172 182) scale(1.05)" },
+        duration: 8,
+        ease: "power2.inOut",
+      },
+      "gradientDrops"
+    )
+    .to(
+      $('[home-gradient-drop="2"]'),
+      {
+        attr: { transform: "translate(603 361) scale(1.05)" },
+        duration: 8,
+        ease: "power2.inOut",
+      },
+      "gradientDrops"
+    )
+    .to(
+      $('[home-gradient-drop="3"]'),
+      {
+        attr: { transform: "translate(1034 182) scale(1.05)" },
+        duration: 8,
+        ease: "power2.inOut",
+      },
+      "gradientDrops"
+    )
+    .to(
+      $("[home-gradient-drop-blur]"),
+      {
+        attr: { stdDeviation: 28 },
+        duration: 8,
+        ease: "power1.inOut",
+      },
+      "gradientDrops"
+    )
+    .addLabel("gradientMerge", 80)
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
-        x: 631,
-        y: 290,
-        duration: 16,
+        attr: { transform: "translate(631 290) scale(0.8)" },
+        duration: 14,
         ease: "power2.inOut",
       },
       "gradientMerge"
@@ -519,9 +571,8 @@ function homeAnimation() {
     .to(
       $('[home-gradient-drop="2"]'),
       {
-        x: 631,
-        y: 290,
-        duration: 16,
+        attr: { transform: "translate(631 290) scale(0.8)" },
+        duration: 14,
         ease: "power2.inOut",
       },
       "gradientMerge"
@@ -530,7 +581,7 @@ function homeAnimation() {
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
         opacity: 0,
-        duration: 6,
+        duration: 4,
         ease: "power1.in",
       },
       "gradientMerge+=10"
@@ -543,7 +594,7 @@ function homeAnimation() {
         duration: 12,
         ease: "power2.inOut",
       },
-      82
+      86
     );
 
   function syncRestingTimeline(progress) {
