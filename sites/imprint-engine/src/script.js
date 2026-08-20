@@ -157,12 +157,6 @@ function homeAnimation() {
     opacity: 0,
   });
 
-  gsap.set($("[home-gradient-drop]"), {
-    y: "5rem",
-    scale: 0.25,
-    opacity: 0,
-  });
-
   gsap.set($("[home-gradient-line]"), {
     scaleX: 0,
     opacity: 0,
@@ -443,23 +437,14 @@ function homeAnimation() {
     .to(
       $('[home-gradient-blob="3"]'),
       {
-        scale: 0.3,
-        opacity: 0,
+        scaleX: 0.24,
+        scaleY: 0.32,
+        rotation: -45,
+        borderRadius: "50% 0% 50% 50%",
         duration: 8,
-        ease: "power1.in",
+        ease: "power2.inOut",
       },
       "thirdEnter+=22"
-    )
-    .to(
-      $("[home-gradient-drop]"),
-      {
-        y: 0,
-        scale: 1,
-        opacity: 1,
-        duration: 10,
-        ease: "power2.out",
-      },
-      "thirdEnter+=20"
     )
     .to(
       $("[home-gradient-line]"),
@@ -507,7 +492,7 @@ function homeAnimation() {
     );
     gsap.set(
       $(
-        ".home-gradient, [home-gradient-blob], [home-gradient-drop], [home-gradient-line]"
+        ".home-gradient, [home-gradient-blob], [home-gradient-line]"
       ),
       { clearProps: "transform,opacity,will-change" }
     );
