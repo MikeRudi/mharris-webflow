@@ -263,9 +263,9 @@ function homeAnimation() {
       {
         opacity: 0,
         duration: 3.75,
-        ease: "power1.in",
+        ease: "power1.out",
       },
-      "secondExit"
+      "secondExit+=3.75"
     )
     .addLabel("thirdEnter", 60)
     .to(
