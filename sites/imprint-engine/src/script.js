@@ -143,24 +143,54 @@ function homeAnimation() {
     }
   );
 
-  gsap.set($(".home-gradient"), {
+  gsap.set($("[home-gradient-orbit]"), {
+    x: 0,
     y: 0,
-    scaleX: 1,
-    scaleY: 1,
-    opacity: 1,
+    rotation: 0,
+    svgOrigin: "720 416",
   });
 
-  gsap.set($("[home-gradient-blob]"), {
-    x: 0,
-    y: "42vh",
-    scale: 0.35,
+  gsap.set($("[home-gradient-piece]"), {
+    attr: {
+      x: -120,
+      y: 700,
+      width: 1680,
+      height: 260,
+      rx: 130,
+      ry: 130,
+    },
+    opacity: 0.2,
+  });
+
+  gsap.set($("[home-gradient-drop]"), {
     opacity: 0,
+    transformOrigin: "0 0",
+  });
+
+  gsap.set($('[home-gradient-drop="1"]'), {
+    x: 122,
+    y: -15,
+    scale: 0.8,
+  });
+
+  gsap.set($('[home-gradient-drop="2"]'), {
+    x: 631,
+    y: 92,
+    scale: 0.8,
+  });
+
+  gsap.set($('[home-gradient-drop="3"]'), {
+    x: 1140,
+    y: -15,
+    scale: 0.8,
   });
 
   gsap.set($("[home-gradient-line]"), {
-    scaleX: 0,
+    attr: {
+      "stroke-dasharray": 780,
+      "stroke-dashoffset": 780,
+    },
     opacity: 0,
-    transformOrigin: "left center",
   });
 
   const restingTimeline = gsap.timeline();
@@ -327,134 +357,193 @@ function homeAnimation() {
     .addLabel("complete", 100);
 
   homeTimeline
+    .addLabel("gradientStretch", 0)
     .to(
-      $(".home-gradient"),
+      $("[home-gradient-piece]"),
       {
-        y: "-42vh",
-        scaleX: 0.72,
-        scaleY: 2.5,
-        opacity: 0,
-        duration: 24,
-        ease: "power2.inOut",
-      },
-      "startExit"
-    )
-    .to(
-      $('[home-gradient-blob="1"]'),
-      {
-        x: "-36vw",
-        y: "-28vh",
-        scale: 1,
-        duration: 24,
-        ease: "power2.inOut",
-      },
-      "startExit"
-    )
-    .to(
-      $('[home-gradient-blob="2"]'),
-      {
-        x: "36vw",
-        y: "-28vh",
-        scale: 1,
-        duration: 24,
-        ease: "power2.inOut",
-      },
-      "startExit"
-    )
-    .to(
-      $('[home-gradient-blob="3"]'),
-      {
-        x: 0,
-        y: "28vh",
-        scale: 1,
-        duration: 24,
-        ease: "power2.inOut",
-      },
-      "startExit"
-    )
-    .to(
-      $("[home-gradient-blob]"),
-      {
-        opacity: 1,
-        duration: 12,
-        ease: "power1.out",
-      },
-      "startExit+=6"
-    )
-    .to(
-      $('[home-gradient-blob="1"]'),
-      {
-        x: "-32vw",
-        y: "-34vh",
-        scale: 0.92,
-        duration: 30,
-        ease: "sine.inOut",
-      },
-      "secondEnter"
-    )
-    .to(
-      $('[home-gradient-blob="2"]'),
-      {
-        x: "34vw",
-        y: "-32vh",
-        scale: 0.96,
-        duration: 30,
-        ease: "sine.inOut",
-      },
-      "secondEnter"
-    )
-    .to(
-      $('[home-gradient-blob="3"]'),
-      {
-        x: "5vw",
-        y: "25vh",
-        scale: 1.08,
-        duration: 30,
-        ease: "sine.inOut",
-      },
-      "secondEnter"
-    )
-    .to(
-      $("[home-gradient-blob]"),
-      {
-        x: 0,
-        y: 0,
-        scale: 0.55,
-        duration: 22,
-        ease: "power2.inOut",
-      },
-      "thirdEnter"
-    )
-    .to(
-      $('[home-gradient-blob="1"], [home-gradient-blob="2"]'),
-      {
-        opacity: 0,
-        duration: 10,
-        ease: "power1.in",
-      },
-      "thirdEnter+=12"
-    )
-    .to(
-      $('[home-gradient-blob="3"]'),
-      {
-        scaleX: 0.24,
-        scaleY: 0.32,
-        rotation: -45,
-        borderRadius: "50% 0% 50% 50%",
+        attr: {
+          y: 310,
+          height: 720,
+          rx: 360,
+          ry: 360,
+        },
+        opacity: 0.28,
         duration: 8,
         ease: "power2.inOut",
       },
-      "thirdEnter+=22"
+      "gradientStretch"
+    )
+    .addLabel("gradientSplit", 8)
+    .to(
+      $('[home-gradient-piece="1"]'),
+      {
+        attr: { x: 540, y: -140, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $('[home-gradient-piece="2"]'),
+      {
+        attr: { x: 978, y: -16, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $('[home-gradient-piece="3"]'),
+      {
+        attr: { x: 1260, y: 236, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $('[home-gradient-piece="4"]'),
+      {
+        attr: { x: 978, y: 488, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $('[home-gradient-piece="5"]'),
+      {
+        attr: { x: 540, y: 612, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $('[home-gradient-piece="6"]'),
+      {
+        attr: { x: 102, y: 488, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $('[home-gradient-piece="7"]'),
+      {
+        attr: { x: -180, y: 236, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $('[home-gradient-piece="8"]'),
+      {
+        attr: { x: 102, y: -16, width: 360, height: 360, rx: 180, ry: 180 },
+        opacity: 0.85,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "gradientSplit"
+    )
+    .to(
+      $("[home-gradient-orbit]"),
+      {
+        rotation: 360,
+        duration: 30,
+        ease: "none",
+      },
+      "secondEnter"
+    )
+    .addLabel("gradientRise", 60)
+    .to(
+      $("[home-gradient-orbit]"),
+      {
+        y: -520,
+        duration: 12,
+        ease: "power2.inOut",
+      },
+      "gradientRise"
+    )
+    .to(
+      $(
+        '[home-gradient-piece="1"], [home-gradient-piece="2"], [home-gradient-piece="3"], [home-gradient-piece="7"], [home-gradient-piece="8"]'
+      ),
+      {
+        opacity: 0,
+        duration: 8,
+        ease: "power1.in",
+      },
+      "gradientRise+=4"
+    )
+    .addLabel("gradientDrops", 68)
+    .to(
+      $(
+        '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
+      ),
+      {
+        opacity: 0,
+        duration: 6,
+        ease: "power1.in",
+      },
+      "gradientDrops"
+    )
+    .to(
+      $("[home-gradient-drop]"),
+      {
+        opacity: 1,
+        duration: 6,
+        ease: "power1.out",
+      },
+      "gradientDrops"
+    )
+    .addLabel("gradientMerge", 74)
+    .to(
+      $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
+      {
+        x: 631,
+        y: 290,
+        duration: 16,
+        ease: "power2.inOut",
+      },
+      "gradientMerge"
+    )
+    .to(
+      $('[home-gradient-drop="2"]'),
+      {
+        x: 631,
+        y: 290,
+        duration: 16,
+        ease: "power2.inOut",
+      },
+      "gradientMerge"
+    )
+    .to(
+      $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
+      {
+        opacity: 0,
+        duration: 6,
+        ease: "power1.in",
+      },
+      "gradientMerge+=10"
     )
     .to(
       $("[home-gradient-line]"),
       {
-        scaleX: 1,
+        attr: { "stroke-dashoffset": 0 },
         opacity: 1,
-        duration: 6,
-        ease: "power2.out",
+        duration: 12,
+        ease: "power2.inOut",
       },
-      90
+      82
     );
 
   function syncRestingTimeline(progress) {
@@ -492,7 +581,7 @@ function homeAnimation() {
     );
     gsap.set(
       $(
-        ".home-gradient, [home-gradient-blob], [home-gradient-line]"
+        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drop], [home-gradient-line]"
       ),
       { clearProps: "transform,opacity,will-change" }
     );
