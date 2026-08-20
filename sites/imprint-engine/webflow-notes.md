@@ -43,7 +43,10 @@ directions like clock hands. The reveal finishes at 90%; the final 10% holds.
 The line starts at timeline time 80, stops at the drop at 85, and the clip
 starts from the `lineMeetsDrop` label at 85.
 At `lineMeetsDrop`, four blurred circles move through the final-drop mask while
-the star scales up, rotates, and settles slightly smaller.
+the star scales up, rotates, and settles slightly smaller. The circles enter
+from left to right. The star is anchored where the line meets the drop: it
+grows from 86-90, spins from 90-98, then settles from 98-101. The final drop
+blur sharpens from 22 to 16 during this transition.
 ```
 
 ## Libraries
