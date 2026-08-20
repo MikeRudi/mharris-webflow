@@ -23,7 +23,6 @@
   [home-gradient-blob="2"]
   [home-gradient-blob="3"]
   [home-gradient-line]
-  [home-gradient-drop]
 
 Gradient CSS lives in .home-gradient-embed.
 Gradient scroll animation lives in homeAnimation().
