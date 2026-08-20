@@ -41,7 +41,8 @@ ripple plays on its own timeline and is not tied to scroll scrub.
 The bottom gradient forms the hollow ring in one transition. After the drop
 lands, the white line reaches the drop before .home-start opens with a
 12-point polygon around an oversized square. Two points sweep in opposite
-directions like clock hands. The reveal finishes at 90%; the final 10% holds.
+directions like clock hands. The main timeline reserves 117.6-120 as its final
+2% spacer; the star continues its approved rotation through the timeline end.
 The line starts at timeline time 80, stops at the drop at 85, and the clip
 starts from the `lineMeetsDrop` label at 85.
 At `lineMeetsDrop`, four blurred circles move through the final-drop mask while
@@ -58,6 +59,23 @@ drop groups.
 
 The desktop page-load animation stops Lenis before its entrance stagger starts
 and restarts Lenis from the load timeline's `onComplete` callback.
+
+.layout-end
+  .home-end-brackets [home-end-brackets]
+    .home-end-brackets-svg
+      .home-end-bracket-shape.home-end-bracket-left [home-end-bracket="left"]
+      .home-end-bracket-shape.home-end-bracket-right [home-end-bracket="right"]
+      .home-end-captured-drop [home-end-captured-drop]
+  .home-end-drop-stage [home-end-drop-stage]
+    .home-end-target-svg [home-end-target]
+      .home-end-target-path
+    .home-end-ripples [home-end-ripples]
+      .home-end-ripple [home-end-ripple] x3
+
+`homeEndAnimation()` is separate from `homeAnimation()`. The outlined drop is
+fixed at viewport centre beneath `.home-start`. When the scrolling bracket
+group reaches the drop, the drop scales down, the brackets open, the fixed drop
+crossfades into the captured drop, and the approved non-scrub ripple plays.
 ```
 
 ## Libraries
