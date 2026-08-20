@@ -155,6 +155,118 @@ function homeAnimation() {
     (Math.PI * 5) / 4,
   ];
 
+  function layoutClipPath(state) {
+    const layout = $(".layout-start")[0];
+    const width = layout.offsetWidth;
+    const height = layout.offsetHeight;
+    const centerX = width * 0.5;
+    const centerY = height * 0.4;
+    const half = Math.max(width, height);
+    const left = centerX - half;
+    const right = centerX + half;
+    const top = centerY - half;
+    const bottom = centerY + half;
+    const point = (x, y) => `${x}px ${y}px`;
+    const topLeft = point(left, top);
+    const topRight = point(right, top);
+    const bottomLeft = point(left, bottom);
+    const bottomRight = point(right, bottom);
+    const leftCenter = point(left, centerY);
+    const rightCenter = point(right, centerY);
+    const center = point(centerX, centerY);
+    const rightUpper = point(right, centerY - half * 0.06);
+    const rightLower = point(right, centerY + half * 0.06);
+
+    const paths = {
+      closed: [
+        topRight,
+        topRight,
+        topRight,
+        topRight,
+        rightCenter,
+        center,
+        rightCenter,
+        bottomRight,
+        bottomRight,
+        bottomRight,
+        bottomLeft,
+        topLeft,
+      ],
+      slit: [
+        topRight,
+        topRight,
+        topRight,
+        topRight,
+        rightUpper,
+        center,
+        rightLower,
+        bottomRight,
+        bottomRight,
+        bottomRight,
+        bottomLeft,
+        topLeft,
+      ],
+      open: [
+        topRight,
+        topRight,
+        topRight,
+        topRight,
+        topRight,
+        center,
+        bottomRight,
+        bottomRight,
+        bottomRight,
+        bottomRight,
+        bottomLeft,
+        topLeft,
+      ],
+      sweep: [
+        topLeft,
+        topLeft,
+        topLeft,
+        topLeft,
+        topRight,
+        center,
+        bottomRight,
+        bottomLeft,
+        bottomLeft,
+        bottomLeft,
+        bottomLeft,
+        topLeft,
+      ],
+      left: [
+        topLeft,
+        topLeft,
+        topLeft,
+        topLeft,
+        topLeft,
+        center,
+        bottomLeft,
+        bottomLeft,
+        bottomLeft,
+        bottomLeft,
+        bottomLeft,
+        topLeft,
+      ],
+      complete: [
+        leftCenter,
+        leftCenter,
+        leftCenter,
+        leftCenter,
+        leftCenter,
+        center,
+        leftCenter,
+        leftCenter,
+        leftCenter,
+        leftCenter,
+        leftCenter,
+        leftCenter,
+      ],
+    };
+
+    return `polygon(${paths[state].join(", ")})`;
+  }
+
   function moveGradientDots() {
     if (homeTimeline.time() < 40) return;
 
@@ -220,8 +332,7 @@ function homeAnimation() {
   });
 
   gsap.set($(".layout-start"), {
-    clipPath:
-      "polygon(0% 0%, 100% 0%, 100% 40%, 100% 40%, 100% 100%, 0% 100%)",
+    clipPath: layoutClipPath("closed"),
     willChange: "clip-path",
   });
 
@@ -631,9 +742,8 @@ function homeAnimation() {
     .to(
       $(".layout-start"),
       {
-        clipPath:
-          "polygon(0% 0%, 55% 0%, 50% 40%, 50% 40%, 70% 100%, 0% 100%)",
-        duration: 12,
+        clipPath: () => layoutClipPath("slit"),
+        duration: 2,
         ease: "power2.inOut",
       },
       "layoutReveal"
@@ -641,12 +751,44 @@ function homeAnimation() {
     .to(
       $(".layout-start"),
       {
-        clipPath:
-          "polygon(0% 40%, 0% 40%, 50% 40%, 50% 40%, 0% 40%, 0% 40%)",
-        duration: 18,
+        clipPath: () => layoutClipPath("open"),
+        duration: 3,
         ease: "power2.inOut",
       },
-      "layoutReveal+=12"
+      "layoutReveal+=2"
+    )
+    .set(
+      $(".layout-start"),
+      {
+        clipPath: () => layoutClipPath("sweep"),
+      },
+      "layoutReveal+=5"
+    )
+    .to(
+      $(".layout-start"),
+      {
+        clipPath: () => layoutClipPath("left"),
+        duration: 8,
+        ease: "power1.inOut",
+      },
+      "layoutReveal+=5"
+    )
+    .to(
+      $(".layout-start"),
+      {
+        clipPath: () => layoutClipPath("complete"),
+        duration: 5,
+        ease: "power1.inOut",
+      },
+      "layoutReveal+=13"
+    )
+    .to(
+      {},
+      {
+        duration: 12,
+        ease: "none",
+      },
+      108
     );
 
   function syncRestingTimeline(progress) {
