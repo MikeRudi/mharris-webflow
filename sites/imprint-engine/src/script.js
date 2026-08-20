@@ -215,7 +215,7 @@ function homeAnimation() {
     xPercent: (index) => (index % 2 === 0 ? 1 : -1),
     yPercent: (index) => (index % 3 === 0 ? -2 : 2),
     duration: 3.2,
-    ease: "circ.inOut",
+    ease: "power1.inOut",
     repeat: -1,
     repeatDelay: 0,
     yoyo: true,
