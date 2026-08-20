@@ -225,7 +225,7 @@ function homeAnimation() {
       {
         y: 0,
         duration: 7.5,
-        ease: "power2.out",
+        ease: "power1.in",
       },
       "secondEnter"
     )
