@@ -50,6 +50,8 @@ For fast Webflow testing, `scripts/watch-push.js` can watch a site's `src` folde
 - Use the Webflow plugin primarily to inspect context, selected elements, pages, classes, structure, and what the user is referring to.
 - Do not edit, create, move, delete, style, publish, upload, or otherwise change anything inside Webflow unless the user explicitly asks for that specific Webflow action.
 - Before making any Webflow change, ask for confirmation that editing Webflow is allowed for that action.
+- Every `div` created in Webflow must have a meaningful class.
+- Follow the site's existing class naming patterns. Custom attributes are extra behavior hooks, not replacements for classes.
 - This restriction does not apply to local repo files in `sites/*/src/script.js` and `sites/*/src/styles.css`; continue editing those files normally when asked.
 - Current connected site: `Imprint Engine v1` (`siteId: 6a59f919cc325da48eff4d6d`).
 
