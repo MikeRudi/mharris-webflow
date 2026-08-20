@@ -1028,6 +1028,7 @@ function homeEndAnimation() {
   });
 
   gsap.set($(".home-end-captured-drop"), {
+    attr: { transform: "translate(46.75 20.5) scale(0.22)" },
     opacity: 0,
     transformOrigin: "0 0",
   });
