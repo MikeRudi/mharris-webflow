@@ -142,6 +142,33 @@ function homeAnimation() {
       willChange: "transform, opacity",
     }
   );
+
+  gsap.set($(".home-gradient"), {
+    y: 0,
+    scaleX: 1,
+    scaleY: 1,
+    opacity: 1,
+  });
+
+  gsap.set($("[home-gradient-blob]"), {
+    x: 0,
+    y: "42vh",
+    scale: 0.35,
+    opacity: 0,
+  });
+
+  gsap.set($("[home-gradient-drop]"), {
+    y: "5rem",
+    scale: 0.25,
+    opacity: 0,
+  });
+
+  gsap.set($("[home-gradient-line]"), {
+    scaleX: 0,
+    opacity: 0,
+    transformOrigin: "left center",
+  });
+
   const restingTimeline = gsap.timeline();
 
   restingTimeline.to($("[home-resting]"), {
@@ -305,6 +332,146 @@ function homeAnimation() {
     )
     .addLabel("complete", 100);
 
+  homeTimeline
+    .to(
+      $(".home-gradient"),
+      {
+        y: "-42vh",
+        scaleX: 0.72,
+        scaleY: 2.5,
+        opacity: 0,
+        duration: 24,
+        ease: "power2.inOut",
+      },
+      "startExit"
+    )
+    .to(
+      $('[home-gradient-blob="1"]'),
+      {
+        x: "-36vw",
+        y: "-28vh",
+        scale: 1,
+        duration: 24,
+        ease: "power2.inOut",
+      },
+      "startExit"
+    )
+    .to(
+      $('[home-gradient-blob="2"]'),
+      {
+        x: "36vw",
+        y: "-28vh",
+        scale: 1,
+        duration: 24,
+        ease: "power2.inOut",
+      },
+      "startExit"
+    )
+    .to(
+      $('[home-gradient-blob="3"]'),
+      {
+        x: 0,
+        y: "28vh",
+        scale: 1,
+        duration: 24,
+        ease: "power2.inOut",
+      },
+      "startExit"
+    )
+    .to(
+      $("[home-gradient-blob]"),
+      {
+        opacity: 1,
+        duration: 12,
+        ease: "power1.out",
+      },
+      "startExit+=6"
+    )
+    .to(
+      $('[home-gradient-blob="1"]'),
+      {
+        x: "-32vw",
+        y: "-34vh",
+        scale: 0.92,
+        duration: 30,
+        ease: "sine.inOut",
+      },
+      "secondEnter"
+    )
+    .to(
+      $('[home-gradient-blob="2"]'),
+      {
+        x: "34vw",
+        y: "-32vh",
+        scale: 0.96,
+        duration: 30,
+        ease: "sine.inOut",
+      },
+      "secondEnter"
+    )
+    .to(
+      $('[home-gradient-blob="3"]'),
+      {
+        x: "5vw",
+        y: "25vh",
+        scale: 1.08,
+        duration: 30,
+        ease: "sine.inOut",
+      },
+      "secondEnter"
+    )
+    .to(
+      $("[home-gradient-blob]"),
+      {
+        x: 0,
+        y: 0,
+        scale: 0.55,
+        duration: 22,
+        ease: "power2.inOut",
+      },
+      "thirdEnter"
+    )
+    .to(
+      $('[home-gradient-blob="1"], [home-gradient-blob="2"]'),
+      {
+        opacity: 0,
+        duration: 10,
+        ease: "power1.in",
+      },
+      "thirdEnter+=12"
+    )
+    .to(
+      $('[home-gradient-blob="3"]'),
+      {
+        scale: 0.3,
+        opacity: 0,
+        duration: 8,
+        ease: "power1.in",
+      },
+      "thirdEnter+=22"
+    )
+    .to(
+      $("[home-gradient-drop]"),
+      {
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        duration: 10,
+        ease: "power2.out",
+      },
+      "thirdEnter+=20"
+    )
+    .to(
+      $("[home-gradient-line]"),
+      {
+        scaleX: 1,
+        opacity: 1,
+        duration: 6,
+        ease: "power2.out",
+      },
+      90
+    );
+
   function syncRestingTimeline(progress) {
     if (progress === 0) {
       restingTimeline.resume();
@@ -335,6 +502,12 @@ function homeAnimation() {
     gsap.set(
       $(
         "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
+      ),
+      { clearProps: "transform,opacity,will-change" }
+    );
+    gsap.set(
+      $(
+        ".home-gradient, [home-gradient-blob], [home-gradient-drop], [home-gradient-line]"
       ),
       { clearProps: "transform,opacity,will-change" }
     );
