@@ -162,8 +162,8 @@ function homeAnimation() {
       const angle = gradientAngles[index] + gradientOrbit.angle;
 
       $(this).attr({
-        cx: 720 + Math.cos(angle) * 610,
-        cy: 416 + Math.sin(angle) * 610,
+        cx: 720 + Math.cos(angle) * 520,
+        cy: 416 + Math.sin(angle) * 520,
       });
     });
   }
@@ -213,10 +213,16 @@ function homeAnimation() {
 
   gsap.set($("[home-gradient-line]"), {
     attr: {
-      "stroke-dasharray": 780,
-      "stroke-dashoffset": 780,
+      "stroke-dasharray": 1560,
+      "stroke-dashoffset": 1560,
     },
     opacity: 0,
+  });
+
+  gsap.set($(".layout-start"), {
+    clipPath:
+      "polygon(0% 0%, 100% 0%, 100% 40%, 100% 40%, 100% 100%, 0% 100%)",
+    willChange: "clip-path",
   });
 
   gsap.set($("[ripple-ring]"), {
@@ -392,102 +398,86 @@ function homeAnimation() {
     .addLabel("complete", 100);
 
   homeTimeline
-    .addLabel("gradientStretch", 10)
-    .to(
-      $("[home-gradient-piece]"),
-      {
-        attr: {
-          cx: 720,
-          cy: 660,
-          rx: 700,
-          ry: 600,
-        },
-        opacity: 0.16,
-        duration: 8,
-        ease: "power2.inOut",
-      },
-      "gradientStretch"
-    )
-    .addLabel("gradientSplit", 18)
+    .addLabel("gradientCircle", 10)
     .to(
       $('[home-gradient-piece="1"]'),
       {
-        attr: { cx: 720, cy: -194, rx: 210, ry: 210 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 720, cy: -104, rx: 160, ry: 160 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .to(
       $('[home-gradient-piece="2"]'),
       {
-        attr: { cx: 1151, cy: -15, rx: 185, ry: 185 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 1088, cy: 48, rx: 145, ry: 145 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .to(
       $('[home-gradient-piece="3"]'),
       {
-        attr: { cx: 1330, cy: 416, rx: 205, ry: 205 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 1240, cy: 416, rx: 155, ry: 155 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .to(
       $('[home-gradient-piece="4"]'),
       {
-        attr: { cx: 1151, cy: 847, rx: 180, ry: 180 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 1088, cy: 784, rx: 140, ry: 140 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .to(
       $('[home-gradient-piece="5"]'),
       {
-        attr: { cx: 720, cy: 1026, rx: 215, ry: 215 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 720, cy: 936, rx: 165, ry: 165 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .to(
       $('[home-gradient-piece="6"]'),
       {
-        attr: { cx: 289, cy: 847, rx: 190, ry: 190 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 352, cy: 784, rx: 145, ry: 145 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .to(
       $('[home-gradient-piece="7"]'),
       {
-        attr: { cx: 110, cy: 416, rx: 205, ry: 205 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 200, cy: 416, rx: 155, ry: 155 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .to(
       $('[home-gradient-piece="8"]'),
       {
-        attr: { cx: 289, cy: -15, rx: 180, ry: 180 },
-        opacity: 0.85,
-        duration: 22,
+        attr: { cx: 352, cy: 48, rx: 140, ry: 140 },
+        opacity: 0.82,
+        duration: 30,
         ease: "power2.inOut",
       },
-      "gradientSplit"
+      "gradientCircle"
     )
     .addLabel("gradientOrbit", 40)
     .to(
@@ -504,8 +494,8 @@ function homeAnimation() {
     .to(
       $("[home-gradient-orbit]"),
       {
-        y: -650,
-        duration: 12,
+        y: -620,
+        duration: 10,
         ease: "power2.inOut",
       },
       "gradientRise"
@@ -515,8 +505,8 @@ function homeAnimation() {
         '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
       ),
       {
-        attr: { cy: 830 },
-        duration: 12,
+        attr: { cy: 800 },
+        duration: 10,
         ease: "power2.inOut",
       },
       "gradientRise"
@@ -527,19 +517,19 @@ function homeAnimation() {
       ),
       {
         opacity: 0,
-        duration: 8,
+        duration: 6,
         ease: "power1.in",
       },
-      "gradientRise+=4"
+      "gradientRise+=2"
     )
-    .addLabel("gradientDrops", 67)
+    .addLabel("gradientDrops", 60)
     .to(
       $(
         '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
       ),
       {
         opacity: 0,
-        duration: 8,
+        duration: 7,
         ease: "power1.in",
       },
       "gradientDrops"
@@ -548,7 +538,7 @@ function homeAnimation() {
       $("[home-gradient-drop]"),
       {
         opacity: 1,
-        duration: 8,
+        duration: 7,
         ease: "power1.out",
       },
       "gradientDrops"
@@ -557,7 +547,7 @@ function homeAnimation() {
       $('[home-gradient-drop="1"]'),
       {
         attr: { transform: "translate(234 102) scale(0.5)" },
-        duration: 8,
+        duration: 7,
         ease: "power2.inOut",
       },
       "gradientDrops"
@@ -566,7 +556,7 @@ function homeAnimation() {
       $('[home-gradient-drop="2"]'),
       {
         attr: { transform: "translate(665 102) scale(0.5)" },
-        duration: 8,
+        duration: 7,
         ease: "power2.inOut",
       },
       "gradientDrops"
@@ -575,7 +565,7 @@ function homeAnimation() {
       $('[home-gradient-drop="3"]'),
       {
         attr: { transform: "translate(1096 102) scale(0.5)" },
-        duration: 8,
+        duration: 7,
         ease: "power2.inOut",
       },
       "gradientDrops"
@@ -584,17 +574,17 @@ function homeAnimation() {
       $("[home-gradient-drop-blur]"),
       {
         attr: { stdDeviation: 22 },
-        duration: 8,
+        duration: 7,
         ease: "power1.inOut",
       },
       "gradientDrops"
     )
-    .addLabel("gradientMerge", 75)
+    .addLabel("gradientMerge", 67)
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
         attr: { transform: "translate(640 59) scale(0.72)" },
-        duration: 10,
+        duration: 8,
         ease: "power2.inOut",
       },
       "gradientMerge"
@@ -603,7 +593,7 @@ function homeAnimation() {
       $('[home-gradient-drop="2"]'),
       {
         attr: { transform: "translate(640 59) scale(0.72)" },
-        duration: 10,
+        duration: 8,
         ease: "power2.inOut",
       },
       "gradientMerge"
@@ -612,7 +602,7 @@ function homeAnimation() {
       $("[home-gradient-drops]"),
       {
         y: 150,
-        duration: 18,
+        duration: 13,
         ease: "power2.in",
       },
       "gradientMerge"
@@ -624,26 +614,39 @@ function homeAnimation() {
         duration: 3,
         ease: "power1.in",
       },
-      "gradientMerge+=7"
+      "gradientMerge+=5"
     )
-    .addLabel("gradientLand", 85)
+    .addLabel("gradientLand", 80)
     .to(
       $("[home-gradient-line]"),
       {
         attr: { "stroke-dashoffset": 0 },
         opacity: 1,
-        duration: 8,
+        duration: 10,
         ease: "power2.inOut",
       },
       "gradientLand"
     )
+    .addLabel("layoutReveal", 90)
     .to(
-      {},
+      $(".layout-start"),
       {
-        duration: 27,
-        ease: "none",
+        clipPath:
+          "polygon(0% 0%, 55% 0%, 50% 40%, 50% 40%, 70% 100%, 0% 100%)",
+        duration: 12,
+        ease: "power2.inOut",
       },
-      93
+      "layoutReveal"
+    )
+    .to(
+      $(".layout-start"),
+      {
+        clipPath:
+          "polygon(0% 40%, 0% 40%, 50% 40%, 50% 40%, 0% 40%, 0% 40%)",
+        duration: 18,
+        ease: "power2.inOut",
+      },
+      "layoutReveal+=12"
     );
 
   function syncRestingTimeline(progress) {
@@ -655,7 +658,7 @@ function homeAnimation() {
   }
 
   function syncRippleTimeline() {
-    const dropHasLanded = homeTimeline.time() >= 93;
+    const dropHasLanded = homeTimeline.time() >= 80;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
