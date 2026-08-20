@@ -155,15 +155,13 @@ function homeAnimation() {
     (Math.PI * 5) / 4,
   ];
 
-  function layoutClipPath(state, timelineTime) {
-    const layout = $(".layout-start")[0];
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const scrollRange = Math.max(layout.offsetHeight - viewportHeight, 0);
-    const centerX = layout.offsetWidth * 0.5;
-    const centerY =
-      scrollRange * (timelineTime / 120) + viewportHeight * 0.4;
-    const half = Math.max(viewportWidth, viewportHeight);
+  function homeClipPath(state) {
+    const home = $(".home-start")[0];
+    const width = home.offsetWidth;
+    const height = home.offsetHeight;
+    const centerX = width * 0.5;
+    const centerY = height * 0.4;
+    const half = Math.max(width, height);
     const left = centerX - half;
     const right = centerX + half;
     const top = centerY - half;
@@ -333,7 +331,7 @@ function homeAnimation() {
     opacity: 0,
   });
 
-  gsap.set($(".layout-start"), {
+  gsap.set($(".home-start"), {
     clipPath: "none",
     willChange: "clip-path",
   });
@@ -742,50 +740,50 @@ function homeAnimation() {
     )
     .addLabel("layoutReveal", 90)
     .set(
-      $(".layout-start"),
+      $(".home-start"),
       {
-        clipPath: () => layoutClipPath("closed", 90),
+        clipPath: () => homeClipPath("closed"),
       },
       "layoutReveal"
     )
     .to(
-      $(".layout-start"),
+      $(".home-start"),
       {
-        clipPath: () => layoutClipPath("slit", 92),
+        clipPath: () => homeClipPath("slit"),
         duration: 2,
         ease: "power2.inOut",
       },
       "layoutReveal"
     )
     .to(
-      $(".layout-start"),
+      $(".home-start"),
       {
-        clipPath: () => layoutClipPath("open", 95),
+        clipPath: () => homeClipPath("open"),
         duration: 3,
         ease: "power2.inOut",
       },
       "layoutReveal+=2"
     )
     .set(
-      $(".layout-start"),
+      $(".home-start"),
       {
-        clipPath: () => layoutClipPath("sweep", 95),
+        clipPath: () => homeClipPath("sweep"),
       },
       "layoutReveal+=5"
     )
     .to(
-      $(".layout-start"),
+      $(".home-start"),
       {
-        clipPath: () => layoutClipPath("left", 103),
+        clipPath: () => homeClipPath("left"),
         duration: 8,
         ease: "power1.inOut",
       },
       "layoutReveal+=5"
     )
     .to(
-      $(".layout-start"),
+      $(".home-start"),
       {
-        clipPath: () => layoutClipPath("complete", 108),
+        clipPath: () => homeClipPath("complete"),
         duration: 5,
         ease: "power1.inOut",
       },
@@ -865,7 +863,7 @@ function homeAnimation() {
       ),
       { clearProps: "transform,opacity,visibility,will-change" }
     );
-    gsap.set($(".layout-start"), {
+    gsap.set($(".home-start"), {
       clearProps: "clip-path,will-change",
     });
   };
