@@ -211,9 +211,12 @@ function homeAnimation() {
 
   gsap.set($("[ripple-ring]"), {
     scale: 0.08,
-    opacity: 0,
-    svgOrigin: "720 453",
+    autoAlpha: 0,
+    transformOrigin: "center",
   });
+
+  const homeRippleTimeline = rippleAnimation();
+  let rippleHasPlayed = false;
 
   const restingTimeline = gsap.timeline();
 
@@ -379,7 +382,7 @@ function homeAnimation() {
     .addLabel("complete", 100);
 
   homeTimeline
-    .addLabel("gradientStretch", 0)
+    .addLabel("gradientStretch", 10)
     .to(
       $("[home-gradient-piece]"),
       {
@@ -395,7 +398,7 @@ function homeAnimation() {
       },
       "gradientStretch"
     )
-    .addLabel("gradientSplit", 8)
+    .addLabel("gradientSplit", 18)
     .to(
       $('[home-gradient-piece="1"]'),
       {
@@ -476,6 +479,7 @@ function homeAnimation() {
       },
       "gradientSplit"
     )
+    .addLabel("gradientOrbit", 40)
     .to(
       gradientOrbit,
       {
@@ -484,9 +488,9 @@ function homeAnimation() {
         ease: "none",
         onUpdate: moveGradientDots,
       },
-      "secondEnter"
+      "gradientOrbit"
     )
-    .addLabel("gradientRise", 60)
+    .addLabel("gradientRise", 70)
     .to(
       $("[home-gradient-orbit]"),
       {
@@ -518,7 +522,7 @@ function homeAnimation() {
       },
       "gradientRise+=4"
     )
-    .addLabel("gradientDrops", 72)
+    .addLabel("gradientDrops", 82)
     .to(
       $(
         '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
@@ -542,7 +546,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-drop="1"]'),
       {
-        attr: { transform: "translate(211 70) scale(0.7)" },
+        attr: { transform: "translate(234 102) scale(0.5)" },
         duration: 8,
         ease: "power2.inOut",
       },
@@ -551,7 +555,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-drop="2"]'),
       {
-        attr: { transform: "translate(642 70) scale(0.7)" },
+        attr: { transform: "translate(665 102) scale(0.5)" },
         duration: 8,
         ease: "power2.inOut",
       },
@@ -560,7 +564,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-drop="3"]'),
       {
-        attr: { transform: "translate(1073 70) scale(0.7)" },
+        attr: { transform: "translate(1096 102) scale(0.5)" },
         duration: 8,
         ease: "power2.inOut",
       },
@@ -569,17 +573,17 @@ function homeAnimation() {
     .to(
       $("[home-gradient-drop-blur]"),
       {
-        attr: { stdDeviation: 28 },
+        attr: { stdDeviation: 22 },
         duration: 8,
         ease: "power1.inOut",
       },
       "gradientDrops"
     )
-    .addLabel("gradientMerge", 80)
+    .addLabel("gradientMerge", 90)
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
-        attr: { transform: "translate(615 31) scale(0.95)" },
+        attr: { transform: "translate(640 67) scale(0.72)" },
         duration: 10,
         ease: "power2.inOut",
       },
@@ -588,7 +592,7 @@ function homeAnimation() {
     .to(
       $('[home-gradient-drop="2"]'),
       {
-        attr: { transform: "translate(615 31) scale(0.95)" },
+        attr: { transform: "translate(640 67) scale(0.72)" },
         duration: 10,
         ease: "power2.inOut",
       },
@@ -603,11 +607,11 @@ function homeAnimation() {
       },
       "gradientMerge+=7"
     )
-    .addLabel("gradientLand", 90)
+    .addLabel("gradientLand", 100)
     .to(
       $('[home-gradient-drop="2"]'),
       {
-        attr: { transform: "translate(615 181) scale(0.95)" },
+        attr: { transform: "translate(640 217) scale(0.72)" },
         duration: 8,
         ease: "power2.in",
       },
@@ -623,33 +627,13 @@ function homeAnimation() {
       },
       "gradientLand"
     )
-    .addLabel("gradientRipple", 98)
-    .set(
-      $("[ripple-ring]"),
-      {
-        scale: 0.08,
-        opacity: 0.42,
-      },
-      "gradientRipple"
-    )
-    .to(
-      $("[ripple-ring]"),
-      {
-        scale: 1,
-        opacity: 0,
-        duration: 6,
-        stagger: 0.8,
-        ease: "power2.out",
-      },
-      "gradientRipple"
-    )
     .to(
       {},
       {
-        duration: 4,
+        duration: 12,
         ease: "none",
       },
-      106
+      108
     );
 
   function syncRestingTimeline(progress) {
@@ -660,6 +644,21 @@ function homeAnimation() {
     }
   }
 
+  function syncRippleTimeline() {
+    const dropHasLanded = homeTimeline.time() >= 108;
+
+    if (dropHasLanded && !rippleHasPlayed) {
+      if (homeRippleTimeline) homeRippleTimeline.restart();
+      rippleHasPlayed = true;
+    }
+
+    if (!dropHasLanded && rippleHasPlayed) {
+      if (homeRippleTimeline) homeRippleTimeline.pause(0);
+      gsap.set($("[ripple-ring]"), { scale: 0.08, autoAlpha: 0 });
+      rippleHasPlayed = false;
+    }
+  }
+
   const homeScrollTrigger = ScrollTrigger.create({
     trigger: $(".layout-start")[0],
     animation: homeTimeline,
@@ -667,17 +666,28 @@ function homeAnimation() {
     end: "bottom bottom",
     scrub: true,
     invalidateOnRefresh: true,
-    onUpdate: (self) => syncRestingTimeline(self.progress),
-    onLeave: () => syncRestingTimeline(1),
-    onLeaveBack: () => syncRestingTimeline(0),
+    onUpdate: (self) => {
+      syncRestingTimeline(self.progress);
+      syncRippleTimeline();
+    },
+    onLeave: () => {
+      syncRestingTimeline(1);
+      syncRippleTimeline();
+    },
+    onLeaveBack: () => {
+      syncRestingTimeline(0);
+      syncRippleTimeline();
+    },
   });
 
   syncRestingTimeline(homeScrollTrigger.progress);
+  syncRippleTimeline();
 
   return () => {
     homeScrollTrigger.kill();
     homeLoadTimeline.kill();
     homeTimeline.kill();
+    if (homeRippleTimeline) homeRippleTimeline.kill();
     restingTimeline.kill();
     gsap.set(
       $(
@@ -689,7 +699,7 @@ function homeAnimation() {
       $(
         "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drop], [home-gradient-line], [ripple-ring]"
       ),
-      { clearProps: "transform,opacity,will-change" }
+      { clearProps: "transform,opacity,visibility,will-change" }
     );
   };
 }
@@ -697,6 +707,8 @@ function homeAnimation() {
 function rippleAnimation() {
   const $rings = $("[ripple-ring]");
   if (!$rings.length || !window.gsap) return null;
+
+  gsap.set($rings, { scale: 0.08, autoAlpha: 0 });
 
   const rippleTimeline = gsap.timeline({ paused: true });
 
@@ -712,6 +724,7 @@ function rippleAnimation() {
       duration: 1.6,
       stagger: 0.16,
       ease: "power2.out",
+      immediateRender: false,
     }
   );
 
