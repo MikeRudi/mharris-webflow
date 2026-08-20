@@ -90,10 +90,12 @@ function initSite() {
     // gitTestDesktop();
     lineHover();
     const homeAnimationCleanup = homeAnimation();
+    const homeEndAnimationCleanup = homeEndAnimation();
     const footerEnginePixelsCleanup = footerEnginePixels();
 
     return () => {
       if (homeAnimationCleanup) homeAnimationCleanup();
+      if (homeEndAnimationCleanup) homeEndAnimationCleanup();
       if (footerEnginePixelsCleanup) footerEnginePixelsCleanup();
     };
   });
@@ -954,6 +956,151 @@ function homeAnimation() {
     gsap.set($(".home-start"), {
       clearProps: "clip-path,will-change",
     });
+  };
+}
+
+function homeEndAnimation() {
+  if (
+    !$(".layout-end").length ||
+    !$('[home-end-brackets]').length ||
+    !$('[home-end-drop-stage]').length ||
+    !window.gsap ||
+    !window.ScrollTrigger
+  ) {
+    return null;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.set($("[home-end-target]"), {
+    scale: 1,
+    opacity: 1,
+    transformOrigin: "center center",
+  });
+
+  gsap.set($("[home-end-captured-drop]"), {
+    opacity: 0,
+  });
+
+  gsap.set($("[home-end-bracket]"), {
+    x: 0,
+  });
+
+  gsap.set($("[home-end-ripple]"), {
+    scale: 0.08,
+    autoAlpha: 0,
+    transformOrigin: "center",
+  });
+
+  const homeEndRippleTimeline = gsap.timeline({ paused: true });
+
+  homeEndRippleTimeline.fromTo(
+    $("[home-end-ripple]"),
+    {
+      scale: 0.08,
+      autoAlpha: 0.42,
+    },
+    {
+      scale: 1,
+      autoAlpha: 0,
+      duration: 1.6,
+      stagger: 0.16,
+      ease: "power2.out",
+      immediateRender: false,
+    }
+  );
+
+  const homeEndTimeline = gsap.timeline({
+    paused: true,
+    onComplete: () => homeEndRippleTimeline.restart(),
+    onReverseComplete: () => {
+      homeEndRippleTimeline.pause(0);
+      gsap.set($("[home-end-ripple]"), {
+        scale: 0.08,
+        autoAlpha: 0,
+      });
+    },
+  });
+
+  homeEndTimeline
+    .to(
+      $("[home-end-target]"),
+      {
+        scale: 0.5,
+        duration: 0.75,
+        ease: "power2.inOut",
+      },
+      0
+    )
+    .to(
+      $('[home-end-bracket="left"]'),
+      {
+        x: -8,
+        duration: 0.75,
+        ease: "power2.inOut",
+      },
+      0
+    )
+    .to(
+      $('[home-end-bracket="right"]'),
+      {
+        x: 8,
+        duration: 0.75,
+        ease: "power2.inOut",
+      },
+      0
+    )
+    .to(
+      $("[home-end-target]"),
+      {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power1.out",
+      },
+      0.55
+    )
+    .to(
+      $("[home-end-captured-drop]"),
+      {
+        opacity: 1,
+        duration: 0.2,
+        ease: "power1.out",
+      },
+      0.55
+    );
+
+  const homeEndTrigger = ScrollTrigger.create({
+    trigger: $("[home-end-brackets]")[0],
+    start: "center center",
+    onEnter: () => homeEndTimeline.play(),
+    onLeaveBack: () => homeEndTimeline.reverse(),
+    invalidateOnRefresh: true,
+  });
+
+  const homeEndStageTrigger = ScrollTrigger.create({
+    trigger: $(".layout-end")[0],
+    start: "top bottom",
+    end: "bottom top",
+    onEnter: () => gsap.set($("[home-end-drop-stage]"), { autoAlpha: 1 }),
+    onEnterBack: () =>
+      gsap.set($("[home-end-drop-stage]"), { autoAlpha: 1 }),
+    onLeave: () => gsap.set($("[home-end-drop-stage]"), { autoAlpha: 0 }),
+    invalidateOnRefresh: true,
+  });
+
+  return () => {
+    homeEndTrigger.kill();
+    homeEndStageTrigger.kill();
+    homeEndTimeline.kill();
+    homeEndRippleTimeline.kill();
+    gsap.set(
+      $(
+        "[home-end-drop-stage], [home-end-target], [home-end-captured-drop], [home-end-bracket], [home-end-ripple]"
+      ),
+      {
+        clearProps: "transform,opacity,visibility,will-change",
+      }
+    );
   };
 }
 
