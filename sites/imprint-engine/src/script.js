@@ -328,10 +328,7 @@ function homeAnimation() {
 
   gsap.set($("[home-drop-circle]"), {
     x: -75,
-  });
-
-  gsap.set($("[home-drop-colors]"), {
-    opacity: 0.45,
+    opacity: 0.18,
   });
 
   gsap.set($("[home-drop-star]"), {
@@ -772,15 +769,17 @@ function homeAnimation() {
       x: 0,
       duration: 7,
       ease: "power2.inOut",
+      stagger: 0.25,
     },
     "lineMeetsDrop"
   )
     .to(
-      $("[home-drop-colors]"),
+      $("[home-drop-circle]"),
       {
         opacity: 1,
-        duration: 7,
+        duration: 4,
         ease: "power1.inOut",
+        stagger: 0.25,
       },
       "lineMeetsDrop"
     )
@@ -932,7 +931,7 @@ function homeAnimation() {
     );
     gsap.set(
       $(
-        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [home-drop-colors], [home-drop-circle], [home-drop-star], [ripple-ring]"
+        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [home-drop-circle], [home-drop-star], [ripple-ring]"
       ),
       { clearProps: "transform,opacity,visibility,will-change" }
     );
