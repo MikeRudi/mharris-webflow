@@ -47,6 +47,9 @@ the star scales up, rotates, and settles slightly smaller. The circles enter
 from left to right. The star is anchored where the line meets the drop: it
 grows from 86-90, spins from 90-98, then settles from 98-101. The final drop
 blur sharpens from 22 to 16 during this transition.
+Keep the star artwork centred around its local SVG origin and animate it with
+`transformOrigin: "center center"`; `svgOrigin` drifts inside the transformed
+drop groups.
 ```
 
 ## Libraries
