@@ -33,7 +33,9 @@
 
 Gradient SVG and CSS live in .home-gradient-embed.
 Gradient scroll animation lives in homeAnimation(). The eight SVG pieces form the
-bottom gradient, split into a rotating ring, then become three drops that merge.
+bottom gradient, split into a rotating ring, then form and merge into one drop in
+the same transition. `gradientDropMerge` runs from 60-80; the side drops fade as
+all three converge while the drop group moves down `150px`.
 The final drop landing triggers the preserved elliptical ripple animation. The
 ripple plays on its own timeline and is not tied to scroll scrub.
 The bottom gradient forms the hollow ring in one transition. After the drop
