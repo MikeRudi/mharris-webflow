@@ -23,6 +23,11 @@
         [home-gradient-line]
         [home-gradient-drops]
           [home-gradient-drop="1"] to [home-gradient-drop="3"]
+          [home-gradient-drop="2"]
+            [home-drop-base]
+              [home-drop-colors]
+                [home-drop-circle] x4
+            [home-drop-star]
       [home-gradient-ripples]
         [ripple-ring] x3
 
@@ -37,6 +42,8 @@ lands, the white line reaches the drop before .home-start opens with a
 directions like clock hands. The reveal finishes at 90%; the final 10% holds.
 The line starts at timeline time 80, stops at the drop at 85, and the clip
 starts from the `lineMeetsDrop` label at 85.
+At `lineMeetsDrop`, four blurred circles move through the final-drop mask while
+the star scales up, rotates, and settles slightly smaller.
 ```
 
 ## Libraries
