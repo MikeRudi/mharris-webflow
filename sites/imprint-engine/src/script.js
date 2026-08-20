@@ -999,27 +999,39 @@ function homeEndAnimation() {
   }
 
   const homeEndDropPosition = positionHomeEndDrop();
+  const $layoutEndContent = $(".layout-end")
+    .children()
+    .not(".home-end-drop-stage");
   const layoutEndRect = $(".layout-end")[0].getBoundingClientRect();
   const bracketsRect = $(".home-end-brackets")[0].getBoundingClientRect();
   const bracketsCenter =
     bracketsRect.top - layoutEndRect.top + bracketsRect.height / 2;
-  const naturalDropLandingProgress =
-    (window.innerHeight + bracketsCenter - homeEndDropPosition.y) /
-    $(".layout-end")[0].offsetHeight;
-  const dropLandingProgress = gsap.utils.clamp(
-    0.55,
-    1,
-    naturalDropLandingProgress
-  );
-  const dropLandingTime = dropLandingProgress * 100;
-  const dropApproachTime = dropLandingTime - 18;
-  const bracketsLandingY =
-    naturalDropLandingProgress > 1
-      ? homeEndDropPosition.y -
-        (window.innerHeight - $(".layout-end")[0].offsetHeight + bracketsCenter)
-      : 0;
+  const dropTravelY = 24;
+  const bracketStartGap = 40;
+  const contentStartY =
+    homeEndDropPosition.y +
+    dropTravelY +
+    bracketStartGap -
+    (window.innerHeight + bracketsCenter);
+  const contentEndY =
+    homeEndDropPosition.y +
+    dropTravelY -
+    (window.innerHeight -
+      $(".layout-end")[0].offsetHeight +
+      bracketsCenter);
+  const dropLandingProgress = 1;
+  const dropLandingTime = 100;
+  const dropApproachTime = 60;
 
-  gsap.set($(".home-end-drop-stage"), { autoAlpha: 1 });
+  gsap.set($layoutEndContent, {
+    y: contentStartY,
+    willChange: "transform",
+  });
+
+  gsap.set($(".home-end-drop-stage"), {
+    y: 0,
+    autoAlpha: 1,
+  });
 
   gsap.set($(".home-end-target-svg"), {
     scale: 1,
@@ -1035,10 +1047,6 @@ function homeEndAnimation() {
 
   gsap.set($(".home-end-bracket-shape"), {
     x: 0,
-  });
-
-  gsap.set($(".home-end-brackets"), {
-    y: 0,
   });
 
   gsap.set($(".home-end-ripple"), {
@@ -1096,12 +1104,30 @@ function homeEndAnimation() {
   });
 
   homeEndTimeline
+    .to(
+      $layoutEndContent,
+      {
+        y: contentEndY,
+        duration: 100,
+        ease: "none",
+      },
+      0
+    )
     .addLabel("dropApproach", dropApproachTime)
+    .to(
+      $(".home-end-drop-stage"),
+      {
+        y: dropTravelY,
+        duration: 40,
+        ease: "power2.inOut",
+      },
+      "dropApproach"
+    )
     .to(
       $(".home-end-target-svg"),
       {
         scale: 0.5,
-        duration: 18,
+        duration: 40,
         ease: "power2.inOut",
       },
       "dropApproach"
@@ -1110,7 +1136,7 @@ function homeEndAnimation() {
       $(".home-end-bracket-left"),
       {
         x: -8,
-        duration: 18,
+        duration: 40,
         ease: "power2.inOut",
       },
       "dropApproach"
@@ -1119,47 +1145,14 @@ function homeEndAnimation() {
       $(".home-end-bracket-right"),
       {
         x: 8,
-        duration: 18,
-        ease: "power2.inOut",
-      },
-      "dropApproach"
-    )
-    .to(
-      $(".home-end-brackets"),
-      {
-        y: bracketsLandingY,
-        duration: 18,
+        duration: 40,
         ease: "power2.inOut",
       },
       "dropApproach"
     )
     .addLabel("dropLands", dropLandingTime)
-    .to(
-      $(".home-end-target-svg"),
-      {
-        opacity: 0,
-        duration: 2,
-        ease: "power1.out",
-      },
-      "dropLands-=2"
-    )
-    .to(
-      $(".home-end-captured-drop"),
-      {
-        opacity: 1,
-        duration: 2,
-        ease: "power1.out",
-      },
-      "dropLands-=2"
-    )
-    .to(
-      {},
-      {
-        duration: 100 - dropLandingTime,
-        ease: "none",
-      },
-      "dropLands"
-    );
+    .set($(".home-end-target-svg"), { opacity: 0 }, "dropLands")
+    .set($(".home-end-captured-drop"), { opacity: 1 }, "dropLands");
 
   const homeEndStageTrigger = ScrollTrigger.create({
     trigger: $(".layout-end")[0],
@@ -1177,6 +1170,9 @@ function homeEndAnimation() {
     homeEndStageTrigger.kill();
     homeEndTimeline.kill();
     homeEndRippleTimeline.kill();
+    gsap.set($layoutEndContent, {
+      clearProps: "transform,will-change",
+    });
     gsap.set(
       $(
         ".home-end-drop-stage, .home-end-target-svg, .home-end-captured-drop, .home-end-brackets, .home-end-bracket-shape, .home-end-ripple"
