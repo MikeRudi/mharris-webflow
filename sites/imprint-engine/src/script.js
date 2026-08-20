@@ -714,6 +714,9 @@ function homeAnimation() {
       ),
       { clearProps: "transform,opacity,visibility,will-change" }
     );
+    gsap.set($(".layout-start"), {
+      clearProps: "clip-path,will-change",
+    });
   };
 }
 
