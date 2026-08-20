@@ -46,12 +46,16 @@ At `lineMeetsDrop`, four blurred circles move through the final-drop mask while
 the star scales up, rotates, and settles slightly smaller. The circles enter
 from left to right. They start at `x: -40` with yellow and white faint, blue
 hidden, and purple visible, then build to full opacity. A purple drop base fades
-in from 80-84. The star is fixed halfway between the line contact point and the
-drop centre: it grows from 86-90, spins from 90-98, then settles from 98-101.
-The final drop blur sharpens from 22 to 16 during this transition.
+in from `lineMeetsDrop` at 85. The star is fixed halfway between the line
+contact point and the drop centre: it grows from 86-90, rotates continuously
+from 86-120, and settles from 98-101. The final drop blur sharpens from 22 to
+16 during this transition.
 Keep the star artwork centred around its local SVG origin and animate it with
 `transformOrigin: "center center"`; `svgOrigin` drifts inside the transformed
 drop groups.
+
+The desktop page-load animation stops Lenis before its entrance stagger starts
+and restarts Lenis from the load timeline's `onComplete` callback.
 ```
 
 ## Libraries
