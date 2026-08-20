@@ -157,10 +157,13 @@ function homeAnimation() {
 
   function homeClipPath(state) {
     const home = $(".home-start")[0];
+    const line = $("[home-gradient-line]")[0];
+    const homeRect = home.getBoundingClientRect();
+    const lineRect = line.getBoundingClientRect();
     const width = home.offsetWidth;
     const height = home.offsetHeight;
     const centerX = width * 0.5;
-    const centerY = height * 0.4;
+    const centerY = lineRect.top + lineRect.height / 2 - homeRect.top;
     const half = Math.max(width, height);
     const left = centerX - half;
     const right = centerX + half;
