@@ -346,7 +346,7 @@ function homeAnimation() {
     opacity: 0,
     scale: 0.15,
     rotation: -35,
-    svgOrigin: "0 0",
+    transformOrigin: "center center",
   });
 
   gsap.set($("[home-gradient-line]"), {
