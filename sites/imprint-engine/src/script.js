@@ -252,9 +252,9 @@ function homeAnimation() {
     .to(
       $("[home-second-up]"),
       {
-        y: "-10rem",
+        y: "-20rem",
         duration: 7.5,
-        ease: "power2.in",
+        ease: "power1.out",
       },
       "secondExit"
     )
@@ -265,7 +265,7 @@ function homeAnimation() {
         duration: 3.75,
         ease: "power1.in",
       },
-      "secondExit+=3.75"
+      "secondExit"
     )
     .addLabel("thirdEnter", 60)
     .to(
