@@ -624,12 +624,16 @@ function homeAnimation() {
       "gradientLand"
     )
     .addLabel("gradientRipple", 98)
-    .fromTo(
+    .set(
       $("[ripple-ring]"),
       {
         scale: 0.08,
         opacity: 0.42,
       },
+      "gradientRipple"
+    )
+    .to(
+      $("[ripple-ring]"),
       {
         scale: 1,
         opacity: 0,
