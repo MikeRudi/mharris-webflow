@@ -61,21 +61,25 @@ The desktop page-load animation stops Lenis before its entrance stagger starts
 and restarts Lenis from the load timeline's `onComplete` callback.
 
 .layout-end
-  .home-end-brackets [home-end-brackets]
+  .home-end-brackets
     .home-end-brackets-svg
-      .home-end-bracket-shape.home-end-bracket-left [home-end-bracket="left"]
-      .home-end-bracket-shape.home-end-bracket-right [home-end-bracket="right"]
-      .home-end-captured-drop [home-end-captured-drop]
-  .home-end-drop-stage [home-end-drop-stage]
-    .home-end-target-svg [home-end-target]
+      .home-end-bracket-shape.home-end-bracket-left
+      .home-end-bracket-shape.home-end-bracket-right
+      .home-end-captured-drop
+  .home-end-drop-stage
+    .home-end-target-svg
       .home-end-target-path
-    .home-end-ripples [home-end-ripples]
-      .home-end-ripple [home-end-ripple] x3
+    .home-end-ripples
+      .home-end-ripple x3
 
 `homeEndAnimation()` is separate from `homeAnimation()`. The outlined drop is
-fixed at viewport centre beneath `.home-start`. When the scrolling bracket
-group reaches the drop, the drop scales down, the brackets open, the fixed drop
-crossfades into the captured drop, and the approved non-scrub ripple plays.
+fixed at the final gradient-drop centre beneath `.home-start`. Its timeline
+scrubs from `.layout-end` `top bottom` to `bottom bottom`. As the bracket reaches
+the drop, the drop scales down and the brackets open. At landing, the fixed drop
+crossfades into `.home-end-captured-drop`, which then scrolls with the bracket,
+and the approved non-scrub ripple plays. These inserted elements use their
+classes as JavaScript hooks because Webflow did not retain their valueless
+custom attributes.
 ```
 
 ## Libraries
