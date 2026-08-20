@@ -74,12 +74,15 @@ and restarts Lenis from the load timeline's `onComplete` callback.
 
 `homeEndAnimation()` is separate from `homeAnimation()`. The outlined drop is
 fixed at the final gradient-drop centre beneath `.home-start`. Its timeline
-scrubs from `.layout-end` `top bottom` to `bottom bottom`. As the bracket reaches
-the drop, the drop scales down and the brackets open. At landing, the fixed drop
-crossfades into `.home-end-captured-drop`, which then scrolls with the bracket,
-and the approved non-scrub ripple plays. These inserted elements use their
-classes as JavaScript hooks because Webflow did not retain their valueless
-custom attributes.
+scrubs from `.layout-end` `top bottom` to `bottom bottom`. The layout-end content
+is pre-positioned so the brackets, heading, copy, and button are already visible
+when the home-start clip finishes. The content then closes only a small gap over
+the full scrub. During the approach, the outlined drop moves down `24px` while
+scaling down and the brackets open. At landing, the fixed drop switches
+instantly to `.home-end-captured-drop`, which then scrolls with the bracket, and
+the approved non-scrub ripple plays. These inserted elements use their classes
+as JavaScript hooks because Webflow did not retain their valueless custom
+attributes.
 ```
 
 ## Libraries
