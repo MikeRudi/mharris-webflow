@@ -1022,6 +1022,7 @@ function homeEndAnimation() {
 
   gsap.set($(".home-end-captured-drop"), {
     opacity: 0,
+    transformOrigin: "0 0",
   });
 
   gsap.set($(".home-end-bracket-shape"), {
