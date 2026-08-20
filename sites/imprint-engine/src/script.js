@@ -1007,7 +1007,7 @@ function homeEndAnimation() {
   const bracketsCenter =
     bracketsRect.top - layoutEndRect.top + bracketsRect.height / 2;
   const dropTravelY = 24;
-  const bracketStartGap = 40;
+  const bracketStartGap = 500;
   const contentStartY =
     homeEndDropPosition.y +
     dropTravelY +
