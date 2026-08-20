@@ -14,20 +14,21 @@
 ## Classes and Attributes
 
 ```txt
-[lander-ripples] with [ripple-ring]: preserved ripple for homeAnimation()
-
 .home-gradient-wrap
   .home-gradient
     .home-gradient-embed
       [home-gradient-svg]
         [home-gradient-orbit]
           [home-gradient-piece="1"] to [home-gradient-piece="8"]
+        [home-gradient-ripples]
+          [ripple-ring] x3
         [home-gradient-line]
         [home-gradient-drop="1"] to [home-gradient-drop="3"]
 
 Gradient SVG and CSS live in .home-gradient-embed.
 Gradient scroll animation lives in homeAnimation(). The eight SVG pieces form the
 bottom gradient, split into a rotating ring, then become three drops that merge.
+The final drop landing triggers the preserved elliptical ripple animation.
 ```
 
 ## Libraries
