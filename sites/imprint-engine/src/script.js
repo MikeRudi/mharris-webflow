@@ -326,6 +326,17 @@ function homeAnimation() {
     attr: { stdDeviation: 52 },
   });
 
+  gsap.set($("[home-drop-circle]"), {
+    x: 260,
+  });
+
+  gsap.set($("[home-drop-star]"), {
+    opacity: 0,
+    scale: 0.15,
+    rotation: -35,
+    transformOrigin: "50% 50%",
+  });
+
   gsap.set($("[home-gradient-line]"), {
     attr: {
       "stroke-dasharray": 1560,
@@ -742,6 +753,44 @@ function homeAnimation() {
       "gradientLand"
     )
     .addLabel("lineMeetsDrop", 85)
+    .to(
+      $("[home-drop-circle]"),
+      {
+        x: 0,
+        duration: 7,
+        ease: "power2.inOut",
+        stagger: 0.25,
+      },
+      "lineMeetsDrop"
+    )
+    .to(
+      $("[home-drop-star]"),
+      {
+        opacity: 1,
+        scale: 2.5,
+        duration: 4,
+        ease: "power2.out",
+      },
+      "lineMeetsDrop+=1"
+    )
+    .to(
+      $("[home-drop-star]"),
+      {
+        rotation: 180,
+        duration: 5,
+        ease: "power1.inOut",
+      },
+      "lineMeetsDrop+=3"
+    )
+    .to(
+      $("[home-drop-star]"),
+      {
+        scale: 2.15,
+        duration: 3,
+        ease: "power2.inOut",
+      },
+      "lineMeetsDrop+=8"
+    )
     .set(
       $(".home-start"),
       {
@@ -862,7 +911,7 @@ function homeAnimation() {
     );
     gsap.set(
       $(
-        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [ripple-ring]"
+        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [home-drop-circle], [home-drop-star], [ripple-ring]"
       ),
       { clearProps: "transform,opacity,visibility,will-change" }
     );
