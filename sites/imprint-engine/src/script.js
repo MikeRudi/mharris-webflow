@@ -196,7 +196,7 @@ function homeAnimation() {
     .to(
       $("[home-start-up]"),
       {
-        y: "-10rem",
+        y: "-20rem",
         duration: 24,
         ease: "power2.inOut",
         stagger: {
