@@ -21,7 +21,8 @@
         [home-gradient-orbit]
           [home-gradient-piece="1"] to [home-gradient-piece="8"]
         [home-gradient-line]
-        [home-gradient-drop="1"] to [home-gradient-drop="3"]
+        [home-gradient-drops]
+          [home-gradient-drop="1"] to [home-gradient-drop="3"]
       [home-gradient-ripples]
         [ripple-ring] x3
 
