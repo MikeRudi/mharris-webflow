@@ -217,7 +217,7 @@ function homeAnimation() {
           from: "end",
         },
       },
-      "startExit+=6"
+      "startExit"
     )
     .addLabel("secondEnter", 30)
     .to(
