@@ -494,13 +494,13 @@ function homeAnimation() {
       gradientOrbit,
       {
         angle: Math.PI * 2,
-        duration: 30,
+        duration: 15,
         ease: "none",
         onUpdate: moveGradientDots,
       },
       "gradientOrbit"
     )
-    .addLabel("gradientRise", 70)
+    .addLabel("gradientRise", 55)
     .to(
       $("[home-gradient-orbit]"),
       {
@@ -532,7 +532,7 @@ function homeAnimation() {
       },
       "gradientRise+=4"
     )
-    .addLabel("gradientDrops", 82)
+    .addLabel("gradientDrops", 67)
     .to(
       $(
         '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
@@ -589,7 +589,7 @@ function homeAnimation() {
       },
       "gradientDrops"
     )
-    .addLabel("gradientMerge", 90)
+    .addLabel("gradientMerge", 75)
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
@@ -626,7 +626,7 @@ function homeAnimation() {
       },
       "gradientMerge+=7"
     )
-    .addLabel("gradientLand", 100)
+    .addLabel("gradientLand", 85)
     .to(
       $("[home-gradient-line]"),
       {
@@ -640,10 +640,10 @@ function homeAnimation() {
     .to(
       {},
       {
-        duration: 12,
+        duration: 27,
         ease: "none",
       },
-      108
+      93
     );
 
   function syncRestingTimeline(progress) {
@@ -655,7 +655,7 @@ function homeAnimation() {
   }
 
   function syncRippleTimeline() {
-    const dropHasLanded = homeTimeline.time() >= 108;
+    const dropHasLanded = homeTimeline.time() >= 93;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
