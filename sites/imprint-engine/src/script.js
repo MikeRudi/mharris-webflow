@@ -328,7 +328,22 @@ function homeAnimation() {
 
   gsap.set($("[home-drop-circle]"), {
     x: -75,
-    opacity: 0.18,
+  });
+
+  gsap.set($('[home-drop-circle="yellow"]'), {
+    opacity: 0.12,
+  });
+
+  gsap.set($('[home-drop-circle="white"]'), {
+    opacity: 0.08,
+  });
+
+  gsap.set($('[home-drop-circle="blue"]'), {
+    opacity: 0,
+  });
+
+  gsap.set($('[home-drop-circle="purple"]'), {
+    opacity: 1,
   });
 
   gsap.set($("[home-drop-star]"), {
