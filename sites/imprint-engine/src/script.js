@@ -156,6 +156,8 @@ function homeAnimation() {
   ];
 
   function moveGradientDots() {
+    if (homeTimeline.time() < 40) return;
+
     $("[home-gradient-piece]").each(function (index) {
       const angle = gradientAngles[index] + gradientOrbit.angle;
 
@@ -168,6 +170,10 @@ function homeAnimation() {
 
   gsap.set($("[home-gradient-orbit]"), {
     x: 0,
+    y: 0,
+  });
+
+  gsap.set($("[home-gradient-drops]"), {
     y: 0,
   });
 
@@ -587,17 +593,26 @@ function homeAnimation() {
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
-        attr: { transform: "translate(640 87) scale(0.72)" },
+        attr: { transform: "translate(640 59) scale(0.72)" },
         duration: 10,
-        ease: "power2.in",
+        ease: "power2.inOut",
       },
       "gradientMerge"
     )
     .to(
       $('[home-gradient-drop="2"]'),
       {
-        attr: { transform: "translate(640 87) scale(0.72)" },
+        attr: { transform: "translate(640 59) scale(0.72)" },
         duration: 10,
+        ease: "power2.inOut",
+      },
+      "gradientMerge"
+    )
+    .to(
+      $("[home-gradient-drops]"),
+      {
+        y: 150,
+        duration: 18,
         ease: "power2.in",
       },
       "gradientMerge"
@@ -612,15 +627,6 @@ function homeAnimation() {
       "gradientMerge+=7"
     )
     .addLabel("gradientLand", 100)
-    .to(
-      $('[home-gradient-drop="2"]'),
-      {
-        attr: { transform: "translate(640 217) scale(0.72)" },
-        duration: 8,
-        ease: "power3.in",
-      },
-      "gradientLand"
-    )
     .to(
       $("[home-gradient-line]"),
       {
@@ -701,7 +707,7 @@ function homeAnimation() {
     );
     gsap.set(
       $(
-        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drop], [home-gradient-line], [ripple-ring]"
+        "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [ripple-ring]"
       ),
       { clearProps: "transform,opacity,visibility,will-change" }
     );
