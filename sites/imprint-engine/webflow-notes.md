@@ -32,7 +32,7 @@ bottom gradient, split into a rotating ring, then become three drops that merge.
 The final drop landing triggers the preserved elliptical ripple animation. The
 ripple plays on its own timeline and is not tied to scroll scrub.
 The bottom gradient forms the hollow ring in one transition. After the drop
-lands, the white line crosses the viewport before .layout-start opens with a
+lands, the white line crosses the viewport before .home-start opens with a
 12-point polygon around an oversized square. Two points sweep in opposite
 directions like clock hands. The reveal finishes at 90%; the final 10% holds.
 ```
