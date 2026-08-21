@@ -598,118 +598,115 @@ function homeAnimation() {
   // Scrub: gradient
   homeScrubTimeline
     // Bottom gradient becomes the dot circle
-    .addLabel("gradientCircle", 10)
     .to(
       $('[home-gradient-piece="1"]'),
       {
         attr: { cx: 720, cy: -104, rx: 160, ry: 160 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     .to(
       $('[home-gradient-piece="2"]'),
       {
         attr: { cx: 1088, cy: 48, rx: 145, ry: 145 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     .to(
       $('[home-gradient-piece="3"]'),
       {
         attr: { cx: 1240, cy: 416, rx: 155, ry: 155 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     .to(
       $('[home-gradient-piece="4"]'),
       {
         attr: { cx: 1088, cy: 784, rx: 140, ry: 140 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     .to(
       $('[home-gradient-piece="5"]'),
       {
         attr: { cx: 720, cy: 936, rx: 165, ry: 165 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     .to(
       $('[home-gradient-piece="6"]'),
       {
         attr: { cx: 352, cy: 784, rx: 145, ry: 145 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     .to(
       $('[home-gradient-piece="7"]'),
       {
         attr: { cx: 200, cy: 416, rx: 155, ry: 155 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     .to(
       $('[home-gradient-piece="8"]'),
       {
         attr: { cx: 352, cy: 48, rx: 140, ry: 140 },
         opacity: 0.82,
-        duration: 30,
+        duration: 0.333,
         ease: "power2.inOut",
       },
-      "gradientCircle"
+      0.111
     )
     // Dot circle spins and shrinks
-    .addLabel("gradientOrbit", 40)
     .to(
       gradientOrbit,
       {
         angle: Math.PI,
-        duration: 8,
+        duration: 0.089,
         ease: "none",
         onUpdate: moveGradientDots,
       },
-      "gradientOrbit"
+      0.444
     )
     .to(
       $("[home-gradient-orbit]"),
       {
         scale: 0.82,
-        duration: 4,
+        duration: 0.044,
         ease: "power1.inOut",
       },
-      "gradientOrbit"
+      0.444
     )
     // Small dot circle moves up
-    .addLabel("gradientRise", 48)
     .to(
       $("[home-gradient-orbit]"),
       {
         y: -620,
-        duration: 10,
+        duration: 0.111,
         ease: "power2.inOut",
       },
-      "gradientRise"
+      0.533
     )
     .to(
       $(
@@ -717,10 +714,10 @@ function homeAnimation() {
       ),
       {
         attr: { cy: 800 },
-        duration: 10,
+        duration: 0.111,
         ease: "power2.inOut",
       },
-      "gradientRise"
+      0.533
     )
     .to(
       $(
@@ -728,10 +725,10 @@ function homeAnimation() {
       ),
       {
         opacity: 0,
-        duration: 6,
+        duration: 0.067,
         ease: "power1.in",
       },
-      "gradientRise+=2"
+      0.556
     )
     // Three drops form and merge
     .addLabel("gradientDropMerge", 53)
