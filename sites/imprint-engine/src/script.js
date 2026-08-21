@@ -799,12 +799,12 @@ function homeAnimation() {
       {
         attr: { "stroke-dashoffset": 780 },
         opacity: 1,
-        duration: 5,
+        duration: 10,
         ease: "power2.inOut",
       },
       "gradientLand"
     )
-    .addLabel("lineMeetsDrop", 85)
+    .addLabel("lineMeetsDrop", 90)
     .to(
       $("[home-drop-purple-base], [home-drop-colors]"),
       {
@@ -921,7 +921,7 @@ function homeAnimation() {
       },
       "lineMeetsDrop+=15"
     )
-    .addLabel("endDropSettle", 108)
+    .addLabel("endDropSettle", 113)
     .to(
       $homeEndContent,
       {
@@ -973,7 +973,7 @@ function homeAnimation() {
         duration: 2.6,
         ease: "none",
       },
-      127.4
+      132.4
     );
 
   function syncRestingTimeline(progress) {
@@ -986,7 +986,7 @@ function homeAnimation() {
 
   function syncRippleTimeline() {
     const dropHasLanded = homeTimeline.time() >= 80;
-    const endDropHasSettled = homeTimeline.time() >= 127.4;
+    const endDropHasSettled = homeTimeline.time() >= 132.4;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
@@ -1094,7 +1094,7 @@ function homeAnimation() {
   const homeScrollTrigger = ScrollTrigger.create({
     trigger: $(".layout-start")[0],
     start: "top top",
-    end: "bottom bottom",
+    end: "bottom bottom+=12",
     invalidateOnRefresh: true,
     onUpdate: (self) => {
       if (homeFinishState !== "scrub") return;
