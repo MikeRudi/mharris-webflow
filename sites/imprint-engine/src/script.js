@@ -937,7 +937,7 @@ function homeAnimation() {
 
   function syncRippleTimeline() {
     const dropHasLanded = homeScrubTimeline.progress() >= 0.811;
-    const endDropHasSettled = homeFinishTimeline.progress() >= 0.848;
+    const endDropHasSettled = homeFinishTimeline.progress() >= 0.811;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
