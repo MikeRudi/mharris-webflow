@@ -280,8 +280,6 @@ function homeAnimation() {
   }
 
   function moveGradientDots() {
-    if (homeTimeline.time() < 40) return;
-
     $("[home-gradient-piece]").each(function (index) {
       const angle = gradientAngles[index] + gradientOrbit.angle;
 
