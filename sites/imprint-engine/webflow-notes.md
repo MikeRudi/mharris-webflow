@@ -41,7 +41,7 @@ ripple plays on its own timeline and is not tied to scroll scrub.
 The bottom gradient forms the hollow ring in one transition. After the drop
 lands, the white line reaches the drop before .home-start opens with a
 12-point polygon around an oversized square. Two points sweep in opposite
-directions like clock hands. The main timeline reserves 117.6-120 as its final
+directions like clock hands. The main timeline reserves 127.4-130 as its final
 2% spacer; the star continues its approved rotation through the timeline end.
 The line starts at timeline time 80, stops at the drop at 85, and the clip
 starts from the `lineMeetsDrop` label at 85.
@@ -60,29 +60,29 @@ drop groups.
 The desktop page-load animation stops Lenis before its entrance stagger starts
 and restarts Lenis from the load timeline's `onComplete` callback.
 
-.layout-end
-  .home-end-brackets
-    .home-end-brackets-svg
-      .home-end-bracket-shape.home-end-bracket-left
-      .home-end-bracket-shape.home-end-bracket-right
-      .home-end-captured-drop
-  .home-end-drop-stage
-    .home-end-target-svg
-      .home-end-target-path
-    .home-end-ripples
-      .home-end-ripple x3
+.layout-start
+  .home-start
+  .layout-end
+    .home-end-brackets
+      .home-end-brackets-svg
+        .home-end-bracket-shape.home-end-bracket-left
+        .home-end-bracket-shape.home-end-bracket-right
+      .home-end-drop-stage
+        .home-end-target-svg
+          .home-end-target-path
+        .home-end-ripples
+          .home-end-ripple x3
 
-`homeEndAnimation()` is separate from `homeAnimation()`. The outlined drop is
-fixed at the final gradient-drop centre beneath `.home-start`. Its timeline
-scrubs from `.layout-end` `top bottom` to `bottom bottom`. The layout-end content
-is pre-positioned so the brackets, heading, copy, and button are already visible
-when the home-start clip finishes. The content then closes only a small gap over
-the full scrub. During the approach, the outlined drop moves down `24px` while
-scaling down and the brackets open. At landing, the fixed drop switches
-instantly to `.home-end-captured-drop`, which then scrolls with the bracket, and
-the approved non-scrub ripple plays. These inserted elements use their classes
-as JavaScript hooks because Webflow did not retain their valueless custom
-attributes.
+`.layout-end` is a sticky `100vh` layer beneath `.home-start` inside
+`.layout-start`. Its bracket group is aligned with the final gradient-drop
+centre, and the single outlined drop is positioned in the centre of that group.
+`homeAnimation()` controls everything with the existing `.layout-start`
+ScrollTrigger. After the clip finishes, `endDropSettle` runs from `108-127.4`:
+the outlined drop scales down and the open brackets close around it. The larger,
+stronger second ripple then plays on its own non-scrub timeline. There is no separate
+`homeEndAnimation()`, duplicate captured drop, content translation, or drop
+swap. When the main sticky timeline finishes, `.layout-end`, the brackets, and
+the outlined drop leave together through normal page scroll.
 ```
 
 ## Libraries
