@@ -846,16 +846,16 @@ function homeAnimation() {
       {
         attr: { stdDeviation: 16 },
         duration: 4,
-        ease: "power1.out",
+        ease: "power1.in",
       },
-      "lineMeetsDrop"
+      "lineMeetsDrop-=3"
     )
     .to(
       $("[home-drop-circle]"),
       {
         x: 0,
         duration: 7,
-        ease: "power2.inOut",
+        ease: "power1.in",
         stagger: 0.25,
       },
       "lineMeetsDrop"
