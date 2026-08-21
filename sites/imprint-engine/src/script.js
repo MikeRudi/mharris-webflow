@@ -881,7 +881,7 @@ function homeAnimation() {
         duration: 0.388,
         ease: "power1.in",
       },
-      0.46
+      0.36
     )
     .to(
       $(".home-end-target-svg"),
