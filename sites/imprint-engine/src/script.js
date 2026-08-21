@@ -841,62 +841,28 @@ function homeAnimation() {
       },
       0.26
     )
-    // Clip opens
-    // Closed: 0%
+    // Clip rotates open: 0%-36%
     .set(
       $(".home-start"),
       {
-        clipPath: () => homeClipPath("closed"),
+        clipPath: () => homeClipPath(0),
       },
       0
     )
-    // Closed to slit: 0%-4%, power2.inOut
     .to(
-      $(".home-start"),
+      homeClip,
       {
-        clipPath: () => homeClipPath("slit"),
-        duration: 0.04,
-        ease: "linear",
+        progress: 1,
+        duration: 0.36,
+        ease: "none",
+        onUpdate: () => {
+          $(".home-start").css(
+            "clip-path",
+            homeClipPath(homeClip.progress)
+          );
+        },
       },
       0
-    )
-    // Slit to open: 4%-10%, power2.inOut
-    .to(
-      $(".home-start"),
-      {
-        clipPath: () => homeClipPath("open"),
-        duration: 0.06,
-        ease: "linear",
-      },
-      0.04
-    )
-    // Switch to sweep: 10%
-    .set(
-      $(".home-start"),
-      {
-        clipPath: () => homeClipPath("sweep"),
-      },
-      0.1
-    )
-    // Sweep to left: 10%-30%, power1.inOut
-    .to(
-      $(".home-start"),
-      {
-        clipPath: () => homeClipPath("left"),
-        duration: 0.2,
-        ease: "linear",
-      },
-      0.1
-    )
-    // Left to complete: 30%-46%, power1.inOut
-    .to(
-      $(".home-start"),
-      {
-        clipPath: () => homeClipPath("complete"),
-        duration: 0.16,
-        ease: "linear",
-      },
-      0.3
     )
     // Final drop settles into the brackets
     .to(
@@ -1025,6 +991,7 @@ function homeAnimation() {
     if (homeFinishState !== "scrub") return;
 
     homeFinishState = "playing";
+    homeClip.progress = 0;
     syncRestingTimeline(1);
     lockHomeFinishScroll();
 
@@ -1051,6 +1018,8 @@ function homeAnimation() {
     ) {
       homeFinishTimeline.pause(0);
       homeFinishTimeline.timeScale(1);
+      homeClip.progress = 0;
+      $(".home-start").css("clip-path", "none");
       homeFinishState = "scrub";
       syncRippleTimeline();
       releaseHomeFinishScroll();
