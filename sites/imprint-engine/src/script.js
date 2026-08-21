@@ -423,14 +423,13 @@ function homeAnimation() {
   const homeEndRippleTimeline = rippleAnimation($(".home-end-ripple"), {
     endScale: 1.25,
     startOpacity: 0.62,
-    duration: 1.9,
-    stagger: 0.18,
+    duration: 0.95,
+    stagger: 0.09,
   });
   let rippleHasPlayed = false;
   let homeEndRippleHasPlayed = false;
   let homeEndRippleHasFinished = true;
-  let homeFinishHasStarted = false;
-  let homeFinishHasCompleted = false;
+  let homeFinishState = "scrub";
   let homeFinishScrollLocked = false;
 
   const restingTimeline = gsap.timeline();
@@ -1017,8 +1016,6 @@ function homeAnimation() {
   }
 
   function releaseHomeFinishScroll() {
-    if (!homeFinishHasCompleted || !homeEndRippleHasFinished) return;
-
     if (homeFinishScrollLocked && window.lenis) {
       window.lenis.start();
     }
@@ -1026,33 +1023,71 @@ function homeAnimation() {
     homeFinishScrollLocked = false;
   }
 
-  function playHomeFinish() {
-    if (homeFinishHasStarted) return;
-
-    homeFinishHasStarted = true;
-    homeFinishHasCompleted = false;
-    syncRestingTimeline(1);
-
-    if (window.lenis) {
+  function lockHomeFinishScroll() {
+    if (!homeFinishScrollLocked && window.lenis) {
       window.lenis.stop();
       homeFinishScrollLocked = true;
     }
-
-    homeTimeline.pause();
-    homeTimeline.time(homeTimeline.labels.lineMeetsDrop);
-    homeTimeline.timeScale(10).play();
   }
 
-  homeTimeline.eventCallback("onUpdate", syncRippleTimeline);
-  homeTimeline.eventCallback("onComplete", () => {
-    homeFinishHasCompleted = true;
+  function completeHomeFinish() {
+    if (
+      homeFinishState !== "playing" ||
+      homeTimeline.progress() < 1 ||
+      !homeEndRippleHasFinished
+    ) {
+      return;
+    }
+
+    homeFinishState = "complete";
     releaseHomeFinishScroll();
+  }
+
+  function playHomeFinish() {
+    if (homeFinishState !== "scrub") return;
+
+    homeFinishState = "playing";
+    syncRestingTimeline(1);
+    lockHomeFinishScroll();
+
+    homeTimeline.pause();
+    homeTimeline.time(homeTimeline.labels.lineMeetsDrop, true);
+    homeTimeline.timeScale(20).play();
+  }
+
+  function reverseHomeFinish() {
+    if (homeFinishState !== "complete") return;
+
+    homeFinishState = "reversing";
+    syncRestingTimeline(1);
+    lockHomeFinishScroll();
+    homeTimeline.timeScale(20).reverse();
+  }
+
+  homeTimeline.eventCallback("onUpdate", () => {
+    syncRippleTimeline();
+
+    if (
+      homeFinishState === "reversing" &&
+      homeTimeline.time() <= homeTimeline.labels.lineMeetsDrop
+    ) {
+      homeTimeline.pause();
+      homeTimeline.time(homeTimeline.labels.lineMeetsDrop, true);
+      homeTimeline.timeScale(1);
+      homeFinishState = "scrub";
+      syncRippleTimeline();
+      releaseHomeFinishScroll();
+    }
+  });
+
+  homeTimeline.eventCallback("onComplete", () => {
+    completeHomeFinish();
   });
 
   if (homeEndRippleTimeline) {
     homeEndRippleTimeline.eventCallback("onComplete", () => {
       homeEndRippleHasFinished = true;
-      releaseHomeFinishScroll();
+      completeHomeFinish();
     });
   }
 
@@ -1062,7 +1097,7 @@ function homeAnimation() {
     end: "bottom bottom",
     invalidateOnRefresh: true,
     onUpdate: (self) => {
-      if (homeFinishHasStarted) return;
+      if (homeFinishState !== "scrub") return;
 
       homeTimeline.time(
         self.progress * homeTimeline.labels.lineMeetsDrop
@@ -1077,8 +1112,11 @@ function homeAnimation() {
     onLeave: () => {
       playHomeFinish();
     },
+    onEnterBack: () => {
+      reverseHomeFinish();
+    },
     onLeaveBack: () => {
-      if (homeFinishHasStarted) return;
+      if (homeFinishState !== "scrub") return;
 
       homeTimeline.time(0);
       syncRestingTimeline(0);
