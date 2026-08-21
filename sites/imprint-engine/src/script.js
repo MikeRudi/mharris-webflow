@@ -459,6 +459,7 @@ function homeAnimation() {
     },
   });
 
+  // Page load
   homeLoadTimeline
     .to(
       $("[home-start-up]"),
@@ -489,7 +490,9 @@ function homeAnimation() {
 
   const homeTimeline = gsap.timeline({ paused: true });
 
+  // Scrub: content scenes
   homeTimeline
+    // First scene leaves
     .addLabel("startExit", 0)
     .to(
       $("[home-start-up]"),
@@ -517,6 +520,7 @@ function homeAnimation() {
       },
       "startExit"
     )
+    // Second scene enters
     .addLabel("secondEnter", 30)
     .to(
       $("[home-second-up]"),
@@ -536,6 +540,7 @@ function homeAnimation() {
       },
       "secondEnter"
     )
+    // Second scene holds
     .addLabel("secondResting", 37.5)
     .to(
       $("[home-second-up]"),
@@ -546,6 +551,7 @@ function homeAnimation() {
       },
       "secondResting"
     )
+    // Second scene leaves
     .addLabel("secondExit", 52.5)
     .to(
       $("[home-second-up]"),
@@ -565,6 +571,7 @@ function homeAnimation() {
       },
       "secondExit"
     )
+    // Third scene enters
     .addLabel("thirdEnter", 60)
     .to(
       $("[home-third-up]"),
@@ -584,6 +591,7 @@ function homeAnimation() {
       },
       "thirdEnter"
     )
+    // Third scene holds
     .addLabel("thirdResting", 67.5)
     .to(
       $("[home-third-up]"),
@@ -604,7 +612,9 @@ function homeAnimation() {
     )
     .addLabel("complete", 100);
 
+  // Scrub: gradient
   homeTimeline
+    // Bottom gradient becomes the dot circle
     .addLabel("gradientCircle", 10)
     .to(
       $('[home-gradient-piece="1"]'),
@@ -686,6 +696,7 @@ function homeAnimation() {
       },
       "gradientCircle"
     )
+    // Dot circle spins and shrinks
     .addLabel("gradientOrbit", 40)
     .to(
       gradientOrbit,
@@ -706,6 +717,7 @@ function homeAnimation() {
       },
       "gradientOrbit"
     )
+    // Small dot circle moves up
     .addLabel("gradientRise", 48)
     .to(
       $("[home-gradient-orbit]"),
@@ -738,6 +750,7 @@ function homeAnimation() {
       },
       "gradientRise+=2"
     )
+    // Three drops form and merge
     .addLabel("gradientDropMerge", 53)
     .to(
       $(
@@ -804,6 +817,7 @@ function homeAnimation() {
       },
       "gradientDropMerge+=3"
     )
+    // Drop lands, ripple plays and line draws
     .addLabel("gradientLand", 73)
     .to(
       $("[home-gradient-line]"),
@@ -815,7 +829,9 @@ function homeAnimation() {
       },
       "gradientLand"
     )
+    // Scrub ends here. Auto play starts.
     .addLabel("lineMeetsDrop", 90)
+    // Drop fills and star turns
     .to(
       $("[home-drop-purple-base], [home-drop-colors]"),
       {
@@ -882,6 +898,7 @@ function homeAnimation() {
       },
       "lineMeetsDrop+=13"
     )
+    // Clip opens
     .set(
       $(".home-start"),
       {
@@ -932,7 +949,9 @@ function homeAnimation() {
       },
       "lineMeetsDrop+=15"
     )
+    // Final drop settles into the brackets
     .addLabel("endDropSettle", 113)
+    // Short pause before scrolling unlocks
     .to(
       $homeEndContent,
       {
