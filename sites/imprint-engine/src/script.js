@@ -90,12 +90,10 @@ function initSite() {
     // gitTestDesktop();
     lineHover();
     const homeAnimationCleanup = homeAnimation();
-    const homeEndAnimationCleanup = homeEndAnimation();
     const footerEnginePixelsCleanup = footerEnginePixels();
 
     return () => {
       if (homeAnimationCleanup) homeAnimationCleanup();
-      if (homeEndAnimationCleanup) homeEndAnimationCleanup();
       if (footerEnginePixelsCleanup) footerEnginePixelsCleanup();
     };
   });
@@ -382,8 +380,30 @@ function homeAnimation() {
     transformOrigin: "center",
   });
 
+  gsap.set($(".home-end-target-svg"), {
+    scale: 1,
+    opacity: 1,
+    transformOrigin: "center center",
+  });
+
+  gsap.set($(".home-end-bracket-left"), {
+    x: -18,
+  });
+
+  gsap.set($(".home-end-bracket-right"), {
+    x: 18,
+  });
+
+  gsap.set($(".home-end-ripple"), {
+    scale: 0.08,
+    autoAlpha: 0,
+    transformOrigin: "center",
+  });
+
   const homeRippleTimeline = rippleAnimation();
+  const homeEndRippleTimeline = rippleAnimation($(".home-end-ripple"));
   let rippleHasPlayed = false;
+  let homeEndRippleHasPlayed = false;
 
   const restingTimeline = gsap.timeline();
 
@@ -874,6 +894,34 @@ function homeAnimation() {
       },
       "lineMeetsDrop+=15"
     )
+    .addLabel("endDropSettle", 96.5)
+    .to(
+      $(".home-end-target-svg"),
+      {
+        scale: 0.5,
+        duration: 11.5,
+        ease: "power2.inOut",
+      },
+      "endDropSettle"
+    )
+    .to(
+      $(".home-end-bracket-left"),
+      {
+        x: 0,
+        duration: 11.5,
+        ease: "power2.inOut",
+      },
+      "endDropSettle"
+    )
+    .to(
+      $(".home-end-bracket-right"),
+      {
+        x: 0,
+        duration: 11.5,
+        ease: "power2.inOut",
+      },
+      "endDropSettle"
+    )
     .to(
       {},
       {
@@ -893,6 +941,7 @@ function homeAnimation() {
 
   function syncRippleTimeline() {
     const dropHasLanded = homeTimeline.time() >= 80;
+    const endDropHasSettled = homeTimeline.time() >= 108;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
@@ -903,6 +952,17 @@ function homeAnimation() {
       if (homeRippleTimeline) homeRippleTimeline.pause(0);
       gsap.set($("[ripple-ring]"), { scale: 0.08, autoAlpha: 0 });
       rippleHasPlayed = false;
+    }
+
+    if (endDropHasSettled && !homeEndRippleHasPlayed) {
+      if (homeEndRippleTimeline) homeEndRippleTimeline.restart();
+      homeEndRippleHasPlayed = true;
+    }
+
+    if (!endDropHasSettled && homeEndRippleHasPlayed) {
+      if (homeEndRippleTimeline) homeEndRippleTimeline.pause(0);
+      gsap.set($(".home-end-ripple"), { scale: 0.08, autoAlpha: 0 });
+      homeEndRippleHasPlayed = false;
     }
   }
 
@@ -940,6 +1000,7 @@ function homeAnimation() {
     homeLoadTimeline.kill();
     homeTimeline.kill();
     if (homeRippleTimeline) homeRippleTimeline.kill();
+    if (homeEndRippleTimeline) homeEndRippleTimeline.kill();
     restingTimeline.kill();
     gsap.set(
       $(
@@ -956,236 +1017,18 @@ function homeAnimation() {
     gsap.set($(".home-start"), {
       clearProps: "clip-path,will-change",
     });
-  };
-}
-
-function homeEndAnimation() {
-  if (
-    !$(".layout-end").length ||
-    !$(".home-end-brackets").length ||
-    !$(".home-end-drop-stage").length ||
-    !window.gsap ||
-    !window.ScrollTrigger
-  ) {
-    return null;
-  }
-
-  gsap.registerPlugin(ScrollTrigger);
-
-  function positionHomeEndDrop() {
-    const homeStart = $(".home-start")[0];
-    if (!homeStart) return { x: window.innerWidth / 2, y: window.innerHeight * 0.384 };
-
-    const homeStartStyle = window.getComputedStyle(homeStart);
-    const homeStartRect = homeStart.getBoundingClientRect();
-    const svgScale = Math.max(
-      homeStart.offsetWidth / 1440,
-      homeStart.offsetHeight / 832
-    );
-    const svgLeft = (homeStart.offsetWidth - 1440 * svgScale) / 2;
-    const svgTop = (homeStart.offsetHeight - 832 * svgScale) / 2;
-    const stickyTop = parseFloat(homeStartStyle.top) || 0;
-    const dropPosition = {
-      x: homeStartRect.left + svgLeft + 720 * svgScale,
-      y: stickyTop + svgTop + 319.52 * svgScale,
-    };
-
-    gsap.set($(".home-end-drop-stage"), {
-      left: dropPosition.x,
-      top: dropPosition.y,
-    });
-
-    return dropPosition;
-  }
-
-  const homeEndDropPosition = positionHomeEndDrop();
-  const $layoutEndContent = $(".layout-end")
-    .children()
-    .not(".home-end-drop-stage");
-  const layoutEndRect = $(".layout-end")[0].getBoundingClientRect();
-  const bracketsRect = $(".home-end-brackets")[0].getBoundingClientRect();
-  const bracketsCenter =
-    bracketsRect.top - layoutEndRect.top + bracketsRect.height / 2;
-  const dropTravelY = 24;
-  const bracketStartGap = 500;
-  const contentStartY =
-    homeEndDropPosition.y +
-    dropTravelY +
-    bracketStartGap -
-    (window.innerHeight + bracketsCenter);
-  const contentEndY =
-    homeEndDropPosition.y +
-    dropTravelY -
-    (window.innerHeight -
-      $(".layout-end")[0].offsetHeight +
-      bracketsCenter);
-  const dropLandingProgress = 1;
-  const dropLandingTime = 100;
-  const dropApproachTime = 60;
-
-  gsap.set($layoutEndContent, {
-    y: contentStartY,
-    willChange: "transform",
-  });
-
-  gsap.set($(".home-end-drop-stage"), {
-    y: 0,
-    autoAlpha: 1,
-  });
-
-  gsap.set($(".home-end-target-svg"), {
-    scale: 1,
-    opacity: 1,
-    transformOrigin: "center center",
-  });
-
-  gsap.set($(".home-end-captured-drop"), {
-    attr: { transform: "translate(46.75 20.5) scale(0.22)" },
-    opacity: 0,
-    transformOrigin: "0 0",
-  });
-
-  gsap.set($(".home-end-bracket-shape"), {
-    x: 0,
-  });
-
-  gsap.set($(".home-end-ripple"), {
-    scale: 0.08,
-    autoAlpha: 0,
-    transformOrigin: "center",
-  });
-
-  const homeEndRippleTimeline = gsap.timeline({ paused: true });
-
-  homeEndRippleTimeline.fromTo(
-    $(".home-end-ripple"),
-    {
-      scale: 0.08,
-      autoAlpha: 0.42,
-    },
-    {
-      scale: 1,
-      autoAlpha: 0,
-      duration: 1.6,
-      stagger: 0.16,
-      ease: "power2.out",
-      immediateRender: false,
-    }
-  );
-
-  let homeEndRippleHasPlayed = false;
-
-  function syncHomeEndRipple(progress) {
-    if (progress >= dropLandingProgress && !homeEndRippleHasPlayed) {
-      homeEndRippleTimeline.restart();
-      homeEndRippleHasPlayed = true;
-    }
-
-    if (progress < dropLandingProgress && homeEndRippleHasPlayed) {
-      homeEndRippleTimeline.pause(0);
-      gsap.set($(".home-end-ripple"), {
-        scale: 0.08,
-        autoAlpha: 0,
-      });
-      homeEndRippleHasPlayed = false;
-    }
-  }
-
-  const homeEndTimeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: $(".layout-end")[0],
-      start: "top bottom",
-      end: "bottom bottom",
-      scrub: true,
-      invalidateOnRefresh: true,
-      onRefresh: positionHomeEndDrop,
-      onUpdate: (self) => syncHomeEndRipple(self.progress),
-    },
-  });
-
-  homeEndTimeline
-    .to(
-      $layoutEndContent,
-      {
-        y: contentEndY,
-        duration: 100,
-        ease: "none",
-      },
-      0
-    )
-    .addLabel("dropApproach", dropApproachTime)
-    .to(
-      $(".home-end-drop-stage"),
-      {
-        y: dropTravelY,
-        duration: 40,
-        ease: "power2.inOut",
-      },
-      "dropApproach"
-    )
-    .to(
-      $(".home-end-target-svg"),
-      {
-        scale: 0.5,
-        duration: 40,
-        ease: "power2.inOut",
-      },
-      "dropApproach"
-    )
-    .to(
-      $(".home-end-bracket-left"),
-      {
-        x: -8,
-        duration: 40,
-        ease: "power2.inOut",
-      },
-      "dropApproach"
-    )
-    .to(
-      $(".home-end-bracket-right"),
-      {
-        x: 8,
-        duration: 40,
-        ease: "power2.inOut",
-      },
-      "dropApproach"
-    )
-    .addLabel("dropLands", dropLandingTime)
-    .set($(".home-end-target-svg"), { opacity: 0 }, "dropLands")
-    .set($(".home-end-captured-drop"), { opacity: 1 }, "dropLands");
-
-  const homeEndStageTrigger = ScrollTrigger.create({
-    trigger: $(".layout-end")[0],
-    start: "top bottom",
-    end: "bottom top",
-    onEnter: () => gsap.set($(".home-end-drop-stage"), { autoAlpha: 1 }),
-    onEnterBack: () =>
-      gsap.set($(".home-end-drop-stage"), { autoAlpha: 1 }),
-    onLeave: () => gsap.set($(".home-end-drop-stage"), { autoAlpha: 0 }),
-    invalidateOnRefresh: true,
-  });
-
-  return () => {
-    homeEndTimeline.scrollTrigger.kill();
-    homeEndStageTrigger.kill();
-    homeEndTimeline.kill();
-    homeEndRippleTimeline.kill();
-    gsap.set($layoutEndContent, {
-      clearProps: "transform,will-change",
-    });
     gsap.set(
       $(
-        ".home-end-drop-stage, .home-end-target-svg, .home-end-captured-drop, .home-end-brackets, .home-end-bracket-shape, .home-end-ripple"
+        ".home-end-target-svg, .home-end-bracket-left, .home-end-bracket-right, .home-end-ripple"
       ),
       {
-        clearProps: "left,top,transform,opacity,visibility,will-change",
+        clearProps: "transform,opacity,visibility",
       }
     );
   };
 }
 
-function rippleAnimation() {
-  const $rings = $("[ripple-ring]");
+function rippleAnimation($rings = $("[ripple-ring]")) {
   if (!$rings.length || !window.gsap) return null;
 
   gsap.set($rings, { scale: 0.08, autoAlpha: 0 });
