@@ -428,6 +428,10 @@ function homeAnimation() {
   });
   let rippleHasPlayed = false;
   let homeEndRippleHasPlayed = false;
+  let homeEndRippleHasFinished = true;
+  let homeFinishHasStarted = false;
+  let homeFinishHasCompleted = false;
+  let homeFinishScrollLocked = false;
 
   const restingTimeline = gsap.timeline();
 
@@ -997,7 +1001,10 @@ function homeAnimation() {
     }
 
     if (endDropHasSettled && !homeEndRippleHasPlayed) {
-      if (homeEndRippleTimeline) homeEndRippleTimeline.restart();
+      if (homeEndRippleTimeline) {
+        homeEndRippleHasFinished = false;
+        homeEndRippleTimeline.restart();
+      }
       homeEndRippleHasPlayed = true;
     }
 
@@ -1005,37 +1012,91 @@ function homeAnimation() {
       if (homeEndRippleTimeline) homeEndRippleTimeline.pause(0);
       gsap.set($(".home-end-ripple"), { scale: 0.08, autoAlpha: 0 });
       homeEndRippleHasPlayed = false;
+      homeEndRippleHasFinished = true;
     }
+  }
+
+  function releaseHomeFinishScroll() {
+    if (!homeFinishHasCompleted || !homeEndRippleHasFinished) return;
+
+    if (homeFinishScrollLocked && window.lenis) {
+      window.lenis.start();
+    }
+
+    homeFinishScrollLocked = false;
+  }
+
+  function playHomeFinish() {
+    if (homeFinishHasStarted) return;
+
+    homeFinishHasStarted = true;
+    homeFinishHasCompleted = false;
+    syncRestingTimeline(1);
+
+    if (window.lenis) {
+      window.lenis.stop();
+      homeFinishScrollLocked = true;
+    }
+
+    homeTimeline.pause();
+    homeTimeline.time(homeTimeline.labels.lineMeetsDrop);
+    homeTimeline.timeScale(10).play();
+  }
+
+  homeTimeline.eventCallback("onUpdate", syncRippleTimeline);
+  homeTimeline.eventCallback("onComplete", () => {
+    homeFinishHasCompleted = true;
+    releaseHomeFinishScroll();
+  });
+
+  if (homeEndRippleTimeline) {
+    homeEndRippleTimeline.eventCallback("onComplete", () => {
+      homeEndRippleHasFinished = true;
+      releaseHomeFinishScroll();
+    });
   }
 
   const homeScrollTrigger = ScrollTrigger.create({
     trigger: $(".layout-start")[0],
-    animation: homeTimeline,
     start: "top top",
     end: "bottom bottom",
-    scrub: true,
     invalidateOnRefresh: true,
     onUpdate: (self) => {
+      if (homeFinishHasStarted) return;
+
+      homeTimeline.time(
+        self.progress * homeTimeline.labels.lineMeetsDrop
+      );
       syncRestingTimeline(self.progress);
       syncRippleTimeline();
+
+      if (self.progress >= 1) {
+        playHomeFinish();
+      }
     },
     onLeave: () => {
-      syncRestingTimeline(1);
-      syncRippleTimeline();
+      playHomeFinish();
     },
     onLeaveBack: () => {
+      if (homeFinishHasStarted) return;
+
+      homeTimeline.time(0);
       syncRestingTimeline(0);
       syncRippleTimeline();
     },
   });
 
+  homeTimeline.time(
+    homeScrollTrigger.progress * homeTimeline.labels.lineMeetsDrop
+  );
   syncRestingTimeline(homeScrollTrigger.progress);
   syncRippleTimeline();
 
   return () => {
-    if (homeLoadScrollLocked && window.lenis) {
+    if ((homeLoadScrollLocked || homeFinishScrollLocked) && window.lenis) {
       window.lenis.start();
       homeLoadScrollLocked = false;
+      homeFinishScrollLocked = false;
     }
 
     homeScrollTrigger.kill();
