@@ -642,7 +642,7 @@ function homeAnimation() {
     .to(
       gradientOrbit,
       {
-        angle: Math.PI,
+        angle: Math.PI / 2,
         duration: 0.089,
         ease: "none",
         onUpdate: moveGradientDots,
