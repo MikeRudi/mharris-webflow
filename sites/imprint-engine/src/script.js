@@ -818,67 +818,67 @@ function homeAnimation() {
       $("[home-drop-purple-base], [home-drop-colors]"),
       {
         opacity: 1,
-        duration: 4,
+        duration: 0.08,
         ease: "power1.in",
       },
-      "lineMeetsDrop"
+      0
     )
     .to(
       $("[home-final-drop-blur]"),
       {
         attr: { stdDeviation: 16 },
-        duration: 4,
+        duration: 0.08,
         ease: "power1.in",
       },
-      "lineMeetsDrop+=2"
+      0.04
     )
     .to(
       $("[home-drop-circle]"),
       {
         x: 0,
-        duration: 7,
+        duration: 0.14,
         ease: "power1.in",
-        stagger: 0.25,
+        stagger: 0.005,
       },
-      "lineMeetsDrop+=4"
+      0.08
     )
     .to(
       $("[home-drop-circle]"),
       {
         opacity: 1,
-        duration: 4,
+        duration: 0.08,
         ease: "power1.inOut",
-        stagger: 0.25,
+        stagger: 0.005,
       },
-      "lineMeetsDrop+=4"
+      0.08
     )
     .to(
       $("[home-drop-star]"),
       {
         opacity: 1,
         scale: 2.5,
-        duration: 4,
+        duration: 0.08,
         ease: "power2.out",
       },
-      "lineMeetsDrop+=5"
+      0.1
     )
     .to(
       $("[home-drop-star]"),
       {
         rotation: 360,
-        duration: 44,
+        duration: 0.88,
         ease: "none",
       },
-      "lineMeetsDrop+=6"
+      0.12
     )
     .to(
       $("[home-drop-star]"),
       {
         scale: 2.15,
-        duration: 3,
+        duration: 0.06,
         ease: "power2.inOut",
       },
-      "lineMeetsDrop+=13"
+      0.26
     )
     // Clip opens
     .set(
@@ -886,106 +886,105 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("closed"),
       },
-      "lineMeetsDrop"
+      0
     )
     .to(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("slit"),
-        duration: 2,
+        duration: 0.04,
         ease: "power2.inOut",
       },
-      "lineMeetsDrop"
+      0
     )
     .to(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("open"),
-        duration: 3,
+        duration: 0.06,
         ease: "power2.inOut",
       },
-      "lineMeetsDrop+=2"
+      0.04
     )
     .set(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("sweep"),
       },
-      "lineMeetsDrop+=5"
+      0.1
     )
     .to(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("left"),
-        duration: 10,
+        duration: 0.2,
         ease: "power1.inOut",
       },
-      "lineMeetsDrop+=5"
+      0.1
     )
     .to(
       $(".home-start"),
       {
         clipPath: () => homeClipPath("complete"),
-        duration: 8,
+        duration: 0.16,
         ease: "power1.inOut",
       },
-      "lineMeetsDrop+=15"
+      0.3
     )
     // Final drop settles into the brackets
-    .addLabel("endDropSettle", 113)
     .to(
       $homeEndContent,
       {
         opacity: 1,
-        duration: 8,
+        duration: 0.16,
         ease: "power1.inOut",
       },
-      "endDropSettle"
+      0.46
     )
     .to(
       $(".home-end-drop-stage"),
       {
         y: 0,
-        duration: 19.4,
+        duration: 0.388,
         ease: "power2.inOut",
       },
-      "endDropSettle"
+      0.46
     )
     .to(
       $(".home-end-target-svg"),
       {
         scale: 0.5,
-        duration: 19.4,
+        duration: 0.388,
         ease: "power2.inOut",
       },
-      "endDropSettle"
+      0.46
     )
     .to(
       $(".home-end-bracket-left"),
       {
         x: 0,
-        duration: 19.4,
+        duration: 0.388,
         ease: "power2.inOut",
       },
-      "endDropSettle"
+      0.46
     )
     .to(
       $(".home-end-bracket-right"),
       {
         x: 0,
-        duration: 19.4,
+        duration: 0.388,
         ease: "power2.inOut",
       },
-      "endDropSettle"
+      0.46
     )
     // Short pause before scrolling unlocks
     .to(
       {},
       {
-        duration: 2.6,
+        duration: 0.052,
         ease: "none",
       },
-      132.4
+      0.848
     );
 
   function syncRestingTimeline(progress) {
