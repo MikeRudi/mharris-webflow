@@ -118,6 +118,11 @@ function homeAnimation() {
 
   gsap.registerPlugin(ScrollTrigger);
 
+  const $homeEndContent = $(".layout-end")
+    .children()
+    .not(".home-end-brackets")
+    .add($(".layout-end .home-end-brackets-svg"));
+
   if ("scrollRestoration" in window.history) {
     window.history.scrollRestoration = "manual";
   }
@@ -387,16 +392,21 @@ function homeAnimation() {
   });
 
   gsap.set($(".home-end-drop-stage"), {
-    y: "-5rem",
+    y: "-8rem",
     willChange: "transform",
   });
 
   gsap.set($(".home-end-bracket-left"), {
-    x: -36,
+    x: -54,
   });
 
   gsap.set($(".home-end-bracket-right"), {
-    x: 36,
+    x: 54,
+  });
+
+  gsap.set($homeEndContent, {
+    opacity: 0,
+    willChange: "opacity",
   });
 
   gsap.set($(".home-end-ripple"), {
@@ -906,6 +916,15 @@ function homeAnimation() {
     )
     .addLabel("endDropSettle", 108)
     .to(
+      $homeEndContent,
+      {
+        opacity: 1,
+        duration: 0.3,
+        ease: "power1.in",
+      },
+      "endDropSettle"
+    )
+    .to(
       $(".home-end-drop-stage"),
       {
         y: 0,
@@ -1035,6 +1054,9 @@ function homeAnimation() {
     );
     gsap.set($(".home-start"), {
       clearProps: "clip-path,will-change",
+    });
+    gsap.set($homeEndContent, {
+      clearProps: "opacity,will-change",
     });
     gsap.set(
       $(
