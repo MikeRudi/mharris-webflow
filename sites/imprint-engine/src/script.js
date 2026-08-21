@@ -951,7 +951,6 @@ function homeAnimation() {
     )
     // Final drop settles into the brackets
     .addLabel("endDropSettle", 113)
-    // Short pause before scrolling unlocks
     .to(
       $homeEndContent,
       {
@@ -997,6 +996,7 @@ function homeAnimation() {
       },
       "endDropSettle"
     )
+    // Short pause before scrolling unlocks
     .to(
       {},
       {
