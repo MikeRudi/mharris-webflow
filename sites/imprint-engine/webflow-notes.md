@@ -34,9 +34,10 @@
 Gradient SVG and CSS live in .home-gradient-embed.
 Gradient scroll animation lives in homeAnimation(). The eight SVG pieces form the
 bottom gradient, split into a rotating ring, then form and merge into one drop in
-the same transition. The orbit runs from `40-45`; its group scales from `1` to
-`0.82` during the first half of the spin, then returns to `1` while rising.
-`gradientDropMerge` runs from `50-70`; the side drops fade as all three converge
+the same transition. The orbit runs from `40-48` and rotates by half a turn. Its
+group scales from `1` to `0.82` during the first half of the spin, stays at that
+size for the remaining spin, and moves upward without scaling back up.
+`gradientDropMerge` runs from `53-73`; the side drops fade as all three converge
 while the drop group moves down `150px`.
 The final drop landing triggers the preserved elliptical ripple animation. The
 ripple plays on its own timeline and is not tied to scroll scrub.
@@ -45,7 +46,7 @@ lands, the white line reaches the drop before .home-start opens with a
 12-point polygon around an oversized square. Two points sweep in opposite
 directions like clock hands. The main timeline reserves 132.4-135 as its final
 2% spacer; the star continues its approved rotation through the timeline end.
-The line starts at timeline time 70, runs for 20 timeline units, and stops at
+The line starts at timeline time 73, runs for 17 timeline units, and stops at
 the drop at 90. The clip starts from the `lineMeetsDrop` label at 90.
 At `lineMeetsDrop`, four blurred circles move through the final-drop mask while
 the star scales up, rotates, and settles slightly smaller. The circles enter
