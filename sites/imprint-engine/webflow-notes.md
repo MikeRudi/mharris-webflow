@@ -78,11 +78,14 @@ and restarts Lenis from the load timeline's `onComplete` callback.
 centre, and the single outlined drop is positioned in the centre of that group.
 `homeAnimation()` controls everything with the existing `.layout-start`
 ScrollTrigger. After the clip finishes, `endDropSettle` runs from `108-127.4`:
-the outlined drop scales down and the open brackets close around it. The larger,
-stronger second ripple then plays on its own non-scrub timeline. There is no separate
-`homeEndAnimation()`, duplicate captured drop, content translation, or drop
-swap. When the main sticky timeline finishes, `.layout-end`, the brackets, and
-the outlined drop leave together through normal page scroll.
+the outlined drop moves down `5rem` while scaling down, and the brackets close
+from a doubled initial gap around it. The `.layout-end` content starts `5rem`
+lower so the drop remains aligned with the gradient drop before this movement.
+The larger, stronger second ripple then plays on its own non-scrub timeline.
+There is no separate `homeEndAnimation()`, duplicate captured drop, content
+translation, or drop swap. When the main sticky timeline finishes,
+`.layout-end`, the brackets, and the outlined drop leave together through
+normal page scroll.
 ```
 
 ## Libraries
