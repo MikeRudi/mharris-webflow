@@ -885,7 +885,7 @@ function homeAnimation() {
         duration: 0.388,
         ease: "power1.in",
       },
-      0.18
+      0.1
     )
     // Drop scales down
     .to(
@@ -895,7 +895,7 @@ function homeAnimation() {
         duration: 0.388,
         ease: "power1.in",
       },
-      0.18
+      0.1
     )
     // Left bracket closes
     .to(
