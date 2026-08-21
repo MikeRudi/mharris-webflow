@@ -812,8 +812,7 @@ function homeAnimation() {
 
   // Auto play starts when scrub reaches 100%
   homeFinishTimeline
-    // Star turns
-    // Star scales down
+    // Star grows
     .to(
       $("[home-drop-star]"),
       {
@@ -824,6 +823,7 @@ function homeAnimation() {
       },
       0
     )
+    // Star rotates
     .to(
       $("[home-drop-star]"),
       {
@@ -833,6 +833,7 @@ function homeAnimation() {
       },
       0
     )
+    // Star scales down
     .to(
       $("[home-drop-star]"),
       {
