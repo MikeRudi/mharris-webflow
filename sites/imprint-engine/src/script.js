@@ -164,7 +164,7 @@ function homeAnimation() {
     (Math.PI * 5) / 4,
   ];
 
-  function homeClipPath(state) {
+  function homeClipPath(progress) {
     const home = $(".home-start")[0];
     const line = $("[home-gradient-line]")[0];
     const homeRect = home.getBoundingClientRect();
@@ -179,104 +179,61 @@ function homeAnimation() {
     const top = centerY - half;
     const bottom = centerY + half;
     const point = (x, y) => `${x}px ${y}px`;
+    const center = point(centerX, centerY);
+    const angle = Math.PI * Math.min(Math.max(progress, 0), 1);
+
+    const rayPoint = (rayAngle) => {
+      const x = Math.cos(rayAngle);
+      const y = Math.sin(rayAngle);
+      const distance = half / Math.max(Math.abs(x), Math.abs(y));
+
+      return point(centerX + x * distance, centerY + y * distance);
+    };
+
+    const upper = rayPoint(-angle);
+    const lower = rayPoint(angle);
     const topLeft = point(left, top);
     const topRight = point(right, top);
     const bottomLeft = point(left, bottom);
     const bottomRight = point(right, bottom);
-    const leftCenter = point(left, centerY);
-    const rightCenter = point(right, centerY);
-    const center = point(centerX, centerY);
-    const rightUpper = point(right, centerY - half * 0.06);
-    const rightLower = point(right, centerY + half * 0.06);
+    let path;
 
-    const paths = {
-      closed: [
-        topRight,
-        topRight,
-        topRight,
-        topRight,
-        rightCenter,
+    if (progress <= 0.25) {
+      path = [
         center,
-        rightCenter,
-        bottomRight,
-        bottomRight,
-        bottomRight,
-        bottomLeft,
+        upper,
+        topRight,
         topLeft,
-      ],
-      slit: [
-        topRight,
-        topRight,
-        topRight,
-        topRight,
-        rightUpper,
+        bottomLeft,
+        bottomRight,
+        lower,
         center,
-        rightLower,
-        bottomRight,
-        bottomRight,
-        bottomRight,
-        bottomLeft,
-        topLeft,
-      ],
-      open: [
-        topRight,
-        topRight,
-        topRight,
-        topRight,
-        topRight,
+      ];
+    } else if (progress <= 0.75) {
+      path = [
         center,
-        bottomRight,
-        bottomRight,
-        bottomRight,
-        bottomRight,
+        upper,
+        upper,
+        topLeft,
         bottomLeft,
-        topLeft,
-      ],
-      sweep: [
-        topLeft,
-        topLeft,
-        topLeft,
-        topLeft,
-        topRight,
+        lower,
+        lower,
         center,
-        bottomRight,
-        bottomLeft,
-        bottomLeft,
-        bottomLeft,
-        bottomLeft,
-        topLeft,
-      ],
-      left: [
-        topLeft,
-        topLeft,
-        topLeft,
-        topLeft,
-        topLeft,
+      ];
+    } else {
+      path = [
         center,
-        bottomLeft,
-        bottomLeft,
-        bottomLeft,
-        bottomLeft,
-        bottomLeft,
-        topLeft,
-      ],
-      complete: [
-        leftCenter,
-        leftCenter,
-        leftCenter,
-        leftCenter,
-        leftCenter,
+        upper,
+        upper,
+        upper,
+        lower,
+        lower,
+        lower,
         center,
-        leftCenter,
-        leftCenter,
-        leftCenter,
-        leftCenter,
-        leftCenter,
-        leftCenter,
-      ],
-    };
+      ];
+    }
 
-    return `polygon(${paths[state].join(", ")})`;
+    return `polygon(${path.join(", ")})`;
   }
 
   function moveGradientDots() {
