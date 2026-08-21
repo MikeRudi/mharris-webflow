@@ -996,8 +996,8 @@ function homeAnimation() {
   }
 
   function syncRippleTimeline() {
-    const dropHasLanded = homeTimeline.time() >= 73;
-    const endDropHasSettled = homeTimeline.time() >= 132.4;
+    const dropHasLanded = homeScrubTimeline.progress() >= 0.811;
+    const endDropHasSettled = homeFinishTimeline.progress() >= 0.848;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
@@ -1044,7 +1044,7 @@ function homeAnimation() {
   function completeHomeFinish() {
     if (
       homeFinishState !== "playing" ||
-      homeTimeline.progress() < 1 ||
+      homeFinishTimeline.progress() < 1 ||
       !homeEndRippleHasFinished
     ) {
       return;
@@ -1061,9 +1061,9 @@ function homeAnimation() {
     syncRestingTimeline(1);
     lockHomeFinishScroll();
 
-    homeTimeline.pause();
-    homeTimeline.time(homeTimeline.labels.lineMeetsDrop, true);
-    homeTimeline.timeScale(20).play();
+    homeFinishTimeline.pause();
+    homeFinishTimeline.progress(0, true);
+    homeFinishTimeline.timeScale(1 / homeFinishDuration).play();
   }
 
   function reverseHomeFinish() {
@@ -1072,26 +1072,25 @@ function homeAnimation() {
     homeFinishState = "reversing";
     syncRestingTimeline(1);
     lockHomeFinishScroll();
-    homeTimeline.timeScale(20).reverse();
+    homeFinishTimeline.timeScale(1 / homeFinishDuration).reverse();
   }
 
-  homeTimeline.eventCallback("onUpdate", () => {
+  homeFinishTimeline.eventCallback("onUpdate", () => {
     syncRippleTimeline();
 
     if (
       homeFinishState === "reversing" &&
-      homeTimeline.time() <= homeTimeline.labels.lineMeetsDrop
+      homeFinishTimeline.progress() <= 0
     ) {
-      homeTimeline.pause();
-      homeTimeline.time(homeTimeline.labels.lineMeetsDrop, true);
-      homeTimeline.timeScale(1);
+      homeFinishTimeline.pause(0);
+      homeFinishTimeline.timeScale(1);
       homeFinishState = "scrub";
       syncRippleTimeline();
       releaseHomeFinishScroll();
     }
   });
 
-  homeTimeline.eventCallback("onComplete", () => {
+  homeFinishTimeline.eventCallback("onComplete", () => {
     completeHomeFinish();
   });
 
@@ -1110,9 +1109,7 @@ function homeAnimation() {
     onUpdate: (self) => {
       if (homeFinishState !== "scrub") return;
 
-      homeTimeline.time(
-        self.progress * homeTimeline.labels.lineMeetsDrop
-      );
+      homeScrubTimeline.progress(self.progress);
       syncRestingTimeline(self.progress);
       syncRippleTimeline();
 
@@ -1129,15 +1126,13 @@ function homeAnimation() {
     onLeaveBack: () => {
       if (homeFinishState !== "scrub") return;
 
-      homeTimeline.time(0);
+      homeScrubTimeline.progress(0);
       syncRestingTimeline(0);
       syncRippleTimeline();
     },
   });
 
-  homeTimeline.time(
-    homeScrollTrigger.progress * homeTimeline.labels.lineMeetsDrop
-  );
+  homeScrubTimeline.progress(homeScrollTrigger.progress);
   syncRestingTimeline(homeScrollTrigger.progress);
   syncRippleTimeline();
 
@@ -1150,7 +1145,8 @@ function homeAnimation() {
 
     homeScrollTrigger.kill();
     homeLoadTimeline.kill();
-    homeTimeline.kill();
+    homeScrubTimeline.kill();
+    homeFinishTimeline.kill();
     if (homeRippleTimeline) homeRippleTimeline.kill();
     if (homeEndRippleTimeline) homeEndRippleTimeline.kill();
     restingTimeline.kill();
