@@ -895,7 +895,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("slit"),
         duration: 0.04,
-        ease: "power2.inOut",
+        ease: "power1.in",
       },
       0
     )
@@ -905,7 +905,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("open"),
         duration: 0.06,
-        ease: "power2.inOut",
+        ease: "power1.in",
       },
       0.04
     )
@@ -923,7 +923,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("left"),
         duration: 0.2,
-        ease: "power1.inOut",
+        ease: "power1.in",
       },
       0.1
     )
@@ -933,7 +933,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("complete"),
         duration: 0.16,
-        ease: "power1.inOut",
+        ease: "power1.in",
       },
       0.3
     )
@@ -943,7 +943,7 @@ function homeAnimation() {
       {
         opacity: 1,
         duration: 0.16,
-        ease: "power1.inOut",
+        ease: "power1.in",
       },
       0.46
     )
@@ -952,7 +952,7 @@ function homeAnimation() {
       {
         y: 0,
         duration: 0.388,
-        ease: "power2.inOut",
+        ease: "power1.in",
       },
       0.46
     )
@@ -961,7 +961,7 @@ function homeAnimation() {
       {
         scale: 0.5,
         duration: 0.388,
-        ease: "power2.inOut",
+        ease: "power1.in",
       },
       0.46
     )
@@ -970,7 +970,7 @@ function homeAnimation() {
       {
         x: 0,
         duration: 0.388,
-        ease: "power2.inOut",
+        ease: "power1.in",
       },
       0.46
     )
@@ -979,7 +979,7 @@ function homeAnimation() {
       {
         x: 0,
         duration: 0.388,
-        ease: "power2.inOut",
+        ease: "power1.in",
       },
       0.46
     )
