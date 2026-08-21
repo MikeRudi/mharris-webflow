@@ -895,7 +895,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("slit"),
         duration: 0.04,
-        ease: "power1.in",
+        ease: "linear",
       },
       0
     )
@@ -905,7 +905,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("open"),
         duration: 0.06,
-        ease: "power1.in",
+        ease: "linear",
       },
       0.04
     )
@@ -923,7 +923,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("left"),
         duration: 0.2,
-        ease: "power1.in",
+        ease: "linear",
       },
       0.1
     )
@@ -933,7 +933,7 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath("complete"),
         duration: 0.16,
-        ease: "power1.in",
+        ease: "linear",
       },
       0.3
     )
