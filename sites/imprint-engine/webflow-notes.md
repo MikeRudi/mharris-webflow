@@ -41,15 +41,15 @@ ripple plays on its own timeline and is not tied to scroll scrub.
 The bottom gradient forms the hollow ring in one transition. After the drop
 lands, the white line reaches the drop before .home-start opens with a
 12-point polygon around an oversized square. Two points sweep in opposite
-directions like clock hands. The main timeline reserves 127.4-130 as its final
+directions like clock hands. The main timeline reserves 132.4-135 as its final
 2% spacer; the star continues its approved rotation through the timeline end.
-The line starts at timeline time 80, stops at the drop at 85, and the clip
-starts from the `lineMeetsDrop` label at 85.
+The line starts at timeline time 80, runs for 10 timeline units, and stops at
+the drop at 90. The clip starts from the `lineMeetsDrop` label at 90.
 At `lineMeetsDrop`, four blurred circles move through the final-drop mask while
 the star scales up, rotates, and settles slightly smaller. The circles enter
 from left to right. They start at `x: -40` with yellow and white faint, blue
 hidden, and purple visible, then build to full opacity. A purple drop base fades
-in from `lineMeetsDrop` at 85. The star is fixed halfway between the line
+in from `lineMeetsDrop` at 90. The star is fixed halfway between the line
 contact point and the drop centre: it grows from 86-90, rotates continuously
 from 86-120, and settles from 98-101. The final drop blur sharpens from 22 to
 16 during this transition.
@@ -77,18 +77,20 @@ and restarts Lenis from the load timeline's `onComplete` callback.
 `.layout-start`. Its bracket group is aligned with the final gradient-drop
 centre, and the single outlined drop is positioned in the centre of that group.
 `.layout-start` is `300vh`. Its ScrollTrigger maps the full scroll range only
-to timeline time `0-85`, ending exactly at `lineMeetsDrop`. At that trigger end,
+to timeline time `0-90`, ending exactly at `lineMeetsDrop`. The trigger ends
+12px before the sticky boundary to prevent a white gap during the Lenis lock.
+At that trigger end,
 Lenis stops and the same `homeTimeline` plays from `lineMeetsDrop` to its end at
 `20x` time scale. The second ripple also uses half its previous duration. Lenis
 restarts only after the master timeline and the second ripple have both
 completed. Crossing the trigger end while scrolling back up stops Lenis again,
 reverses the same timeline to `lineMeetsDrop`, then returns control to scrub.
-After the clip finishes, `endDropSettle` runs from `108-127.4`:
+After the clip finishes, `endDropSettle` runs from `113-132.4`:
 the outlined drop moves down `8rem` while scaling down, and the brackets close
 from an initial `72px` offset on each side, fully clipped by their SVG parent.
 The `.layout-end` content starts
 `8rem` lower so the drop remains aligned with the gradient drop before this
-movement. At `108`, the bracket SVG, heading, copy, and button fade from
+movement. At `113`, the bracket SVG, heading, copy, and button fade from
 `opacity: 0` to `1` over `8` timeline units with `power1.inOut`; the drop stays
 visible.
 The larger, stronger second ripple then plays on its own non-scrub timeline.
