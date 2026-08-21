@@ -78,9 +78,11 @@ and restarts Lenis from the load timeline's `onComplete` callback.
 centre, and the single outlined drop is positioned in the centre of that group.
 `homeAnimation()` controls everything with the existing `.layout-start`
 ScrollTrigger. After the clip finishes, `endDropSettle` runs from `108-127.4`:
-the outlined drop moves down `5rem` while scaling down, and the brackets close
-from a doubled initial gap around it. The `.layout-end` content starts `5rem`
-lower so the drop remains aligned with the gradient drop before this movement.
+the outlined drop moves down `8rem` while scaling down, and the brackets close
+from an initial `54px` offset on each side. The `.layout-end` content starts
+`8rem` lower so the drop remains aligned with the gradient drop before this
+movement. At `108`, the bracket SVG, heading, copy, and button fade from
+`opacity: 0` to `1` over `0.3` with `power1.in`; the drop stays visible.
 The larger, stronger second ripple then plays on its own non-scrub timeline.
 There is no separate `homeEndAnimation()`, duplicate captured drop, content
 translation, or drop swap. When the main sticky timeline finishes,
