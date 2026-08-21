@@ -881,6 +881,7 @@ function homeAnimation() {
       0.26
     )
     // Clip opens
+    // Closed: 0%
     .set(
       $(".home-start"),
       {
@@ -888,6 +889,7 @@ function homeAnimation() {
       },
       0
     )
+    // Closed to slit: 0%-4%, power2.inOut
     .to(
       $(".home-start"),
       {
@@ -897,6 +899,7 @@ function homeAnimation() {
       },
       0
     )
+    // Slit to open: 4%-10%, power2.inOut
     .to(
       $(".home-start"),
       {
@@ -906,6 +909,7 @@ function homeAnimation() {
       },
       0.04
     )
+    // Switch to sweep: 10%
     .set(
       $(".home-start"),
       {
@@ -913,6 +917,7 @@ function homeAnimation() {
       },
       0.1
     )
+    // Sweep to left: 10%-30%, power1.inOut
     .to(
       $(".home-start"),
       {
@@ -922,6 +927,7 @@ function homeAnimation() {
       },
       0.1
     )
+    // Left to complete: 30%-46%, power1.inOut
     .to(
       $(".home-start"),
       {
