@@ -486,132 +486,117 @@ function homeAnimation() {
       0
     );
 
-  const homeTimeline = gsap.timeline({ paused: true });
+  const homeScrubTimeline = gsap.timeline({ paused: true });
 
   // Scrub: content scenes
-  homeTimeline
+  homeScrubTimeline
     // First scene leaves
-    .addLabel("startExit", 0)
     .to(
       $("[home-start-up]"),
       {
         y: "-20rem",
-        duration: 24,
+        duration: 0.267,
         ease: "power2.inOut",
         stagger: {
-          amount: 6,
+          amount: 0.067,
           from: "end",
         },
       },
-      "startExit"
+      0
     )
     .to(
       $("[home-start-up]"),
       {
         opacity: 0,
-        duration: 12,
+        duration: 0.133,
         ease: "power1.in",
         stagger: {
-          amount: 6,
+          amount: 0.067,
           from: "end",
         },
       },
-      "startExit"
+      0
     )
     // Second scene enters
-    .addLabel("secondEnter", 30)
     .to(
       $("[home-second-up]"),
       {
         y: 0,
-        duration: 7.5,
+        duration: 0.083,
         ease: "power1.in",
       },
-      "secondEnter"
+      0.333
     )
     .to(
       $("[home-second-up]"),
       {
         opacity: 1,
-        duration: 6,
+        duration: 0.067,
         ease: "power1.out",
       },
-      "secondEnter"
+      0.333
     )
     // Second scene holds
-    .addLabel("secondResting", 37.5)
     .to(
       $("[home-second-up]"),
       {
         y: 0,
-        duration: 15,
+        duration: 0.167,
         ease: "none",
       },
-      "secondResting"
+      0.417
     )
     // Second scene leaves
-    .addLabel("secondExit", 52.5)
     .to(
       $("[home-second-up]"),
       {
         y: "-20rem",
-        duration: 7.5,
+        duration: 0.083,
         ease: "power1.in",
       },
-      "secondExit"
+      0.583
     )
     .to(
       $("[home-second-up]"),
       {
         opacity: 0,
-        duration: 6,
+        duration: 0.067,
         ease: "power1.out",
       },
-      "secondExit"
+      0.583
     )
     // Third scene enters
-    .addLabel("thirdEnter", 60)
     .to(
       $("[home-third-up]"),
       {
         y: 0,
-        duration: 7.5,
+        duration: 0.083,
         ease: "power2.out",
       },
-      "thirdEnter"
+      0.667
     )
     .to(
       $("[home-third-up]"),
       {
         opacity: 1,
-        duration: 6,
+        duration: 0.067,
         ease: "power1.out",
       },
-      "thirdEnter"
+      0.667
     )
     // Third scene holds
-    .addLabel("thirdResting", 67.5)
     .to(
       $("[home-third-up]"),
       {
         y: 0,
-        duration: 22.5,
+        duration: 0.25,
         ease: "none",
       },
-      "thirdResting"
-    )
-    .to(
-      {},
-      {
-        duration: 10,
-        ease: "none",
-      },
-      90
-    )
-    .addLabel("complete", 100);
+      0.75
+    );
 
   // Scrub: gradient
-  homeTimeline
+  homeScrubTimeline
     // Bottom gradient becomes the dot circle
     .addLabel("gradientCircle", 10)
     .to(
