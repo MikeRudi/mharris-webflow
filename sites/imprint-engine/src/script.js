@@ -839,7 +839,7 @@ function homeAnimation() {
         duration: 4,
         ease: "power1.in",
       },
-      "lineMeetsDrop-=5"
+      "lineMeetsDrop"
     )
     .to(
       $("[home-final-drop-blur]"),
@@ -848,7 +848,7 @@ function homeAnimation() {
         duration: 4,
         ease: "power1.in",
       },
-      "lineMeetsDrop-=3"
+      "lineMeetsDrop+=2"
     )
     .to(
       $("[home-drop-circle]"),
@@ -858,7 +858,7 @@ function homeAnimation() {
         ease: "power1.in",
         stagger: 0.25,
       },
-      "lineMeetsDrop"
+      "lineMeetsDrop+=4"
     )
     .to(
       $("[home-drop-circle]"),
@@ -868,7 +868,7 @@ function homeAnimation() {
         ease: "power1.inOut",
         stagger: 0.25,
       },
-      "lineMeetsDrop"
+      "lineMeetsDrop+=4"
     )
     .to(
       $("[home-drop-star]"),
@@ -878,7 +878,7 @@ function homeAnimation() {
         duration: 4,
         ease: "power2.out",
       },
-      "lineMeetsDrop+=1"
+      "lineMeetsDrop+=5"
     )
     .to(
       $("[home-drop-star]"),
@@ -887,7 +887,7 @@ function homeAnimation() {
         duration: 44,
         ease: "none",
       },
-      "lineMeetsDrop+=1"
+      "lineMeetsDrop+=6"
     )
     .to(
       $("[home-drop-star]"),
