@@ -396,12 +396,16 @@ function homeAnimation() {
     willChange: "transform",
   });
 
+  gsap.set($(".home-end-brackets-svg"), {
+    overflow: "hidden",
+  });
+
   gsap.set($(".home-end-bracket-left"), {
-    x: -54,
+    x: -72,
   });
 
   gsap.set($(".home-end-bracket-right"), {
-    x: 54,
+    x: 72,
   });
 
   gsap.set($homeEndContent, {
@@ -919,8 +923,8 @@ function homeAnimation() {
       $homeEndContent,
       {
         opacity: 1,
-        duration: 0.3,
-        ease: "power1.in",
+        duration: 8,
+        ease: "power1.inOut",
       },
       "endDropSettle"
     )
@@ -1057,6 +1061,9 @@ function homeAnimation() {
     });
     gsap.set($homeEndContent, {
       clearProps: "opacity,will-change",
+    });
+    gsap.set($(".home-end-brackets-svg"), {
+      clearProps: "overflow",
     });
     gsap.set(
       $(
