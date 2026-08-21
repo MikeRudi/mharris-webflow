@@ -837,9 +837,9 @@ function homeAnimation() {
       {
         opacity: 1,
         duration: 4,
-        ease: "power1.inOut",
+        ease: "power1.in",
       },
-      "lineMeetsDrop"
+      "lineMeetsDrop-=4"
     )
     .to(
       $("[home-final-drop-blur]"),
