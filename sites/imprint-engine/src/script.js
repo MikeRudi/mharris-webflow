@@ -813,6 +813,7 @@ function homeAnimation() {
   // Auto play starts when scrub reaches 100%
   homeFinishTimeline
     // Star turns
+    // Star scales down
     .to(
       $("[home-drop-star]"),
       {
@@ -849,6 +850,7 @@ function homeAnimation() {
       },
       0
     )
+    // Screen clip rotates open
     .to(
       homeClip,
       {
@@ -864,7 +866,7 @@ function homeAnimation() {
       },
       0
     )
-    // Final drop settles into the brackets
+    // End content fades in
     .to(
       $homeEndContent,
       {
@@ -874,6 +876,7 @@ function homeAnimation() {
       },
       0.46
     )
+    // Drop falls into the brackets
     .to(
       $(".home-end-drop-stage"),
       {
@@ -881,8 +884,9 @@ function homeAnimation() {
         duration: 0.388,
         ease: "power1.in",
       },
-      0.36
+      0.18
     )
+    // Drop scales down
     .to(
       $(".home-end-target-svg"),
       {
@@ -890,8 +894,9 @@ function homeAnimation() {
         duration: 0.388,
         ease: "power1.in",
       },
-      0.46
+      0.18
     )
+    // Left bracket closes
     .to(
       $(".home-end-bracket-left"),
       {
@@ -899,8 +904,9 @@ function homeAnimation() {
         duration: 0.388,
         ease: "power1.in",
       },
-      0.46
+      0.18
     )
+    // Right bracket closes
     .to(
       $(".home-end-bracket-right"),
       {
@@ -908,7 +914,7 @@ function homeAnimation() {
         duration: 0.388,
         ease: "power1.in",
       },
-      0.46
+      0.18
     )
     // Short pause before scrolling unlocks
     .to(
