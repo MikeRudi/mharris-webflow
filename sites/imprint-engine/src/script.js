@@ -766,14 +766,8 @@ function homeAnimation() {
         ease: "power2.inOut",
       },
       0.811
-    );
-
-  const homeFinishDuration = 2.5;
-  const homeFinishTimeline = gsap.timeline({ paused: true });
-
-  // Auto play starts when scrub reaches 100%
-  homeFinishTimeline
-    // Drop fills and star turns
+    )
+    // Masked drop fills as the line reaches it
     .to(
       $("[home-drop-purple-base], [home-drop-colors]"),
       {
@@ -781,7 +775,7 @@ function homeAnimation() {
         duration: 0.08,
         ease: "power1.in",
       },
-      0
+      0.9
     )
     .to(
       $("[home-final-drop-blur]"),
@@ -790,17 +784,17 @@ function homeAnimation() {
         duration: 0.08,
         ease: "power1.in",
       },
-      0.04
+      0.92
     )
     .to(
       $("[home-drop-circle]"),
       {
         x: 0,
-        duration: 0.14,
+        duration: 0.085,
         ease: "power1.in",
         stagger: 0.005,
       },
-      0.08
+      0.9
     )
     .to(
       $("[home-drop-circle]"),
@@ -810,8 +804,15 @@ function homeAnimation() {
         ease: "power1.inOut",
         stagger: 0.005,
       },
-      0.08
-    )
+      0.9
+    );
+
+  const homeFinishDuration = 2.5;
+  const homeFinishTimeline = gsap.timeline({ paused: true });
+
+  // Auto play starts when scrub reaches 100%
+  homeFinishTimeline
+    // Star turns
     .to(
       $("[home-drop-star]"),
       {
@@ -820,7 +821,7 @@ function homeAnimation() {
         duration: 0.08,
         ease: "power2.out",
       },
-      0.1
+      0
     )
     .to(
       $("[home-drop-star]"),
@@ -829,7 +830,7 @@ function homeAnimation() {
         duration: 0.88,
         ease: "none",
       },
-      0.12
+      0
     )
     .to(
       $("[home-drop-star]"),
