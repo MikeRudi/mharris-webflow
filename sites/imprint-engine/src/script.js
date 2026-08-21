@@ -839,7 +839,7 @@ function homeAnimation() {
         duration: 4,
         ease: "power1.in",
       },
-      "lineMeetsDrop-=4"
+      "lineMeetsDrop-=5"
     )
     .to(
       $("[home-final-drop-blur]"),
