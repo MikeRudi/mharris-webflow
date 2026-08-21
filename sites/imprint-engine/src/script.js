@@ -153,6 +153,7 @@ function homeAnimation() {
   );
 
   const gradientOrbit = { angle: 0 };
+  const homeClip = { progress: 0 };
   const gradientAngles = [
     -Math.PI / 2,
     -Math.PI / 4,
@@ -317,6 +318,8 @@ function homeAnimation() {
   });
 
   gsap.set($("[home-drop-star]"), {
+    x: -20,
+    y: -20,
     opacity: 0,
     scale: 0.15,
     rotation: -35,
