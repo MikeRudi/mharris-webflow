@@ -731,86 +731,88 @@ function homeAnimation() {
       0.556
     )
     // Three drops form and merge
-    .addLabel("gradientDropMerge", 53)
     .to(
       $(
         '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
       ),
       {
         opacity: 0,
-        duration: 10,
+        duration: 0.111,
         ease: "power1.in",
       },
-      "gradientDropMerge"
+      0.589
     )
     .to(
       $('[home-gradient-drop="2"]'),
       {
         opacity: 1,
-        duration: 7,
+        duration: 0.078,
         ease: "power1.out",
       },
-      "gradientDropMerge"
+      0.589
     )
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
         opacity: 0.8,
-        duration: 3,
+        duration: 0.033,
         ease: "power1.out",
       },
-      "gradientDropMerge"
+      0.589
     )
     .to(
       $("[home-gradient-drop]"),
       {
         attr: { transform: "translate(640 59) scale(0.72)" },
-        duration: 20,
+        duration: 0.222,
         ease: "power2.out",
       },
-      "gradientDropMerge"
+      0.589
     )
     .to(
       $("[home-gradient-drop-blur], [home-final-drop-blur]"),
       {
         attr: { stdDeviation: 22 },
-        duration: 20,
+        duration: 0.222,
         ease: "power1.inOut",
       },
-      "gradientDropMerge"
+      0.589
     )
     .to(
       $("[home-gradient-drops]"),
       {
         y: 150,
-        duration: 20,
+        duration: 0.222,
         ease: "power1.inOut",
       },
-      "gradientDropMerge"
+      0.589
     )
     .to(
       $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
       {
         opacity: 0,
-        duration: 10,
+        duration: 0.111,
         ease: "power1.in",
       },
-      "gradientDropMerge+=3"
+      0.622
     )
     // Drop lands, ripple plays and line draws
-    .addLabel("gradientLand", 73)
     .to(
       $("[home-gradient-line]"),
       {
         attr: { "stroke-dashoffset": 780 },
         opacity: 1,
-        duration: 17,
+        duration: 0.189,
         ease: "power2.inOut",
       },
-      "gradientLand"
-    )
-    // Scrub ends here. Auto play starts.
-    .addLabel("lineMeetsDrop", 90)
+      0.811
+    );
+
+  const homeFinishDuration = 2.5;
+  const homeFinishTimeline = gsap.timeline({ paused: true });
+
+  // Auto play starts when scrub reaches 100%
+  homeFinishTimeline
     // Drop fills and star turns
     .to(
       $("[home-drop-purple-base], [home-drop-colors]"),
