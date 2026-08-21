@@ -386,12 +386,17 @@ function homeAnimation() {
     transformOrigin: "center center",
   });
 
+  gsap.set($(".home-end-drop-stage"), {
+    y: "-5rem",
+    willChange: "transform",
+  });
+
   gsap.set($(".home-end-bracket-left"), {
-    x: -18,
+    x: -36,
   });
 
   gsap.set($(".home-end-bracket-right"), {
-    x: 18,
+    x: 36,
   });
 
   gsap.set($(".home-end-ripple"), {
@@ -901,6 +906,15 @@ function homeAnimation() {
     )
     .addLabel("endDropSettle", 108)
     .to(
+      $(".home-end-drop-stage"),
+      {
+        y: 0,
+        duration: 19.4,
+        ease: "power2.inOut",
+      },
+      "endDropSettle"
+    )
+    .to(
       $(".home-end-target-svg"),
       {
         scale: 0.5,
@@ -1024,10 +1038,10 @@ function homeAnimation() {
     });
     gsap.set(
       $(
-        ".home-end-target-svg, .home-end-bracket-left, .home-end-bracket-right, .home-end-ripple"
+        ".home-end-drop-stage, .home-end-target-svg, .home-end-bracket-left, .home-end-bracket-right, .home-end-ripple"
       ),
       {
-        clearProps: "transform,opacity,visibility",
+        clearProps: "transform,opacity,visibility,will-change",
       }
     );
   };
