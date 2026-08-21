@@ -401,7 +401,12 @@ function homeAnimation() {
   });
 
   const homeRippleTimeline = rippleAnimation();
-  const homeEndRippleTimeline = rippleAnimation($(".home-end-ripple"));
+  const homeEndRippleTimeline = rippleAnimation($(".home-end-ripple"), {
+    endScale: 1.25,
+    startOpacity: 0.62,
+    duration: 1.9,
+    stagger: 0.18,
+  });
   let rippleHasPlayed = false;
   let homeEndRippleHasPlayed = false;
 
@@ -830,7 +835,7 @@ function homeAnimation() {
       $("[home-drop-star]"),
       {
         rotation: 360,
-        duration: 34,
+        duration: 44,
         ease: "none",
       },
       "lineMeetsDrop+=1"
@@ -894,12 +899,12 @@ function homeAnimation() {
       },
       "lineMeetsDrop+=15"
     )
-    .addLabel("endDropSettle", 96.5)
+    .addLabel("endDropSettle", 108)
     .to(
       $(".home-end-target-svg"),
       {
         scale: 0.5,
-        duration: 11.5,
+        duration: 19.4,
         ease: "power2.inOut",
       },
       "endDropSettle"
@@ -908,7 +913,7 @@ function homeAnimation() {
       $(".home-end-bracket-left"),
       {
         x: 0,
-        duration: 11.5,
+        duration: 19.4,
         ease: "power2.inOut",
       },
       "endDropSettle"
@@ -917,7 +922,7 @@ function homeAnimation() {
       $(".home-end-bracket-right"),
       {
         x: 0,
-        duration: 11.5,
+        duration: 19.4,
         ease: "power2.inOut",
       },
       "endDropSettle"
@@ -925,10 +930,10 @@ function homeAnimation() {
     .to(
       {},
       {
-        duration: 2.4,
+        duration: 2.6,
         ease: "none",
       },
-      117.6
+      127.4
     );
 
   function syncRestingTimeline(progress) {
@@ -941,7 +946,7 @@ function homeAnimation() {
 
   function syncRippleTimeline() {
     const dropHasLanded = homeTimeline.time() >= 80;
-    const endDropHasSettled = homeTimeline.time() >= 108;
+    const endDropHasSettled = homeTimeline.time() >= 127.4;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
@@ -1028,7 +1033,15 @@ function homeAnimation() {
   };
 }
 
-function rippleAnimation($rings = $("[ripple-ring]")) {
+function rippleAnimation(
+  $rings = $("[ripple-ring]"),
+  {
+    endScale = 1,
+    startOpacity = 0.42,
+    duration = 1.6,
+    stagger = 0.16,
+  } = {}
+) {
   if (!$rings.length || !window.gsap) return null;
 
   gsap.set($rings, { scale: 0.08, autoAlpha: 0 });
@@ -1039,13 +1052,13 @@ function rippleAnimation($rings = $("[ripple-ring]")) {
     $rings,
     {
       scale: 0.08,
-      autoAlpha: 0.42,
+      autoAlpha: startOpacity,
     },
     {
-      scale: 1,
+      scale: endScale,
       autoAlpha: 0,
-      duration: 1.6,
-      stagger: 0.16,
+      duration,
+      stagger,
       ease: "power2.out",
       immediateRender: false,
     }
