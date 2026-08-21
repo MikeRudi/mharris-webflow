@@ -76,8 +76,14 @@ and restarts Lenis from the load timeline's `onComplete` callback.
 `.layout-end` is a sticky `100vh` layer beneath `.home-start` inside
 `.layout-start`. Its bracket group is aligned with the final gradient-drop
 centre, and the single outlined drop is positioned in the centre of that group.
-`homeAnimation()` controls everything with the existing `.layout-start`
-ScrollTrigger. After the clip finishes, `endDropSettle` runs from `108-127.4`:
+`.layout-start` is `300vh`. Its ScrollTrigger maps the full scroll range only
+to timeline time `0-85`, ending exactly at `lineMeetsDrop`. At that trigger end,
+Lenis stops and the same `homeTimeline` plays from `lineMeetsDrop` to its end at
+`20x` time scale. The second ripple also uses half its previous duration. Lenis
+restarts only after the master timeline and the second ripple have both
+completed. Crossing the trigger end while scrolling back up stops Lenis again,
+reverses the same timeline to `lineMeetsDrop`, then returns control to scrub.
+After the clip finishes, `endDropSettle` runs from `108-127.4`:
 the outlined drop moves down `8rem` while scaling down, and the brackets close
 from an initial `72px` offset on each side, fully clipped by their SVG parent.
 The `.layout-end` content starts
