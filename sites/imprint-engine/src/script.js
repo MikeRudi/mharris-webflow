@@ -533,7 +533,7 @@ function homeAnimation() {
         duration: 0.25,
         ease: "none",
       },
-      0.333
+      0.1
     )
     // Second scene leaves
     .to(
@@ -562,7 +562,7 @@ function homeAnimation() {
         duration: 0.083,
         ease: "power1.in",
       },
-      0.583
+      0.2
     )
     .to(
       $("[home-logo-up]"),
@@ -571,7 +571,7 @@ function homeAnimation() {
         duration: 0.067,
         ease: "power1.out",
       },
-      0.583
+      0.2
     )
     // Third scene enters
     .to(
