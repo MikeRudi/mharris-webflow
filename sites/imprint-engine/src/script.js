@@ -600,23 +600,12 @@ function homeAnimation() {
   let homeRestingInputX = 0;
   let homeRestingInputY = 0;
   let homeRestingUserSelect = "";
-  const homeRestingAutoDirection = { angle: -45 };
-  let homeRestingDirectionTween = null;
-
-  function changeHomeRestingDirection() {
-    homeRestingDirectionTween = gsap.to(homeRestingAutoDirection, {
-      angle: gsap.utils.random(-180, 180),
-      duration: gsap.utils.random(3.5, 5),
-      ease: "sine.inOut",
-      onComplete: changeHomeRestingDirection,
-    });
-  }
 
   function rotateHomeRestingSphere(time, deltaTime) {
     if (homeRestingIsDragging) return;
 
-    const rotation = (deltaTime / 1000) * (360 / 10);
-    const direction = (homeRestingAutoDirection.angle * Math.PI) / 180;
+    const rotation = (deltaTime / 1000) * (360 / 14);
+    const direction = (-45 * Math.PI) / 180;
 
     homeRestingInputX += Math.cos(direction) * rotation;
     homeRestingInputY += Math.sin(direction) * rotation;
@@ -681,7 +670,6 @@ function homeAnimation() {
     $homeRestingDragSurface.css("cursor", "grab");
   }
 
-  changeHomeRestingDirection();
   gsap.ticker.add(rotateHomeRestingSphere);
 
   const homeLoadTimeline = gsap.timeline({
@@ -1418,7 +1406,6 @@ function homeAnimation() {
     if (homeRippleTimeline) homeRippleTimeline.kill();
     if (homeEndRippleTimeline) homeEndRippleTimeline.kill();
     gsap.ticker.remove(rotateHomeRestingSphere);
-    if (homeRestingDirectionTween) homeRestingDirectionTween.kill();
     homeRestingQuickX.tween.kill();
     homeRestingQuickY.tween.kill();
     $homeRestingDragSurface.css("cursor", "");
