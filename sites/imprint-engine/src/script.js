@@ -156,6 +156,8 @@ function homeAnimation() {
   const homeRestingRotation = { angle: 0 };
   const homeRestingView = { progress: 0 };
   const homeRestingCenterShift = { x: 0, y: 0 };
+  const homeRestingBaseY =
+    parseFloat(getComputedStyle(document.documentElement).fontSize) * 2;
   let homeRestingSphere = [];
 
   function buildHomeRestingSphere() {
@@ -173,6 +175,7 @@ function homeAnimation() {
         x: bounds.left - transformX + bounds.width / 2,
         y: bounds.top - transformY + bounds.height / 2,
         depth: isFront ? 1 : isBack ? -1 : index % 2 === 0 ? 0.35 : -0.35,
+        opacity: isFront ? 1 : isBack ? 0.1 : 0.3,
       };
     });
 
@@ -191,7 +194,8 @@ function homeAnimation() {
     );
 
     homeRestingCenterShift.x = window.innerWidth / 2 - centerX;
-    homeRestingCenterShift.y = window.innerHeight / 2 - centerY;
+    homeRestingCenterShift.y =
+      window.innerHeight / 2 + homeRestingBaseY - centerY - homeRestingBaseY;
 
     homeRestingSphere = restingItems.map((item) => {
       const x = item.x - centerX;
@@ -230,24 +234,23 @@ function homeAnimation() {
         axisY * axisDot * (1 - cos);
       const depth =
         item.z * cos + (axisX * item.y - axisY * item.x) * sin;
-      const depthProgress = gsap.utils.clamp(
-        0,
-        1,
-        (depth / item.radius + 1) / 2
-      );
       const scale =
-        gsap.utils.interpolate(0.72, 1.42, depthProgress) * viewScale;
-      const opacity = gsap.utils.interpolate(
+        gsap.utils.clamp(
+          0.82,
+          1.16,
+          1 + ((depth - item.z) / item.radius) * 0.16
+        ) * viewScale;
+      const opacity = gsap.utils.clamp(
         0.08,
         1,
-        Math.pow(depthProgress, 1.25)
+        item.opacity + ((depth - item.z) / (item.radius * 2)) * 0.9
       );
 
       $(item.element).css("z-index", Math.round(depth + item.radius));
 
       gsap.set(item.card, {
         x: x * viewScale + viewX - item.x,
-        y: y * viewScale + viewY - item.y,
+        y: y * viewScale + homeRestingBaseY + viewY - item.y,
         scale,
         opacity,
         force3D: true,
