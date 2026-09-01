@@ -559,19 +559,19 @@ function homeAnimation() {
       $("[home-logo-up]"),
       {
         y: "-20rem",
-        duration: 0.083,
+        duration: 0.09,
         ease: "power1.in",
       },
-      0.25
+      0.35
     )
     .to(
       $("[home-logo-up]"),
       {
         opacity: 0,
-        duration: 0.067,
+        duration: 0.07,
         ease: "power1.out",
       },
-      0.25
+      0.35
     )
     // Third scene enters
     .to(
