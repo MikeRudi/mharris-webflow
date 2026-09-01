@@ -154,12 +154,17 @@ function homeAnimation() {
 
   const $homeResting = $("[home-resting]");
   const $homeRestingDragSurface = $(".home-start");
-  const homeRestingRotation = { angle: 0 };
   const homeRestingView = { progress: 0 };
   const homeRestingCenterShift = { x: 0, y: 0 };
   const homeRestingBaseY =
     parseFloat(getComputedStyle(document.documentElement).fontSize) * 2;
   const homeRestingRadiusScale = 0.9;
+  const homeRestingMatrix = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  const homeRestingMatrixTemp = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const homeRestingRotationMatrix = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const homeRestingSmooth = { x: 0, y: 0 };
+  let homeRestingPreviousX = 0;
+  let homeRestingPreviousY = 0;
   let homeRestingSphere = [];
 
   function buildHomeRestingSphere() {
@@ -199,22 +204,49 @@ function homeAnimation() {
     homeRestingCenterShift.y = window.innerHeight / 2 - centerY;
 
     homeRestingSphere = restingItems.map((item) => {
-      const x = item.x - centerX;
-      const y = item.y - centerY;
+      const screenX = item.x - centerX;
+      const screenY = item.y - centerY;
       const z =
-        Math.sqrt(Math.max(radius * radius - x * x - y * y, 0)) *
+        Math.sqrt(
+          Math.max(
+            radius * radius - screenX * screenX - screenY * screenY,
+            0
+          )
+        ) *
         item.depth;
 
-      return { ...item, x, y, z, radius };
+      return {
+        ...item,
+        x: screenX,
+        y: -screenY,
+        screenX,
+        screenY,
+        z,
+        radius,
+      };
     });
   }
 
+  function premultiplyHomeRestingMatrix(left) {
+    for (let row = 0; row < 3; row += 1) {
+      const a = left[row * 3];
+      const b = left[row * 3 + 1];
+      const c = left[row * 3 + 2];
+
+      for (let column = 0; column < 3; column += 1) {
+        homeRestingMatrixTemp[row * 3 + column] =
+          a * homeRestingMatrix[column] +
+          b * homeRestingMatrix[3 + column] +
+          c * homeRestingMatrix[6 + column];
+      }
+    }
+
+    for (let index = 0; index < 9; index += 1) {
+      homeRestingMatrix[index] = homeRestingMatrixTemp[index];
+    }
+  }
+
   function renderHomeRestingSphere() {
-    const angle = (homeRestingRotation.angle * Math.PI) / 180;
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    const axisX = -Math.SQRT1_2;
-    const axisY = Math.SQRT1_2;
     const viewScale = gsap.utils.interpolate(
       1,
       0.78,
@@ -224,17 +256,18 @@ function homeAnimation() {
     const viewY = homeRestingCenterShift.y * homeRestingView.progress;
 
     homeRestingSphere.forEach((item) => {
-      const axisDot = item.x * axisX + item.y * axisY;
       const x =
-        item.x * cos +
-        axisY * item.z * sin +
-        axisX * axisDot * (1 - cos);
+        homeRestingMatrix[0] * item.x +
+        homeRestingMatrix[1] * item.y +
+        homeRestingMatrix[2] * item.z;
       const y =
-        item.y * cos -
-        axisX * item.z * sin +
-        axisY * axisDot * (1 - cos);
+        homeRestingMatrix[3] * item.x +
+        homeRestingMatrix[4] * item.y +
+        homeRestingMatrix[5] * item.z;
       const depth =
-        item.z * cos + (axisX * item.y - axisY * item.x) * sin;
+        homeRestingMatrix[6] * item.x +
+        homeRestingMatrix[7] * item.y +
+        homeRestingMatrix[8] * item.z;
       const scale =
         gsap.utils.clamp(
           0.82,
@@ -250,12 +283,15 @@ function homeAnimation() {
       $(item.element).css("z-index", Math.round(depth + item.radius));
 
       gsap.set(item.card, {
-        x: x * homeRestingRadiusScale * viewScale + viewX - item.x,
+        x:
+          x * homeRestingRadiusScale * viewScale +
+          viewX -
+          item.screenX,
         y:
-          y * homeRestingRadiusScale * viewScale +
+          -y * homeRestingRadiusScale * viewScale +
           homeRestingBaseY +
           viewY -
-          item.y,
+          item.screenY,
         scale,
         opacity,
         force3D: true,
@@ -263,6 +299,48 @@ function homeAnimation() {
       });
     });
   }
+
+  function updateHomeRestingSphere() {
+    const rotationY =
+      ((homeRestingSmooth.y - homeRestingPreviousY) * Math.PI) / 180;
+    const rotationX =
+      ((homeRestingSmooth.x - homeRestingPreviousX) * Math.PI) / 180;
+
+    homeRestingPreviousY = homeRestingSmooth.y;
+    homeRestingPreviousX = homeRestingSmooth.x;
+
+    if (rotationX !== 0 || rotationY !== 0) {
+      const cosY = Math.cos(rotationY);
+      const sinY = Math.sin(rotationY);
+      const cosX = Math.cos(rotationX);
+      const sinX = Math.sin(rotationX);
+
+      homeRestingRotationMatrix[0] = cosY;
+      homeRestingRotationMatrix[1] = 0;
+      homeRestingRotationMatrix[2] = sinY;
+      homeRestingRotationMatrix[3] = sinX * sinY;
+      homeRestingRotationMatrix[4] = cosX;
+      homeRestingRotationMatrix[5] = -sinX * cosY;
+      homeRestingRotationMatrix[6] = -cosX * sinY;
+      homeRestingRotationMatrix[7] = sinX;
+      homeRestingRotationMatrix[8] = cosX * cosY;
+
+      premultiplyHomeRestingMatrix(homeRestingRotationMatrix);
+    }
+
+    renderHomeRestingSphere();
+  }
+
+  const homeRestingQuickY = gsap.quickTo(homeRestingSmooth, "y", {
+    duration: 1,
+    ease: "power2",
+    onUpdate: updateHomeRestingSphere,
+  });
+  const homeRestingQuickX = gsap.quickTo(homeRestingSmooth, "x", {
+    duration: 1,
+    ease: "power2",
+    onUpdate: updateHomeRestingSphere,
+  });
 
   gsap.set(
     $(".perspective-opacity-1, .perspective-opacity-2, .perspective-opacity-3"),
