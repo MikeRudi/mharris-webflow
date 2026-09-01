@@ -593,34 +593,24 @@ function homeAnimation() {
   let homeFinishState = "scrub";
   let homeFinishScrollLocked = false;
 
-  let homeRestingTween = null;
-  let homeRestingMomentumTween = null;
   let homeRestingIsDragging = false;
   let homeRestingPointerId = null;
-  let homeRestingDragStartX = 0;
-  let homeRestingDragStartY = 0;
-  let homeRestingDragStartAngle = 0;
-  let homeRestingLastAngle = 0;
-  let homeRestingLastTime = 0;
-  let homeRestingVelocity = 0;
+  let homeRestingLastPointerX = 0;
+  let homeRestingLastPointerY = 0;
+  let homeRestingInputX = 0;
+  let homeRestingInputY = 0;
   let homeRestingUserSelect = "";
 
-  function startHomeRestingRotation() {
-    if (homeRestingTween) homeRestingTween.kill();
+  function rotateHomeRestingSphere(time, deltaTime) {
+    if (homeRestingIsDragging) return;
 
-    homeRestingRotation.angle = gsap.utils.wrap(
-      0,
-      360,
-      homeRestingRotation.angle
-    );
+    const rotation =
+      (deltaTime / 1000) * (360 / 8 / Math.SQRT2);
 
-    homeRestingTween = gsap.to(homeRestingRotation, {
-      angle: homeRestingRotation.angle + 360,
-      duration: 8,
-      ease: "none",
-      repeat: -1,
-      onUpdate: renderHomeRestingSphere,
-    });
+    homeRestingInputX += rotation;
+    homeRestingInputY += rotation;
+    homeRestingQuickY(homeRestingInputX);
+    homeRestingQuickX(homeRestingInputY);
   }
 
   function canDragHomeResting() {
@@ -642,19 +632,12 @@ function homeAnimation() {
 
     homeRestingIsDragging = true;
     homeRestingPointerId = event.pointerId;
-    homeRestingDragStartX = event.clientX;
-    homeRestingDragStartY = event.clientY;
-    homeRestingDragStartAngle = homeRestingRotation.angle;
-    homeRestingLastAngle = homeRestingRotation.angle;
-    homeRestingLastTime = performance.now();
-    homeRestingVelocity = 0;
-
-    if (homeRestingTween) homeRestingTween.pause();
-    if (homeRestingMomentumTween) homeRestingMomentumTween.kill();
+    homeRestingLastPointerX = event.clientX;
+    homeRestingLastPointerY = event.clientY;
 
     homeRestingUserSelect = document.body.style.userSelect;
     document.body.style.userSelect = "none";
-    $homeResting.css("cursor", "grabbing");
+    $homeRestingDragSurface.css("cursor", "grabbing");
     event.preventDefault();
   }
 
@@ -666,54 +649,28 @@ function homeAnimation() {
       return;
     }
 
-    const nextAngle =
-      homeRestingDragStartAngle +
-      (event.clientX - homeRestingDragStartX) * 0.3 -
-      (event.clientY - homeRestingDragStartY) * 0.3;
-    const now = performance.now();
-    const elapsed = Math.max(now - homeRestingLastTime, 16);
-    const nextVelocity = (nextAngle - homeRestingLastAngle) / elapsed;
+    const deltaX = event.clientX - homeRestingLastPointerX;
+    const deltaY = event.clientY - homeRestingLastPointerY;
 
-    homeRestingVelocity = gsap.utils.interpolate(
-      homeRestingVelocity,
-      nextVelocity,
-      0.4
-    );
-    homeRestingRotation.angle = nextAngle;
-    homeRestingLastAngle = nextAngle;
-    homeRestingLastTime = now;
-
-    renderHomeRestingSphere();
+    homeRestingLastPointerX = event.clientX;
+    homeRestingLastPointerY = event.clientY;
+    homeRestingInputX += deltaX / 4;
+    homeRestingInputY += deltaY / 4;
+    homeRestingQuickY(homeRestingInputX);
+    homeRestingQuickX(homeRestingInputY);
     event.preventDefault();
   }
 
-  function endHomeRestingDrag(useMomentum = true) {
+  function endHomeRestingDrag() {
     if (!homeRestingIsDragging) return;
 
     homeRestingIsDragging = false;
     homeRestingPointerId = null;
     document.body.style.userSelect = homeRestingUserSelect;
-    $homeResting.css("cursor", "grab");
-
-    const momentum = useMomentum
-      ? gsap.utils.clamp(-90, 90, homeRestingVelocity * 180)
-      : 0;
-
-    if (!momentum) {
-      startHomeRestingRotation();
-      return;
-    }
-
-    homeRestingMomentumTween = gsap.to(homeRestingRotation, {
-      angle: homeRestingRotation.angle + momentum,
-      duration: 0.6,
-      ease: "power2.out",
-      onUpdate: renderHomeRestingSphere,
-      onComplete: startHomeRestingRotation,
-    });
+    $homeRestingDragSurface.css("cursor", "grab");
   }
 
-  startHomeRestingRotation();
+  gsap.ticker.add(rotateHomeRestingSphere);
 
   const homeLoadTimeline = gsap.timeline({
     onComplete: () => {
