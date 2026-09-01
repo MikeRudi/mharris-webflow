@@ -504,7 +504,7 @@ function homeAnimation() {
         duration: 0.083,
         ease: "power1.in",
       },
-      0.333
+      0.4
     )
     .to(
       $("[home-second-up]"),
@@ -513,7 +513,7 @@ function homeAnimation() {
         duration: 0.067,
         ease: "power1.out",
       },
-      0.333
+      0.4
     )
     // Second scene holds
     .to(
@@ -523,7 +523,7 @@ function homeAnimation() {
         duration: 0.167,
         ease: "none",
       },
-      0.417
+      0.484
     )
     // Logo holds with second scene
     // .to(
@@ -543,7 +543,7 @@ function homeAnimation() {
         duration: 0.083,
         ease: "power1.in",
       },
-      0.5
+      0.567
     )
     .to(
       $("[home-second-up]"),
@@ -552,7 +552,7 @@ function homeAnimation() {
         duration: 0.067,
         ease: "power1.out",
       },
-      0.5
+      0.567
     )
     // Logo leaves as second scene enters
     .to(
