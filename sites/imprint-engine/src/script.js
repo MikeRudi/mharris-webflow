@@ -194,8 +194,7 @@ function homeAnimation() {
     );
 
     homeRestingCenterShift.x = window.innerWidth / 2 - centerX;
-    homeRestingCenterShift.y =
-      window.innerHeight / 2 + homeRestingBaseY - centerY - homeRestingBaseY;
+    homeRestingCenterShift.y = window.innerHeight / 2 - centerY;
 
     homeRestingSphere = restingItems.map((item) => {
       const x = item.x - centerX;
