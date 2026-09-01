@@ -482,7 +482,7 @@ function homeAnimation() {
       $("[home-logo-up]"),
       {
         y: 0,
-        duration: 0.05,
+        duration: 0.07,
         ease: "power1.in",
       },
       0.05
@@ -491,8 +491,8 @@ function homeAnimation() {
       $("[home-logo-up]"),
       {
         opacity: 1,
-        duration: 0.05,
-        ease: "power1.out",
+        duration: 0.09,
+        ease: "power1.in",
       },
       0.05
     )
