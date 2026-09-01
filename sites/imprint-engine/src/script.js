@@ -143,7 +143,7 @@ function homeAnimation() {
 
   gsap.set(
     $(
-      "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
+      "[home-resting], [home-start-up], [home-second-up], [home-third-up], [home-logo-up]"
     ),
     {
       y: "10rem",
@@ -477,6 +477,25 @@ function homeAnimation() {
       },
       0
     )
+    // Logo enters between first and second scenes
+    .to(
+      $("[home-logo-up]"),
+      {
+        y: 0,
+        duration: 0.083,
+        ease: "power1.in",
+      },
+      0.25
+    )
+    .to(
+      $("[home-logo-up]"),
+      {
+        opacity: 1,
+        duration: 0.067,
+        ease: "power1.out",
+      },
+      0.25
+    )
     // Second scene enters
     .to(
       $("[home-second-up]"),
@@ -506,6 +525,16 @@ function homeAnimation() {
       },
       0.417
     )
+    // Logo holds with second scene
+    .to(
+      $("[home-logo-up]"),
+      {
+        y: 0,
+        duration: 0.25,
+        ease: "none",
+      },
+      0.333
+    )
     // Second scene leaves
     .to(
       $("[home-second-up]"),
@@ -518,6 +547,25 @@ function homeAnimation() {
     )
     .to(
       $("[home-second-up]"),
+      {
+        opacity: 0,
+        duration: 0.067,
+        ease: "power1.out",
+      },
+      0.583
+    )
+    // Logo leaves with second scene
+    .to(
+      $("[home-logo-up]"),
+      {
+        y: "-20rem",
+        duration: 0.083,
+        ease: "power1.in",
+      },
+      0.583
+    )
+    .to(
+      $("[home-logo-up]"),
       {
         opacity: 0,
         duration: 0.067,
@@ -1095,7 +1143,7 @@ function homeAnimation() {
     restingTimeline.kill();
     gsap.set(
       $(
-        "[home-resting], [home-start-up], [home-second-up], [home-third-up]"
+        "[home-resting], [home-start-up], [home-second-up], [home-third-up], [home-logo-up]"
       ),
       { clearProps: "transform,opacity,will-change" }
     );
