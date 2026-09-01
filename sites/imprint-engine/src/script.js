@@ -152,6 +152,82 @@ function homeAnimation() {
     }
   );
 
+  const $homeResting = $("[home-resting]");
+  const homeRestingRotation = { x: 0, y: 0 };
+  let homeRestingSphere = [];
+
+  function buildHomeRestingSphere() {
+    const restingItems = $homeResting.toArray().map((element, index) => ({
+      element,
+      card: $(element).find(".perspective-card")[0],
+      x: element.offsetLeft + element.offsetWidth / 2,
+      y: element.offsetTop + element.offsetHeight / 2,
+      depth: $(element).closest(".perspective-opacity-1").length
+        ? 1
+        : $(element).closest(".perspective-opacity-3").length
+          ? -1
+          : index % 2 === 0
+            ? 0.35
+            : -0.35,
+    }));
+
+    if (!restingItems.length) return;
+
+    const centerX =
+      restingItems.reduce((total, item) => total + item.x, 0) /
+      restingItems.length;
+    const centerY =
+      restingItems.reduce((total, item) => total + item.y, 0) /
+      restingItems.length;
+    const radius = Math.max(
+      ...restingItems.map((item) =>
+        Math.hypot(item.x - centerX, item.y - centerY)
+      )
+    );
+
+    homeRestingSphere = restingItems.map((item) => {
+      const x = item.x - centerX;
+      const y = item.y - centerY;
+      const z =
+        Math.sqrt(Math.max(radius * radius - x * x - y * y, 0)) *
+        item.depth;
+
+      return { ...item, x, y, z, radius };
+    });
+  }
+
+  function renderHomeRestingSphere() {
+    const rotateX = gsap.utils.toRad(homeRestingRotation.x);
+    const rotateY = gsap.utils.toRad(homeRestingRotation.y);
+    const cosX = Math.cos(rotateX);
+    const sinX = Math.sin(rotateX);
+    const cosY = Math.cos(rotateY);
+    const sinY = Math.sin(rotateY);
+
+    homeRestingSphere.forEach((item) => {
+      const y = item.y * cosX - item.z * sinX;
+      const z = item.y * sinX + item.z * cosX;
+      const x = item.x * cosY + z * sinY;
+      const depth = -item.x * sinY + z * cosY;
+      const scale = gsap.utils.clamp(
+        0.82,
+        1.16,
+        1 + ((depth - item.z) / item.radius) * 0.16
+      );
+
+      gsap.set(item.card, {
+        x: x - item.x,
+        y: y - item.y,
+        scale,
+        force3D: true,
+        transformOrigin: "center center",
+      });
+    });
+  }
+
+  buildHomeRestingSphere();
+  renderHomeRestingSphere();
+
   const gradientOrbit = { angle: 0 };
   const homeClip = { progress: 0 };
   const gradientAngles = [
@@ -392,21 +468,17 @@ function homeAnimation() {
   let homeFinishState = "scrub";
   let homeFinishScrollLocked = false;
 
-  const restingTimeline = gsap.timeline();
+  const restingTimeline = gsap.timeline({ repeat: -1 });
 
-  restingTimeline.to($("[home-resting]"), {
-    xPercent: (index) => (index % 2 === 0 ? 1 : -1),
-    yPercent: (index) => (index % 3 === 0 ? -2 : 2),
-    duration: 3.2,
-    ease: "power1.inOut",
-    repeat: -1,
-    repeatDelay: 0,
-    yoyo: true,
-    stagger: {
-      each: 0.14,
-      from: "random",
-    },
+  restingTimeline.to(homeRestingRotation, {
+    x: 360,
+    y: 360,
+    duration: 320,
+    ease: "none",
+    onUpdate: renderHomeRestingSphere,
   });
+
+  restingTimeline.totalTime(restingTimeline.duration() * 1000);
 
   const homeLoadTimeline = gsap.timeline({
     onComplete: () => {
@@ -452,7 +524,7 @@ function homeAnimation() {
   homeScrubTimeline
     // First scene leaves
     .to(
-      $("[home-start-up]"),
+      $("[home-start-up]").not("[home-resting]"),
       {
         y: "-20rem",
         duration: 0.267,
@@ -465,7 +537,7 @@ function homeAnimation() {
       0
     )
     .to(
-      $("[home-start-up]"),
+      $("[home-start-up]").not("[home-resting]"),
       {
         opacity: 0,
         duration: 0.133,
@@ -561,6 +633,25 @@ function homeAnimation() {
         y: "-10rem",
         duration: 0.09,
         ease: "power1.in",
+      },
+      0.3
+    )
+    // Resting cards leave with the logos
+    .to(
+      $homeResting,
+      {
+        y: "-10rem",
+        duration: 0.09,
+        ease: "power1.in",
+      },
+      0.3
+    )
+    .to(
+      $homeResting,
+      {
+        opacity: 0,
+        duration: 0.07,
+        ease: "power1.out",
       },
       0.3
     )
@@ -943,12 +1034,20 @@ function homeAnimation() {
       0.848
     );
 
+  let restingMotion = null;
+
   function syncRestingTimeline(progress) {
-    if (progress === 0) {
-      restingTimeline.resume();
-    } else {
-      restingTimeline.pause();
-    }
+    const nextMotion = progress === 0 ? "resting" : "transition";
+
+    if (restingMotion === nextMotion) return;
+
+    restingMotion = nextMotion;
+    gsap.to(restingTimeline, {
+      timeScale: nextMotion === "resting" ? 1 : -1.8,
+      duration: 0.8,
+      ease: "power1.inOut",
+      overwrite: true,
+    });
   }
 
   function syncRippleTimeline() {
@@ -1108,6 +1207,7 @@ function homeAnimation() {
     homeFinishTimeline.kill();
     if (homeRippleTimeline) homeRippleTimeline.kill();
     if (homeEndRippleTimeline) homeEndRippleTimeline.kill();
+    gsap.killTweensOf(restingTimeline);
     restingTimeline.kill();
     gsap.set(
       $(
@@ -1115,6 +1215,9 @@ function homeAnimation() {
       ),
       { clearProps: "transform,opacity,will-change" }
     );
+    gsap.set($homeResting.find(".perspective-card"), {
+      clearProps: "transform,will-change",
+    });
     gsap.set(
       $(
         "[home-gradient-orbit], [home-gradient-piece], [home-gradient-drops], [home-gradient-drop], [home-gradient-line], [home-drop-purple-base], [home-drop-colors], [home-drop-circle], [home-drop-star], [ripple-ring]"
