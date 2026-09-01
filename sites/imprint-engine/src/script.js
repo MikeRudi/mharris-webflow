@@ -526,15 +526,15 @@ function homeAnimation() {
       0.417
     )
     // Logo holds with second scene
-    .to(
-      $("[home-logo-up]"),
-      {
-        y: 0,
-        duration: 0.25,
-        ease: "none",
-      },
-      0.1
-    )
+    // .to(
+    //   $("[home-logo-up]"),
+    //   {
+    //     y: 0,
+    //     duration: 0.25,
+    //     ease: "none",
+    //   },
+    //   0.1
+    // )
     // Second scene leaves
     .to(
       $("[home-second-up]"),
