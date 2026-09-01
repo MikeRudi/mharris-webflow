@@ -716,22 +716,9 @@ function homeAnimation() {
       },
       0.533
     )
+    // All circles merge into the centre drop
     .to(
-      $(
-        '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
-      ),
-      {
-        attr: { cy: 800 },
-        duration: 0.111,
-        ease: "power2.inOut",
-      },
-      0.533
-    )
-    // Remaining circles merge into the centre drop
-    .to(
-      $(
-        '[home-gradient-piece="1"], [home-gradient-piece="2"], [home-gradient-piece="3"], [home-gradient-piece="7"], [home-gradient-piece="8"]'
-      ),
+      $("[home-gradient-piece]"),
       {
         attr: { cx: 720, cy: 800 },
         duration: 0.111,
@@ -740,21 +727,7 @@ function homeAnimation() {
       0.533
     )
     .to(
-      $(
-        '[home-gradient-piece="1"], [home-gradient-piece="2"], [home-gradient-piece="3"], [home-gradient-piece="7"], [home-gradient-piece="8"]'
-      ),
-      {
-        opacity: 0,
-        duration: 0.067,
-        ease: "power1.in",
-      },
-      0.556
-    )
-    // Three drops form and merge
-    .to(
-      $(
-        '[home-gradient-piece="4"], [home-gradient-piece="5"], [home-gradient-piece="6"]'
-      ),
+      $("[home-gradient-piece]"),
       {
         opacity: 0,
         duration: 0.111,
@@ -762,20 +735,12 @@ function homeAnimation() {
       },
       0.589
     )
+    // Centre circle becomes the drop
     .to(
       $('[home-gradient-drop="2"]'),
       {
         opacity: 1,
         duration: 0.078,
-        ease: "power1.out",
-      },
-      0.589
-    )
-    .to(
-      $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
-      {
-        opacity: 0.8,
-        duration: 0.033,
         ease: "power1.out",
       },
       0.589
@@ -806,15 +771,6 @@ function homeAnimation() {
         ease: "power1.inOut",
       },
       0.589
-    )
-    .to(
-      $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
-      {
-        opacity: 0,
-        duration: 0.111,
-        ease: "power1.in",
-      },
-      0.622
     )
     // Drop lands, ripple plays and line draws
     .to(
