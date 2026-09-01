@@ -492,7 +492,7 @@ function homeAnimation() {
       {
         opacity: 1,
         duration: 0.09,
-        ease: "power1.in",
+        ease: "power1.out",
       },
       0.05
     )
