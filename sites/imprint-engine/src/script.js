@@ -727,6 +727,18 @@ function homeAnimation() {
       },
       0.533
     )
+    // Remaining circles merge into the centre drop
+    .to(
+      $(
+        '[home-gradient-piece="1"], [home-gradient-piece="2"], [home-gradient-piece="3"], [home-gradient-piece="7"], [home-gradient-piece="8"]'
+      ),
+      {
+        attr: { cx: 720, cy: 800 },
+        duration: 0.111,
+        ease: "power2.inOut",
+      },
+      0.533
+    )
     .to(
       $(
         '[home-gradient-piece="1"], [home-gradient-piece="2"], [home-gradient-piece="3"], [home-gradient-piece="7"], [home-gradient-piece="8"]'
