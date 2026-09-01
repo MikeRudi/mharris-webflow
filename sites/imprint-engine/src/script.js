@@ -153,7 +153,9 @@ function homeAnimation() {
   );
 
   const $homeResting = $("[home-resting]");
-  const homeRestingRotation = { x: 0, y: 0 };
+  const homeRestingRotation = { angle: 0 };
+  const homeRestingView = { progress: 0 };
+  const homeRestingCenterShift = { x: 0, y: 0 };
   let homeRestingSphere = [];
 
   function buildHomeRestingSphere() {
@@ -161,13 +163,16 @@ function homeAnimation() {
       const isFront = $(element).closest(".perspective-opacity-1").length;
       const isBack = $(element).closest(".perspective-opacity-3").length;
 
+      const transformX = Number(gsap.getProperty(element, "x", "px")) || 0;
+      const transformY = Number(gsap.getProperty(element, "y", "px")) || 0;
+      const bounds = element.getBoundingClientRect();
+
       return {
         element,
         card: $(element).find(".perspective-card")[0],
-        x: element.offsetLeft + element.offsetWidth / 2,
-        y: element.offsetTop + element.offsetHeight / 2,
+        x: bounds.left - transformX + bounds.width / 2,
+        y: bounds.top - transformY + bounds.height / 2,
         depth: isFront ? 1 : isBack ? -1 : index % 2 === 0 ? 0.35 : -0.35,
-        opacity: isFront ? 1 : isBack ? 0.1 : 0.3,
       };
     });
 
@@ -185,6 +190,9 @@ function homeAnimation() {
       )
     );
 
+    homeRestingCenterShift.x = window.innerWidth / 2 - centerX;
+    homeRestingCenterShift.y = window.innerHeight / 2 - centerY;
+
     homeRestingSphere = restingItems.map((item) => {
       const x = item.x - centerX;
       const y = item.y - centerY;
@@ -197,34 +205,49 @@ function homeAnimation() {
   }
 
   function renderHomeRestingSphere() {
-    const rotateX = (homeRestingRotation.x * Math.PI) / 180;
-    const rotateY = (homeRestingRotation.y * Math.PI) / 180;
-    const cosX = Math.cos(rotateX);
-    const sinX = Math.sin(rotateX);
-    const cosY = Math.cos(rotateY);
-    const sinY = Math.sin(rotateY);
+    const angle = (homeRestingRotation.angle * Math.PI) / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const axisX = -Math.SQRT1_2;
+    const axisY = Math.SQRT1_2;
+    const viewScale = gsap.utils.interpolate(
+      1,
+      0.78,
+      homeRestingView.progress
+    );
+    const viewX = homeRestingCenterShift.x * homeRestingView.progress;
+    const viewY = homeRestingCenterShift.y * homeRestingView.progress;
 
     homeRestingSphere.forEach((item) => {
-      const y = item.y * cosX - item.z * sinX;
-      const z = item.y * sinX + item.z * cosX;
-      const x = item.x * cosY + z * sinY;
-      const depth = -item.x * sinY + z * cosY;
-      const scale = gsap.utils.clamp(
-        0.82,
-        1.16,
-        1 + ((depth - item.z) / item.radius) * 0.16
+      const axisDot = item.x * axisX + item.y * axisY;
+      const x =
+        item.x * cos +
+        axisY * item.z * sin +
+        axisX * axisDot * (1 - cos);
+      const y =
+        item.y * cos -
+        axisX * item.z * sin +
+        axisY * axisDot * (1 - cos);
+      const depth =
+        item.z * cos + (axisX * item.y - axisY * item.x) * sin;
+      const depthProgress = gsap.utils.clamp(
+        0,
+        1,
+        (depth / item.radius + 1) / 2
       );
-      const opacity = gsap.utils.clamp(
+      const scale =
+        gsap.utils.interpolate(0.72, 1.42, depthProgress) * viewScale;
+      const opacity = gsap.utils.interpolate(
         0.08,
         1,
-        item.opacity + ((depth - item.z) / (item.radius * 2)) * 0.9
+        Math.pow(depthProgress, 1.25)
       );
 
       $(item.element).css("z-index", Math.round(depth + item.radius));
 
       gsap.set(item.card, {
-        x: x - item.x,
-        y: y - item.y,
+        x: x * viewScale + viewX - item.x,
+        y: y * viewScale + viewY - item.y,
         scale,
         opacity,
         force3D: true,
@@ -487,8 +510,7 @@ function homeAnimation() {
   const restingTimeline = gsap.timeline({ repeat: -1 });
 
   restingTimeline.to(homeRestingRotation, {
-    x: 360,
-    y: 360,
+    angle: 360,
     duration: 8,
     ease: "none",
     onUpdate: renderHomeRestingSphere,
@@ -538,6 +560,17 @@ function homeAnimation() {
 
   // Scrub: content scenes
   homeScrubTimeline
+    // Sphere scales down and moves to the centre
+    .to(
+      homeRestingView,
+      {
+        progress: 1,
+        duration: 0.2,
+        ease: "power1.inOut",
+        onUpdate: renderHomeRestingSphere,
+      },
+      0
+    )
     // First scene leaves
     .to(
       $("[home-start-up]").not("[home-resting]"),
@@ -1050,22 +1083,6 @@ function homeAnimation() {
       0.848
     );
 
-  let restingMotion = null;
-
-  function syncRestingTimeline(progress) {
-    const nextMotion = progress === 0 ? "resting" : "transition";
-
-    if (restingMotion === nextMotion) return;
-
-    restingMotion = nextMotion;
-    gsap.to(restingTimeline, {
-      timeScale: nextMotion === "resting" ? 1 : -2,
-      duration: 0.8,
-      ease: "power1.inOut",
-      overwrite: true,
-    });
-  }
-
   function syncRippleTimeline() {
     const dropHasLanded = homeScrubTimeline.progress() >= 0.811;
     const endDropHasSettled = homeFinishTimeline.progress() >= 0.3;
@@ -1130,7 +1147,6 @@ function homeAnimation() {
 
     homeFinishState = "playing";
     homeClip.progress = 0;
-    syncRestingTimeline(1);
     lockHomeFinishScroll();
 
     homeFinishTimeline.pause();
@@ -1142,7 +1158,6 @@ function homeAnimation() {
     if (homeFinishState !== "complete") return;
 
     homeFinishState = "reversing";
-    syncRestingTimeline(1);
     lockHomeFinishScroll();
     homeFinishTimeline.timeScale(1 / homeFinishDuration).reverse();
   }
@@ -1184,7 +1199,6 @@ function homeAnimation() {
       if (homeFinishState !== "scrub") return;
 
       homeScrubTimeline.progress(self.progress);
-      syncRestingTimeline(self.progress);
       syncRippleTimeline();
 
       if (self.progress >= 1) {
@@ -1207,7 +1221,6 @@ function homeAnimation() {
   });
 
   homeScrubTimeline.progress(homeScrollTrigger.progress);
-  syncRestingTimeline(homeScrollTrigger.progress);
   syncRippleTimeline();
 
   return () => {
