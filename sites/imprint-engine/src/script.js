@@ -605,7 +605,7 @@ function homeAnimation() {
     if (homeRestingIsDragging) return;
 
     const rotation = (deltaTime / 1000) * (360 / 14);
-    const direction = (-45 * Math.PI) / 180;
+    const direction = (45 * Math.PI) / 180;
 
     homeRestingInputX += Math.cos(direction) * rotation;
     homeRestingInputY += Math.sin(direction) * rotation;
