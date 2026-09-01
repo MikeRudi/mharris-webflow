@@ -482,19 +482,19 @@ function homeAnimation() {
       $("[home-logo-up]"),
       {
         y: 0,
-        duration: 0.083,
+        duration: 0.05,
         ease: "power1.in",
       },
-      0.167
+      0.05
     )
     .to(
       $("[home-logo-up]"),
       {
         opacity: 1,
-        duration: 0.067,
+        duration: 0.05,
         ease: "power1.out",
       },
-      0.167
+      0.05
     )
     // Second scene enters
     .to(
