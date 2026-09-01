@@ -1215,7 +1215,6 @@ function homeAnimation() {
       if (homeFinishState !== "scrub") return;
 
       homeScrubTimeline.progress(0);
-      syncRestingTimeline(0);
       syncRippleTimeline();
     },
   });
