@@ -489,7 +489,7 @@ function homeAnimation() {
   restingTimeline.to(homeRestingRotation, {
     x: 360,
     y: 360,
-    duration: 2,
+    duration: 4,
     ease: "none",
     onUpdate: renderHomeRestingSphere,
   });
