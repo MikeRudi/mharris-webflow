@@ -157,19 +157,19 @@ function homeAnimation() {
   let homeRestingSphere = [];
 
   function buildHomeRestingSphere() {
-    const restingItems = $homeResting.toArray().map((element, index) => ({
-      element,
-      card: $(element).find(".perspective-card")[0],
-      x: element.offsetLeft + element.offsetWidth / 2,
-      y: element.offsetTop + element.offsetHeight / 2,
-      depth: $(element).closest(".perspective-opacity-1").length
-        ? 1
-        : $(element).closest(".perspective-opacity-3").length
-          ? -1
-          : index % 2 === 0
-            ? 0.35
-            : -0.35,
-    }));
+    const restingItems = $homeResting.toArray().map((element, index) => {
+      const isFront = $(element).closest(".perspective-opacity-1").length;
+      const isBack = $(element).closest(".perspective-opacity-3").length;
+
+      return {
+        element,
+        card: $(element).find(".perspective-card")[0],
+        x: element.offsetLeft + element.offsetWidth / 2,
+        y: element.offsetTop + element.offsetHeight / 2,
+        depth: isFront ? 1 : isBack ? -1 : index % 2 === 0 ? 0.35 : -0.35,
+        opacity: isFront ? 1 : isBack ? 0.1 : 0.3,
+      };
+    });
 
     if (!restingItems.length) return;
 
@@ -197,8 +197,8 @@ function homeAnimation() {
   }
 
   function renderHomeRestingSphere() {
-    const rotateX = gsap.utils.toRad(homeRestingRotation.x);
-    const rotateY = gsap.utils.toRad(homeRestingRotation.y);
+    const rotateX = (homeRestingRotation.x * Math.PI) / 180;
+    const rotateY = (homeRestingRotation.y * Math.PI) / 180;
     const cosX = Math.cos(rotateX);
     const sinX = Math.sin(rotateX);
     const cosY = Math.cos(rotateY);
@@ -214,16 +214,32 @@ function homeAnimation() {
         1.16,
         1 + ((depth - item.z) / item.radius) * 0.16
       );
+      const opacity = gsap.utils.clamp(
+        0.08,
+        1,
+        item.opacity + ((depth - item.z) / (item.radius * 2)) * 0.9
+      );
+
+      $(item.element).css("z-index", Math.round(depth + item.radius));
 
       gsap.set(item.card, {
         x: x - item.x,
         y: y - item.y,
         scale,
+        opacity,
         force3D: true,
         transformOrigin: "center center",
       });
     });
   }
+
+  gsap.set(
+    $(".perspective-opacity-1, .perspective-opacity-2, .perspective-opacity-3"),
+    {
+      opacity: 1,
+      zIndex: "auto",
+    }
+  );
 
   buildHomeRestingSphere();
   renderHomeRestingSphere();
@@ -1216,7 +1232,16 @@ function homeAnimation() {
       { clearProps: "transform,opacity,will-change" }
     );
     gsap.set($homeResting.find(".perspective-card"), {
-      clearProps: "transform,will-change",
+      clearProps: "transform,opacity,will-change",
+    });
+    gsap.set(
+      $(".perspective-opacity-1, .perspective-opacity-2, .perspective-opacity-3"),
+      {
+        clearProps: "opacity,z-index",
+      }
+    );
+    $homeResting.css({
+      zIndex: "",
     });
     gsap.set(
       $(
