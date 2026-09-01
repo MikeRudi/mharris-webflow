@@ -1353,7 +1353,7 @@ function homeAnimation() {
       if (homeFinishState !== "scrub") return;
 
       if (self.progress > 0.002 && homeRestingIsDragging) {
-        endHomeRestingDrag(false);
+        endHomeRestingDrag();
       }
 
       homeScrubTimeline.progress(self.progress);
@@ -1380,7 +1380,7 @@ function homeAnimation() {
   homeScrubTimeline.progress(homeScrollTrigger.progress);
   syncRippleTimeline();
 
-  $homeResting.css("cursor", "grab");
+  $homeRestingDragSurface.css("cursor", "grab");
   $homeRestingDragSurface.on(
     "pointerdown.homeRestingDrag",
     startHomeRestingDrag
@@ -1405,9 +1405,10 @@ function homeAnimation() {
     homeFinishTimeline.kill();
     if (homeRippleTimeline) homeRippleTimeline.kill();
     if (homeEndRippleTimeline) homeEndRippleTimeline.kill();
-    if (homeRestingTween) homeRestingTween.kill();
-    if (homeRestingMomentumTween) homeRestingMomentumTween.kill();
-    $homeResting.css("cursor", "");
+    gsap.ticker.remove(rotateHomeRestingSphere);
+    homeRestingQuickX.tween.kill();
+    homeRestingQuickY.tween.kill();
+    $homeRestingDragSurface.css("cursor", "");
     $homeRestingDragSurface.off(".homeRestingDrag");
     $(document).off(".homeRestingDrag");
     document.body.style.userSelect = homeRestingUserSelect;
