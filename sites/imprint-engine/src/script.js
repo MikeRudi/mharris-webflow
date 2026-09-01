@@ -514,16 +514,121 @@ function homeAnimation() {
   let homeFinishState = "scrub";
   let homeFinishScrollLocked = false;
 
-  const restingTimeline = gsap.timeline({ repeat: -1 });
+  let homeRestingTween = null;
+  let homeRestingMomentumTween = null;
+  let homeRestingIsDragging = false;
+  let homeRestingPointerId = null;
+  let homeRestingDragStartX = 0;
+  let homeRestingDragStartY = 0;
+  let homeRestingDragStartAngle = 0;
+  let homeRestingLastAngle = 0;
+  let homeRestingLastTime = 0;
+  let homeRestingVelocity = 0;
+  let homeRestingUserSelect = "";
 
-  restingTimeline.to(homeRestingRotation, {
-    angle: 360,
-    duration: 8,
-    ease: "none",
-    onUpdate: renderHomeRestingSphere,
-  });
+  function startHomeRestingRotation() {
+    if (homeRestingTween) homeRestingTween.kill();
 
-  restingTimeline.totalTime(restingTimeline.duration() * 1000);
+    homeRestingRotation.angle = gsap.utils.wrap(
+      0,
+      360,
+      homeRestingRotation.angle
+    );
+
+    homeRestingTween = gsap.to(homeRestingRotation, {
+      angle: homeRestingRotation.angle + 360,
+      duration: 8,
+      ease: "none",
+      repeat: -1,
+      onUpdate: renderHomeRestingSphere,
+    });
+  }
+
+  function canDragHomeResting() {
+    return (
+      homeLoadTimeline.progress() === 1 &&
+      homeFinishState === "scrub" &&
+      homeScrollTrigger.progress <= 0.002
+    );
+  }
+
+  function startHomeRestingDrag(event) {
+    if (event.button !== 0 || !canDragHomeResting()) return;
+
+    homeRestingIsDragging = true;
+    homeRestingPointerId = event.pointerId;
+    homeRestingDragStartX = event.clientX;
+    homeRestingDragStartY = event.clientY;
+    homeRestingDragStartAngle = homeRestingRotation.angle;
+    homeRestingLastAngle = homeRestingRotation.angle;
+    homeRestingLastTime = performance.now();
+    homeRestingVelocity = 0;
+
+    if (homeRestingTween) homeRestingTween.pause();
+    if (homeRestingMomentumTween) homeRestingMomentumTween.kill();
+
+    homeRestingUserSelect = document.body.style.userSelect;
+    document.body.style.userSelect = "none";
+    $homeResting.css("cursor", "grabbing");
+    event.preventDefault();
+  }
+
+  function moveHomeRestingDrag(event) {
+    if (
+      !homeRestingIsDragging ||
+      event.pointerId !== homeRestingPointerId
+    ) {
+      return;
+    }
+
+    const nextAngle =
+      homeRestingDragStartAngle +
+      (event.clientX - homeRestingDragStartX) * 0.3 -
+      (event.clientY - homeRestingDragStartY) * 0.3;
+    const now = performance.now();
+    const elapsed = Math.max(now - homeRestingLastTime, 16);
+    const nextVelocity = (nextAngle - homeRestingLastAngle) / elapsed;
+
+    homeRestingVelocity = gsap.utils.interpolate(
+      homeRestingVelocity,
+      nextVelocity,
+      0.4
+    );
+    homeRestingRotation.angle = nextAngle;
+    homeRestingLastAngle = nextAngle;
+    homeRestingLastTime = now;
+
+    renderHomeRestingSphere();
+    event.preventDefault();
+  }
+
+  function endHomeRestingDrag(useMomentum = true) {
+    if (!homeRestingIsDragging) return;
+
+    homeRestingIsDragging = false;
+    homeRestingPointerId = null;
+    document.body.style.userSelect = homeRestingUserSelect;
+    $homeResting.css("cursor", "grab");
+
+    const momentum = useMomentum
+      ? gsap.utils.clamp(-90, 90, homeRestingVelocity * 180)
+      : 0;
+
+    if (!momentum) {
+      startHomeRestingRotation();
+      return;
+    }
+
+    homeRestingMomentumTween = gsap.to(homeRestingRotation, {
+      angle: homeRestingRotation.angle + momentum,
+      duration: 0.6,
+      ease: "power2.out",
+      onUpdate: renderHomeRestingSphere,
+      onComplete: startHomeRestingRotation,
+    });
+  }
+
+  startHomeRestingRotation();
 
   const homeLoadTimeline = gsap.timeline({
     onComplete: () => {
@@ -1205,6 +1310,10 @@ function homeAnimation() {
     onUpdate: (self) => {
       if (homeFinishState !== "scrub") return;
 
+      if (self.progress > 0.002 && homeRestingIsDragging) {
+        endHomeRestingDrag(false);
+      }
+
       homeScrubTimeline.progress(self.progress);
       syncRippleTimeline();
 
@@ -1229,6 +1338,16 @@ function homeAnimation() {
   homeScrubTimeline.progress(homeScrollTrigger.progress);
   syncRippleTimeline();
 
+  $homeResting
+    .css("cursor", "grab")
+    .on("pointerdown.homeRestingDrag", startHomeRestingDrag);
+  $(document)
+    .on("pointermove.homeRestingDrag", moveHomeRestingDrag)
+    .on("pointerup.homeRestingDrag pointercancel.homeRestingDrag", (event) => {
+      if (event.pointerId !== homeRestingPointerId) return;
+      endHomeRestingDrag();
+    });
+
   return () => {
     if ((homeLoadScrollLocked || homeFinishScrollLocked) && window.lenis) {
       window.lenis.start();
@@ -1242,8 +1361,11 @@ function homeAnimation() {
     homeFinishTimeline.kill();
     if (homeRippleTimeline) homeRippleTimeline.kill();
     if (homeEndRippleTimeline) homeEndRippleTimeline.kill();
-    gsap.killTweensOf(restingTimeline);
-    restingTimeline.kill();
+    if (homeRestingTween) homeRestingTween.kill();
+    if (homeRestingMomentumTween) homeRestingMomentumTween.kill();
+    $homeResting.off(".homeRestingDrag").css("cursor", "");
+    $(document).off(".homeRestingDrag");
+    document.body.style.userSelect = homeRestingUserSelect;
     gsap.set(
       $(
         "[home-resting], [home-start-up], [home-second-up], [home-third-up], [home-logo-up]"
