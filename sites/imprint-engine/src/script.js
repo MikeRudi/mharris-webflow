@@ -615,7 +615,7 @@ function homeAnimation() {
   function rotateHomeRestingSphere(time, deltaTime) {
     if (homeRestingIsDragging) return;
 
-    const rotation = (deltaTime / 1000) * (360 / 8);
+    const rotation = (deltaTime / 1000) * (360 / 10);
     const direction = (homeRestingAutoDirection.angle * Math.PI) / 180;
 
     homeRestingInputX += Math.cos(direction) * rotation;
