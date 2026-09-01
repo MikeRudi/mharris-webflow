@@ -153,6 +153,7 @@ function homeAnimation() {
   );
 
   const $homeResting = $("[home-resting]");
+  const $homeRestingDragSurface = $(".home-start");
   const homeRestingRotation = { angle: 0 };
   const homeRestingView = { progress: 0 };
   const homeRestingCenterShift = { x: 0, y: 0 };
@@ -546,14 +547,20 @@ function homeAnimation() {
 
   function canDragHomeResting() {
     return (
-      homeLoadTimeline.progress() === 1 &&
+      homeLoadTimeline.progress() >= 0.999 &&
       homeFinishState === "scrub" &&
       homeScrollTrigger.progress <= 0.002
     );
   }
 
   function startHomeRestingDrag(event) {
-    if (event.button !== 0 || !canDragHomeResting()) return;
+    if (
+      event.button !== 0 ||
+      $(event.target).closest("a, button, input, textarea, select").length ||
+      !canDragHomeResting()
+    ) {
+      return;
+    }
 
     homeRestingIsDragging = true;
     homeRestingPointerId = event.pointerId;
@@ -1338,9 +1345,11 @@ function homeAnimation() {
   homeScrubTimeline.progress(homeScrollTrigger.progress);
   syncRippleTimeline();
 
-  $homeResting
-    .css("cursor", "grab")
-    .on("pointerdown.homeRestingDrag", startHomeRestingDrag);
+  $homeResting.css("cursor", "grab");
+  $homeRestingDragSurface.on(
+    "pointerdown.homeRestingDrag",
+    startHomeRestingDrag
+  );
   $(document)
     .on("pointermove.homeRestingDrag", moveHomeRestingDrag)
     .on("pointerup.homeRestingDrag pointercancel.homeRestingDrag", (event) => {
@@ -1363,7 +1372,8 @@ function homeAnimation() {
     if (homeEndRippleTimeline) homeEndRippleTimeline.kill();
     if (homeRestingTween) homeRestingTween.kill();
     if (homeRestingMomentumTween) homeRestingMomentumTween.kill();
-    $homeResting.off(".homeRestingDrag").css("cursor", "");
+    $homeResting.css("cursor", "");
+    $homeRestingDragSurface.off(".homeRestingDrag");
     $(document).off(".homeRestingDrag");
     document.body.style.userSelect = homeRestingUserSelect;
     gsap.set(
