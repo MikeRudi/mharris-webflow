@@ -158,6 +158,7 @@ function homeAnimation() {
   const homeRestingCenterShift = { x: 0, y: 0 };
   const homeRestingBaseY =
     parseFloat(getComputedStyle(document.documentElement).fontSize) * 2;
+  const homeRestingRadiusScale = 0.9;
   let homeRestingSphere = [];
 
   function buildHomeRestingSphere() {
@@ -248,8 +249,12 @@ function homeAnimation() {
       $(item.element).css("z-index", Math.round(depth + item.radius));
 
       gsap.set(item.card, {
-        x: x * viewScale + viewX - item.x,
-        y: y * viewScale + homeRestingBaseY + viewY - item.y,
+        x: x * homeRestingRadiusScale * viewScale + viewX - item.x,
+        y:
+          y * homeRestingRadiusScale * viewScale +
+          homeRestingBaseY +
+          viewY -
+          item.y,
         scale,
         opacity,
         force3D: true,
