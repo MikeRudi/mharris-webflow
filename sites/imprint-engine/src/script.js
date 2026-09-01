@@ -489,7 +489,7 @@ function homeAnimation() {
   restingTimeline.to(homeRestingRotation, {
     x: 360,
     y: 360,
-    duration: 320,
+    duration: 2,
     ease: "none",
     onUpdate: renderHomeRestingSphere,
   });
@@ -1059,7 +1059,7 @@ function homeAnimation() {
 
     restingMotion = nextMotion;
     gsap.to(restingTimeline, {
-      timeScale: nextMotion === "resting" ? 1 : -1.8,
+      timeScale: nextMotion === "resting" ? 1 : -2,
       duration: 0.8,
       ease: "power1.inOut",
       overwrite: true,
