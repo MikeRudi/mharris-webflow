@@ -1911,13 +1911,18 @@ function accordionOne() {
     const $currentItem = $items.filter(".active").first();
     const $initialItem = $currentItem.length ? $currentItem : $items.first();
     let activeValue = $initialItem.attr("accord-item");
+    const $initialChild = $children
+      .filter(`[accord-reveal="${activeValue}"]`)
+      .first();
 
+    $children.removeClass("active");
+    $initialChild.addClass("active");
     gsap.set($children, {
       autoAlpha: 0,
       pointerEvents: "none",
     });
 
-    gsap.set($children.filter(`[accord-reveal="${activeValue}"]`).first(), {
+    gsap.set($initialChild, {
       autoAlpha: 1,
       pointerEvents: "auto",
     });
@@ -1961,21 +1966,28 @@ function accordionOne() {
         if ($nextChild.length) {
           gsap.killTweensOf([$currentChild[0], $nextChild[0]]);
 
-          gsap.to($currentChild, {
+          $children.removeClass("active");
+          $nextChild.addClass("active");
+
+          gsap.set($currentChild, {
             autoAlpha: 0,
             pointerEvents: "none",
-            duration: 0.3,
-            ease: "none",
-            overwrite: true,
           });
 
-          gsap.to($nextChild, {
-            autoAlpha: 1,
-            pointerEvents: "auto",
-            duration: 0.3,
-            ease: "none",
-            overwrite: true,
-          });
+          gsap.fromTo(
+            $nextChild,
+            {
+              autoAlpha: 0,
+              pointerEvents: "none",
+            },
+            {
+              autoAlpha: 1,
+              pointerEvents: "auto",
+              duration: 0.3,
+              ease: "none",
+              overwrite: true,
+            }
+          );
 
           activeValue = nextValue;
         }
