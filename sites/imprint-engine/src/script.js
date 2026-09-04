@@ -85,6 +85,7 @@ function initSite() {
   navTheme();
   accordionOne();
   filterOne();
+  catalogueAnimation();
 
   onDesktop(() => {
     // gitTestDesktop();
@@ -1891,6 +1892,39 @@ function filterOne() {
 
     $tabs.off("click.filterOne");
     gsap.killTweensOf($lines);
+  };
+}
+
+function catalogueAnimation() {
+  const $selects = $("[cat-select]");
+  const $reveals = $("[cat-reveal]");
+  if (!$selects.length || !$reveals.length) return null;
+
+  function setActiveCatalogue($select) {
+    const value = $select.attr("cat-select");
+    const $matchingReveals = $reveals.filter(function () {
+      return $(this).attr("cat-reveal") === value;
+    });
+    if (!$matchingReveals.length) return;
+
+    $selects.removeClass("active");
+    $select.addClass("active");
+    $reveals.removeClass("active");
+    $matchingReveals.addClass("active");
+  }
+
+  const $initialSelect = $selects.filter(".active").first();
+  setActiveCatalogue($initialSelect.length ? $initialSelect : $selects.first());
+
+  $selects
+    .off("click.catalogueAnimation")
+    .on("click.catalogueAnimation", function (event) {
+      event.preventDefault();
+      setActiveCatalogue($(this));
+    });
+
+  return () => {
+    $selects.off("click.catalogueAnimation");
   };
 }
 
