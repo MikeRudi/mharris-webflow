@@ -1,0 +1,30 @@
+<!-- Reference markup applied to Home Staged's layout-end SVGs on 2026-09-07.
+     Keep the current .home-end-brackets, .home-end-drop-stage and ripple wrappers.
+     The bracket paths are uniformly scaled from the supplied artwork to retain
+     their current height and centres in the existing animation viewport.
+     The drop uses the supplied path unchanged, retaining its painted height
+     and centre.
+     The fill/stroke rules below are set on the existing Webflow classes. -->
+
+<style>
+  .home-end-bracket-shape {
+    fill: #5F249F;
+  }
+
+  .home-end-target-path {
+    fill: #111111;
+    stroke: none;
+    stroke-width: 0;
+  }
+</style>
+
+<!-- Replace the existing brackets SVG in .home-end-brackets. -->
+<svg xmlns="http://www.w3.org/2000/svg" class="home-end-brackets-svg" viewBox="0 0 180 140" fill="none" aria-hidden="true">
+  <path class="home-end-bracket-shape home-end-bracket-left" d="M 37.408471 13.3505 V 126.6495 H 66.591529 V 111.180419 H 52.858328 V 28.800356 H 66.591529 V 13.3505 H 37.408471 Z" fill="#5F249F" />
+  <path class="home-end-bracket-shape home-end-bracket-right" d="M 113.408471 13.3505 V 28.800356 H 127.141672 V 111.180419 H 113.408471 V 126.6495 H 142.591529 V 13.3505 H 113.408471 Z" fill="#5F249F" />
+</svg>
+
+<!-- Replace the existing drop SVG inside .home-end-drop-stage. -->
+<svg xmlns="http://www.w3.org/2000/svg" class="home-end-target-svg" viewBox="0 0 223 315" fill="none" aria-hidden="true">
+  <path class="home-end-target-path" d="M11.7856 9.469L6.31939 0L0.853191 9.469C-0.624546 12.0275 -0.146314 15.2173 2.00573 17.2355C3.1774 18.3306 4.70774 18.9332 6.31939 18.9332C7.93103 18.9332 9.46137 18.3306 10.633 17.2355C12.7899 15.2173 13.2633 12.0275 11.7856 9.469ZM8.57186 15.0356C7.95972 15.6047 7.16107 15.9203 6.31939 15.9203C5.4777 15.9203 4.67427 15.6047 4.06691 15.0356C2.94307 13.9787 2.69439 12.3097 3.46434 10.9754L6.32417 6.02573L9.184 10.9754C9.95395 12.3145 9.70527 13.9835 8.58142 15.0356H8.57186Z" transform="translate(14.028351 8.0996) scale(15.359284)" fill="#111111" stroke="none" />
+</svg>

@@ -109,6 +109,13 @@ translation, or drop swap. When the main sticky timeline finishes,
 normal page scroll.
 ```
 
+Home Staged's approved `.layout-end` artwork is recorded in
+`sites/imprint-engine/layout-end-svg-replacement.html`. The existing SVG
+containers, viewBoxes, classes, and animation hooks are preserved. The supplied
+brackets are uniformly scaled to their existing height and centres; the supplied
+compound raindrop path is scaled to its existing painted height and centre.
+The brackets use `fill: #5F249F`, and the drop uses `fill: #111111` with no stroke.
+
 ## Libraries
 
 - GSAP:
