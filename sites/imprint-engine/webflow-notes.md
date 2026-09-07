@@ -69,6 +69,13 @@ scrub time `0.334`, after the first scene's full exit stagger, then move up and
 fade out. Scrolling back restores the logos. The initial CSS `opacity: 0`
 prevents a flash before the page-load animation starts.
 
+The rotating card sphere caches GSAP quick setters for each card. Do not create
+`gsap.set()` tweens inside its frame updates: those completed tweens stay retained
+by the desktop matchMedia context. Rotation and smoothing pause when the browser
+tab is hidden, `.home-start` is outside the viewport, or the resting cards have
+finished fading at scrub time `0.37`. Returning resumes from the retained position.
+The observer, visibility listener, and ticker are removed during desktop cleanup.
+
 .layout-start
   .home-start
   .layout-end

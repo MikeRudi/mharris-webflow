@@ -194,6 +194,9 @@ function homeAnimation() {
 
   function buildHomeRestingSphere() {
     const restingItems = $homeResting.toArray().map((element, index) => {
+      const card = $(element).find(".perspective-card")[0];
+      if (!card) return null;
+
       const isFront = $(element).closest(".perspective-opacity-1").length;
       const isBack = $(element).closest(".perspective-opacity-3").length;
 
@@ -201,15 +204,25 @@ function homeAnimation() {
       const transformY = Number(gsap.getProperty(element, "y", "px")) || 0;
       const bounds = element.getBoundingClientRect();
 
+      gsap.set(card, {
+        force3D: true,
+        transformOrigin: "center center",
+      });
+
       return {
         element,
-        card: $(element).find(".perspective-card")[0],
+        card,
+        setX: gsap.quickSetter(card, "x", "px"),
+        setY: gsap.quickSetter(card, "y", "px"),
+        setScale: gsap.quickSetter(card, "scale"),
+        setOpacity: gsap.quickSetter(card, "opacity"),
+        setZIndex: gsap.quickSetter(element, "zIndex"),
         x: bounds.left - transformX + bounds.width / 2,
         y: bounds.top - transformY + bounds.height / 2,
         depth: isFront ? 1 : isBack ? -1 : index % 2 === 0 ? 0.35 : -0.35,
         opacity: isFront ? 1 : isBack ? 0.1 : 0.3,
       };
-    });
+    }).filter(Boolean);
 
     if (!restingItems.length) return;
 
@@ -220,6 +233,7 @@ function homeAnimation() {
       restingItems.reduce((total, item) => total + item.y, 0) /
       restingItems.length;
     const radius = Math.max(
+      1,
       ...restingItems.map((item) =>
         Math.hypot(item.x - centerX, item.y - centerY)
       )
@@ -305,23 +319,17 @@ function homeAnimation() {
         item.opacity + ((depth - item.z) / (item.radius * 2)) * 0.9
       );
 
-      $(item.element).css("z-index", Math.round(depth + item.radius));
-
-      gsap.set(item.card, {
-        x:
-          x * homeRestingRadiusScale * viewScale +
-          viewX -
-          item.screenX,
-        y:
-          -y * homeRestingRadiusScale * viewScale +
-          homeRestingBaseY +
-          viewY -
-          item.screenY,
-        scale,
-        opacity,
-        force3D: true,
-        transformOrigin: "center center",
-      });
+      // Reuse setters: per-frame gsap.set() tweens accumulate in matchMedia.
+      item.setZIndex(Math.round(depth + item.radius));
+      item.setX(
+        x * homeRestingRadiusScale * viewScale + viewX - item.screenX
+      );
+      item.setY(
+        -y * homeRestingRadiusScale * viewScale +
+          homeRestingBaseY + viewY - item.screenY
+      );
+      item.setScale(scale);
+      item.setOpacity(opacity);
     });
   }
 
@@ -625,9 +633,13 @@ function homeAnimation() {
   let homeRestingInputX = 0;
   let homeRestingInputY = 0;
   let homeRestingUserSelect = "";
+  let homeRestingIsActive = false;
+  let homeRestingIsInView = true;
+  let homeRestingIsDestroyed = false;
+  let homeRestingObserver = null;
 
   function rotateHomeRestingSphere(time, deltaTime) {
-    if (document.hidden || homeRestingIsDragging) return;
+    if (!homeRestingIsActive || document.hidden || homeRestingIsDragging) return;
 
     const rotation = (Math.min(deltaTime, 32) / 1000) * (360 / 14);
     const direction = (45 * Math.PI) / 180;
@@ -638,8 +650,33 @@ function homeAnimation() {
     homeRestingQuickX(homeRestingInputY);
   }
 
+  function syncHomeRestingActivity() {
+    if (homeRestingIsDestroyed) return;
+
+    // Resting cards finish fading at scrub time 0.3 + 0.07.
+    const shouldRun =
+      homeRestingSphere.length > 0 &&
+      !document.hidden &&
+      homeRestingIsInView &&
+      homeFinishState === "scrub" &&
+      homeScrubTimeline.time() < 0.37;
+
+    if (shouldRun === homeRestingIsActive) return;
+    homeRestingIsActive = shouldRun;
+
+    if (shouldRun) {
+      gsap.ticker.add(rotateHomeRestingSphere);
+    } else {
+      gsap.ticker.remove(rotateHomeRestingSphere);
+      homeRestingQuickX.tween.pause();
+      homeRestingQuickY.tween.pause();
+      endHomeRestingDrag();
+    }
+  }
+
   function canDragHomeResting() {
     return (
+      homeRestingIsActive &&
       homeLoadTimeline.progress() >= 0.999 &&
       homeFinishState === "scrub" &&
       homeScrollTrigger.progress <= 0.002
@@ -694,8 +731,6 @@ function homeAnimation() {
     document.body.style.userSelect = homeRestingUserSelect;
     $homeRestingDragSurface.css("cursor", "grab");
   }
-
-  gsap.ticker.add(rotateHomeRestingSphere);
 
   const homeLoadTimeline = gsap.timeline({
     onComplete: () => {
@@ -1379,6 +1414,7 @@ function homeAnimation() {
       }
 
       homeScrubTimeline.progress(self.progress);
+      syncHomeRestingActivity();
       syncRippleTimeline();
 
       if (self.progress >= 1) {
@@ -1395,12 +1431,24 @@ function homeAnimation() {
       if (homeFinishState !== "scrub") return;
 
       homeScrubTimeline.progress(0);
+      syncHomeRestingActivity();
       syncRippleTimeline();
     },
   });
 
   homeScrubTimeline.progress(homeScrollTrigger.progress);
+  syncHomeRestingActivity();
   syncRippleTimeline();
+
+  if (window.IntersectionObserver) {
+    homeRestingObserver = new IntersectionObserver(([entry]) => {
+      homeRestingIsInView = entry.isIntersecting;
+      syncHomeRestingActivity();
+    });
+    homeRestingObserver.observe($homeRestingDragSurface[0]);
+  }
+
+  $(document).on("visibilitychange.homeRestingVisibility", syncHomeRestingActivity);
 
   $homeRestingDragSurface.css("cursor", "grab");
   $homeRestingDragSurface.on(
@@ -1415,6 +1463,11 @@ function homeAnimation() {
     });
 
   return () => {
+    homeRestingIsDestroyed = true;
+    homeRestingIsActive = false;
+    if (homeRestingObserver) homeRestingObserver.disconnect();
+    $(document).off(".homeRestingVisibility");
+
     if ((homeLoadScrollLocked || homeFinishScrollLocked) && window.lenis) {
       window.lenis.start();
       homeLoadScrollLocked = false;
