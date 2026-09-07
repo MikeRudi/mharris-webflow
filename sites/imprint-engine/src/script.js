@@ -612,22 +612,20 @@ function homeAnimation() {
   const homeRippleTimeline = rippleAnimation();
   const homeEndRippleTimeline = rippleAnimation($(".home-end-ripple"), {
     endScale: (index) => 1.1 - index * 0.3,
-    startOpacity: 0.62,
     duration: 0.95,
     stagger: 0.09,
     settle: {
       opacity: 0.7,
       blur: "2.5rem",
+      // Decimal rgba alpha avoids GSAP 3.15's percentage-alpha interpolation snap.
       shadow:
-        "0 0 5rem 3rem rgb(104 150 230 / 60%), inset 0 0 5rem 3rem rgb(104 150 230 / 45%)",
-      start: 0.25,
+        "0 0 5rem 3rem rgba(104, 150, 230, 0.6), inset 0 0 5rem 3rem rgba(104, 150, 230, 0.45)",
+      start: 0.05,
       duration: 1.15,
       ease: "power2.out",
     },
   });
   let rippleHasPlayed = false;
-  let homeEndRippleHasPlayed = false;
-  let homeEndRippleHasFinished = true;
   let homeFinishState = "scrub";
   let homeFinishScrollLocked = false;
 
@@ -1289,9 +1287,16 @@ function homeAnimation() {
       0.848
     );
 
+  if (homeEndRippleTimeline) {
+    // Keep the ripple's real-second timing while the finish plays at 1 / 2.5 speed.
+    homeFinishTimeline.add(
+      homeEndRippleTimeline.timeScale(homeFinishDuration).paused(false),
+      0.27
+    );
+  }
+
   function syncRippleTimeline() {
     const dropHasLanded = homeScrubTimeline.progress() >= 0.811;
-    const endDropHasSettled = homeFinishTimeline.progress() >= 0.3;
 
     if (dropHasLanded && !rippleHasPlayed) {
       if (homeRippleTimeline) homeRippleTimeline.restart();
@@ -1302,21 +1307,6 @@ function homeAnimation() {
       if (homeRippleTimeline) homeRippleTimeline.pause(0);
       gsap.set($("[ripple-ring]"), { scale: 0.08, autoAlpha: 0 });
       rippleHasPlayed = false;
-    }
-
-    if (endDropHasSettled && !homeEndRippleHasPlayed) {
-      if (homeEndRippleTimeline) {
-        homeEndRippleHasFinished = false;
-        homeEndRippleTimeline.restart();
-      }
-      homeEndRippleHasPlayed = true;
-    }
-
-    if (!endDropHasSettled && homeEndRippleHasPlayed) {
-      if (homeEndRippleTimeline) homeEndRippleTimeline.pause(0);
-      gsap.set($(".home-end-ripple"), { scale: 0.08, autoAlpha: 0 });
-      homeEndRippleHasPlayed = false;
-      homeEndRippleHasFinished = true;
     }
   }
 
@@ -1338,8 +1328,7 @@ function homeAnimation() {
   function completeHomeFinish() {
     if (
       homeFinishState !== "playing" ||
-      homeFinishTimeline.progress() < 1 ||
-      !homeEndRippleHasFinished
+      homeFinishTimeline.progress() < 1
     ) {
       return;
     }
@@ -1349,6 +1338,13 @@ function homeAnimation() {
   }
 
   function playHomeFinish() {
+    if (homeFinishState === "reversing") {
+      homeFinishState = "playing";
+      lockHomeFinishScroll();
+      homeFinishTimeline.timeScale(1 / homeFinishDuration).play();
+      return;
+    }
+
     if (homeFinishState !== "scrub") return;
 
     homeFinishState = "playing";
@@ -1361,40 +1357,36 @@ function homeAnimation() {
   }
 
   function reverseHomeFinish() {
-    if (homeFinishState !== "complete") return;
+    if (homeFinishState !== "complete" && homeFinishState !== "playing") return;
 
     homeFinishState = "reversing";
     lockHomeFinishScroll();
+
+    if (homeFinishTimeline.time() === 0) {
+      completeHomeReverse();
+      return;
+    }
+
     homeFinishTimeline.timeScale(1 / homeFinishDuration).reverse();
   }
 
-  homeFinishTimeline.eventCallback("onUpdate", () => {
+  function completeHomeReverse() {
+    homeFinishTimeline.pause(0);
+    homeFinishTimeline.timeScale(1);
+    homeClip.progress = 0;
+    $(".home-start").css("clip-path", "none");
+    homeFinishState = "scrub";
+    homeScrubTimeline.progress(homeScrollTrigger.progress);
+    syncHomeRestingActivity();
     syncRippleTimeline();
+    releaseHomeFinishScroll();
+  }
 
-    if (
-      homeFinishState === "reversing" &&
-      homeFinishTimeline.progress() <= 0
-    ) {
-      homeFinishTimeline.pause(0);
-      homeFinishTimeline.timeScale(1);
-      homeClip.progress = 0;
-      $(".home-start").css("clip-path", "none");
-      homeFinishState = "scrub";
-      syncRippleTimeline();
-      releaseHomeFinishScroll();
-    }
-  });
+  homeFinishTimeline.eventCallback("onReverseComplete", completeHomeReverse);
 
   homeFinishTimeline.eventCallback("onComplete", () => {
     completeHomeFinish();
   });
-
-  if (homeEndRippleTimeline) {
-    homeEndRippleTimeline.eventCallback("onComplete", () => {
-      homeEndRippleHasFinished = true;
-      completeHomeFinish();
-    });
-  }
 
   const homeScrollTrigger = ScrollTrigger.create({
     trigger: $(".layout-start")[0],
@@ -1549,7 +1541,7 @@ function rippleAnimation(
     $rings,
     {
       scale: 0.08,
-      autoAlpha: startOpacity,
+      autoAlpha: settle ? 0 : startOpacity,
     },
     {
       scale: endScale,

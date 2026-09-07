@@ -106,20 +106,24 @@ time `0-0.36`. The final drop scales in place from `1` to `0.5` over
 `0.1-0.488`. Both brackets close horizontally from `-72px` / `72px` to `0`
 over `0.18-0.568`, clipped by their SVG parent. The bracket SVG, heading, copy,
 and button fade in over `0.46-0.62`; the drop stays visible.
-The larger second ripple plays on its own non-scrub timeline. Its three rings
-expand to scales `1.1 / 0.8 / 0.5` over `0.95s`, staggered by `0.09s`. Only this
-final ripple has a `settle` configuration: from `0.25s`, blue shadows spread
-and blur to `2.5rem` over `1.15s`. The rings finish at opacity `0.7` and stay
-visible as a soft background, with no repeating animation. End content and
-bracket artwork stay above the rings at `z-index: 2`. The earlier gradient ripple
-still fades away as before. Lenis restarts after the finish timeline and second
-ripple complete. Scrolling back reverses
-the finish timeline before returning control to scrub. The drop has no vertical
-travel in either direction. After the sticky sequence, `.layout-end`, brackets,
-and drop leave together through normal page scroll. Reversing below the final
-ripple trigger hides and resets the rings, including their original Webflow
-filter and shadows; replay starts cleanly. Desktop cleanup also clears the
-settling styles and content stacking order.
+The larger second ripple is nested in `homeFinishTimeline` at time `0.27`.
+Its child time scale is `homeFinishDuration`, preserving real-second timing
+under the slowed parent. Its three rings expand to scales `1.1 / 0.8 / 0.5`
+over `0.95s`, staggered by `0.09s`, and fade in from zero. Only this final ripple
+has a `settle` configuration: from `0.05s`, blue shadows spread and blur to
+`2.5rem` over `1.15s`. Use decimal `rgba()` alpha for animated shadow colours:
+GSAP 3.15 interpolates percentage alpha incorrectly and snaps at completion.
+The rings finish at opacity `0.7` and stay visible as a soft background, with
+no repeating animation. End content and bracket artwork stay above the rings
+at `z-index: 2`. The earlier gradient ripple still plays independently and fades
+away as before. Lenis restarts when the parent finish timeline completes.
+Scrolling back reverses the same parent and ripple together, smoothly restoring
+the rings' starting scale, zero opacity, and original Webflow filter/shadows.
+Direction changes during the finish resume from the current frame. Reverse
+completion applies the latest ScrollTrigger progress before returning control
+to scrub. The drop has no vertical travel in either direction. After the sticky
+sequence, `.layout-end`, brackets, drop, and ripple leave together through normal
+page scroll. Desktop cleanup clears settling styles and content stacking order.
 ```
 
 Home Staged's approved `.layout-end` artwork is recorded in
