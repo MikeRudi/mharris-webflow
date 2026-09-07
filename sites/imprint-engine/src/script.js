@@ -388,6 +388,30 @@ function homeAnimation() {
 
   const gradientOrbit = { angle: 0 };
   const homeClip = { progress: 0 };
+  const gradientDropletAnimation = {
+    final: {
+      widthEm: 3.125,
+      blur: 6,
+      start: 0.92,
+      duration: 0.08,
+      ease: "power1.in",
+    },
+  };
+
+  function finalGradientDropTransform() {
+    const svg = $("[home-gradient-svg]")[0];
+    const matrix = svg && svg.getScreenCTM();
+    const screenScale = matrix && Math.hypot(matrix.a, matrix.b);
+    if (!screenScale) return "translate(640 59) scale(0.72)";
+
+    const em = parseFloat(getComputedStyle(svg).fontSize);
+    const scale = (gradientDropletAnimation.final.widthEm * em) / (223 * screenScale);
+    // Scale the 223 x 315 artwork around the existing line-contact point.
+    const x = 720 - 111.1 * scale;
+    const y = 180 - 168.0556 * scale;
+    return `translate(${x} ${y}) scale(${scale})`;
+  }
+
   const gradientAngles = [
     -Math.PI / 2,
     -Math.PI / 4,
@@ -1150,11 +1174,11 @@ function homeAnimation() {
     .to(
       $("[home-final-drop-blur]"),
       {
-        attr: { stdDeviation: 16 },
-        duration: 0.08,
-        ease: "power1.in",
+        attr: { stdDeviation: gradientDropletAnimation.final.blur },
+        duration: gradientDropletAnimation.final.duration,
+        ease: gradientDropletAnimation.final.ease,
       },
-      0.92
+      gradientDropletAnimation.final.start
     )
     .to(
       $("[home-drop-circle]"),
@@ -1176,6 +1200,20 @@ function homeAnimation() {
       },
       0.9
     );
+
+  const homeFinalDropTween = homeScrubTimeline
+    .fromTo(
+      $('[home-gradient-drop="2"]'),
+      { attr: { transform: "translate(640 59) scale(0.72)" } },
+      {
+        attr: { transform: finalGradientDropTransform },
+        duration: gradientDropletAnimation.final.duration,
+        ease: gradientDropletAnimation.final.ease,
+        immediateRender: false,
+      },
+      gradientDropletAnimation.final.start
+    )
+    .recent();
 
   const homeFinishDuration = 2.5;
   const homeFinishTimeline = gsap.timeline({ paused: true });
@@ -1393,6 +1431,13 @@ function homeAnimation() {
     start: "top top",
     end: "bottom bottom+=12",
     invalidateOnRefresh: true,
+    onRefresh: () => {
+      const progress = homeFinalDropTween.progress();
+      homeFinalDropTween.invalidate();
+      if (homeScrubTimeline.time() >= gradientDropletAnimation.final.start) {
+        homeFinalDropTween.progress(progress, true);
+      }
+    },
     onUpdate: (self) => {
       if (homeFinishState !== "scrub") return;
 

@@ -15,14 +15,15 @@ try {
   // The site deliberately has no package/build dependency installation.
 }
 
-if (gsap?.version !== version) {
+if (gsap?.version !== version || !gsap.plugins.attr) {
   const response = await fetch(
     `https://cdn.jsdelivr.net/npm/gsap@${version}/dist/gsap.min.js`,
     { signal: AbortSignal.timeout(30000) }
   );
   assert.ok(response.ok, `Could not load pinned GSAP: ${response.status}`);
   const module = { exports: {} };
-  new Function("module", "exports", await response.text())(module, module.exports);
+  // A window object enables GSAP's built-in AttrPlugin for SVG attribute stubs.
+  new Function("module", "exports", "window", await response.text())(module, module.exports, {});
   ({ gsap } = module.exports);
 }
 
@@ -118,6 +119,45 @@ function finishLifecycle() {
     } }
   );
   return { ...finish, ...lifecycle, scrub, trigger, clip, calls };
+}
+
+function gradientDropFixture() {
+  const svg = {
+    matrix: { a: 1, b: 0 },
+    fontSize: "16px",
+    getScreenCTM() { return this.matrix; },
+  };
+  const drop = {
+    attributes: { transform: "translate(598 7) scale(1.1)" },
+    getAttribute(name) { return this.attributes[name]; },
+    setAttribute(name, value) { this.attributes[name] = String(value); },
+  };
+  const configSource = section("  const gradientDropletAnimation =", "  const gradientAngles =");
+  const mergeSource = section(
+    '    .to(\n      $("[home-gradient-drop]"),',
+    '    .to(\n      $("[home-gradient-drop-blur], [home-final-drop-blur]"),'
+  );
+  const tweenSource = section("  const homeFinalDropTween =", "  const homeFinishDuration =");
+  const refreshSource = section("    onRefresh: () => {", "    onUpdate: (self) => {");
+  const build = new Function(
+    "gsap", "$", "getComputedStyle",
+    `${configSource}
+     const homeScrubTimeline = gsap.timeline({ paused: true });
+     homeScrubTimeline${mergeSource};
+     ${tweenSource}
+     const hooks = { ${refreshSource} };
+     return { homeScrubTimeline, homeFinalDropTween, finalGradientDropTransform,
+       gradientDropletAnimation, refresh: hooks.onRefresh };`
+  );
+  const $ = (selector) => selector === "[home-gradient-svg]" ? [svg] : [drop];
+  return { ...build(gsap, $, (element) => element), svg, drop };
+}
+
+function dropTransform(drop) {
+  const numbers = drop.getAttribute("transform").match(/[-+]?(?:\d*\.)?\d+(?:e[-+]?\d+)?/gi);
+  assert.equal(numbers.length, 3);
+  const [x, y, scale] = numbers.map(Number);
+  return { x, y, scale };
 }
 
 afterEach(() => {
@@ -260,4 +300,65 @@ test("interrupting either direction resumes the same finish/ripple state", () =>
   assert.equal(current.state(), "complete");
   assert.equal(current.locked(), false);
   assert.equal(calls.filter(([name]) => name === "start").length, 1);
+});
+
+test("final gradient drop uses em-based nominal width and preserves its line anchor", () => {
+  const current = gradientDropFixture();
+  const { svg, drop, homeScrubTimeline: timeline } = current;
+  assert.equal(drop.getAttribute("transform"), "translate(598 7) scale(1.1)");
+  timeline.progress(1);
+  for (const [a, b, em] of [[0.7, 0, 16], [1, 0, 16], [1.8, 0, 20], [0, 2, 16]]) {
+    svg.matrix = { a, b };
+    svg.fontSize = `${em}px`;
+    current.refresh();
+    const { x, y, scale } = dropTransform(drop);
+    const sceneScale = Math.hypot(a, b);
+    assert.ok(Math.abs(223 * scale * sceneScale - 3.125 * em) < 1e-6);
+    assert.ok(Math.abs(315 * scale * sceneScale - 3.125 * em * 315 / 223) < 1e-6);
+    assert.ok(Math.abs(x + 111.1 * scale - 720) < 1e-6);
+    assert.ok(Math.abs(y + 168.0556 * scale + 150 - 330) < 1e-6);
+    assert.equal(timeline.time(), 1);
+  }
+  svg.matrix = null;
+  assert.equal(current.finalGradientDropTransform(), "translate(640 59) scale(0.72)");
+  svg.matrix = { a: 0, b: 0 };
+  assert.equal(current.finalGradientDropTransform(), "translate(640 59) scale(0.72)");
+});
+
+test("resizing midway through drop shrink preserves progress and reverses to the old merge", () => {
+  const current = gradientDropFixture();
+  const { svg, drop, homeScrubTimeline: timeline, homeFinalDropTween: tween } = current;
+  timeline.time(0.96);
+  const oldScale = dropTransform(drop).scale;
+  svg.matrix = { a: 2, b: 0 };
+  current.refresh();
+  assert.equal(timeline.time(), 0.96);
+  assert.ok(Math.abs(tween.progress() - 0.5) < 1e-6);
+  assert.ok(dropTransform(drop).scale < oldScale);
+  const resizedFrame = drop.getAttribute("transform");
+  timeline.time(1).reverse().pause().time(0.96);
+  assert.equal(drop.getAttribute("transform"), resizedFrame);
+  timeline.time(0.92);
+  assert.equal(drop.getAttribute("transform"), "translate(640 59) scale(0.72)");
+  timeline.time(0);
+  assert.equal(drop.getAttribute("transform"), "translate(598 7) scale(1.1)");
+  timeline.time(1);
+  assert.ok(Math.abs(dropTransform(drop).scale * 223 * 2 - 50) < 1e-6);
+});
+
+test("refresh before drop shrink leaves the earlier merge untouched", () => {
+  const current = gradientDropFixture();
+  const { svg, drop, homeScrubTimeline: timeline } = current;
+  timeline.time(1);
+  timeline.time(0.7);
+  const before = drop.getAttribute("transform");
+  svg.matrix = { a: 1.5, b: 0 };
+  current.refresh();
+  assert.equal(drop.getAttribute("transform"), before);
+  timeline.time(0.92);
+  assert.equal(drop.getAttribute("transform"), "translate(640 59) scale(0.72)");
+  timeline.time(1);
+  assert.ok(Math.abs(dropTransform(drop).scale * 223 * 1.5 - 50) < 1e-6);
+  timeline.time(0.7);
+  assert.equal(drop.getAttribute("transform"), before);
 });

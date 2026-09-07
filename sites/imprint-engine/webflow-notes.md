@@ -54,11 +54,24 @@ from left to right. They start at `x: -40` with yellow and white faint, blue
 hidden, and purple visible, then build to full opacity. A purple drop base fades
 in from `lineMeetsDrop` at 90. The star is fixed halfway between the line
 contact point and the drop centre: it grows from 91-95, rotates continuously
-from 91-135, and settles from 103-106. The final drop blur sharpens from 22 to
-16 during this transition.
+from 91-135, and settles from 103-106. In the current normalized scrub timeline,
+the final drop blur sharpens from `22` to `6` over `0.92-1.0` so the blue, white,
+yellow, and purple remain more distinct. The masked colour layer retains its
+existing blur and palette.
 Keep the star artwork centred around its local SVG origin and animate it with
 `transformOrigin: "center center"`; `svgOrigin` drifts inside the transformed
 drop groups.
+
+`gradientDropletAnimation.final.widthEm` controls the gradient droplet's final
+nominal SVG width, currently `3.125em`. With the existing `223 x 315` artwork
+space, that is `50 x 70.63px` at a `16px` font size; the painted path has internal
+padding. Height follows the artwork proportion without distortion. Only the
+final masked state shrinks, over scrub time `0.92-1.0`; the earlier merge stays
+unchanged. Its transform is calculated from the SVG's screen scale, maintaining
+the existing line-contact point at scene `(720, 330)`. The line, clip pivot,
+root SVG sizing, and later `.home-end-target-svg` are unchanged. ScrollTrigger
+refresh recalculates only this explicit-from-state resize tween, preserving
+scrub progress and reversal without invalidating unrelated animations.
 
 The desktop page-load animation stops Lenis before its entrance stagger starts
 and restarts Lenis from the load timeline's `onComplete` callback.
