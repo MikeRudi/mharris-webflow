@@ -119,7 +119,13 @@ The drop stays centred by `.home-end-drop-stage`'s Webflow CSS
 `homeScrubTimeline` and ends 12px before the sticky boundary. At the trigger end,
 Lenis stops and `homeFinishTimeline` plays at `1 / homeFinishDuration` time scale.
 The clip keeps its existing pivot at the gradient line and opens over timeline
-time `0-0.36`. The final drop scales in place from `1` to `0.5` over
+time `0-0.36`. `homeClipAnimation.contentBlur` blurs each direct content child
+of `.home-start` once, from `0` to `1.5rem` over `0-0.18`: full blur at 50% of
+the clip. It starts clear, holds the blur for the rest of the finish, and
+reverses with the same timeline. The parent clip edge and `.layout-end` stay
+unfiltered. Reverse completion and desktop cleanup remove the content filter
+so it does not leave a containing block or stacking context behind.
+The final drop scales in place from `1` to `0.5` over
 `0.1-0.488`. Both brackets close horizontally from `-72px` / `72px` to `0`
 over `0.18-0.568`, clipped by their SVG parent. The bracket SVG, heading, copy,
 and button fade in over `0.46-0.62`; the drop stays visible.

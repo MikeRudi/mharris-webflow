@@ -119,6 +119,7 @@ function homeAnimation() {
 
   gsap.registerPlugin(ScrollTrigger);
 
+  const $homeStartContent = $(".home-start").children().not("script, style");
   const $homeEndContent = $(".layout-end")
     .children()
     .not(".home-end-brackets")
@@ -1221,6 +1222,19 @@ function homeAnimation() {
     .recent();
 
   const homeFinishDuration = 2.5;
+  const homeClipAnimation = {
+    clip: {
+      start: 0,
+      duration: 0.36,
+      ease: "none",
+    },
+    contentBlur: {
+      from: "blur(0rem)",
+      to: "blur(1.5rem)",
+      completeAt: 0.5,
+      ease: "none",
+    },
+  };
   const homeFinishTimeline = gsap.timeline({ paused: true });
 
   // Auto play starts when scrub reaches 100%
@@ -1262,15 +1276,15 @@ function homeAnimation() {
       {
         clipPath: () => homeClipPath(0),
       },
-      0
+      homeClipAnimation.clip.start
     )
     // Screen clip rotates open
     .to(
       homeClip,
       {
         progress: 1,
-        duration: 0.36,
-        ease: "none",
+        duration: homeClipAnimation.clip.duration,
+        ease: homeClipAnimation.clip.ease,
         onUpdate: () => {
           $(".home-start").css(
             "clip-path",
@@ -1278,7 +1292,20 @@ function homeAnimation() {
           );
         },
       },
-      0
+      homeClipAnimation.clip.start
+    )
+    // Blur each content subtree once, keeping the parent clip edge sharp.
+    .fromTo(
+      $homeStartContent,
+      { filter: homeClipAnimation.contentBlur.from },
+      {
+        filter: homeClipAnimation.contentBlur.to,
+        duration:
+          homeClipAnimation.clip.duration * homeClipAnimation.contentBlur.completeAt,
+        ease: homeClipAnimation.contentBlur.ease,
+        immediateRender: false,
+      },
+      homeClipAnimation.clip.start
     )
     // End content fades in
     .to(
@@ -1418,6 +1445,7 @@ function homeAnimation() {
     homeFinishTimeline.timeScale(1);
     homeClip.progress = 0;
     $(".home-start").css("clip-path", "none");
+    $homeStartContent.css("filter", "");
     homeFinishState = "scrub";
     homeScrubTimeline.progress(homeScrollTrigger.progress);
     syncHomeRestingActivity();
@@ -1551,6 +1579,7 @@ function homeAnimation() {
     gsap.set($(".home-start"), {
       clearProps: "clip-path,will-change",
     });
+    gsap.set($homeStartContent, { clearProps: "filter" });
     gsap.set($homeEndContent, {
       clearProps: "opacity,will-change,z-index",
     });

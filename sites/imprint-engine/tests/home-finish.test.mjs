@@ -40,6 +40,8 @@ function section(start, end) {
 const rippleSource = section("function rippleAnimation(", "\nfunction navTheme()");
 const finalSource = section("  const homeEndRippleTimeline =", "  let rippleHasPlayed");
 const finishSource = section("  const homeFinishDuration =", "  function syncRippleTimeline()");
+const startContentSource = source.match(/  const \$homeStartContent =[^;]+;/)?.[0];
+assert.ok(startContentSource, "Missing home-start content selection");
 const initialShadow =
   "rgba(104, 150, 230, 0.32) 0px 0px 32px 0px, rgba(104, 150, 230, 0.24) 0px 0px 32px 0px inset";
 
@@ -56,28 +58,38 @@ function collection(count = 1) {
   }));
   Object.defineProperties(items, {
     toArray: { value: () => items.slice() },
-    css: { value: () => items },
+    not: { value: () => items },
+    css: { value: (name, value) => {
+      items.forEach((element) => { element[name] = value === "" ? "none" : value; });
+      return items;
+    } },
   });
   return items;
 }
 
 function fixture() {
   const rings = collection(3);
-  const elements = new Map([[".home-end-ripple", rings]]);
+  const startContent = collection(3);
+  startContent.forEach((element) => { element.children = collection(2); });
+  const startWrapper = collection();
+  Object.defineProperty(startWrapper, "children", { value: () => startContent });
+  const endContent = collection(3);
+  const clip = { progress: 0 };
+  const elements = new Map([[".home-end-ripple", rings], [".home-start", startWrapper]]);
   const $ = (selector) => {
     if (!elements.has(selector)) elements.set(selector, collection());
     return elements.get(selector);
   };
   const build = new Function(
     "gsap", "window", "getComputedStyle", "$", "homeClip", "homeClipPath", "$homeEndContent",
-    `${rippleSource}\n${finalSource}\n${finishSource}
+    `${startContentSource}\n${rippleSource}\n${finalSource}\n${finishSource}
      return { rippleAnimation, homeEndRippleTimeline, homeFinishTimeline, homeFinishDuration };`
   );
   const result = build(
-    gsap, { gsap }, (ring) => ring, $, { progress: 0 }, () => "none", collection(3)
+    gsap, { gsap }, (ring) => ring, $, clip, () => "none", endContent
   );
   result.homeFinishTimeline.timeScale(1 / result.homeFinishDuration);
-  return { ...result, rings };
+  return { ...result, rings, startContent, startWrapper, endContent, elements, clip };
 }
 
 function snapshot(rings) {
@@ -92,6 +104,13 @@ function alphas(shadow) {
   );
 }
 
+function blurRem(filter) {
+  if (filter === "none") return 0;
+  const match = filter.match(/^blur\(([\d.]+)rem\)$/);
+  assert.ok(match, `Unexpected blur filter: ${filter}`);
+  return Number(match[1]);
+}
+
 function finishLifecycle() {
   const finish = fixture();
   const scrub = gsap.timeline({ paused: true }).to({ value: 0 }, { value: 1, duration: 1 });
@@ -99,9 +118,10 @@ function finishLifecycle() {
   const clip = { progress: 1 };
   const trigger = { progress: 1 };
   const calls = [];
+  const releasedFilters = [];
   const lifecycleSource = section("  function releaseHomeFinishScroll()", "  const homeScrollTrigger =");
   const register = new Function(
-    "homeFinishTimeline", "homeFinishDuration", "homeScrubTimeline", "homeScrollTrigger", "homeClip", "$",
+    "homeFinishTimeline", "homeFinishDuration", "homeScrubTimeline", "homeScrollTrigger", "homeClip", "$", "$homeStartContent",
     "syncHomeRestingActivity", "syncRippleTimeline", "window",
     `let homeFinishState = "scrub";
      let homeFinishScrollLocked = false;
@@ -110,15 +130,18 @@ function finishLifecycle() {
        state: () => homeFinishState, locked: () => homeFinishScrollLocked };`
   );
   const lifecycle = register(
-    finish.homeFinishTimeline, finish.homeFinishDuration, scrub, trigger, clip, () => ({ css() {} }),
+    finish.homeFinishTimeline, finish.homeFinishDuration, scrub, trigger, clip, () => ({ css() {} }), finish.startContent,
     () => calls.push(["activity", scrub.progress()]),
     () => calls.push(["ripple", scrub.progress()]),
     { lenis: {
       stop: () => calls.push(["stop", scrub.progress()]),
-      start: () => calls.push(["start", scrub.progress()]),
+      start: () => {
+        releasedFilters.push(finish.startContent.map((element) => element.filter));
+        calls.push(["start", scrub.progress()]);
+      },
     } }
   );
-  return { ...finish, ...lifecycle, scrub, trigger, clip, calls };
+  return { ...finish, ...lifecycle, scrub, trigger, clip, calls, releasedFilters };
 }
 
 function gradientDropFixture() {
@@ -281,6 +304,7 @@ test("reverse completion restores current scroll progress before releasing scrol
   assert.equal(clip.progress, 0);
   assert.equal(parent.paused(), true);
   assert.deepEqual(calls.slice(-3), [["activity", 0.63], ["ripple", 0.63], ["start", 0.63]]);
+  assert.ok(current.releasedFilters.at(-1).every((filter) => filter === "none"));
 });
 
 test("immediate native return at time zero cannot leave scrolling locked", () => {
@@ -409,4 +433,50 @@ test("gradient drop size stays fixed throughout masked color changes in both dir
   assert.equal(Number(finalBlur.getAttribute("stdDeviation")), 22);
   timeline.time(0.86);
   assert.notEqual(drop.getAttribute("transform"), finalTransform);
+});
+
+test("home-start content blurs with the clip and reaches full blur at its halfway point", () => {
+  const { homeFinishTimeline: timeline, startContent, clip } = fixture();
+  assert.ok(startContent.every((element) => element.filter === "none"));
+  for (const [time, clipProgress, blur] of [[0.09, 0.25, 0.75], [0.18, 0.5, 1.5], [0.27, 0.75, 1.5], [0.36, 1, 1.5]]) {
+    timeline.time(time);
+    assert.ok(Math.abs(clip.progress - clipProgress) < 1e-6);
+    assert.ok(startContent.every((element) => Math.abs(blurRem(element.filter) - blur) < 1e-6));
+  }
+  timeline.progress(1);
+  assert.ok(startContent.every((element) => blurRem(element.filter) === 1.5));
+});
+
+test("content blur retraces smoothly and starts clear on every replay", () => {
+  const { homeFinishTimeline: timeline, startContent } = fixture();
+  const times = [0, 0.03, 0.09, 0.179, 0.18, 0.3, 0.36, 0.9];
+  const frames = times.map((time) => {
+    timeline.time(time);
+    return startContent.map((element) => blurRem(element.filter));
+  });
+  timeline.reverse().pause();
+  for (let index = times.length - 1; index >= 0; index--) {
+    timeline.time(times[index]);
+    assert.deepEqual(startContent.map((element) => blurRem(element.filter)), frames[index]);
+  }
+  for (let cycle = 0; cycle < 3; cycle++) {
+    timeline.progress(1).restart().pause();
+    assert.ok(startContent.every((element) => blurRem(element.filter) === 0));
+    timeline.time(0.09);
+    assert.ok(startContent.every((element) => blurRem(element.filter) === 0.75));
+  }
+});
+
+test("content blur is applied once per subtree and leaves clip wrapper and end artwork sharp", () => {
+  const { homeFinishTimeline: timeline, startContent, startWrapper, endContent, elements } = fixture();
+  timeline.progress(1);
+  assert.ok(startContent.every((element) => blurRem(element.filter) === 1.5));
+  assert.ok(startContent.every((element) => element.children.every((child) => child.filter === "none")));
+  const sharp = [
+    ...startWrapper, ...endContent,
+    ...elements.get(".home-end-target-svg"),
+    ...elements.get(".home-end-bracket-left"),
+    ...elements.get(".home-end-bracket-right"),
+  ];
+  assert.ok(sharp.every((element) => element.filter === "none"));
 });
