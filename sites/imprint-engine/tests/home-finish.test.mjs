@@ -435,10 +435,10 @@ test("gradient drop size stays fixed throughout masked color changes in both dir
   assert.notEqual(drop.getAttribute("transform"), finalTransform);
 });
 
-test("home-start content blurs with the clip and reaches full blur at its halfway point", () => {
+test("home-start content blurs throughout the clip and reaches full blur at its end", () => {
   const { homeFinishTimeline: timeline, startContent, clip } = fixture();
   assert.ok(startContent.every((element) => element.filter === "none"));
-  for (const [time, clipProgress, blur] of [[0.09, 0.25, 0.75], [0.18, 0.5, 1.5], [0.27, 0.75, 1.5], [0.36, 1, 1.5]]) {
+  for (const [time, clipProgress, blur] of [[0.09, 0.25, 0.375], [0.18, 0.5, 0.75], [0.27, 0.75, 1.125], [0.36, 1, 1.5]]) {
     timeline.time(time);
     assert.ok(Math.abs(clip.progress - clipProgress) < 1e-6);
     assert.ok(startContent.every((element) => Math.abs(blurRem(element.filter) - blur) < 1e-6));
@@ -449,7 +449,7 @@ test("home-start content blurs with the clip and reaches full blur at its halfwa
 
 test("content blur retraces smoothly and starts clear on every replay", () => {
   const { homeFinishTimeline: timeline, startContent } = fixture();
-  const times = [0, 0.03, 0.09, 0.179, 0.18, 0.3, 0.36, 0.9];
+  const times = [0, 0.03, 0.09, 0.179, 0.18, 0.3, 0.359, 0.36, 0.9];
   const frames = times.map((time) => {
     timeline.time(time);
     return startContent.map((element) => blurRem(element.filter));
@@ -463,7 +463,7 @@ test("content blur retraces smoothly and starts clear on every replay", () => {
     timeline.progress(1).restart().pause();
     assert.ok(startContent.every((element) => blurRem(element.filter) === 0));
     timeline.time(0.09);
-    assert.ok(startContent.every((element) => blurRem(element.filter) === 0.75));
+    assert.ok(startContent.every((element) => blurRem(element.filter) === 0.375));
   }
 });
 

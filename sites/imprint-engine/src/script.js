@@ -1231,7 +1231,7 @@ function homeAnimation() {
     contentBlur: {
       from: "blur(0rem)",
       to: "blur(1.5rem)",
-      completeAt: 0.5,
+      completeAt: 1,
       ease: "none",
     },
   };
