@@ -63,8 +63,8 @@ Keep the star artwork centred around its local SVG origin and animate it with
 drop groups.
 
 `gradientDropletAnimation.final.widthEm` controls the gradient droplet's final
-nominal SVG width, currently `3.125em`. With the existing `223 x 315` artwork
-space, that is `50 x 70.63px` at a `16px` font size; the painted path has internal
+nominal SVG width, currently `6.5em`. With the existing `223 x 315` artwork
+space, that is `104 x 146.91px` at a `16px` font size; the painted path has internal
 padding. Height follows the artwork proportion without distortion. Only the
 final masked state shrinks, over scrub time `0.92-1.0`; the earlier merge stays
 unchanged. Its transform is calculated from the SVG's screen scale, maintaining

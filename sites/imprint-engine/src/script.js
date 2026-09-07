@@ -390,7 +390,7 @@ function homeAnimation() {
   const homeClip = { progress: 0 };
   const gradientDropletAnimation = {
     final: {
-      widthEm: 3.125,
+      widthEm: 6.5,
       blur: 6,
       start: 0.92,
       duration: 0.08,

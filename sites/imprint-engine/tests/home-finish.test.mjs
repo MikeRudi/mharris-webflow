@@ -313,8 +313,8 @@ test("final gradient drop uses em-based nominal width and preserves its line anc
     current.refresh();
     const { x, y, scale } = dropTransform(drop);
     const sceneScale = Math.hypot(a, b);
-    assert.ok(Math.abs(223 * scale * sceneScale - 3.125 * em) < 1e-6);
-    assert.ok(Math.abs(315 * scale * sceneScale - 3.125 * em * 315 / 223) < 1e-6);
+    assert.ok(Math.abs(223 * scale * sceneScale - 6.5 * em) < 1e-6);
+    assert.ok(Math.abs(315 * scale * sceneScale - 6.5 * em * 315 / 223) < 1e-6);
     assert.ok(Math.abs(x + 111.1 * scale - 720) < 1e-6);
     assert.ok(Math.abs(y + 168.0556 * scale + 150 - 330) < 1e-6);
     assert.equal(timeline.time(), 1);
@@ -343,7 +343,7 @@ test("resizing midway through drop shrink preserves progress and reverses to the
   timeline.time(0);
   assert.equal(drop.getAttribute("transform"), "translate(598 7) scale(1.1)");
   timeline.time(1);
-  assert.ok(Math.abs(dropTransform(drop).scale * 223 * 2 - 50) < 1e-6);
+  assert.ok(Math.abs(dropTransform(drop).scale * 223 * 2 - 104) < 1e-6);
 });
 
 test("refresh before drop shrink leaves the earlier merge untouched", () => {
@@ -358,7 +358,7 @@ test("refresh before drop shrink leaves the earlier merge untouched", () => {
   timeline.time(0.92);
   assert.equal(drop.getAttribute("transform"), "translate(640 59) scale(0.72)");
   timeline.time(1);
-  assert.ok(Math.abs(dropTransform(drop).scale * 223 * 1.5 - 50) < 1e-6);
+  assert.ok(Math.abs(dropTransform(drop).scale * 223 * 1.5 - 104) < 1e-6);
   timeline.time(0.7);
   assert.equal(drop.getAttribute("transform"), before);
 });
