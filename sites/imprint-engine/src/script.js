@@ -600,6 +600,7 @@ function homeAnimation() {
   gsap.set($homeEndContent, {
     opacity: 0,
     willChange: "opacity",
+    zIndex: 2,
   });
 
   gsap.set($(".home-end-ripple"), {
@@ -610,10 +611,19 @@ function homeAnimation() {
 
   const homeRippleTimeline = rippleAnimation();
   const homeEndRippleTimeline = rippleAnimation($(".home-end-ripple"), {
-    endScale: 1.25,
+    endScale: (index) => 1.1 - index * 0.3,
     startOpacity: 0.62,
     duration: 0.95,
     stagger: 0.09,
+    settle: {
+      opacity: 0.7,
+      blur: "2.5rem",
+      shadow:
+        "0 0 5rem 3rem rgb(104 150 230 / 60%), inset 0 0 5rem 3rem rgb(104 150 230 / 45%)",
+      start: 0.25,
+      duration: 1.15,
+      ease: "power2.out",
+    },
   });
   let rippleHasPlayed = false;
   let homeEndRippleHasPlayed = false;
@@ -1500,7 +1510,7 @@ function homeAnimation() {
       clearProps: "clip-path,will-change",
     });
     gsap.set($homeEndContent, {
-      clearProps: "opacity,will-change",
+      clearProps: "opacity,will-change,z-index",
     });
     gsap.set($(".home-end-brackets-svg"), {
       clearProps: "overflow",
@@ -1513,6 +1523,9 @@ function homeAnimation() {
         clearProps: "transform,opacity,visibility,will-change",
       }
     );
+    gsap.set($(".home-end-ripple"), {
+      clearProps: "filter,box-shadow",
+    });
   };
 }
 
@@ -1523,6 +1536,7 @@ function rippleAnimation(
     startOpacity = 0.42,
     duration = 1.6,
     stagger = 0.16,
+    settle = null,
   } = {}
 ) {
   if (!$rings.length || !window.gsap) return null;
@@ -1539,13 +1553,41 @@ function rippleAnimation(
     },
     {
       scale: endScale,
-      autoAlpha: 0,
+      autoAlpha: settle ? settle.opacity : 0,
       duration,
       stagger,
       ease: "power2.out",
       immediateRender: false,
     }
   );
+
+  if (settle) {
+    // Capture Webflow's resting styles so replay restores the original water rings.
+    const ringStyles = $rings.toArray().map((ring) => {
+      const styles = getComputedStyle(ring);
+      return {
+        filter: styles.filter === "none" ? "blur(0rem)" : styles.filter,
+        shadow: styles.boxShadow,
+      };
+    });
+
+    rippleTimeline.fromTo(
+      $rings,
+      {
+        filter: (index) => ringStyles[index].filter,
+        boxShadow: (index) => ringStyles[index].shadow,
+      },
+      {
+        filter: `blur(${settle.blur})`,
+        boxShadow: settle.shadow,
+        duration: settle.duration,
+        stagger,
+        ease: settle.ease,
+        immediateRender: false,
+      },
+      settle.start
+    );
+  }
 
   return rippleTimeline;
 }
