@@ -142,6 +142,28 @@ function homeAnimation() {
 
   let homeLoadScrollLocked = Boolean(window.lenis);
 
+  const $homeLogos = $("[home-logo-up]");
+  const logoAnimation = {
+    reveal: {
+      fromY: "10rem",
+      toY: 0,
+      duration: 1.2,
+      ease: "power2.out",
+      stagger: 0,
+      fadeDuration: 0.6,
+      fadeEase: "power1.out",
+    },
+    hide: {
+      start: 0.334,
+      toY: "-10rem",
+      duration: 0.09,
+      ease: "power1.in",
+      stagger: 0,
+      fadeDuration: 0.07,
+      fadeEase: "power1.out",
+    },
+  };
+
   gsap.set(
     $(
       "[home-resting], [home-start-up], [home-second-up], [home-third-up], [home-logo-up]"
@@ -152,6 +174,8 @@ function homeAnimation() {
       willChange: "transform, opacity",
     }
   );
+
+  gsap.set($homeLogos, { y: logoAnimation.reveal.fromY });
 
   const $homeResting = $("[home-resting]");
   const $homeRestingDragSurface = $(".home-start");
@@ -709,6 +733,26 @@ function homeAnimation() {
         },
       },
       0
+    )
+    .to(
+      $homeLogos,
+      {
+        y: logoAnimation.reveal.toY,
+        duration: logoAnimation.reveal.duration,
+        ease: logoAnimation.reveal.ease,
+        stagger: logoAnimation.reveal.stagger,
+      },
+      0
+    )
+    .to(
+      $homeLogos,
+      {
+        opacity: 1,
+        duration: logoAnimation.reveal.fadeDuration,
+        ease: logoAnimation.reveal.fadeEase,
+        stagger: logoAnimation.reveal.stagger,
+      },
+      0
     );
 
   const homeScrubTimeline = gsap.timeline({ paused: true });
@@ -753,25 +797,6 @@ function homeAnimation() {
       },
       0
     )
-    // Logo enters between first and second scenes
-    .to(
-      $("[home-logo-up]"),
-      {
-        y: 0,
-        duration: 0.15,
-        ease: "power1.in",
-      },
-      0.05
-    )
-    .to(
-      $("[home-logo-up]"),
-      {
-        opacity: 1,
-        duration: 0.17,
-        ease: "power1.out",
-      },
-      0.05
-    )
     // Second scene enters
     .to(
       $("[home-second-up]"),
@@ -801,16 +826,6 @@ function homeAnimation() {
       },
       0.484
     )
-    // Logo holds with second scene
-    // .to(
-    //   $("[home-logo-up]"),
-    //   {
-    //     y: 0,
-    //     duration: 0.25,
-    //     ease: "none",
-    //   },
-    //   0.1
-    // )
     // Second scene leaves
     .to(
       $("[home-second-up]"),
@@ -830,37 +845,43 @@ function homeAnimation() {
       },
       0.567
     )
-    // Logo leaves as second scene enters
-    .to(
-      $("[home-logo-up]"),
+    // Logos leave after the first scene's full exit stagger (0.267 + 0.067).
+    .fromTo(
+      $homeLogos,
+      { y: logoAnimation.reveal.toY },
       {
-        y: "-10rem",
-        duration: 0.09,
-        ease: "power1.in",
+        y: logoAnimation.hide.toY,
+        duration: logoAnimation.hide.duration,
+        ease: logoAnimation.hide.ease,
+        stagger: logoAnimation.hide.stagger,
+        immediateRender: false,
       },
-      0.3
+      logoAnimation.hide.start
     )
-    // Resting cards leave with the logos
-    .to(
-      $homeResting,
-      {
-        y: "-10rem",
-        duration: 0.09,
-        ease: "power1.in",
-      },
-      0.3
-    )
-    .to(
-      $homeResting,
+    .fromTo(
+      $homeLogos,
+      { opacity: 1 },
       {
         opacity: 0,
-        duration: 0.07,
-        ease: "power1.out",
+        duration: logoAnimation.hide.fadeDuration,
+        ease: logoAnimation.hide.fadeEase,
+        stagger: logoAnimation.hide.stagger,
+        immediateRender: false,
+      },
+      logoAnimation.hide.start
+    )
+    // Resting cards leave before the second scene enters
+    .to(
+      $homeResting,
+      {
+        y: "-10rem",
+        duration: 0.09,
+        ease: "power1.in",
       },
       0.3
     )
     .to(
-      $("[home-logo-up]"),
+      $homeResting,
       {
         opacity: 0,
         duration: 0.07,

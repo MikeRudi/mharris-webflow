@@ -63,6 +63,12 @@ drop groups.
 The desktop page-load animation stops Lenis before its entrance stagger starts
 and restarts Lenis from the load timeline's `onComplete` callback.
 
+`[home-logo-up]` reveals alongside the first content on page load. Its movement
+takes 1.2 seconds and its fade takes 0.6 seconds. The logos stay visible until
+scrub time `0.334`, after the first scene's full exit stagger, then move up and
+fade out. Scrolling back restores the logos. The initial CSS `opacity: 0`
+prevents a flash before the page-load animation starts.
+
 .layout-start
   .home-start
   .layout-end
