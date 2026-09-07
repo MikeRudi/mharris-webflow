@@ -90,30 +90,26 @@ The observer, visibility listener, and ticker are removed during desktop cleanup
           .home-end-ripple x3
 
 `.layout-end` is a sticky `100vh` layer beneath `.home-start` inside
-`.layout-start`. Its bracket group is aligned with the final gradient-drop
-centre, and the single outlined drop is positioned in the centre of that group.
-`.layout-start` is `300vh`. Its ScrollTrigger maps the full scroll range only
-to timeline time `0-90`, ending exactly at `lineMeetsDrop`. The trigger ends
-12px before the sticky boundary to prevent a white gap during the Lenis lock.
-At that trigger end,
-Lenis stops and the same `homeTimeline` plays from `lineMeetsDrop` to its end at
-`20x` time scale. The second ripple also uses half its previous duration. Lenis
-restarts only after the master timeline and the second ripple have both
-completed. Crossing the trigger end while scrolling back up stops Lenis again,
-reverses the same timeline to `lineMeetsDrop`, then returns control to scrub.
-After the clip finishes, `endDropSettle` runs from `113-132.4`:
-the outlined drop moves down `8rem` while scaling down, and the brackets close
-from an initial `72px` offset on each side, fully clipped by their SVG parent.
-The `.layout-end` content starts
-`8rem` lower so the drop remains aligned with the gradient drop before this
-movement. At `113`, the bracket SVG, heading, copy, and button fade from
-`opacity: 0` to `1` over `8` timeline units with `power1.inOut`; the drop stays
-visible.
-The larger, stronger second ripple then plays on its own non-scrub timeline.
-There is no separate `homeEndAnimation()`, duplicate captured drop, content
-translation, or drop swap. When the main sticky timeline finishes,
-`.layout-end`, the brackets, and the outlined drop leave together through
-normal page scroll.
+`.layout-start`. On desktop, the local CSS sets its top padding to
+`calc(50vh - 4.375rem)`, centring the existing `8.75rem` bracket group at `50vh`.
+The heading, copy, and button follow beneath the group. If the bracket group's
+height changes in Webflow, update the half-height in that CSS calculation.
+The drop stays centred by `.home-end-drop-stage`'s Webflow CSS
+`translate(-50%, -50%)`; JavaScript no longer offsets or animates that wrapper.
+
+`.layout-start` is currently `450vh` in Webflow. Its ScrollTrigger drives
+`homeScrubTimeline` and ends 12px before the sticky boundary. At the trigger end,
+Lenis stops and `homeFinishTimeline` plays at `1 / homeFinishDuration` time scale.
+The clip keeps its existing pivot at the gradient line and opens over timeline
+time `0-0.36`. The final drop scales in place from `1` to `0.5` over
+`0.1-0.488`. Both brackets close horizontally from `-72px` / `72px` to `0`
+over `0.18-0.568`, clipped by their SVG parent. The bracket SVG, heading, copy,
+and button fade in over `0.46-0.62`; the drop stays visible.
+The larger second ripple plays on its own non-scrub timeline. Lenis restarts
+after the finish timeline and second ripple complete. Scrolling back reverses
+the finish timeline before returning control to scrub. The drop has no vertical
+travel in either direction. After the sticky sequence, `.layout-end`, brackets,
+and drop leave together through normal page scroll.
 ```
 
 Home Staged's approved `.layout-end` artwork is recorded in

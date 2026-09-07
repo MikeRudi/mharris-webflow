@@ -585,11 +585,6 @@ function homeAnimation() {
     transformOrigin: "center center",
   });
 
-  gsap.set($(".home-end-drop-stage"), {
-    y: "-8rem",
-    willChange: "transform",
-  });
-
   gsap.set($(".home-end-brackets-svg"), {
     overflow: "hidden",
   });
@@ -1244,17 +1239,7 @@ function homeAnimation() {
       },
       0.46
     )
-    // Drop falls into the brackets
-    .to(
-      $(".home-end-drop-stage"),
-      {
-        y: 0,
-        duration: 0.388,
-        ease: "power1.in",
-      },
-      0.1
-    )
-    // Drop scales down
+    // Drop scales down in place while the brackets close around it
     .to(
       $(".home-end-target-svg"),
       {
@@ -1522,7 +1507,7 @@ function homeAnimation() {
     });
     gsap.set(
       $(
-        ".home-end-drop-stage, .home-end-target-svg, .home-end-bracket-left, .home-end-bracket-right, .home-end-ripple"
+        ".home-end-target-svg, .home-end-bracket-left, .home-end-bracket-right, .home-end-ripple"
       ),
       {
         clearProps: "transform,opacity,visibility,will-change",
