@@ -7,13 +7,6 @@
   opacity: 0;
 }
 
-@media screen and (min-width: 992px) {
-  .layout-start .layout-end {
-    /* Centre the existing 8.75rem bracket group in the viewport. */
-    padding-top: calc(50vh - 4.375rem);
-  }
-}
-
 .git-test.is-moved-down {
   transform: translateY(50%);
 }

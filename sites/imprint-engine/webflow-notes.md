@@ -90,10 +90,11 @@ The observer, visibility listener, and ticker are removed during desktop cleanup
           .home-end-ripple x3
 
 `.layout-end` is a sticky `100vh` layer beneath `.home-start` inside
-`.layout-start`. On desktop, the local CSS sets its top padding to
-`calc(50vh - 4.375rem)`, centring the existing `8.75rem` bracket group at `50vh`.
-The heading, copy, and button follow beneath the group. If the bracket group's
-height changes in Webflow, update the half-height in that CSS calculation.
+`.layout-start`. Its spacing is controlled in Webflow, including its current
+`35vh` top padding. Do not override that padding in the local CSS: it prevents
+Webflow adjustments from taking effect on staging. The heading, copy, and button
+follow beneath the bracket group. The group's centre is its top padding plus
+half its height; this is separate from the clip's pivot at the gradient line.
 The drop stays centred by `.home-end-drop-stage`'s Webflow CSS
 `translate(-50%, -50%)`; JavaScript no longer offsets or animates that wrapper.
 
