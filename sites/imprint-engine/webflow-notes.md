@@ -65,9 +65,13 @@ drop groups.
 `gradientDropletAnimation.final.widthEm` controls the gradient droplet's final
 nominal SVG width, currently `6.5em`. With the existing `223 x 315` artwork
 space, that is `104 x 146.91px` at a `16px` font size; the painted path has internal
-padding. Height follows the artwork proportion without distortion. Only the
-final masked state shrinks, over scrub time `0.92-1.0`; the earlier merge stays
-unchanged. Its transform is calculated from the SVG's screen scale, maintaining
+padding. Height follows the artwork proportion without distortion. The
+`gradientDropletAnimation.scaleDown` phase runs over scrub time `0.82-0.9`,
+after the merge ends at `0.811` and while the horizontal line approaches.
+The drop is already at its final size when the masked colours begin at `0.9`,
+and its size stays fixed throughout the masked animation. Blur sharpening keeps
+its existing `0.92-1.0` timing. The earlier merge stays unchanged. The final
+transform is calculated from the SVG's screen scale, maintaining
 the existing line-contact point at scene `(720, 330)`. The line, clip pivot,
 root SVG sizing, and later `.home-end-target-svg` are unchanged. ScrollTrigger
 refresh recalculates only this explicit-from-state resize tween, preserving

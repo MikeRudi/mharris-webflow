@@ -132,11 +132,21 @@ function gradientDropFixture() {
     getAttribute(name) { return this.attributes[name]; },
     setAttribute(name, value) { this.attributes[name] = String(value); },
   };
+  const finalBlur = {
+    attributes: { stdDeviation: "22" },
+    getAttribute(name) { return this.attributes[name]; },
+    setAttribute(name, value) { this.attributes[name] = String(value); },
+  };
+  const colorLayers = collection(2);
+  colorLayers.forEach((layer) => { layer.opacity = 0; });
+  const circles = collection(4);
+  circles.forEach((circle) => { circle.x = -40; circle.opacity = 0; });
   const configSource = section("  const gradientDropletAnimation =", "  const gradientAngles =");
   const mergeSource = section(
     '    .to(\n      $("[home-gradient-drop]"),',
     '    .to(\n      $("[home-gradient-drop-blur], [home-final-drop-blur]"),'
   );
+  const maskSource = section("    // Masked drop fills as the line reaches it", "\n\n  const homeFinalDropTween =");
   const tweenSource = section("  const homeFinalDropTween =", "  const homeFinishDuration =");
   const refreshSource = section("    onRefresh: () => {", "    onUpdate: (self) => {");
   const build = new Function(
@@ -144,13 +154,25 @@ function gradientDropFixture() {
     `${configSource}
      const homeScrubTimeline = gsap.timeline({ paused: true });
      homeScrubTimeline${mergeSource};
+     homeScrubTimeline\n${maskSource}
      ${tweenSource}
      const hooks = { ${refreshSource} };
      return { homeScrubTimeline, homeFinalDropTween, finalGradientDropTransform,
        gradientDropletAnimation, refresh: hooks.onRefresh };`
   );
-  const $ = (selector) => selector === "[home-gradient-svg]" ? [svg] : [drop];
-  return { ...build(gsap, $, (element) => element), svg, drop };
+  const elements = new Map([
+    ["[home-gradient-svg]", [svg]],
+    ["[home-gradient-drop]", [drop]],
+    ['[home-gradient-drop="2"]', [drop]],
+    ["[home-drop-purple-base], [home-drop-colors]", colorLayers],
+    ["[home-final-drop-blur]", [finalBlur]],
+    ["[home-drop-circle]", circles],
+  ]);
+  const $ = (selector) => {
+    assert.ok(elements.has(selector), `Missing gradient fixture target: ${selector}`);
+    return elements.get(selector);
+  };
+  return { ...build(gsap, $, (element) => element), svg, drop, finalBlur, colorLayers, circles };
 }
 
 function dropTransform(drop) {
@@ -328,17 +350,17 @@ test("final gradient drop uses em-based nominal width and preserves its line anc
 test("resizing midway through drop shrink preserves progress and reverses to the old merge", () => {
   const current = gradientDropFixture();
   const { svg, drop, homeScrubTimeline: timeline, homeFinalDropTween: tween } = current;
-  timeline.time(0.96);
+  timeline.time(0.86);
   const oldScale = dropTransform(drop).scale;
   svg.matrix = { a: 2, b: 0 };
   current.refresh();
-  assert.equal(timeline.time(), 0.96);
+  assert.equal(timeline.time(), 0.86);
   assert.ok(Math.abs(tween.progress() - 0.5) < 1e-6);
   assert.ok(dropTransform(drop).scale < oldScale);
   const resizedFrame = drop.getAttribute("transform");
-  timeline.time(1).reverse().pause().time(0.96);
+  timeline.time(1).reverse().pause().time(0.86);
   assert.equal(drop.getAttribute("transform"), resizedFrame);
-  timeline.time(0.92);
+  timeline.time(0.82);
   assert.equal(drop.getAttribute("transform"), "translate(640 59) scale(0.72)");
   timeline.time(0);
   assert.equal(drop.getAttribute("transform"), "translate(598 7) scale(1.1)");
@@ -355,10 +377,36 @@ test("refresh before drop shrink leaves the earlier merge untouched", () => {
   svg.matrix = { a: 1.5, b: 0 };
   current.refresh();
   assert.equal(drop.getAttribute("transform"), before);
-  timeline.time(0.92);
+  timeline.time(0.82);
   assert.equal(drop.getAttribute("transform"), "translate(640 59) scale(0.72)");
   timeline.time(1);
   assert.ok(Math.abs(dropTransform(drop).scale * 223 * 1.5 - 104) < 1e-6);
   timeline.time(0.7);
   assert.equal(drop.getAttribute("transform"), before);
+});
+
+test("gradient drop size stays fixed throughout masked color changes in both directions", () => {
+  const current = gradientDropFixture();
+  const { homeScrubTimeline: timeline, homeFinalDropTween: tween, drop, finalBlur, colorLayers } = current;
+  assert.equal(tween.startTime(), 0.82);
+  assert.equal(tween.duration(), 0.08);
+  timeline.time(0.9);
+  const finalTransform = drop.getAttribute("transform");
+  assert.equal(tween.progress(), 1);
+  assert.ok(colorLayers.every((layer) => layer.opacity === 0));
+  for (const time of [0.91, 0.92, 0.94, 0.96, 0.98, 1]) {
+    timeline.time(time);
+    assert.equal(drop.getAttribute("transform"), finalTransform, `Scale changed at ${time}`);
+  }
+  assert.ok(colorLayers.every((layer) => layer.opacity === 1));
+  assert.equal(Number(finalBlur.getAttribute("stdDeviation")), 6);
+  timeline.reverse().pause();
+  for (const time of [1, 0.98, 0.96, 0.94, 0.92, 0.91, 0.9]) {
+    timeline.time(time);
+    assert.equal(drop.getAttribute("transform"), finalTransform, `Reverse scale changed at ${time}`);
+  }
+  assert.ok(colorLayers.every((layer) => layer.opacity === 0));
+  assert.equal(Number(finalBlur.getAttribute("stdDeviation")), 22);
+  timeline.time(0.86);
+  assert.notEqual(drop.getAttribute("transform"), finalTransform);
 });

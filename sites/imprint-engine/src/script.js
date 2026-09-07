@@ -389,6 +389,11 @@ function homeAnimation() {
   const gradientOrbit = { angle: 0 };
   const homeClip = { progress: 0 };
   const gradientDropletAnimation = {
+    scaleDown: {
+      start: 0.82,
+      duration: 0.08,
+      ease: "power1.in",
+    },
     final: {
       widthEm: 6.5,
       blur: 6,
@@ -1207,11 +1212,11 @@ function homeAnimation() {
       { attr: { transform: "translate(640 59) scale(0.72)" } },
       {
         attr: { transform: finalGradientDropTransform },
-        duration: gradientDropletAnimation.final.duration,
-        ease: gradientDropletAnimation.final.ease,
+        duration: gradientDropletAnimation.scaleDown.duration,
+        ease: gradientDropletAnimation.scaleDown.ease,
         immediateRender: false,
       },
-      gradientDropletAnimation.final.start
+      gradientDropletAnimation.scaleDown.start
     )
     .recent();
 
@@ -1434,7 +1439,7 @@ function homeAnimation() {
     onRefresh: () => {
       const progress = homeFinalDropTween.progress();
       homeFinalDropTween.invalidate();
-      if (homeScrubTimeline.time() >= gradientDropletAnimation.final.start) {
+      if (homeScrubTimeline.time() >= gradientDropletAnimation.scaleDown.start) {
         homeFinalDropTween.progress(progress, true);
       }
     },
