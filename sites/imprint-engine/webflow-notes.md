@@ -156,6 +156,63 @@ brackets are uniformly scaled to their existing height and centres; the supplied
 compound raindrop path is scaled to its existing painted height and centre.
 The brackets use `fill: #5F249F`, and the drop uses `fill: #111111` with no stroke.
 
+## Flex Grow Gallery
+
+Home Staged's process gallery uses the existing `.flex-grow-block` structure:
+
+```txt
+.flex-grow-block
+  .flex-grow-item x4 (one .active)
+    .flex-grow-item-content
+      .text-grow-item-title
+        .flex-grow-item-number [class="h-1 weight-700"]
+        [class="h-9 weight-700"]
+      .flex-grow-item-copy [class="p-3"]
+    .flex-grow-item-img
+      .img-abs
+```
+
+`flexGrowAnimation()` runs globally from `initSite()`. Hover, focus, or tap/click
+activates an item; Enter and Space also work. Exactly one valid item per block
+is active, starting with the authored active item (then an active image, then
+the first item as fallbacks). The same `.active` state is applied to the item,
+its image wrapper, and its copy. Leaving the gallery keeps the last item open.
+
+On desktop/tablet, the item and image wrapper animate `flexGrow` between `0` and `1` together over
+`0.3s` with `power1.in`. Copy fades over `0.15s`. Interrupted transitions restart
+from the current rendered values; initial inline values prevent active-class CSS
+from snapping widths before a tween starts. Div items receive keyboard focus,
+button semantics, and `aria-expanded`. Cleanup restores authored styles,
+classes, and accessibility attributes.
+
+Sizing is native Webflow CSS, recorded in `flex-grow-webflow.css` for reference;
+do not load that reference file as another runtime stylesheet. Desktop text
+columns are `10em` with `1rem` padding/gaps. The item's non-shrinking basis also
+accounts for its padding, internal gap, and two 1px borders. Image wrappers have
+zero basis/width, `min-width: 0`, and no forced aspect ratio; the absolute image
+fills their available space with the existing `.img-abs` cover styling.
+The active image therefore occupies the remaining row width without overflow.
+Desktop copy is anchored to the bottom of its text column and hidden when
+inactive. Its previous `[text-ch="18"]` limit now lives on the native copy class
+as `max-width: 18ch`, allowing an unrestricted mobile right-hand column.
+
+At tablet widths, text columns reduce to `7em`, spacing to `0.75rem`, and the
+row height increases to `30em`. At `767px` and below, the gallery matches the
+mobile reference: a centered heading/button, number/title on the left, copy
+on the right, and a full-width 2:1 image underneath. Closed rows show only their
+number/title. Mobile rows have `1.25em` padding and a `9em` minimum height.
+The section has `1.25em` horizontal padding. The heading uses the scoped native
+`.h-4.flex-grow-heading` combo to avoid changing other headings.
+Mobile animation measures and tweens content/image heights and the image's
+`1em` top gap at the same `0.3s`, `power1.in` timing; horizontal flex-grow remains
+desktop/tablet-only. Width changes keep the selected item and recalculate its
+sizes; mobile address-bar height changes do not interrupt the animation.
+Font readiness also refreshes measured text heights, guarded against cleanup.
+Numbers and labels are 01 Discover, 02 Design, 03 Develop,
+and 04 Deploy. Existing image assets and body copy are preserved for editing
+in Webflow. The first item, image, and copy are authored active in Designer.
+Native changes need a Webflow publish; the JS uses the existing site loader.
+
 ## Drop Text Section
 
 Home Staged contains `.drop-text-section > .drop-text-layout`. The existing

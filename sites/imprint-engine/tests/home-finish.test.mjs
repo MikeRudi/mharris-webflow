@@ -539,7 +539,7 @@ test("content blur is applied once per subtree and leaves clip wrapper and end a
 });
 
 test("drop-text animation initializes globally and skips missing layouts, rings, or libraries", () => {
-  const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "dropTextAnimation", "onDesktop", "onMobile"];
+  const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "dropTextAnimation", "flexGrowAnimation", "onDesktop", "onMobile"];
   const calls = [];
   new Function(...names, `${section("function initSite()", "\n$(initSite);")}\ninitSite();`)(
     ...names.map((name) => () => calls.push(name))

@@ -21,9 +21,11 @@ See `webflow-custom-code.txt` for the full copy-paste Webflow library setup.
 
 ## Animation regression checks
 
-Run `node --test sites/imprint-engine/tests/home-finish.test.mjs` from the repo
+Run `node --test sites/imprint-engine/tests/*.test.mjs` from the repo
 root. The tests use GSAP 3.15.0 (fetched from the pinned CDN if not installed)
 to check ripple timing, colour interpolation, reverse/replay, scroll handoff,
 responsive em-based gradient-droplet sizing, and the independent drop-text
-ripple trigger, purple settling, reversal, and cleanup.
+ripple trigger, purple settling, reversal, and cleanup. Flex-grow gallery checks
+cover initial active state, hover interruption, keyboard/tap selection, scoped
+class changes, animation timing, and cleanup.
 Browser visual checks are still required for layout and CSS rendering.

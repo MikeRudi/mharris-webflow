@@ -87,6 +87,7 @@ function initSite() {
   filterOne();
   catalogueAnimation();
   dropTextAnimation();
+  flexGrowAnimation();
 
   onDesktop(() => {
     // gitTestDesktop();
@@ -1598,6 +1599,244 @@ function homeAnimation() {
     gsap.set($(".home-end-ripple"), {
       clearProps: "filter,box-shadow",
     });
+  };
+}
+
+function flexGrowAnimation() {
+  const $blocks = $(".flex-grow-block");
+  if (!$blocks.length || !window.gsap) return null;
+
+  const animationControls = {
+    grow: {
+      active: 1,
+      inactive: 0,
+      duration: 0.3,
+      ease: "power1.in",
+    },
+    copy: {
+      active: 1,
+      inactive: 0,
+      duration: 0.15,
+      ease: "power1.in",
+    },
+    mobile: {
+      media: "(max-width: 767px)",
+      imageAspectRatio: 2,
+      imageGapEm: 1,
+      duration: 0.3,
+      ease: "power1.in",
+    },
+  };
+  const cleanups = [];
+  const refreshers = [];
+  let resizeFrame = null;
+  let viewportWidth = window.innerWidth;
+  let destroyed = false;
+
+  $blocks.each(function () {
+    const items = $(this)
+      .children(".flex-grow-item")
+      .toArray()
+      .map((element) => {
+        const $item = $(element);
+        const $image = $item.children(".flex-grow-item-img").first();
+        if (!$image.length) return null;
+
+        const $content = $item.children(".flex-grow-item-content").first();
+        const $title = $content.children(".text-grow-item-title").first();
+        const $copy = $content.find(".flex-grow-item-copy");
+        return { $item, $image, $content, $title, $copy };
+      })
+      .filter(Boolean);
+    if (!items.length) return;
+
+    const $growTargets = $(items.flatMap(({ $item, $image }) => [$item[0], $image[0]]));
+    const $copyTargets = $(items.flatMap(({ $copy }) => $copy.toArray()));
+    const $contentTargets = $(items.flatMap(({ $content }) => $content.toArray()));
+    const originalStates = [];
+    const growStyles = rememberStyles($growTargets, ["flex-grow"]);
+    const mobileStyles = [
+      ...rememberStyles($contentTargets, ["height"]),
+      ...rememberStyles($(items.map(({ $image }) => $image[0])), ["height", "margin-top"]),
+    ];
+    let mobile = window.matchMedia(animationControls.mobile.media).matches;
+    let activeItem = null;
+    let timeline = null;
+
+    function rememberStyles($elements, properties) {
+      return $elements.toArray().flatMap((element) => properties.map((property) => ({
+        element,
+        property,
+        value: element.style.getPropertyValue(property),
+        priority: element.style.getPropertyPriority(property),
+      })));
+    }
+
+    function restoreStyles(styles) {
+      styles.forEach(({ element, property, value, priority }) => {
+        if (value) element.style.setProperty(property, value, priority);
+        else element.style.removeProperty(property);
+      });
+    }
+
+    function rememberElements($elements, attributes) {
+      $elements.each(function () {
+        const $element = $(this);
+        originalStates.push({
+          $element,
+          active: $element.hasClass("active"),
+          attributes: Object.fromEntries(attributes.map((name) => [name, $element.attr(name)])),
+        });
+      });
+    }
+
+    function activateItem(item, immediate = false) {
+      if (activeItem === item && !immediate) return;
+      activeItem = item;
+      if (timeline) timeline.kill();
+
+      const currentSizes = mobile && !immediate ? items.map(({ $content, $image }) => ({
+        content: $content.outerHeight() || 0,
+        image: $image.outerHeight() || 0,
+        gap: parseFloat($image.css("margin-top")) || 0,
+      })) : null;
+
+      items.forEach((entry) => {
+        const active = entry === item;
+        entry.$item.toggleClass("active", active).attr("aria-expanded", String(active));
+        entry.$image.toggleClass("active", active);
+        entry.$copy.toggleClass("active", active);
+      });
+
+      const grow = (_, element) =>
+        $(element).hasClass("active") ? animationControls.grow.active : animationControls.grow.inactive;
+      const visibility = (_, element) =>
+        $(element).hasClass("active") ? animationControls.copy.active : animationControls.copy.inactive;
+
+      if (!immediate) timeline = gsap.timeline();
+
+      if (mobile) {
+        // Measure natural text wrapping, then restore the current frame before tweening.
+        if ($contentTargets.length) gsap.set($contentTargets, { height: "auto" });
+        const targetSizes = items.map(({ $image, $title, $copy }, index) => ({
+          content: Math.max($title.outerHeight(true) || 0, items[index] === item ? $copy.outerHeight(true) || 0 : 0),
+          image: items[index] === item ? $image.outerWidth() / animationControls.mobile.imageAspectRatio : 0,
+          gap: items[index] === item ? animationControls.mobile.imageGapEm * (parseFloat($image.css("font-size")) || 16) : 0,
+        }));
+
+        items.forEach(({ $content, $image }, index) => {
+          const target = targetSizes[index];
+          if (immediate) {
+            if ($content.length) gsap.set($content, { height: target.content });
+            gsap.set($image, { height: target.image, marginTop: target.gap });
+            return;
+          }
+
+          const current = currentSizes[index];
+          if ($content.length) gsap.set($content, { height: current.content });
+          gsap.set($image, { height: current.image, marginTop: current.gap });
+          const timing = {
+            duration: animationControls.mobile.duration,
+            ease: animationControls.mobile.ease,
+            overwrite: "auto",
+          };
+          if ($content.length) timeline.to($content, { height: target.content, ...timing }, 0);
+          timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, 0);
+        });
+      } else if (immediate) {
+        gsap.set($growTargets, { flexGrow: grow });
+      } else {
+        timeline.to($growTargets, {
+          flexGrow: grow,
+          duration: animationControls.grow.duration,
+          ease: animationControls.grow.ease,
+          overwrite: "auto",
+        }, 0);
+      }
+
+      if ($copyTargets.length) {
+        if (immediate) gsap.set($copyTargets, { autoAlpha: visibility });
+        else {
+          timeline.to($copyTargets, {
+            autoAlpha: visibility,
+            duration: animationControls.copy.duration,
+            ease: animationControls.copy.ease,
+            overwrite: "auto",
+          }, 0);
+        }
+      }
+    }
+
+    const initialItem = items.find(({ $item }) => $item.hasClass("active")) ||
+      items.find(({ $image }) => $image.hasClass("active")) || items[0];
+
+    items.forEach((item) => {
+      rememberElements(item.$item, ["style", "role", "tabindex", "aria-expanded"]);
+      rememberElements(item.$image.add(item.$content).add(item.$copy), ["style"]);
+      item.$item.attr({ role: "button", tabindex: "0" });
+      item.$item
+        .off(".flexGrowAnimation")
+        .on("mouseenter.flexGrowAnimation focusin.flexGrowAnimation click.flexGrowAnimation", () => {
+          activateItem(item);
+        })
+        .on("keydown.flexGrowAnimation", function (event) {
+          if (event.target !== this || (event.key !== "Enter" && event.key !== " ")) return;
+          event.preventDefault();
+          activateItem(item);
+        });
+    });
+
+    activateItem(initialItem, true);
+
+    refreshers.push(() => {
+      const nextMobile = window.matchMedia(animationControls.mobile.media).matches;
+      if (timeline) timeline.kill();
+      if (nextMobile !== mobile) {
+        restoreStyles(mobile ? mobileStyles : growStyles);
+        mobile = nextMobile;
+      }
+      activateItem(activeItem, true);
+    });
+
+    cleanups.push(() => {
+      if (timeline) timeline.kill();
+      items.forEach(({ $item }) => $item.off(".flexGrowAnimation"));
+      originalStates.forEach(({ $element, active, attributes }) => {
+        $element.toggleClass("active", active);
+        Object.entries(attributes).forEach(([name, value]) => {
+          if (value === undefined) $element.removeAttr(name);
+          else $element.attr(name, value);
+        });
+      });
+    });
+  });
+
+  if (!cleanups.length) return null;
+
+  function scheduleRefresh(force = false) {
+    if (destroyed || resizeFrame !== null || (!force && window.innerWidth === viewportWidth)) return;
+    resizeFrame = window.requestAnimationFrame(() => {
+      resizeFrame = null;
+      if (destroyed) return;
+      viewportWidth = window.innerWidth;
+      refreshers.forEach((refresh) => refresh());
+    });
+  }
+
+  function refreshOnResize() {
+    scheduleRefresh();
+  }
+
+  window.addEventListener("resize", refreshOnResize);
+  if (window.document?.fonts?.ready) {
+    window.document.fonts.ready.then(() => scheduleRefresh(true));
+  }
+
+  return () => {
+    destroyed = true;
+    window.removeEventListener("resize", refreshOnResize);
+    if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
+    cleanups.forEach((cleanup) => cleanup());
   };
 }
 
