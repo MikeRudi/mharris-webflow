@@ -156,6 +156,50 @@ brackets are uniformly scaled to their existing height and centres; the supplied
 compound raindrop path is scaled to its existing painted height and centre.
 The brackets use `fill: #5F249F`, and the drop uses `fill: #111111` with no stroke.
 
+## Drop Text Section
+
+Home Staged contains `.drop-text-section > .drop-text-layout`. The existing
+`.drop-text-content` and its text are preserved. The new sibling is:
+
+```txt
+.drop-text-artwork (decorative, aria-hidden)
+  .drop-text-ripples
+    .drop-text-ripple x3
+  .drop-text-mark
+    .drop-text-bracket-left (svg)
+    .drop-text-droplet (svg)
+    .drop-text-bracket-right (svg)
+```
+
+Native Webflow styles control the layout, not `src/styles.css`. The artwork
+column is `45%` wide and `28em` tall. The mark is `9.125em` wide; the gradient
+drop is `4.75em` wide with an automatic proportional SVG height. It reuses the
+home drop silhouette with layered purple shading from the supplied Figma
+reference. Brackets use the approved `#5F249F` paths. Native SVG definitions
+use the unique IDs `drop-text-purple-fill` and `drop-text-soft-edge`; after WHTML
+insertion, set the SVG tags to the case-sensitive `radialGradient` and
+`feGaussianBlur` (the importer lowercases them).
+
+The square ripple container is `32em` wide, falling to `28em` on tablet and
+`24em` on mobile portrait. Its three rings have their own classes, so neither
+home ripple animation selects them. `.drop-text-section` hides decorative
+overflow; at tablet and below the section becomes auto-height, its layout
+stacks with a `3em` gap, and the text's desktop `7em` left padding becomes zero.
+Original desktop text typography, spacing and the `80vh` section height remain.
+
+`dropTextAnimation()` initializes globally for desktop and mobile. Each layout
+gets its own ScrollTrigger at `top 50%`: enter plays the ripple, leave-back
+reverses it from its current frame. Scrolling further down leaves it settled;
+there is no scrub, pin, repeat, or Lenis scroll lock. The rings expand over
+`0.95s` with `0.09s` stagger to scales `1.1 / 0.8 / 0.5`. Starting at `0.05s`,
+their purple shadows spread and soften to `1.2rem` blur over `1.15s`, ending at
+opacity `0.7`. Full sequence duration is `1.38s`. The drop and brackets remain
+still. Cleanup kills only these triggers/timelines and clears their ring styles.
+
+`drop-text-artwork.html` and `drop-text-webflow.css` record the native markup and
+class settings as reference copies, not live dependencies. Designer changes
+need a Webflow publish; the animation comes from the existing GitHub JS loader.
+
 ## Libraries
 
 - GSAP:

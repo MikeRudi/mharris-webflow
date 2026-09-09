@@ -24,5 +24,6 @@ See `webflow-custom-code.txt` for the full copy-paste Webflow library setup.
 Run `node --test sites/imprint-engine/tests/home-finish.test.mjs` from the repo
 root. The tests use GSAP 3.15.0 (fetched from the pinned CDN if not installed)
 to check ripple timing, colour interpolation, reverse/replay, scroll handoff,
-and responsive em-based gradient-droplet sizing.
+responsive em-based gradient-droplet sizing, and the independent drop-text
+ripple trigger, purple settling, reversal, and cleanup.
 Browser visual checks are still required for layout and CSS rendering.

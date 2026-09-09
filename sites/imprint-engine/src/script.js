@@ -86,6 +86,7 @@ function initSite() {
   accordionOne();
   filterOne();
   catalogueAnimation();
+  dropTextAnimation();
 
   onDesktop(() => {
     // gitTestDesktop();
@@ -1600,6 +1601,64 @@ function homeAnimation() {
   };
 }
 
+function dropTextAnimation() {
+  const $layouts = $(".drop-text-layout");
+  if (!$layouts.length || !window.gsap || !window.ScrollTrigger) return null;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const rippleControls = {
+    expand: {
+      endScale: (index) => 1.1 - index * 0.3,
+      duration: 0.95,
+      stagger: 0.09,
+      ease: "power2.out",
+    },
+    settle: {
+      opacity: 0.7,
+      blur: "1.2rem",
+      shadow:
+        "0 0 2.4rem 1.3rem rgba(137, 62, 213, 0.35), inset 0 0 2.4rem 1.3rem rgba(137, 62, 213, 0.25)",
+      start: 0.05,
+      duration: 1.15,
+      ease: "power1.out",
+    },
+  };
+  const cleanups = [];
+
+  $layouts.each(function () {
+    const $rings = $(this).find(".drop-text-ripple");
+    if (!$rings.length) return;
+
+    const rippleTimeline = rippleAnimation($rings, {
+      ...rippleControls.expand,
+      settle: rippleControls.settle,
+    });
+    if (!rippleTimeline) return;
+
+    const trigger = ScrollTrigger.create({
+      trigger: this,
+      start: "top 50%",
+      onEnter: () => rippleTimeline.play(),
+      onLeaveBack: () => rippleTimeline.reverse(),
+    });
+
+    cleanups.push(() => {
+      trigger.kill();
+      rippleTimeline.kill();
+      gsap.set($rings, {
+        clearProps: "transform,opacity,visibility,filter,box-shadow",
+      });
+    });
+  });
+
+  if (!cleanups.length) return null;
+
+  return () => {
+    cleanups.forEach((cleanup) => cleanup());
+  };
+}
+
 function rippleAnimation(
   $rings = $("[ripple-ring]"),
   {
@@ -1607,6 +1666,7 @@ function rippleAnimation(
     startOpacity = 0.42,
     duration = 1.6,
     stagger = 0.16,
+    ease = "power2.out",
     settle = null,
   } = {}
 ) {
@@ -1627,7 +1687,7 @@ function rippleAnimation(
       autoAlpha: settle ? settle.opacity : 0,
       duration,
       stagger,
-      ease: "power2.out",
+      ease,
       immediateRender: false,
     }
   );

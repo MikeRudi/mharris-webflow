@@ -38,6 +38,7 @@ function section(start, end) {
 }
 
 const rippleSource = section("function rippleAnimation(", "\nfunction navTheme()");
+const dropTextSource = section("function dropTextAnimation()", "\nfunction rippleAnimation(");
 const finalSource = section("  const homeEndRippleTimeline =", "  let rippleHasPlayed");
 const finishSource = section("  const homeFinishDuration =", "  function syncRippleTimeline()");
 const startContentSource = source.match(/  const \$homeStartContent =[^;]+;/)?.[0];
@@ -196,6 +197,62 @@ function gradientDropFixture() {
     return elements.get(selector);
   };
   return { ...build(gsap, $, (element) => element), svg, drop, finalBlur, colorLayers, circles };
+}
+
+function dropTextFixture({ count = 2, ringCount = 3, hasGsap = true, hasScrollTrigger = true } = {}) {
+  const layouts = Array.from({ length: count }, () => ({ rings: collection(ringCount) }));
+  layouts.forEach(({ rings }) => rings.forEach((ring) => {
+    ring.boxShadow =
+      "rgba(137, 62, 213, 0.16) 0px 0px 16px 0px, rgba(137, 62, 213, 0.1) 0px 0px 16px 0px inset";
+  }));
+  Object.defineProperty(layouts, "each", {
+    value: (callback) => layouts.forEach((layout, index) => callback.call(layout, index, layout)),
+  });
+  const $ = (target) => {
+    if (target === ".drop-text-layout") return layouts;
+    assert.ok(layouts.includes(target), "A ripple lookup escaped its layout");
+    return { find: (selector) => {
+      assert.equal(selector, ".drop-text-ripple");
+      return target.rings;
+    } };
+  };
+  const timelines = [];
+  const triggers = [];
+  const cleared = [];
+  const trackedGsap = {
+    ...gsap,
+    registerPlugin() {},
+    timeline: (options) => {
+      const timeline = gsap.timeline(options);
+      timelines.push(timeline);
+      return timeline;
+    },
+    set: (targets, options) => {
+      // Browser CSS removal is represented by the exact requested properties.
+      if (options.clearProps) {
+        cleared.push({ targets, properties: options.clearProps.split(",") });
+        return;
+      }
+      return gsap.set(targets, options);
+    },
+  };
+  const ScrollTrigger = {
+    create: (options) => {
+      const trigger = { options, killed: false, kill() { this.killed = true; } };
+      triggers.push(trigger);
+      return trigger;
+    },
+  };
+  const build = new Function(
+    "gsap", "window", "ScrollTrigger", "$", "getComputedStyle",
+    `${rippleSource}\n${dropTextSource}\nreturn dropTextAnimation();`
+  );
+  const cleanup = build(
+    trackedGsap,
+    { gsap: hasGsap ? trackedGsap : null, ScrollTrigger: hasScrollTrigger ? ScrollTrigger : null },
+    ScrollTrigger, $, (ring) => ring
+  );
+  return { cleanup, layouts, timelines, triggers, cleared };
 }
 
 function dropTransform(drop) {
@@ -479,4 +536,107 @@ test("content blur is applied once per subtree and leaves clip wrapper and end a
     ...elements.get(".home-end-bracket-right"),
   ];
   assert.ok(sharp.every((element) => element.filter === "none"));
+});
+
+test("drop-text animation initializes globally and skips missing layouts, rings, or libraries", () => {
+  const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "dropTextAnimation", "onDesktop", "onMobile"];
+  const calls = [];
+  new Function(...names, `${section("function initSite()", "\n$(initSite);")}\ninitSite();`)(
+    ...names.map((name) => () => calls.push(name))
+  );
+  assert.equal(calls.filter((name) => name === "dropTextAnimation").length, 1);
+  assert.ok(calls.indexOf("dropTextAnimation") < calls.indexOf("onDesktop"));
+  for (const options of [{ count: 0 }, { ringCount: 0 }, { hasGsap: false }, { hasScrollTrigger: false }]) {
+    const current = dropTextFixture(options);
+    assert.equal(current.cleanup, null);
+    assert.equal(current.triggers.length, 0);
+    assert.equal(current.timelines.length, 0);
+  }
+});
+
+test("drop-text layouts play independently at the viewport midpoint and retain the endpoint", () => {
+  const { layouts, timelines, triggers } = dropTextFixture();
+  assert.equal(triggers.length, 2);
+  triggers.forEach(({ options }, index) => {
+    assert.equal(options.trigger, layouts[index]);
+    assert.equal(options.start, "top 50%");
+    assert.equal(options.scrub, undefined);
+    assert.equal(options.onLeave, undefined);
+    assert.equal(options.onEnterBack, undefined);
+  });
+  assert.ok(layouts.every(({ rings }) => rings.every((ring) => ring.autoAlpha === 0)));
+  triggers[0].options.onEnter();
+  timelines[0].pause().time(0.7);
+  assert.ok(layouts[0].rings.every((ring) => ring.autoAlpha > 0));
+  assert.ok(layouts[1].rings.every((ring) => ring.autoAlpha === 0));
+  timelines[0].progress(1);
+  assert.equal(timelines[0].duration(), 1.38);
+  assert.equal(timelines[0].repeat(), 0);
+  layouts[0].rings.forEach((ring, index) => {
+    assert.ok(Math.abs(ring.scale - (1.1 - index * 0.3)) < 1e-6);
+    assert.equal(ring.autoAlpha, 0.7);
+    assert.equal(ring.filter, "blur(1.2rem)");
+  });
+  const endpoint = snapshot(layouts[0].rings);
+  triggers[0].options.onEnter();
+  timelines[0].pause();
+  assert.deepEqual(snapshot(layouts[0].rings), endpoint);
+});
+
+test("drop-text direction changes resume from the current frame and reverse to hidden", () => {
+  const { layouts, timelines, triggers } = dropTextFixture({ count: 1 });
+  const [timeline] = timelines;
+  const { rings } = layouts[0];
+  const initialShadow = rings[0].boxShadow;
+  triggers[0].options.onEnter();
+  timeline.pause().time(0.8);
+  const beforeReverse = snapshot(rings);
+  triggers[0].options.onLeaveBack();
+  timeline.pause();
+  assert.equal(timeline.time(), 0.8);
+  assert.equal(timeline.reversed(), true);
+  assert.deepEqual(snapshot(rings), beforeReverse);
+  timeline.time(0.4);
+  const beforePlay = snapshot(rings);
+  triggers[0].options.onEnter();
+  timeline.pause();
+  assert.equal(timeline.time(), 0.4);
+  assert.equal(timeline.reversed(), false);
+  assert.deepEqual(snapshot(rings), beforePlay);
+  timeline.progress(1);
+  triggers[0].options.onLeaveBack();
+  timeline.pause().time(0);
+  assert.ok(rings.every((ring) => ring.scale === 0.08 && ring.autoAlpha === 0));
+  assert.ok(rings.every((ring) => ring.filter === "none" && ring.boxShadow === initialShadow));
+});
+
+test("drop-text purple shadows interpolate continuously without invalid percentage alpha", () => {
+  const { layouts, timelines } = dropTextFixture({ count: 1 });
+  const [timeline] = timelines;
+  const { rings } = layouts[0];
+  for (const time of [0.1, 0.3, 0.7, 1.199, 1.2, 1.38]) {
+    timeline.time(time);
+    for (const ring of rings) {
+      for (const [color] of ring.boxShadow.matchAll(/rgba?\([^)]*\)/g)) {
+        const [red, green, blue, alpha] = gsap.utils.splitColor(color);
+        assert.deepEqual([red, green, blue], [137, 62, 213]);
+        assert.ok(alpha >= 0 && alpha <= 1);
+      }
+    }
+  }
+  assert.deepEqual(alphas(rings[0].boxShadow), [0.35, 0.25]);
+});
+
+test("drop-text cleanup kills its triggers and timelines and clears only its rings", () => {
+  const { cleanup, layouts, timelines, triggers, cleared } = dropTextFixture();
+  triggers.forEach(({ options }) => options.onEnter());
+  timelines.forEach((timeline) => timeline.pause().time(0.5));
+  cleanup();
+  assert.ok(triggers.every((trigger) => trigger.killed));
+  assert.ok(timelines.every((timeline) => timeline.parent === null));
+  assert.equal(cleared.length, 2);
+  cleared.forEach(({ targets, properties }, index) => {
+    assert.equal(targets, layouts[index].rings);
+    assert.deepEqual(properties, ["transform", "opacity", "visibility", "filter", "box-shadow"]);
+  });
 });

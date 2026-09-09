@@ -1,0 +1,110 @@
+/* Reference copy of native Webflow classes, not a runtime stylesheet. */
+.drop-text-section {
+  overflow: hidden;
+}
+.drop-text-artwork {
+  position: relative;
+  display: flex;
+  width: 45%;
+  height: 28em;
+  min-width: 0px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: auto;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  isolation: isolate;
+}
+.drop-text-ripples {
+  position: absolute;
+  width: 32em;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  z-index: 0;
+}
+.drop-text-ripple {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-top-color: rgba(137, 62, 213, 0.38);
+  border-right-color: rgba(137, 62, 213, 0.38);
+  border-bottom-color: rgba(137, 62, 213, 0.38);
+  border-left-color: rgba(137, 62, 213, 0.38);
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+  box-shadow: 0 0 1rem rgba(137, 62, 213, 0.16), inset 0 0 1rem rgba(137, 62, 213, 0.1);
+  opacity: 0;
+  transform-origin: center center;
+}
+.drop-text-mark {
+  position: relative;
+  display: flex;
+  width: 9.125em;
+  height: 8em;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.drop-text-droplet {
+  position: relative;
+  display: block;
+  width: 4.75em;
+  height: auto;
+  overflow: visible;
+}
+.drop-text-bracket-left {
+  position: absolute;
+  display: block;
+  left: 0px;
+  width: 2.2em;
+  height: auto;
+}
+.drop-text-bracket-right {
+  position: absolute;
+  display: block;
+  right: 0px;
+  width: 2.2em;
+  height: auto;
+}
+@media screen and (max-width: 991px) {
+  .drop-text-section {
+    height: auto;
+    min-height: 80vh;
+  }
+  .drop-text-layout {
+    flex-direction: column;
+    row-gap: 3em;
+  }
+  .drop-text-content {
+    padding-left: 0em;
+    width: 100%;
+  }
+  .drop-text-artwork {
+    width: 100%;
+    height: 24em;
+  }
+  .drop-text-ripples {
+    width: 28em;
+  }
+}
+@media screen and (max-width: 479px) {
+  .drop-text-artwork {
+    height: 22em;
+  }
+  .drop-text-ripples {
+    width: 24em;
+  }
+}
