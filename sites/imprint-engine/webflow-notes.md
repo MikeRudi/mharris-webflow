@@ -192,6 +192,11 @@ accounts for its padding, internal gap, and two 1px borders. Image wrappers have
 zero basis/width, `min-width: 0`, and no forced aspect ratio; the absolute image
 fills their available space with the existing `.img-abs` cover styling.
 The active image therefore occupies the remaining row width without overflow.
+On desktop/tablet, `src/styles.css` anchors only the gallery's `.img-abs` crop
+to `right center`. As the panel widens, more artwork reveals toward the left
+instead of both sides. This is `object-position`, not `transform-origin`: the
+image is not being scaled. Item order, flex sizing, and mobile cropping stay
+unchanged.
 Desktop copy is anchored to the bottom of its text column and hidden when
 inactive. Its previous `[text-ch="18"]` limit now lives on the native copy class
 as `max-width: 18ch`, allowing an unrestricted mobile right-hand column.

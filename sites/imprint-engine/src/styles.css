@@ -7,6 +7,12 @@
   opacity: 0;
 }
 
+@media screen and (min-width: 768px) {
+  .flex-grow-item-img > .img-abs {
+    object-position: right center;
+  }
+}
+
 .git-test.is-moved-down {
   transform: translateY(50%);
 }
