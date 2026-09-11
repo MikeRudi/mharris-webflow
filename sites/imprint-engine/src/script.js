@@ -11,7 +11,7 @@ function initLenis() {
     gestureOrientation: "vertical",
     normalizeWheel: false,
     smoothTouch: false,
-  });
+  }); 
 
   window.lenis = lenis;
 
