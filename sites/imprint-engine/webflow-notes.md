@@ -125,7 +125,7 @@ observer, visibility listener, ticker, and timelines.
 continuous depth opacity. The scale setters use explicit `scaleX` / `scaleY`;
 GSAP's multi-property `scale` alias does not work as a quickSetter here.
 Framing lasts through 30% of scroll and cards fade from 24–33%. Cards rise
-straight up by `6rem` instead of moving to the viewport centre. Their position
+straight up by `18rem` instead of moving to the viewport centre. Their position
 spread is 1.12 horizontally and 0.6 vertically, anchored at the authored top
 and right. This moves lower cards away from the logos and into left-hand space.
 Refresh remeasures the layout without resetting its rotation.
@@ -260,6 +260,11 @@ need a Webflow publish; the animation comes from the existing GitHub JS loader.
 - jQuery supplied by Webflow.
 
 ## Known Issues
+
+See `homepage-design.md` for the native Home Staged reference pass, new
+comparison/testimonial sections, page-specific FAQ hooks, and remaining source
+artwork dependencies. These layouts use native Webflow classes, not new embeds
+or additions to `src/styles.css`.
 
 - The shared social links still point to `#` until their final URLs are supplied.
 - English is supplied in head code; native locale configuration would also cover

@@ -45,7 +45,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
-    catalogueAnimation(), dropTextAnimation(), flexGrowAnimation()];
+    catalogueAnimation(), homeFaqAnimation(), dropTextAnimation(), flexGrowAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -1819,6 +1819,60 @@ function catalogueAnimation() {
   activate($initial.length ? $initial : $selects.first(), true);
   const unbind = bindControlActivation($selects, "catalogueAnimation", activate);
   return () => { if (transition) transition.kill(); unbind(); restoreSelects(); restoreReveals(); };
+}
+
+function homeFaqAnimation() {
+  const $sections = $("[home-faq]");
+  if (!$sections.length) return null;
+  // HOME FAQ — seconds; Webflow owns the layout, borders and gradient backgrounds.
+  const faqMotion = { toggle: { duration: 0.3, ease: "power1.in" } };
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const cleanups = [];
+  $sections.each(function () {
+    const $items = $(this).find("[home-faq-item]");
+    const $buttons = $items.find("[home-faq-button]");
+    const $panels = $items.find("[home-faq-panel]");
+    const restoreButtons = rememberAttributes($buttons, ["aria-expanded", "aria-controls"]);
+    const restorePanels = rememberAttributes($panels, ["id", "style", "aria-hidden", "inert"]);
+    let transition;
+    $items.each(function () {
+      const $button = $(this).find("[home-faq-button]").first();
+      const $panel = $(this).find("[home-faq-panel]").first();
+      if (!$button.length || !$panel.length) return;
+      if (!$panel[0].id) $panel[0].id = uniqueElementId("home-faq-answer");
+      $button.attr({ "aria-expanded": "false", "aria-controls": $panel[0].id });
+      $panel.attr({ "aria-hidden": "true", inert: "" });
+    });
+    const unbind = bindControlActivation($buttons, "homeFaq", ($button) => {
+      const opening = $button.attr("aria-expanded") !== "true";
+      if (transition) transition.kill();
+      // Refresh downstream scroll positions once, after all panel heights settle.
+      transition = window.gsap ? gsap.timeline({
+        onComplete: () => window.ScrollTrigger && ScrollTrigger.refresh(),
+      }) : null;
+      $items.each(function () {
+        const $current = $(this).find("[home-faq-button]").first();
+        const $panel = $(this).find("[home-faq-panel]").first();
+        const open = opening && $current[0] === $button[0];
+        $current.attr("aria-expanded", String(open));
+        $panel.attr("aria-hidden", String(!open));
+        if (open) $panel.removeAttr("inert"); else $panel.attr("inert", "");
+        if (transition) {
+          transition.to($panel, { height: open ? "auto" : 0,
+            duration: reducedMotion.matches ? 0 : faqMotion.toggle.duration,
+            ease: faqMotion.toggle.ease, overwrite: true,
+          }, 0);
+        } else $panel.css("height", open ? "auto" : 0);
+      });
+    });
+    cleanups.push(() => {
+      unbind();
+      if (transition) transition.kill();
+      if (window.gsap) gsap.killTweensOf($panels);
+      restoreButtons(); restorePanels();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
 }
 
 function accordionOne() {

@@ -27,6 +27,11 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Animation regression checks
 
+See [homepage-design.md](homepage-design.md) for native Webflow styling,
+reference matching and the page-specific FAQ. Run
+`node sites/imprint-engine/tests/homepage-design.browser.mjs` for its desktop,
+tablet, mobile and keyboard checks.
+
 See [animation-controls.md](animation-controls.md) for the other functions'
 control groups, timing units, footer rendering and keyboard behavior.
 

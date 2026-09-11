@@ -63,20 +63,8 @@ try {
     assert.equal(await page.locator('[cat-select][aria-pressed="true"]').getAttribute("cat-select"), key);
     assert.ok((await page.locator('[cat-reveal]:not([inert])').evaluateAll(es=>es.map(e=>e.getAttribute("cat-reveal")))).every(value=>value===key));
   });
-  await check("filter keyboard selection reveals matching results and restores text markup", async () => {
-    await activate("[filter-tab]", 1, "Enter");
-    await page.waitForTimeout(500);
-    const state = await page.evaluate(() => ({key:document.querySelector('[filter-tab][aria-pressed="true"]').getAttribute("filter-tab"),visible:[...document.querySelectorAll("[filter-reveal]")].filter(e=>getComputedStyle(e).display!=="none").map(e=>e.getAttribute("filter-reveal")),split:document.querySelectorAll("[filter-reveal] [word]").length}));
-    assert.ok(state.visible.length > 0);
-    assert.ok(state.visible.every(value=>value.toLowerCase()===state.key.toLowerCase()));
-    assert.equal(state.split, 0);
-  });
-  await check("rapid filter changes settle on All without hidden or offset results", async () => {
-    await page.evaluate(() => {const tabs=document.querySelectorAll("[filter-tab]");[2,3,1,4,0].forEach(i=>tabs[i].click());});
-    await page.waitForTimeout(1600);
-    const state=await page.locator("[filter-reveal]").evaluateAll(es=>es.map(e=>({display:getComputedStyle(e).display,x:gsap.getProperty(e,"x"),opacity:getComputedStyle(e).opacity})));
-    assert.ok(state.every(e=>e.display!=="none" && e.x===0 && e.opacity==="1"));
-  });
+  // Home Staged now uses the reference FAQ instead of the shared category filter.
+  // Its keyboard and interrupted-transition checks live in homepage-design.browser.mjs.
   await check("reinitialization does not accumulate ScrollTriggers, control listeners or Lenis instances", async () => {
     const state=await page.evaluate(() => {
       const before=ScrollTrigger.getAll().length, original=lenis;

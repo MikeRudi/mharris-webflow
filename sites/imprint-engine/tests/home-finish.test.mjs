@@ -243,7 +243,7 @@ test("shared non-home ripple behavior retains its original duration and style re
 });
 
 test("drop-text animation initializes globally and skips missing layouts, rings, or libraries", () => {
-  const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "dropTextAnimation", "flexGrowAnimation", "onDesktop", "onMobile"];
+  const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "homeFaqAnimation", "dropTextAnimation", "flexGrowAnimation", "onDesktop", "onMobile"];
   const calls = [];
   new Function("isWebflowEditor", "window", ...names, `${section("function initSite()", "\n$(initSite);")}\ninitSite();`)(
     () => false, { gsap: {} }, ...names.map((name) => () => { calls.push(name); return null; })
