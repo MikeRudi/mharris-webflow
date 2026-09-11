@@ -8,6 +8,8 @@ For optional libraries on other sites, see sites/_template/webflow-custom-code.t
 HEAD CODE
 
 <script>
+  // English fallback until a native Webflow locale is configured.
+  if (!document.documentElement.lang) document.documentElement.lang = "en";
   // Resolve main once. CSS and JS always come from the same commit.
   const mhRepo = "MikeRudi/mharris-webflow";
   const mhSource = new Map();

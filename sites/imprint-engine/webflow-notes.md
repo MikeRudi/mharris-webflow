@@ -257,5 +257,9 @@ need a Webflow publish; the animation comes from the existing GitHub JS loader.
 - The site loader fetches CSS/JS together from one main commit and defers library
   execution. `webflow-custom-code.txt` contains the complete maintained copy,
   including the site's typography styles.
+- Head code supplies `lang="en"` when the HTML has no language. This runs before
+  content and preserves any future native locale. A native Webflow language
+  setting is preferable for visitors with JavaScript disabled; the connector
+  currently does not expose that setting.
 - Runtime control groups and lifecycle behavior are documented in
   `animation-controls.md`. The accepted home scroll choreography is unchanged.
