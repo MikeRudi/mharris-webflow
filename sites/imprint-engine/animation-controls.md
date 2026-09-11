@@ -13,7 +13,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
 | `lineHover` | `lineMotion.enter / leave` | Pointer and keyboard underline timing and direction |
 | `filterOne` | `filterMotion` | Hide, container resize and incoming result trains |
-| `catalogueAnimation` | `catalogueControls` | Initial selection and active state |
+| `catalogueAnimation` | `catalogueControls.hide / reveal` | Image exit/entrance timing, vertical movement and scale; reduced motion switches immediately |
 | `accordionOne` | `accordionMotion.marker / reveal` | Independent marker movement and panel fade |
 | `footerEnginePixels` | `footerMotion` | Reveal size, pixel pattern, glow, opacity and rendering budget |
 

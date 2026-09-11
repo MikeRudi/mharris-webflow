@@ -72,7 +72,7 @@ try {
     const scales = state.frames.map((frame) => frame.scale);
     near(scales[3] / scales[0], 0.78, 0.001);
     state.frames.forEach((frame) => near(frame.x, state.frames[0].x, 0.001));
-    state.frames.forEach((frame, index) => near(frame.y - state.frames[0].y, -2 * index * state.rem, 0.001));
+    state.frames.forEach((frame, index) => near(frame.y - state.frames[0].y, -6 * index * state.rem, 0.001));
     const differences = scales.slice(1).map((value, index) => scales[index] - value);
     assert.ok(differences.every((difference) => difference > 0.02));
     differences.forEach((difference) => near(difference, differences[0], 0.001));

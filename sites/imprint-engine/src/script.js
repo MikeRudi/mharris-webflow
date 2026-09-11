@@ -95,7 +95,7 @@ function homeAnimation() {
     firstScene: {
       start: 0,
       sphere: { start: 0, duration: 0.3, ease: "none" },
-      move: { start: 0, duration: 0.11, ease: "power1.in", y: "-20rem", stagger: { amount: 0.02, from: "end" } },
+      move: { start: 0, duration: 0.11, ease: "power1.in", y: "-20rem", scale: 0.9, stagger: { amount: 0.02, from: "end" } },
       fade: { start: "move", duration: 0.07, ease: "power1.in", stagger: { amount: 0.02, from: "end" } },
     },
     // 02 — Cards fade gently; the logos follow the first scene's exit.
@@ -111,16 +111,16 @@ function homeAnimation() {
     },
     // 03 — Second scene: enter → hold → leave.
     secondScene: {
-      start: "firstScene.move:end",
-      enter: { start: 0, duration: 0.065, ease: "power1.in" },
+      start: "logos:end+=0.02",
+      enter: { start: 0, duration: 0.065, ease: "power1.in", fromY: "10rem", fromScale: 0.9, scale: 1 },
       reveal: { start: "enter", duration: 0.05, ease: "power1.in" },
-      leave: { start: "enter:end+=0.045", duration: 0.065, ease: "power1.in", y: "-20rem" },
+      leave: { start: "enter:end+=0.045", duration: 0.065, ease: "power1.in", y: "-20rem", scale: 0.9 },
       hide: { start: "leave", duration: 0.05, ease: "power1.in" },
     },
     // 04 — Third scene enters and holds naturally until the screen opens.
     thirdScene: {
       start: "secondScene.leave:end",
-      enter: { start: 0, duration: 0.065, ease: "power1.in" },
+      enter: { start: 0, duration: 0.065, ease: "power1.in", fromY: "10rem", fromScale: 0.9, scale: 1 },
       reveal: { start: "enter", duration: 0.05, ease: "power1.in" },
     },
     // 05 — Bottom gradient → ring → rotation → upward merge.
@@ -167,6 +167,7 @@ function homeAnimation() {
       start: "line:end",
       clip: { start: 0, duration: 0.18, ease: "power1.in" },
       blur: { start: "clip", duration: 0.18, ease: "power1.in", from: "blur(0rem)", to: "blur(1.5rem)" },
+      textLeave: { start: "clip", duration: 0.18, ease: "power1.in", scale: 0.9 },
       starGrow: { start: "clip", duration: 0.04, ease: "power1.in", scale: 2.5 },
       starRotate: { start: "starGrow", duration: 0.43, ease: "none", rotation: 360 },
       starSettle: { start: "starGrow:end+=0.07", duration: 0.04, ease: "power1.in", scale: 2.15 },
@@ -220,6 +221,7 @@ function homeAnimation() {
   const $homeLogos = $("[home-logo-up]");
   // PAGE ENTRANCE — seconds, independent of the scroll controls above.
   const homeEntrance = {
+    scale: { start: 0, duration: 1.2, ease: "power2.out", from: 0.9, to: 1 },
     move: { start: 0, duration: 1.2, ease: "power2.out", stagger: { amount: 0.6, from: "end" } },
     fade: { start: 0, duration: 0.6, ease: "power1.out", stagger: { amount: 0.6, from: "end" } },
     logosMove: { start: 0, fromY: "10rem", duration: 1.2, ease: "power2.out", stagger: 0 },
@@ -238,13 +240,14 @@ function homeAnimation() {
   );
 
   gsap.set($homeLogos, { y: homeEntrance.logosMove.fromY });
+  gsap.set($("[home-start-up]").not("[home-resting]"), { scale: homeEntrance.scale.from });
 
   // CARD BACKGROUND — seconds for idle/drag; framing uses firstScene.sphere above.
   const homeCardMotion = {
     idle: { cycleSeconds: 48, axisDegrees: 45, scrollSpeedMultiplier: 3 },
     drag: { duration: 0.6, ease: "power2.out", degreesPerPixel: 0.25 },
     layout: { horizontalSpread: 1.12, verticalSpread: 0.6 },
-    framing: { scale: 0.78, radiusScale: 0.9, offsetYRem: 2, riseYRem: -6 },
+    framing: { scale: 0.78, radiusScale: 0.9, offsetYRem: 2, riseYRem: -18 },
     opacity: { back: 0.08, front: 1, ease: "power1.inOut" },
   };
   const cardOpacityEase = gsap.parseEase(homeCardMotion.opacity.ease);
@@ -839,6 +842,7 @@ function homeAnimation() {
     },
   });
   homeLoadTimeline
+    .to($("[home-start-up]").not("[home-resting]"), { scale: homeEntrance.scale.to, duration: homeEntrance.scale.duration, ease: homeEntrance.scale.ease }, homeEntrance.scale.start)
     .to($("[home-start-up]"), { y: 0, duration: homeEntrance.move.duration, ease: homeEntrance.move.ease, stagger: homeEntrance.move.stagger }, homeEntrance.move.start)
     .to($("[home-start-up]"), { opacity: 1, duration: homeEntrance.fade.duration, ease: homeEntrance.fade.ease, stagger: homeEntrance.fade.stagger }, homeEntrance.fade.start)
     .to($homeLogos, { y: 0, duration: homeEntrance.logosMove.duration, ease: homeEntrance.logosMove.ease, stagger: homeEntrance.logosMove.stagger }, homeEntrance.logosMove.start)
@@ -884,7 +888,7 @@ function homeAnimation() {
     addHomeStep(group, "sphere", homeRestingView, { progress: 0 },
       { progress: 1, onUpdate: renderHomeRestingSphere }, motion.sphere);
     const $content = $("[home-start-up]").not("[home-resting]");
-    addHomeStep(group, "move", $content, { y: 0 }, { y: motion.move.y }, motion.move);
+    addHomeStep(group, "move", $content, { y: 0, scale: 1 }, { y: motion.move.y, scale: motion.move.scale }, motion.move);
     addHomeStep(group, "fade", $content, { opacity: 1 }, { opacity: 0 }, motion.fade);
   });
 
@@ -901,16 +905,16 @@ function homeAnimation() {
   // 03 — Second scene: the delay before leave is the hold; no competing tween.
   addHomeGroup("secondScene", (group, motion) => {
     const $content = $("[home-second-up]");
-    addHomeStep(group, "enter", $content, { y: "10rem" }, { y: 0 }, motion.enter);
+    addHomeStep(group, "enter", $content, { y: motion.enter.fromY, scale: motion.enter.fromScale }, { y: 0, scale: motion.enter.scale }, motion.enter);
     addHomeStep(group, "reveal", $content, { opacity: 0 }, { opacity: 1 }, motion.reveal);
-    addHomeStep(group, "leave", $content, { y: 0 }, { y: motion.leave.y }, motion.leave);
+    addHomeStep(group, "leave", $content, { y: 0, scale: motion.enter.scale }, { y: motion.leave.y, scale: motion.leave.scale }, motion.leave);
     addHomeStep(group, "hide", $content, { opacity: 1 }, { opacity: 0 }, motion.hide);
   });
 
   // 04 — Third scene remains in place until the clip reveals the next layer.
   addHomeGroup("thirdScene", (group, motion) => {
     const $content = $("[home-third-up]");
-    addHomeStep(group, "enter", $content, { y: "10rem" }, { y: 0 }, motion.enter);
+    addHomeStep(group, "enter", $content, { y: motion.enter.fromY, scale: motion.enter.fromScale }, { y: 0, scale: motion.enter.scale }, motion.enter);
     addHomeStep(group, "reveal", $content, { opacity: 0 }, { opacity: 1 }, motion.reveal);
   });
 
@@ -978,6 +982,7 @@ function homeAnimation() {
   addHomeGroup("finish", (group, motion) => {
     addHomeStep(group, "clip", homeClip, { progress: 0 }, { progress: 1 }, motion.clip);
     addHomeStep(group, "blur", $homeStartContent, { filter: motion.blur.from }, { filter: motion.blur.to }, motion.blur);
+    addHomeStep(group, "textLeave", $("[home-third-up]"), { scale: 1 }, { scale: motion.textLeave.scale }, motion.textLeave);
     addHomeStep(group, "starGrow", $("[home-drop-star]"),
       { opacity: 0, scale: 0.15 }, { opacity: 1, scale: motion.starGrow.scale }, motion.starGrow);
     addHomeStep(group, "starRotate", $("[home-drop-star]"),
@@ -1768,24 +1773,52 @@ function filterOne() {
 function catalogueAnimation() {
   const $selects = $("[cat-select]"), $reveals = $("[cat-reveal]");
   if (!$selects.length || !$reveals.length) return null;
-  // CATALOGUE CONTROLS — visibility and layout stay in Webflow's active state.
-  const catalogueControls = { activeClass: "active", initialValue: null };
+  // CATALOGUE CONTROLS — seconds; the new image follows the outgoing image.
+  const catalogueControls = {
+    activeClass: "active", initialValue: null,
+    hide: { start: 0, duration: 0.2, ease: "power1.in", y: "-2rem", scale: 0.9 },
+    reveal: { start: ">", duration: 0.3, ease: "power1.in", fromY: "2rem", fromScale: 0.9, y: 0, scale: 1 },
+  };
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let transition = null;
   const restoreSelects = rememberAttributes($selects, ["class", "aria-pressed"]);
-  const restoreReveals = rememberAttributes($reveals, ["class", "aria-hidden", "inert"]);
-  function activate($select) {
+  const restoreReveals = rememberAttributes($reveals, ["class", "style", "aria-hidden", "inert"]);
+  function activate($select, immediate = false) {
     const value = $select.attr("cat-select");
     const $matches = $reveals.filter((_, element) => element.getAttribute("cat-reveal") === value);
-    if (!$matches.length) return;
+    if (!$matches.length || (!immediate && $select.hasClass(catalogueControls.activeClass))) return;
+    if (transition) transition.kill();
+    const $outgoing = $reveals.filter(`.${catalogueControls.activeClass}`).not($matches);
     $selects.removeClass(catalogueControls.activeClass).attr("aria-pressed", "false");
     $select.addClass(catalogueControls.activeClass).attr("aria-pressed", "true");
-    $reveals.removeClass(catalogueControls.activeClass).attr({ "aria-hidden": "true", inert: "" });
-    $matches.addClass(catalogueControls.activeClass).attr("aria-hidden", "false").removeAttr("inert");
+    $reveals.attr({ "aria-hidden": "true", inert: "" });
+    function showSelected() {
+      $reveals.removeClass(catalogueControls.activeClass);
+      $matches.addClass(catalogueControls.activeClass).attr("aria-hidden", "false").removeAttr("inert");
+    }
+    if (immediate || !window.gsap || reducedMotion.matches) {
+      showSelected();
+      if (window.gsap) gsap.set($reveals, { clearProps: "transform,opacity" });
+      return;
+    }
+    const { hide, reveal } = catalogueControls;
+    transition = gsap.timeline({ onComplete: () => {
+      gsap.set($reveals, { clearProps: "transform,opacity" });
+      transition = null;
+    } });
+    if ($outgoing.length) {
+      transition.to($outgoing, { y: hide.y, scale: hide.scale, opacity: 0, duration: hide.duration, ease: hide.ease }, hide.start);
+    }
+    // Keep Webflow's display state until the outgoing image has finished.
+    transition.call(showSelected);
+    transition.fromTo($matches, { y: reveal.fromY, scale: reveal.fromScale, opacity: 0 },
+      { y: reveal.y, scale: reveal.scale, opacity: 1, duration: reveal.duration, ease: reveal.ease, immediateRender: false }, reveal.start);
   }
   const $initial = catalogueControls.initialValue === null ? $selects.filter(".active").first()
     : $selects.filter((_, element) => element.getAttribute("cat-select") === catalogueControls.initialValue).first();
-  activate($initial.length ? $initial : $selects.first());
+  activate($initial.length ? $initial : $selects.first(), true);
   const unbind = bindControlActivation($selects, "catalogueAnimation", activate);
-  return () => { unbind(); restoreSelects(); restoreReveals(); };
+  return () => { if (transition) transition.kill(); unbind(); restoreSelects(); restoreReveals(); };
 }
 
 function accordionOne() {

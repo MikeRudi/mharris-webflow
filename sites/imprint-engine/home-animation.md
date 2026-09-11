@@ -127,6 +127,7 @@ The browser suite requires Playwright and Chrome:
 node sites/imprint-engine/tests/home-scroll.browser.mjs
 node sites/imprint-engine/tests/home-polish.browser.mjs
 node sites/imprint-engine/tests/home-cards.browser.mjs
+node sites/imprint-engine/tests/content-pop.browser.mjs
 ```
 
 Use `PLAYWRIGHT_MODULE` for a separately installed Playwright module,
@@ -138,3 +139,10 @@ checks card motion/opacity, actual nav hit-testing during the clip, end alignmen
 and full-size gallery artwork during desktop and mobile expansion.
 The card suite compares top/right anchors and logo clearance, checks resize
 stability, measures rotation speed, and tests wheel scrolling and fade/reverse.
+
+The second scene starts at `logos:end+=0.02`, leaving a 2% scroll gap after
+the logos finish. Its entry and the third scene's entry expose `fromY`,
+`fromScale` and `scale`; text enters from 0.9 and leaves toward 0.9. The final
+scene's exit scale is `finish.textLeave`. Card upward travel is
+`homeCardMotion.framing.riseYRem` (currently -18rem), spread linearly over
+`firstScene.sphere` while rotation continues and accelerates.
