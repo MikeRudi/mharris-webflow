@@ -243,3 +243,19 @@ need a Webflow publish; the animation comes from the existing GitHub JS loader.
 ## Known Issues
 
 - None yet.
+# Performance and accessibility cleanup — 2026-09-11
+
+- The five approved light-background buttons on Home Staged now carry
+  `readable-brand-text`; its purple text colour lives in `src/styles.css`.
+  Keep this attribute when duplicating the same light-surface treatment.
+- Native accordion number/title text is `#6f6c65`; footer legal text is `#999999`.
+- The shared footer's Facebook, LinkedIn and Instagram links have accessible
+  labels. Their existing `#` destinations still need final social URLs.
+- Thirteen Home Staged image instances now use ten uploaded WebP card assets.
+  Original PNG assets are retained; dimensions, transparency and authored alt
+  text are preserved.
+- The site loader fetches CSS/JS together from one main commit and defers library
+  execution. `webflow-custom-code.txt` contains the complete maintained copy,
+  including the site's typography styles.
+- Runtime control groups and lifecycle behavior are documented in
+  `animation-controls.md`. The accepted home scroll choreography is unchanged.

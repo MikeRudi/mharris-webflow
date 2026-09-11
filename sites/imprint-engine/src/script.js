@@ -1,79 +1,40 @@
 function isWebflowEditor() {
-  return window.Webflow && window.Webflow.env && window.Webflow.env("editor") !== undefined;
+  return Boolean(window.Webflow && window.Webflow.env && window.Webflow.env("editor"));
 }
 
 function initLenis() {
   if (!window.Lenis || isWebflowEditor()) return null;
 
-  const lenis = new Lenis({
+  // SCROLL CONTROLS — one clock shared with GSAP, cleaned up on reinitialization.
+  const scrollControls = {
     lerp: 0.1,
     wheelMultiplier: 0.7,
     gestureOrientation: "vertical",
     normalizeWheel: false,
     smoothTouch: false,
-  }); 
-
+  };
+  const lenis = new Lenis(scrollControls);
   window.lenis = lenis;
+  const $prevent = $("[data-lenis-prevent]");
+  $prevent.on("wheel.siteLenis touchmove.siteLenis", (event) => event.stopPropagation());
+  if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+  if (window.ScrollTrigger) lenis.on("scroll", ScrollTrigger.update);
 
-  if (window.gsap && window.ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
-  }
-
-  $("[data-lenis-prevent]").on("wheel touchmove", function (event) {
-    event.stopPropagation();
-  });
-
-  if (window.ScrollTrigger) {
-    lenis.on("scroll", ScrollTrigger.update);
-  }
-
+  let frame = null;
+  const tick = (seconds) => lenis.raf(seconds * 1000);
+  function fallbackTick(time) { lenis.raf(time); frame = requestAnimationFrame(fallbackTick); }
   if (window.gsap) {
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-
+    gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
-  } else {
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-  }
-
-  return lenis;
-}
-
-function gitTestDesktop() {
-  const $gitTest = $("[git-test]");
-  if (!$gitTest.length) return null;
-
-  const handleClick = () => {
-    $gitTest.toggleClass("is-moved-down");
-  };
-
-  $gitTest.on("click.gitTestDesktop", handleClick);
+  } else frame = requestAnimationFrame(fallbackTick);
 
   return () => {
-    $gitTest.off("click.gitTestDesktop");
-    $gitTest.removeClass("is-moved-down");
-  };
-}
-
-function gitTestMobile() {
-  const $gitTest = $("[git-test]");
-  if (!$gitTest.length) return null;
-
-  const handleClick = () => {
-    $gitTest.toggleClass("is-moved-right");
-  };
-
-  $gitTest.on("click.gitTestMobile", handleClick);
-
-  return () => {
-    $gitTest.off("click.gitTestMobile");
-    $gitTest.removeClass("is-moved-right");
+    if (window.gsap) gsap.ticker.remove(tick);
+    if (frame !== null) cancelAnimationFrame(frame);
+    if (window.ScrollTrigger) lenis.off("scroll", ScrollTrigger.update);
+    $prevent.off(".siteLenis");
+    lenis.destroy();
+    if (window.lenis === lenis) window.lenis = null;
   };
 }
 
@@ -81,29 +42,28 @@ const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 992px)", fn);
 const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 
 function initSite() {
-  initLenis();
-  navTheme();
-  accordionOne();
-  filterOne();
-  catalogueAnimation();
-  dropTextAnimation();
-  flexGrowAnimation();
+  if (isWebflowEditor()) return null;
+  if (initSite.cleanup) initSite.cleanup();
+  const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
+    catalogueAnimation(), dropTextAnimation(), flexGrowAnimation()];
 
-  onDesktop(() => {
-    // gitTestDesktop();
-    lineHover();
-    const homeAnimationCleanup = homeAnimation();
-    const footerEnginePixelsCleanup = footerEnginePixels();
-
-    return () => {
-      if (homeAnimationCleanup) homeAnimationCleanup();
-      if (footerEnginePixelsCleanup) footerEnginePixelsCleanup();
-    };
-  });
-
-  onMobile(() => {
-    // gitTestMobile();
-  });
+  if (window.gsap) {
+    const desktop = onDesktop(() => {
+      const lineCleanup = lineHover();
+      const homeCleanup = homeAnimation();
+      const footerCleanup = footerEnginePixels();
+      return () => [footerCleanup, homeCleanup, lineCleanup].forEach((cleanup) => cleanup && cleanup());
+    });
+    cleanups.push(() => desktop.revert());
+  }
+  let destroyed = false;
+  initSite.cleanup = () => {
+    if (destroyed) return;
+    destroyed = true;
+    cleanups.slice().reverse().forEach((cleanup) => cleanup && cleanup());
+    initSite.cleanup = null;
+  };
+  return initSite.cleanup;
 }
 
 $(initSite);
@@ -1160,20 +1120,24 @@ function flexGrowAnimation() {
   const $blocks = $("[flex-grow-block]");
   if (!$blocks.length || !window.gsap) return null;
 
-  const animationControls = {
+  // GALLERY CONTROLS — desktop growth, copy fade, and mobile expansion in seconds.
+  const galleryMotion = {
     grow: {
+      start: 0,
       active: 1,
       inactive: 0,
       duration: 0.3,
       ease: "power1.in",
     },
     copy: {
+      start: 0,
       active: 1,
       inactive: 0,
       duration: 0.15,
       ease: "power1.in",
     },
     mobile: {
+      start: 0,
       media: "(max-width: 767px)",
       imageAspectRatio: 2,
       imageGapEm: 1,
@@ -1213,7 +1177,7 @@ function flexGrowAnimation() {
       ...rememberStyles($contentTargets, ["height"]),
       ...rememberStyles($(items.map(({ $image }) => $image[0])), ["height", "margin-top"]),
     ];
-    let mobile = window.matchMedia(animationControls.mobile.media).matches;
+    let mobile = window.matchMedia(galleryMotion.mobile.media).matches;
     let activeItem = null;
     let timeline = null;
 
@@ -1263,9 +1227,9 @@ function flexGrowAnimation() {
       });
 
       const grow = (_, element) =>
-        $(element).hasClass("active") ? animationControls.grow.active : animationControls.grow.inactive;
+        $(element).hasClass("active") ? galleryMotion.grow.active : galleryMotion.grow.inactive;
       const visibility = (_, element) =>
-        $(element).hasClass("active") ? animationControls.copy.active : animationControls.copy.inactive;
+        $(element).hasClass("active") ? galleryMotion.copy.active : galleryMotion.copy.inactive;
 
       if (!immediate) timeline = gsap.timeline();
 
@@ -1274,8 +1238,8 @@ function flexGrowAnimation() {
         if ($contentTargets.length) gsap.set($contentTargets, { height: "auto" });
         const targetSizes = items.map(({ $image, $title, $copy }, index) => ({
           content: Math.max($title.outerHeight(true) || 0, items[index] === item ? $copy.outerHeight(true) || 0 : 0),
-          image: items[index] === item ? $image.outerWidth() / animationControls.mobile.imageAspectRatio : 0,
-          gap: items[index] === item ? animationControls.mobile.imageGapEm * (parseFloat($image.css("font-size")) || 16) : 0,
+          image: items[index] === item ? $image.outerWidth() / galleryMotion.mobile.imageAspectRatio : 0,
+          gap: items[index] === item ? galleryMotion.mobile.imageGapEm * (parseFloat($image.css("font-size")) || 16) : 0,
         }));
 
         items.forEach(({ $content, $image }, index) => {
@@ -1290,11 +1254,11 @@ function flexGrowAnimation() {
           if ($content.length) gsap.set($content, { height: current.content });
           gsap.set($image, { height: current.image, marginTop: current.gap });
           const timing = {
-            duration: animationControls.mobile.duration,
-            ease: animationControls.mobile.ease,
+            duration: galleryMotion.mobile.duration,
+            ease: galleryMotion.mobile.ease,
             overwrite: "auto",
           };
-          if ($content.length) timeline.to($content, { height: target.content, ...timing }, 0);
+          if ($content.length) timeline.to($content, { height: target.content, ...timing }, galleryMotion.mobile.start);
           timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, 0);
         });
       } else if (immediate) {
@@ -1302,10 +1266,10 @@ function flexGrowAnimation() {
       } else {
         timeline.to($growTargets, {
           flexGrow: grow,
-          duration: animationControls.grow.duration,
-          ease: animationControls.grow.ease,
+          duration: galleryMotion.grow.duration,
+          ease: galleryMotion.grow.ease,
           overwrite: "auto",
-        }, 0);
+        }, galleryMotion.grow.start);
       }
 
       if ($copyTargets.length) {
@@ -1313,10 +1277,10 @@ function flexGrowAnimation() {
         else {
           timeline.to($copyTargets, {
             autoAlpha: visibility,
-            duration: animationControls.copy.duration,
-            ease: animationControls.copy.ease,
+            duration: galleryMotion.copy.duration,
+            ease: galleryMotion.copy.ease,
             overwrite: "auto",
-          }, 0);
+          }, galleryMotion.copy.start);
         }
       }
     }
@@ -1343,7 +1307,7 @@ function flexGrowAnimation() {
     activateItem(initialItem, true);
 
     refreshers.push(() => {
-      const nextMobile = window.matchMedia(animationControls.mobile.media).matches;
+      const nextMobile = window.matchMedia(galleryMotion.mobile.media).matches;
       if (timeline) timeline.kill();
       if (nextMobile !== mobile) {
         restoreStyles(mobile ? mobileStyles : growStyles);
@@ -1400,8 +1364,13 @@ function dropTextAnimation() {
 
   gsap.registerPlugin(ScrollTrigger);
 
+  // DROP-TEXT CONTROLS — separate trigger, expansion, opacity, and settling.
   const rippleControls = {
+    trigger: { start: "top 50%" },
+    fade: { start: 0, duration: 0.95, ease: "power2.out", stagger: 0.09 },
     expand: {
+      start: 0,
+      startScale: 0.08,
       endScale: (index) => 1.1 - index * 0.3,
       duration: 0.95,
       stagger: 0.09,
@@ -1425,13 +1394,15 @@ function dropTextAnimation() {
 
     const rippleTimeline = rippleAnimation($rings, {
       ...rippleControls.expand,
+      fade: rippleControls.fade,
       settle: rippleControls.settle,
     });
     if (!rippleTimeline) return;
 
     const trigger = ScrollTrigger.create({
       trigger: this,
-      start: "top 50%",
+      start: rippleControls.trigger.start,
+      onLeave: () => rippleTimeline.progress(1).pause(),
       onEnter: () => rippleTimeline.play(),
       onLeaveBack: () => rippleTimeline.reverse(),
     });
@@ -1455,35 +1426,42 @@ function dropTextAnimation() {
 function rippleAnimation(
   $rings = $("[ripple-ring]"),
   {
+    start = 0,
+    startScale = 0.08,
     endScale = 1,
     startOpacity = 0.42,
     duration = 1.6,
     stagger = 0.16,
     ease = "power2.out",
+    fade = null,
     settle = null,
   } = {}
 ) {
   if (!$rings.length || !window.gsap) return null;
 
-  gsap.set($rings, { scale: 0.08, autoAlpha: 0 });
+  gsap.set($rings, { scale: startScale, autoAlpha: 0 });
 
   const rippleTimeline = gsap.timeline({ paused: true });
 
   rippleTimeline.fromTo(
     $rings,
     {
-      scale: 0.08,
-      autoAlpha: settle ? 0 : startOpacity,
+      scale: startScale,
     },
     {
       scale: endScale,
-      autoAlpha: settle ? settle.opacity : 0,
       duration,
       stagger,
       ease,
       immediateRender: false,
-    }
+    },
+    start
   );
+  const fadeMotion = { start, duration, ease, stagger, ...fade };
+  rippleTimeline.fromTo($rings, { autoAlpha: settle ? 0 : startOpacity }, {
+    autoAlpha: settle ? settle.opacity : 0, duration: fadeMotion.duration,
+    ease: fadeMotion.ease, stagger: fadeMotion.stagger, immediateRender: false,
+  }, fadeMotion.start);
 
   if (settle) {
     // Capture Webflow's resting styles so replay restores the original water rings.
@@ -1519,10 +1497,13 @@ function rippleAnimation(
 function navTheme() {
   const $nav = $("[nav-block]").first();
   const $sections = $("[nav-light], [nav-dark]");
-  if (!$nav.length || !$sections.length || !window.ScrollTrigger) return null;
+  if (!$nav.length || !$sections.length || !window.gsap || !window.ScrollTrigger) return null;
 
   gsap.registerPlugin(ScrollTrigger);
 
+  // NAV CONTROLS — switch themes when a marked section reaches this position.
+  const navControls = { start: "top top" };
+  let currentMode;
   const initialMode = $nav.hasClass("nav-light") ? "nav-light" : "nav-dark";
   const sections = $sections.toArray().map((element) => ({
     element,
@@ -1530,6 +1511,8 @@ function navTheme() {
   }));
 
   function setNavMode(mode) {
+    if (currentMode === mode) return;
+    currentMode = mode;
     $nav
       .toggleClass("nav-light", mode === "nav-light")
       .toggleClass("nav-dark", mode === "nav-dark");
@@ -1538,8 +1521,8 @@ function navTheme() {
   function syncNavMode() {
     let mode = initialMode;
 
-    sections.forEach((section) => {
-      if (section.element.getBoundingClientRect().top <= 0) {
+    sections.forEach((section, index) => {
+      if (window.scrollY >= triggers[index].start) {
         mode = section.mode;
       }
     });
@@ -1550,7 +1533,7 @@ function navTheme() {
   const triggers = sections.map((section, index) =>
     ScrollTrigger.create({
       trigger: section.element,
-      start: "top top",
+      start: navControls.start,
       onEnter: () => setNavMode(section.mode),
       onLeaveBack: () =>
         setNavMode(index > 0 ? sections[index - 1].mode : initialMode),
@@ -1569,797 +1552,512 @@ function navTheme() {
 }
 
 function lineHover() {
+  if (!window.gsap) return null;
+  // UNDERLINE CONTROLS — each state owns its timing, including keyboard focus.
+  const lineMotion = {
+    enter: { start: 0, duration: 0.3, ease: "power1.in", clipPath: "inset(0% 0% 0% 0%)" },
+    leave: { start: 0, duration: 0.3, ease: "power1.in", clipPath: "inset(0% 0% 0% 100%)" },
+    hidden: "inset(0% 100% 0% 0%)",
+  };
+  const cleanups = [];
   $("[line-hover-item]").each(function () {
-    const $item = $(this);
-    const $line = $item.find("[line-hover]").first();
-
+    const $item = $(this), $line = $item.find("[line-hover]").first();
     if (!$line.length) return;
+    const restore = rememberAttributes($line, ["style"]);
+    let hovered = false, closed = !$item.hasClass("is-active");
+    gsap.set($line, { clipPath: $item.hasClass("is-active") ? lineMotion.enter.clipPath : lineMotion.hidden });
 
-    gsap.set($line, {
-      clipPath: $item.hasClass("is-active")
-        ? "inset(0% 0% 0% 0%)"
-        : "inset(0% 100% 0% 0%)",
-    });
-
-    $item
-      .off(".lineHover")
-      .on("mouseenter.lineHover", function () {
-        gsap.killTweensOf($line);
-
-        if ($item.hasClass("is-active")) {
-          gsap.set($line, { clipPath: "inset(0% 0% 0% 0%)" });
-          return;
-        }
-
-        gsap.fromTo(
-          $line,
-          {
-            clipPath: "inset(0% 100% 0% 0%)",
-          },
-          {
-            clipPath: "inset(0% 0% 0% 0%)",
-            duration: 0.3,
-            ease: "power3.out",
-          }
-        );
-      })
-      .on("mouseleave.lineHover", function () {
-        gsap.killTweensOf($line);
-
-        gsap.to($line, {
-          clipPath: $item.hasClass("is-active")
-            ? "inset(0% 0% 0% 0%)"
-            : "inset(0% 0% 0% 100%)",
-          duration: 0.3,
-          ease: "power3.out",
-        });
-      });
+    function animate(enter) {
+      const motion = lineMotion[enter ? "enter" : "leave"];
+      if (enter && closed) gsap.set($line, { clipPath: lineMotion.hidden });
+      closed = false;
+      gsap.to($line, { clipPath: $item.hasClass("is-active") ? lineMotion.enter.clipPath : motion.clipPath,
+        duration: motion.duration, delay: motion.start, ease: motion.ease, overwrite: true,
+        onComplete: () => { closed = !enter && !$item.hasClass("is-active"); } });
+    }
+    $item.on("mouseenter.lineHover", () => { hovered = true; animate(true); })
+      .on("mouseleave.lineHover", () => { hovered = false; animate(this.contains(document.activeElement)); })
+      .on("focusin.lineHover", () => animate(true))
+      .on("focusout.lineHover", (event) => { if (!this.contains(event.relatedTarget)) animate(hovered); });
+    cleanups.push(() => { $item.off(".lineHover"); gsap.killTweensOf($line); restore(); });
   });
+  return () => cleanups.forEach((cleanup) => cleanup());
 }
 
 function filterOne() {
-  const $tabs = $("[filter-tab]");
-  const $reveals = $("[filter-reveal]");
-  if (!$tabs.length || !$reveals.length) return null;
+  const $tabs = $("[filter-tab]"), $reveals = $("[filter-reveal]");
+  if (!$tabs.length || !$reveals.length || !window.gsap) return null;
 
-  const settings = {
-    itemAnimation: {
-      hide: {
-        duration: 0.2,
-        ease: "power1.out",
-      },
-      reveal: {
-        fromX: -100,
-        toX: 0,
-        duration: 0.4,
-        ease: "power1.inOut",
-      },
+  // FILTER CONTROLS — seconds. Each incoming item's child timeline starts after hide.
+  const filterMotion = {
+    items: {
+      hide: { start: 0, duration: 0.2, ease: "power1.in" },
+      reveal: { start: 0, duration: 0.4, ease: "power1.in", fromX: -100, toX: 0 },
+      train: { start: "switch+=0.04", stagger: 0.03 },
     },
-    wordAnimation: {
-      reveal: {
-        fromX: -100,
-        toX: 0,
-        duration: 0.3,
-        ease: "power1.inOut",
-        stagger: 0.02,
-        fade: 0.2,
-        fadeEase: "power1.in",
-      },
+    words: {
+      move: { start: 0, fromX: -100, toX: 0, duration: 0.3, ease: "power1.in", stagger: { each: 0.02, from: "end" } },
+      fade: { start: 0, duration: 0.06, ease: "power1.in", stagger: { each: 0.02, from: "end" } },
     },
-    itemStagger: 0.03,
-    lineEnterDuration: 0.5,
-    heightDuration: 0.5,
+    divider: { start: 0, duration: 0.5, ease: "power1.in" },
+    container: { start: "switch+=0.001", duration: 0.5, ease: "power1.in" },
+    tabLine: { start: 0, duration: 0.3, ease: "power1.in" },
   };
+  const $lines = $tabs.find("[line-hover]"), $dividers = $reveals.find("[h-line]");
+  const $parent = $reveals.first().parent();
+  const restoreTabs = rememberAttributes($tabs, ["class", "aria-pressed"]);
+  const restoreStyles = rememberAttributes($reveals.add($dividers).add($lines).add($parent), ["style"]);
+  let splits = [], timeline = null;
+  const normalize = (value) => String(value || "").trim().toLowerCase();
 
-  const $lines = $tabs.find("[line-hover]");
-  const $revealLines = $reveals.find("[h-line]");
-  const $revealParent = $reveals.first().parent();
-  const $initialTab = $tabs.filter('[filter-tab="all"]').first();
-  const $activeTab = $initialTab.length ? $initialTab : $tabs.first();
-  let splitInstances = [];
-  let filterTimeline = null;
-
-  function normalizeValue(value) {
-    return String(value || "").trim().toLowerCase();
+  function revertHeadings() { splits.forEach((split) => split.revert()); splits = []; }
+  function headingTargets(element) {
+    const $heading = $(element).find("[accord-heading]").first();
+    const $words = $heading.find("[word]");
+    return ($words.length ? $words : $heading).toArray();
   }
-
-  function revertHeadings() {
-    splitInstances.forEach((instance) => instance.revert());
-    splitInstances = [];
-  }
-
-  function splitHeadings($items) {
+  function finish() {
+    const previous = timeline;
+    if (previous) { previous.progress(1); previous.kill(); timeline = null; }
+    gsap.killTweensOf($reveals.add($dividers).add($parent));
+    gsap.set($parent, { clearProps: "height,overflow" });
+    gsap.set($reveals, { clearProps: "will-change" });
     revertHeadings();
-    if (!window.SplitType) return;
-
-    $items.find("[accord-heading]").each(function () {
-      const split = new SplitType(this, { types: "words" });
-      $(split.words).attr("word", "");
-      splitInstances.push(split);
-    });
   }
-
-  function getHeadingTargets(item) {
-    const $heading = $(item).find("[accord-heading]").first();
-    const words = $heading.find("[word]").toArray();
-
-    return words.length ? words : $heading.toArray();
-  }
-
-  function setActiveTab($nextTab, immediate = false) {
-    const $nextLine = $nextTab.find("[line-hover]").first();
-    const $otherLines = $tabs.not($nextTab).find("[line-hover]");
-    const duration = immediate ? 0 : 0.3;
-
-    $tabs.removeClass("is-active");
-    $nextTab.addClass("is-active");
-
-    gsap.killTweensOf($lines);
-    gsap.to($otherLines, {
-      clipPath: "inset(0% 0% 0% 100%)",
-      duration,
-      ease: "power3.out",
-      overwrite: true,
+  function setActiveTab($tab, immediate = false) {
+    $tabs.removeClass("is-active").attr("aria-pressed", "false");
+    $tab.addClass("is-active").attr("aria-pressed", "true");
+    gsap.to($lines, {
+      clipPath: (_, element) => $tab[0].contains(element) ? "inset(0% 0% 0% 0%)" : "inset(0% 0% 0% 100%)",
+      duration: immediate ? 0 : filterMotion.tabLine.duration,
+      delay: immediate ? 0 : filterMotion.tabLine.start,
+      ease: filterMotion.tabLine.ease, overwrite: true,
     });
-    gsap.to($nextLine, {
-      clipPath: "inset(0% 0% 0% 0%)",
-      duration,
-      ease: "power3.out",
-      overwrite: true,
-    });
-  }
-
-  function finishFilterAnimation() {
-    const activeTimeline = filterTimeline;
-
-    if (activeTimeline) {
-      activeTimeline.progress(1);
-      activeTimeline.kill();
-      filterTimeline = null;
-    }
-
-    gsap.killTweensOf($reveals);
-    gsap.killTweensOf($revealLines);
-    gsap.killTweensOf($revealParent);
-
-    const $visibleReveals = $reveals.filter(function () {
-      return $(this).css("display") !== "none";
-    });
-
-    gsap.set($visibleReveals, { autoAlpha: 1 });
-    gsap.set($visibleReveals.find("[h-line]"), {
-      clipPath: "inset(0% 0% 0% 0%)",
-    });
-    gsap.set($revealParent, { clearProps: "height,overflow" });
-    revertHeadings();
   }
 
   function showFilter(value, immediate = false) {
-    const filterValue = normalizeValue(value);
-    const $itemsToShow =
-      filterValue === "all"
-        ? $reveals
-        : $reveals.filter(function () {
-            return normalizeValue($(this).attr("filter-reveal")) === filterValue;
-          });
-
+    finish();
+    const key = normalize(value);
+    const $incoming = key === "all" ? $reveals : $reveals.filter((_, element) => normalize(element.getAttribute("filter-reveal")) === key);
     if (immediate) {
-      finishFilterAnimation();
-      gsap.set($reveals, {
-        display: "block",
-        autoAlpha: 1,
-      });
-      gsap.set($revealLines, {
-        clipPath: "inset(0% 0% 0% 0%)",
-      });
+      gsap.set($reveals, { display: "none" });
+      gsap.set($incoming, { display: "block", autoAlpha: 1 });
+      gsap.set($dividers, { clipPath: "inset(0% 0% 0% 0%)" });
       return;
     }
-
-    finishFilterAnimation();
-    splitHeadings($itemsToShow);
-
-    const $visibleReveals = $reveals.filter(function () {
-      return $(this).css("display") !== "none";
+    if (window.SplitType) $incoming.find("[accord-heading]").each(function () {
+      const split = new SplitType(this, { types: "words" });
+      $(split.words).attr("word", "");
+      splits.push(split);
     });
-    const incomingHeadingTargets = $itemsToShow
-      .toArray()
-      .flatMap((item) => getHeadingTargets(item));
+    const $outgoing = $reveals.filter((_, element) => getComputedStyle(element).display !== "none");
+    timeline = gsap.timeline({ onComplete: () => {
+      gsap.set($incoming, { clearProps: "transform,opacity,visibility,will-change" });
+      gsap.set($parent, { clearProps: "height,overflow" });
+      revertHeadings();
+      timeline = null;
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    }});
 
-    gsap.killTweensOf(incomingHeadingTargets);
-    gsap.set($visibleReveals, { autoAlpha: 1 });
-
-    filterTimeline = gsap.timeline({
-      onComplete: () => {
-        gsap.set($itemsToShow, {
-          clearProps: "transform,opacity,visibility",
-        });
-        gsap.set($revealParent, { clearProps: "height,overflow" });
-        revertHeadings();
-        filterTimeline = null;
-      },
-    });
-
-    $visibleReveals.each(function () {
-      const $item = $(this);
-
-      gsap.set($item, {
-        autoAlpha: 1,
-        willChange: "opacity",
-      });
-
-      filterTimeline.to(
-        $item,
-        {
-          autoAlpha: 0,
-          duration: settings.itemAnimation.hide.duration,
-          ease: settings.itemAnimation.hide.ease,
-        },
-        0
-      );
-    });
-
-    const exitEnd = filterTimeline.duration();
-
-    filterTimeline.addLabel("switch", exitEnd);
-
-    filterTimeline.add(() => {
-      const currentHeight = $revealParent.outerHeight();
-
-      gsap.set($revealParent, {
-        height: currentHeight,
-        overflow: "hidden",
-      });
+    // 01 — Hide the current results, then switch the visible items.
+    timeline.to($outgoing, { autoAlpha: 0, duration: filterMotion.items.hide.duration,
+      ease: filterMotion.items.hide.ease }, filterMotion.items.hide.start);
+    timeline.addLabel("switch");
+    timeline.call(() => {
+      const height = $parent.outerHeight();
+      gsap.set($parent, { height, overflow: "hidden" });
       gsap.set($reveals, { display: "none" });
-      gsap.set($itemsToShow, {
-        display: "block",
-        autoAlpha: 1,
-        x: settings.itemAnimation.reveal.fromX,
-        willChange: "transform",
-      });
+      gsap.set($incoming, { display: "block", autoAlpha: 1, x: filterMotion.items.reveal.fromX });
+      gsap.set($incoming.find("[h-line]"), { clipPath: "inset(0% 100% 0% 0%)" });
+      $incoming.each(function () { gsap.set(headingTargets(this), { x: filterMotion.words.move.fromX, autoAlpha: 0 }); });
+    }, null, "switch");
 
-      $itemsToShow.each(function () {
-        gsap.set(getHeadingTargets(this), {
-          x: settings.wordAnimation.reveal.fromX,
-          autoAlpha: 0,
-          willChange: "transform,opacity",
-        });
-      });
+    // 02 — Resize the container alongside the incoming train.
+    timeline.to($parent, { height: "auto", duration: filterMotion.container.duration,
+      ease: filterMotion.container.ease }, filterMotion.container.start);
+    timeline.addLabel("incoming", filterMotion.items.train.start);
 
-      gsap.set($itemsToShow.find("[h-line]"), {
-        clipPath: "inset(0% 100% 0% 0%)",
-      });
-    }, "switch");
-
-    filterTimeline.to(
-      $revealParent,
-      {
-        height: "auto",
-        duration: settings.heightDuration,
-        ease: "power2.inOut",
-      },
-      "switch+=0.001"
-    );
-
-    $itemsToShow.each(function (index) {
-      const $item = $(this);
-      const headingTargets = getHeadingTargets(this);
-      const startTime = 0.04 + index * settings.itemStagger;
-
-      filterTimeline.to(
-        $item,
-        {
-          x: settings.itemAnimation.reveal.toX,
-          duration: settings.itemAnimation.reveal.duration,
-          ease: settings.itemAnimation.reveal.ease,
-        },
-        `switch+=${startTime}`
-      );
-
-      filterTimeline.to(
-        $(this).find("[h-line]"),
-        {
-          clipPath: "inset(0% 0% 0% 0%)",
-          duration: settings.lineEnterDuration,
-          ease: "power3.out",
-        },
-        `switch+=${startTime}`
-      );
-
-      filterTimeline.to(
-        headingTargets,
-        {
-          x: settings.wordAnimation.reveal.toX,
-          duration: settings.wordAnimation.reveal.duration,
-          ease: settings.wordAnimation.reveal.ease,
-          stagger: {
-            each: settings.wordAnimation.reveal.stagger,
-            from: "end",
-          },
-        },
-        `switch+=${startTime}`
-      );
-
-      filterTimeline.to(
-        headingTargets,
-        {
-          autoAlpha: 1,
-          duration:
-            settings.wordAnimation.reveal.duration *
-            settings.wordAnimation.reveal.fade,
-          ease: settings.wordAnimation.reveal.fadeEase,
-          stagger: {
-            each: settings.wordAnimation.reveal.stagger,
-            from: "end",
-          },
-        },
-        `switch+=${startTime}`
-      );
+    // 03 — Each result groups its movement, divider, word motion, and word fade.
+    $incoming.each(function (index) {
+      const group = gsap.timeline(), $item = $(this), words = headingTargets(this);
+      const item = filterMotion.items.reveal, move = filterMotion.words.move, fade = filterMotion.words.fade;
+      group.to($item, { x: item.toX, duration: item.duration, ease: item.ease }, item.start)
+        .to($item.find("[h-line]"), { clipPath: "inset(0% 0% 0% 0%)", duration: filterMotion.divider.duration,
+          ease: filterMotion.divider.ease }, filterMotion.divider.start)
+        .to(words, { x: move.toX, duration: move.duration, ease: move.ease, stagger: move.stagger }, move.start)
+        .to(words, { autoAlpha: 1, duration: fade.duration, ease: fade.ease, stagger: fade.stagger }, fade.start);
+      timeline.add(group, `incoming+=${index * filterMotion.items.train.stagger}`);
     });
   }
-
-  setActiveTab($activeTab, true);
-  showFilter("all", true);
-
-  $tabs
-    .off("click.filterOne")
-    .on("click.filterOne", function () {
-      const $nextTab = $(this);
-      if ($nextTab.hasClass("is-active")) return;
-
-      setActiveTab($nextTab);
-      showFilter($nextTab.attr("filter-tab"));
-    });
-
-  return () => {
-    finishFilterAnimation();
-
-    $tabs.off("click.filterOne");
-    gsap.killTweensOf($lines);
-  };
+  const $all = $tabs.filter('[filter-tab="all"]').first();
+  const $initial = $all.length ? $all : $tabs.first();
+  setActiveTab($initial, true);
+  showFilter($initial.attr("filter-tab"), true);
+  const unbind = bindControlActivation($tabs, "filterOne", ($tab) => {
+    if ($tab.hasClass("is-active")) return;
+    setActiveTab($tab);
+    showFilter($tab.attr("filter-tab"));
+  });
+  return () => { finish(); unbind(); gsap.killTweensOf($lines); restoreTabs(); restoreStyles(); };
 }
 
 function catalogueAnimation() {
-  const $selects = $("[cat-select]");
-  const $reveals = $("[cat-reveal]");
+  const $selects = $("[cat-select]"), $reveals = $("[cat-reveal]");
   if (!$selects.length || !$reveals.length) return null;
-
-  function setActiveCatalogue($select) {
+  // CATALOGUE CONTROLS — visibility and layout stay in Webflow's active state.
+  const catalogueControls = { activeClass: "active", initialValue: null };
+  const restoreSelects = rememberAttributes($selects, ["class", "aria-pressed"]);
+  const restoreReveals = rememberAttributes($reveals, ["class", "aria-hidden", "inert"]);
+  function activate($select) {
     const value = $select.attr("cat-select");
-    const $matchingReveals = $reveals.filter(function () {
-      return $(this).attr("cat-reveal") === value;
-    });
-    if (!$matchingReveals.length) return;
-
-    $selects.removeClass("active");
-    $select.addClass("active");
-    $reveals.removeClass("active");
-    $matchingReveals.addClass("active");
+    const $matches = $reveals.filter((_, element) => element.getAttribute("cat-reveal") === value);
+    if (!$matches.length) return;
+    $selects.removeClass(catalogueControls.activeClass).attr("aria-pressed", "false");
+    $select.addClass(catalogueControls.activeClass).attr("aria-pressed", "true");
+    $reveals.removeClass(catalogueControls.activeClass).attr({ "aria-hidden": "true", inert: "" });
+    $matches.addClass(catalogueControls.activeClass).attr("aria-hidden", "false").removeAttr("inert");
   }
-
-  const $initialSelect = $selects.filter(".active").first();
-  setActiveCatalogue($initialSelect.length ? $initialSelect : $selects.first());
-
-  $selects
-    .off("click.catalogueAnimation")
-    .on("click.catalogueAnimation", function (event) {
-      event.preventDefault();
-      setActiveCatalogue($(this));
-    });
-
-  return () => {
-    $selects.off("click.catalogueAnimation");
-  };
+  const $initial = catalogueControls.initialValue === null ? $selects.filter(".active").first()
+    : $selects.filter((_, element) => element.getAttribute("cat-select") === catalogueControls.initialValue).first();
+  activate($initial.length ? $initial : $selects.first());
+  const unbind = bindControlActivation($selects, "catalogueAnimation", activate);
+  return () => { unbind(); restoreSelects(); restoreReveals(); };
 }
 
 function accordionOne() {
-  if (window.Flip) {
-    gsap.registerPlugin(Flip);
-  }
+  const $wraps = $("[accord-wrap]");
+  if (!$wraps.length || !window.gsap) return null;
+  if (window.Flip) gsap.registerPlugin(Flip);
 
+  // ACCORDION CONTROLS — seconds; marker movement and content reveal are independent.
+  const accordionMotion = {
+    marker: { start: 0, duration: 0.3, ease: "power1.in" },
+    reveal: { start: 0, duration: 0.3, ease: "power1.in" },
+  };
   const cleanups = [];
-
-  $("[accord-wrap]").each(function () {
-    const $wrap = $(this);
-    const $items = $wrap.find("[accord-item]");
-    const $children = $wrap.find("[accord-reveal]");
+  $wraps.each(function (wrapIndex) {
+    const wrap = this, $wrap = $(wrap);
+    const $items = $wrap.find("[accord-item]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
+    const $panels = $wrap.find("[accord-reveal]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
     if (!$items.length) return;
-
     const $marker = $items.find("[active-marker]").first();
-    const $currentItem = $items.filter(".active").first();
-    const $initialItem = $currentItem.length ? $currentItem : $items.first();
-    let activeValue = $initialItem.attr("accord-item");
-    const $initialChild = $children
-      .filter(`[accord-reveal="${activeValue}"]`)
-      .first();
-
-    $children.removeClass("active");
-    $initialChild.addClass("active");
-    gsap.set($children, {
-      autoAlpha: 0,
-      pointerEvents: "none",
+    const marker = $marker[0], markerParent = marker && marker.parentNode, markerNext = marker && marker.nextSibling;
+    const restoreItems = rememberAttributes($items, ["class", "aria-expanded", "aria-controls"]);
+    const restorePanels = rememberAttributes($panels, ["id", "class", "style", "aria-hidden", "inert"]);
+    const restoreMarker = rememberAttributes($marker, ["style"]);
+    const panelFor = ($item) => $panels.filter((_, element) => element.getAttribute("accord-reveal") === $item.attr("accord-item")).first();
+    $panels.each(function (index) {
+      if (!this.id) this.id = uniqueElementId(`accordion-${wrapIndex + 1}-panel-${index + 1}`);
+    });
+    $items.each(function () {
+      const panel = panelFor($(this))[0];
+      if (panel) $(this).attr("aria-controls", panel.id);
     });
 
-    gsap.set($initialChild, {
-      autoAlpha: 1,
-      pointerEvents: "auto",
-    });
-
-    $items
-      .off("click.accordionOne")
-      .on("click.accordionOne", function () {
-        const $activeItem = $(this);
-        if ($activeItem.hasClass("active")) return;
-
-        const nextValue = $activeItem.attr("accord-item");
-        const $currentChild = $children
-          .filter(`[accord-reveal="${activeValue}"]`)
-          .first();
-        const $nextChild = $children
-          .filter(`[accord-reveal="${nextValue}"]`)
-          .first();
-        const marker = $marker[0];
-        let markerState = null;
-
-        if (window.Flip && marker) {
-          Flip.killFlipsOf(marker);
-          markerState = Flip.getState(marker);
-        }
-
-        $items.removeClass("active");
-        $activeItem.addClass("active");
-
-        if (marker) {
-          $activeItem.append(marker);
-        }
-
-        if (markerState) {
-          Flip.from(markerState, {
-            duration: 0.3,
-            ease: "ease.in",
-            absolute: true,
-          });
-        }
-
-        if ($nextChild.length) {
-          gsap.killTweensOf([$currentChild[0], $nextChild[0]]);
-
-          $children.removeClass("active");
-          $nextChild.addClass("active");
-
-          gsap.set($currentChild, {
-            autoAlpha: 0,
-            pointerEvents: "none",
-          });
-
-          gsap.fromTo(
-            $nextChild,
-            {
-              autoAlpha: 0,
-              pointerEvents: "none",
-            },
-            {
-              autoAlpha: 1,
-              pointerEvents: "auto",
-              duration: 0.3,
-              ease: "none",
-              overwrite: true,
-            }
-          );
-
-          activeValue = nextValue;
-        }
-      });
-
-    cleanups.push(() => {
-      $items.off("click.accordionOne");
-      gsap.killTweensOf($children);
-
-      if (window.Flip && $marker.length) {
-        Flip.killFlipsOf($marker[0]);
+    function activate($item, immediate = false) {
+      if (!immediate && $item.hasClass("active")) return;
+      const $panel = panelFor($item);
+      if ($panels.length && !$panel.length) return;
+      let markerState;
+      if (window.Flip && marker && !immediate) {
+        Flip.killFlipsOf(marker);
+        markerState = Flip.getState(marker);
       }
+      $items.removeClass("active").attr("aria-expanded", "false");
+      $item.addClass("active").attr("aria-expanded", "true");
+      if (marker) $item.append(marker);
+      if (markerState) Flip.from(markerState, {
+        duration: accordionMotion.marker.duration, delay: accordionMotion.marker.start,
+        ease: accordionMotion.marker.ease, absolute: true,
+      });
+      if (!$panels.length) return;
+      // Kill every old reveal, so interrupted clicks cannot revive hidden panels.
+      gsap.killTweensOf($panels);
+      $panels.removeClass("active").attr({ "aria-hidden": "true", inert: "" });
+      gsap.set($panels, { autoAlpha: 0, pointerEvents: "none" });
+      $panel.addClass("active").attr("aria-hidden", "false").removeAttr("inert");
+      gsap.to($panel, { autoAlpha: 1, pointerEvents: "auto",
+        duration: immediate ? 0 : accordionMotion.reveal.duration,
+        delay: immediate ? 0 : accordionMotion.reveal.start,
+        ease: accordionMotion.reveal.ease, overwrite: true });
+    }
+    const $initial = $items.filter(".active").first();
+    activate($initial.length ? $initial : $items.first(), true);
+    const unbind = bindControlActivation($items, "accordionOne", activate);
+    cleanups.push(() => {
+      unbind(); gsap.killTweensOf($panels);
+      if (window.Flip && marker) Flip.killFlipsOf(marker);
+      if (markerParent) markerParent.insertBefore(marker, markerNext && markerNext.parentNode === markerParent ? markerNext : null);
+      restoreMarker(); restoreItems(); restorePanels();
     });
   });
-
-  if (!cleanups.length) return null;
-
-  return () => {
-    cleanups.forEach((cleanup) => cleanup());
-  };
+  return () => cleanups.forEach((cleanup) => cleanup());
 }
 
 function footerEnginePixels() {
-  const settings = {
-    outsideColor: "#ffffff",
-    insideColor: "#000000",
-    pixelGap: 9,
-    pixelSize: 1.6,
-    outsideSpread: 6,
-    insideSpread: 0.5,
-    lightRadius: 150,
-    lightLevels: 10,
-    maxPixelScale: 4,
-    outsideOpacity: 0.1,
-    insideOpacity: 0.3,
-    outsideBlur: 0.95,
-    scaleFalloff: 0.78,
-    cursorSmoothing: 0.18,
-    fadeIn: 0.35,
-    fadeOut: 0.45,
-  };
-
   const $svg = $("[footer-svg-engine]").first();
-  if (!$svg.length) return null;
+  if (!$svg.length || !window.gsap || !window.Path2D || !window.IntersectionObserver) return null;
 
-  const svg = $svg[0];
-  const viewBox = svg.viewBox.baseVal;
-  const svgNamespace = "http://www.w3.org/2000/svg";
-  const originalPaths = $svg.children("path").toArray();
-  const effectId = `footer-pixels-${Date.now()}`;
-  const lightGradients = [];
-  const pixelCenters = [];
-  const lightPosition = {
-    x: viewBox.x + viewBox.width / 2,
-    y: viewBox.y + viewBox.height / 2,
+  // FOOTER CONTROLS — sizes use the existing SVG viewBox, timings use seconds.
+  const footerMotion = {
+    pixels: { gap: 9, radius: 1.6, maxScale: 4, levels: 10 },
+    light: { radius: 150, solidCore: 0.55, falloff: 0.78 },
+    ink: { color: "#000000", opacity: 0.3, spread: 0.5 },
+    glow: { color: "#ffffff", opacity: 0.1, spread: 6, blur: 0.95 },
+    reveal: { start: 0, duration: 0, ease: "power1.in" },
+    hide: { start: 0, duration: 0.15, ease: "power1.in" },
+    performance: { maxPixelRatio: 1, maxCachePixels: 8000000 },
   };
+  const svg = $svg[0];
+  const view = svg.viewBox.baseVal;
+  const paths = $svg.children("path").toArray();
+  if (!paths.length || !view.width || !view.height) return null;
 
-  if (!originalPaths.length) return null;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const namespace = "http://www.w3.org/2000/svg";
+  const padding = footerMotion.pixels.radius * footerMotion.pixels.maxScale * footerMotion.glow.spread + footerMotion.glow.blur * 3;
+  const width = view.width + padding * 2;
+  const height = view.height + padding * 2;
+  let layer, canvas, context, outline, inverseMatrix, scratch, scratchContext;
+  let renderScale = 0;
+  let columns = [], levels = [];
+  let frame = null;
+  let bakeFrame = null, nextLevel = 0;
+  let visible = false;
+  let listening = false;
+  let hovering = false;
+  let geometryDirty = true;
+  let destroyed = false;
+  let pointer = { x: 0, y: 0 };
 
-  $svg.children("[footer-pixels-defs], [footer-svg-pixel-layer]").remove();
+  // BAKE THE PIXEL FIELDS ONCE — the pointer only reveals cached image regions.
+  function circleField(radius) {
+    const path = new Path2D();
+    columns.forEach((column) => column.points.forEach(({ x, y }) => {
+      path.moveTo(x + radius, y);
+      path.arc(x, y, radius, 0, Math.PI * 2);
+    }));
+    return path;
+  }
+  function bakeField(kind, radius) {
+    const image = document.createElement("canvas");
+    image.width = canvas.width; image.height = canvas.height;
+    const paint = image.getContext("2d");
+    paint.setTransform(renderScale, 0, 0, renderScale,
+      (padding - view.x) * renderScale, (padding - view.y) * renderScale);
+    paint.fillStyle = footerMotion[kind].color;
+    if (kind === "ink") {
+      paint.fill(outline);
+      paint.strokeStyle = footerMotion.ink.color;
+      paint.lineWidth = footerMotion.ink.spread;
+      paint.stroke(outline);
+      paint.globalCompositeOperation = "source-in";
+      paint.fill(circleField(radius));
+    } else {
+      const dots = circleField(radius * footerMotion.glow.spread);
+      paint.filter = `blur(${footerMotion.glow.blur * renderScale}px)`;
+      paint.fill(dots);
+      paint.filter = "none";
+      paint.fill(dots);
+    }
+    return image;
+  }
 
-  for (
-    let y = viewBox.y + settings.pixelGap / 2;
-    y < viewBox.y + viewBox.height;
-    y += settings.pixelGap
-  ) {
-    for (
-      let x = viewBox.x + settings.pixelGap / 2;
-      x < viewBox.x + viewBox.width;
-      x += settings.pixelGap
-    ) {
-      const point = new DOMPoint(x, y);
+  // Prepare one size per frame so first entry does not stall scrolling.
+  function bakeNext() {
+    bakeFrame = null;
+    if (!listening || destroyed || nextLevel >= levels.length) return;
+    const level = levels[nextLevel++];
+    level.ink = bakeField("ink", level.pixelRadius);
+    level.glow = bakeField("glow", level.pixelRadius);
+    scheduleFrame();
+    if (nextLevel < levels.length) bakeFrame = requestAnimationFrame(bakeNext);
+  }
+  function scheduleBake() {
+    if (bakeFrame === null && nextLevel < levels.length) bakeFrame = requestAnimationFrame(bakeNext);
+  }
 
-      if (originalPaths.some((path) => path.isPointInFill(point))) {
-        pixelCenters.push({ x, y });
+  function buildArtwork() {
+    if (canvas) return;
+    outline = new Path2D();
+    paths.forEach((path) => outline.addPath(new Path2D(path.getAttribute("d"))));
+    const sample = document.createElement("canvas").getContext("2d");
+    const gap = footerMotion.pixels.gap;
+    for (let x = view.x + gap / 2; x < view.x + view.width; x += gap) {
+      const points = [];
+      for (let y = view.y + gap / 2; y < view.y + view.height; y += gap) {
+        if (sample.isPointInPath(outline, x, y)) points.push({ x, y });
       }
+      columns.push({ x, points });
     }
+    for (let index = 0; index < footerMotion.pixels.levels; index++) {
+      const fraction = index / Math.max(1, footerMotion.pixels.levels - 1);
+      const radius = footerMotion.pixels.radius * (1 + fraction * (footerMotion.pixels.maxScale - 1));
+      levels.push({
+        radius: footerMotion.light.radius * (1 - fraction * footerMotion.light.falloff),
+        pixelRadius: radius,
+      });
+    }
+    layer = document.createElementNS(namespace, "foreignObject");
+    Object.entries({ x: view.x - padding, y: view.y - padding, width, height,
+      "footer-svg-pixel-layer": "", "aria-hidden": "true" }).forEach(([name, value]) => layer.setAttribute(name, value));
+    canvas = document.createElement("canvas");
+    canvas.setAttribute("footer-pixel-canvas", "");
+    canvas.style.cssText = "display:block;width:100%;height:100%;pointer-events:none";
+    context = canvas.getContext("2d");
+    scratch = document.createElement("canvas");
+    scratchContext = scratch.getContext("2d");
+    layer.appendChild(canvas);
+    svg.appendChild(layer);
   }
 
-  function createSvgElement(tag, attributes = {}) {
-    const element = document.createElementNS(svgNamespace, tag);
-
-    Object.entries(attributes).forEach(([name, value]) => {
-      element.setAttribute(name, value);
-    });
-
-    return element;
-  }
-
-  function createCirclePath(radius) {
-    const diameter = radius * 2;
-
-    return pixelCenters
-      .map(
-        ({ x, y }) =>
-          `M ${x - radius} ${y}` +
-          `a ${radius} ${radius} 0 1 0 ${diameter} 0` +
-          `a ${radius} ${radius} 0 1 0 ${-diameter} 0`
-      )
-      .join(" ");
-  }
-
-  function createPixelPath(path, patternId) {
-    const pixelPath = path.cloneNode(false);
-
-    pixelPath.removeAttribute("id");
-    pixelPath.setAttribute("fill", `url(#${patternId})`);
-    pixelPath.setAttribute("stroke", `url(#${patternId})`);
-    pixelPath.setAttribute("stroke-width", settings.insideSpread);
-    pixelPath.setAttribute("stroke-linejoin", "round");
-
-    return pixelPath;
-  }
-
-  const defs = createSvgElement("defs", {
-    "footer-pixels-defs": "",
-  });
-  const glowFilterId = `${effectId}-glow`;
-  const glowFilter = createSvgElement("filter", {
-    id: glowFilterId,
-    x: "-20%",
-    y: "-80%",
-    width: "140%",
-    height: "260%",
-    "color-interpolation-filters": "sRGB",
-  });
-  const glowBlur = createSvgElement("feGaussianBlur", {
-    stdDeviation: settings.outsideBlur,
-    result: "blur",
-  });
-  const glowMerge = createSvgElement("feMerge");
-
-  glowMerge.append(
-    createSvgElement("feMergeNode", { in: "blur" }),
-    createSvgElement("feMergeNode", { in: "SourceGraphic" })
-  );
-  glowFilter.append(glowBlur, glowMerge);
-  defs.appendChild(glowFilter);
-
-  const pixelLayer = createSvgElement("g", {
-    "footer-svg-pixel-layer": "",
-    "aria-hidden": "true",
-  });
-  const outsideLayer = createSvgElement("g", {
-    filter: `url(#${glowFilterId})`,
-  });
-  const insideLayer = createSvgElement("g");
-
-  for (let index = 0; index < settings.lightLevels; index += 1) {
-    const level = index / (settings.lightLevels - 1);
-    const pixelRadius =
-      settings.pixelSize *
-      (1 + level * (settings.maxPixelScale - 1));
-    const revealRadius =
-      settings.lightRadius * (1 - level * settings.scaleFalloff);
-    const insidePatternId = `${effectId}-inside-${index}`;
-    const gradientId = `${effectId}-gradient-${index}`;
-    const maskId = `${effectId}-mask-${index}`;
-    const insidePattern = createSvgElement("pattern", {
-      id: insidePatternId,
-      patternUnits: "userSpaceOnUse",
-      width: settings.pixelGap,
-      height: settings.pixelGap,
-    });
-
-    insidePattern.appendChild(
-      createSvgElement("circle", {
-        cx: settings.pixelGap / 2,
-        cy: settings.pixelGap / 2,
-        r: pixelRadius,
-        fill: settings.insideColor,
-      })
-    );
-
-    const gradient = createSvgElement("radialGradient", {
-      id: gradientId,
-      gradientUnits: "userSpaceOnUse",
-      cx: lightPosition.x,
-      cy: lightPosition.y,
-      r: revealRadius,
-    });
-
-    gradient.append(
-      createSvgElement("stop", {
-        offset: "0%",
-        "stop-color": "#ffffff",
-      }),
-      createSvgElement("stop", {
-        offset: "55%",
-        "stop-color": "#ffffff",
-      }),
-      createSvgElement("stop", {
-        offset: "100%",
-        "stop-color": "#000000",
-      })
-    );
-
-    const mask = createSvgElement("mask", {
-      id: maskId,
-      maskUnits: "userSpaceOnUse",
-      x: viewBox.x - settings.lightRadius,
-      y: viewBox.y - settings.lightRadius,
-      width: viewBox.width + settings.lightRadius * 2,
-      height: viewBox.height + settings.lightRadius * 2,
-      style: "mask-type: luminance;",
-    });
-
-    mask.appendChild(
-      createSvgElement("rect", {
-        x: viewBox.x - settings.lightRadius,
-        y: viewBox.y - settings.lightRadius,
-        width: viewBox.width + settings.lightRadius * 2,
-        height: viewBox.height + settings.lightRadius * 2,
-        fill: `url(#${gradientId})`,
-      })
-    );
-
-    const outsideLevel = createSvgElement("g", {
-      mask: `url(#${maskId})`,
-      opacity: settings.outsideOpacity,
-    });
-    const insideLevel = createSvgElement("g", {
-      mask: `url(#${maskId})`,
-      opacity: settings.insideOpacity,
-    });
-
-    outsideLevel.appendChild(
-      createSvgElement("path", {
-        d: createCirclePath(pixelRadius * settings.outsideSpread),
-        fill: settings.outsideColor,
-      })
-    );
-
-    originalPaths.forEach((path) => {
-      insideLevel.appendChild(createPixelPath(path, insidePatternId));
-    });
-
-    defs.append(insidePattern, gradient, mask);
-    outsideLayer.appendChild(outsideLevel);
-    insideLayer.appendChild(insideLevel);
-    lightGradients.push(gradient);
-  }
-
-  pixelLayer.append(outsideLayer, insideLayer);
-  svg.prepend(defs);
-  svg.appendChild(pixelLayer);
-
-  function renderLight() {
-    lightGradients.forEach((gradient) => {
-      gradient.setAttribute("cx", lightPosition.x);
-      gradient.setAttribute("cy", lightPosition.y);
-    });
-  }
-
-  const xTo = gsap.quickTo(lightPosition, "x", {
-    duration: settings.cursorSmoothing,
-    ease: "power3.out",
-    onUpdate: renderLight,
-  });
-
-  const yTo = gsap.quickTo(lightPosition, "y", {
-    duration: settings.cursorSmoothing,
-    ease: "power3.out",
-    onUpdate: renderLight,
-  });
-
-  function moveLight(event, immediate = false) {
+  // MEASURE ONLY ON ENTRY / RESIZE / SCROLL — pointer events just store coordinates.
+  function measure() {
     const matrix = svg.getScreenCTM();
-    if (!matrix) return;
-
-    const point = svg.createSVGPoint();
-    point.x = event.clientX;
-    point.y = event.clientY;
-
-    const svgPoint = point.matrixTransform(matrix.inverse());
-
-    if (immediate) {
-      lightPosition.x = svgPoint.x;
-      lightPosition.y = svgPoint.y;
-      renderLight();
-      return;
+    if (!matrix || !matrix.a || !matrix.d) return false;
+    inverseMatrix = matrix.inverse();
+    const ratio = Math.min(window.devicePixelRatio || 1, footerMotion.performance.maxPixelRatio);
+    const scale = Math.min(Math.hypot(matrix.a, matrix.b) * ratio,
+      Math.sqrt(footerMotion.performance.maxCachePixels / (width * height * 2 * levels.length)));
+    const pixelWidth = Math.ceil(width * scale), pixelHeight = Math.ceil(height * scale);
+    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+      renderScale = scale;
+      canvas.width = pixelWidth; canvas.height = pixelHeight;
+      context.setTransform(scale, 0, 0, scale, (padding - view.x) * scale, (padding - view.y) * scale);
+      scratch.width = scratch.height = Math.ceil(footerMotion.light.radius * 2 * scale);
+      nextLevel = 0;
+      levels.forEach((level) => {
+        level.ink = level.glow = null;
+        const centre = footerMotion.light.radius * scale;
+        level.mask = scratchContext.createRadialGradient(centre, centre, 0, centre, centre, level.radius * scale);
+        level.mask.addColorStop(0, "#fff");
+        level.mask.addColorStop(footerMotion.light.solidCore, "#fff");
+        level.mask.addColorStop(1, "rgba(255,255,255,0)");
+      });
     }
-
-    xTo(svgPoint.x);
-    yTo(svgPoint.y);
+    scheduleBake();
+    geometryDirty = false;
+    return true;
   }
 
-  $svg
-    .off(".footerEnginePixels")
-    .on("mouseenter.footerEnginePixels", function (event) {
-      moveLight(event, true);
-
-      gsap.to(pixelLayer, {
-        opacity: 1,
-        duration: settings.fadeIn,
-        ease: "power2.out",
-        overwrite: true,
-      });
-    })
-    .on("mousemove.footerEnginePixels", moveLight)
-    .on("mouseleave.footerEnginePixels", function () {
-      gsap.to(pixelLayer, {
-        opacity: 0,
-        duration: settings.fadeOut,
-        ease: "power2.out",
-        overwrite: true,
+  // POINTER REVEAL — one scheduled frame, small cached image crops, no cursor tween.
+  function render() {
+    frame = null;
+    if (!visible || !hovering || document.hidden || destroyed) return;
+    if (geometryDirty && !measure()) return;
+    const x = pointer.x * inverseMatrix.a + pointer.y * inverseMatrix.c + inverseMatrix.e;
+    const y = pointer.x * inverseMatrix.b + pointer.y * inverseMatrix.d + inverseMatrix.f;
+    const radius = footerMotion.light.radius;
+    const left = x - radius, top = y - radius;
+    context.clearRect(view.x - padding, view.y - padding, width, height);
+    ["glow", "ink"].forEach((kind) => {
+      context.globalAlpha = footerMotion[kind].opacity;
+      levels.forEach((level) => {
+        if (!level[kind]) return;
+        scratchContext.clearRect(0, 0, scratch.width, scratch.height);
+        scratchContext.globalCompositeOperation = "source-over";
+        scratchContext.drawImage(level[kind], -(left - view.x + padding) * renderScale, -(top - view.y + padding) * renderScale);
+        scratchContext.globalCompositeOperation = "destination-in";
+        scratchContext.fillStyle = level.mask;
+        scratchContext.fillRect(0, 0, scratch.width, scratch.height);
+        context.drawImage(scratch, left, top, scratch.width / renderScale, scratch.height / renderScale);
       });
     });
+    context.globalAlpha = 1;
+  }
+
+  function scheduleFrame() {
+    if (frame === null && hovering && visible && !document.hidden) frame = requestAnimationFrame(render);
+  }
+  function move(event) {
+    pointer = { x: event.clientX, y: event.clientY };
+    if (!hovering) {
+      hovering = true;
+      geometryDirty = true;
+      const motion = footerMotion.reveal;
+      gsap.to(layer, { opacity: 1, delay: motion.start, duration: motion.duration, ease: motion.ease, overwrite: true });
+    }
+    scheduleFrame();
+  }
+  function leave() {
+    hovering = false;
+    if (frame !== null) cancelAnimationFrame(frame);
+    frame = null;
+    if (layer) {
+      const motion = footerMotion.hide;
+      gsap.to(layer, { opacity: 0, delay: motion.start, duration: motion.duration, ease: motion.ease, overwrite: true });
+    }
+  }
+  function invalidateGeometry() {
+    geometryDirty = true;
+    scheduleFrame();
+  }
+
+  // VISIBILITY LIFECYCLE — attach work only while the footer is on screen.
+  function syncActivity() {
+    const active = visible && !document.hidden && !reducedMotion.matches && !destroyed;
+    if (active === listening) return;
+    listening = active;
+    if (active) {
+      buildArtwork();
+      geometryDirty = true;
+      measure();
+      $svg.on("pointerenter.footerEnginePixels pointermove.footerEnginePixels", move)
+        .on("pointerleave.footerEnginePixels", leave);
+      window.addEventListener("resize", invalidateGeometry, { passive: true });
+      window.addEventListener("scroll", invalidateGeometry, { passive: true });
+    } else {
+      if (bakeFrame !== null) cancelAnimationFrame(bakeFrame);
+      bakeFrame = null;
+      $svg.off(".footerEnginePixels");
+      window.removeEventListener("resize", invalidateGeometry);
+      window.removeEventListener("scroll", invalidateGeometry);
+      leave();
+      if (layer) { gsap.killTweensOf(layer); layer.style.opacity = "0"; }
+    }
+  }
+  const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncActivity(); });
+  observer.observe(svg);
+  document.addEventListener("visibilitychange", syncActivity);
+  reducedMotion.addEventListener("change", syncActivity);
 
   return () => {
-    $svg.off(".footerEnginePixels");
-    xTo.tween.kill();
-    yTo.tween.kill();
-    gsap.killTweensOf(pixelLayer);
-    pixelLayer.remove();
-    defs.remove();
+    destroyed = true;
+    syncActivity();
+    observer.disconnect();
+    document.removeEventListener("visibilitychange", syncActivity);
+    reducedMotion.removeEventListener("change", syncActivity);
+    if (layer) { gsap.killTweensOf(layer); layer.remove(); }
+    columns = levels = [];
   };
+}
+
+// SMALL DOM HELPERS — used only by this site's interactive controls.
+function rememberAttributes($elements, names) {
+  const originals = $elements.toArray().map((element) => ({ element,
+    values: names.map((name) => [name, element.getAttribute(name)]) }));
+  return () => originals.forEach(({ element, values }) => values.forEach(([name, value]) => {
+    if (value === null) element.removeAttribute(name);
+    else element.setAttribute(name, value);
+  }));
+}
+
+function uniqueElementId(prefix) {
+  let id = prefix, suffix = 1;
+  while (document.getElementById(id)) id = `${prefix}-${suffix++}`;
+  return id;
+}
+
+function bindControlActivation($controls, namespace, activate) {
+  const restore = rememberAttributes($controls, ["role", "tabindex"]);
+  $controls.each(function () {
+    if (!this.matches("button,input,select,textarea")) $(this).attr({ role: "button", tabindex: "0" });
+  });
+  $controls.on(`click.${namespace}`, function (event) { event.preventDefault(); activate($(this)); })
+    .on(`keydown.${namespace}`, function (event) {
+      if (event.target !== this || (event.key !== "Enter" && event.key !== " ")) return;
+      if (this.matches("button,input,select,textarea") || (this.matches("a[href]") && event.key === "Enter")) return;
+      event.preventDefault(); activate($(this));
+    });
+  return () => { $controls.off(`.${namespace}`); restore(); };
 }

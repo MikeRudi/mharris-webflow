@@ -14,7 +14,7 @@ export async function createHomePreview({ port = 4173, htmlPath = process.env.HO
   const previewHtml = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (script, attributes, code) => {
     return !/\bsrc\s*=/.test(attributes) && /\bmhLoad\b/.test(code) ? "" : script;
   }).replace("</head>", '<link rel="stylesheet" href="/styles.css"></head>')
-    .replace("</body>", '<script src="/script.js"></script></body>');
+    .replace("</body>", '<script defer src="/script.js"></script></body>');
   const server = createServer(async (request, response) => {
     try {
       const pathname = new URL(request.url, "http://127.0.0.1").pathname;

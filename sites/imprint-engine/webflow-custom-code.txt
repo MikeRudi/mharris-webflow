@@ -1,65 +1,98 @@
-WEBFLOW CUSTOM CODE
+WEBFLOW CUSTOM CODE — IMPRINT ENGINE
 
 Repo: MikeRudi/mharris-webflow
-
+Development: one GitHub main commit, CSS/JS fetched together; refresh after pushing.
+Keep Home Staged's page-specific entrance CSS in its own page settings.
+For optional libraries on other sites, see sites/_template/webflow-custom-code.txt.
 
 HEAD CODE
 
 <script>
-  window.mhLoad = async function (path, type) {
-    const url = "https://api.github.com/repos/MikeRudi/mharris-webflow/contents/" + path + "?ref=main&v=" + Date.now();
-    const response = await fetch(url, { cache: "no-store" });
-    const file = await response.json();
-    const code = atob(file.content.replace(/\s/g, ""));
-    const el = document.createElement(type === "css" ? "style" : "script");
-
-    el.textContent = code;
-    document[type === "css" ? "head" : "body"].appendChild(el);
+  // Resolve main once. CSS and JS always come from the same commit.
+  const mhRepo = "MikeRudi/mharris-webflow";
+  const mhSource = new Map();
+  window.mhVersion = fetch(`https://api.github.com/repos/${mhRepo}/commits/main?v=${Date.now()}`, { cache: "no-store" })
+    .then((response) => { if (!response.ok) throw new Error("Commit lookup failed"); return response.json(); })
+    .then((commit) => commit.sha).catch(() => "main");
+  window.mhFetch = function (path) {
+    if (!mhSource.has(path)) mhSource.set(path, mhVersion.then(async (version) => {
+      const response = await fetch(`https://raw.githubusercontent.com/${mhRepo}/${version}/${path}`,
+        { cache: version === "main" ? "no-store" : "force-cache" });
+      if (!response.ok) throw new Error("Could not load: " + path);
+      return response.text();
+    }));
+    return mhSource.get(path);
   };
-
-  mhLoad("sites/imprint-engine/src/styles.css", "css");
+  window.mhLoad = async function (path, type) {
+    const element = document.createElement(type === "css" ? "style" : "script");
+    element.textContent = await mhFetch(path);
+    document[type === "css" ? "head" : "body"].appendChild(element);
+  };
+  mhLoad("sites/imprint-engine/src/styles.css", "css").catch(console.error);
+  // Fetch early; execute only after deferred libraries and Webflow's jQuery are ready.
+  mhFetch("sites/imprint-engine/src/script.js").catch(console.error);
 </script>
 
+<style>
+  body {
+    font-size: 1.1111111111111112vw;
+  }
+
+  /* Max Font Size */
+  @media screen and (min-width: 1920px) {
+    body {
+      font-size: 21.333333333333332px;
+    }
+  }
+</style>
+
+<style>
+  :root {
+    --h1: clamp(4.5rem, -1.0357rem + 8.9286vw, 7rem);
+    --h2: clamp(3.0625rem, -0.1205rem + 5.1339vw, 4.5rem);
+    --h3: clamp(2.75rem, -0.1563rem + 4.6875vw, 4.0625rem);
+    --h4: clamp(2.4375rem, 0.0848rem + 3.7946vw, 3.5rem);
+    --h5: clamp(2.25rem, 0.3125rem + 3.125vw, 3.125rem);
+    --h6: clamp(1.875rem, 0.4911rem + 2.2321vw, 2.5rem);
+    --h7: clamp(1.5625rem, 0.5938rem + 1.5625vw, 2rem);
+    --h8: clamp(1.3125rem, 0.8973rem + 0.6696vw, 1.5rem);
+    --h9: clamp(1.125rem, 0.8482rem + 0.4464vw, 1.25rem);
+  }
+
+  @media screen and (min-width: 1440px) {
+    :root {
+      --h1: clamp(7rem, 6.4375rem + 0.625vw, 7.1875rem);
+      --h2: clamp(4.5rem, 4.125rem + 0.4167vw, 4.625rem);
+      --h3: clamp(4.0625rem, 3.6875rem + 0.4167vw, 4.1875rem);
+      --h4: clamp(3.5rem, 3.2188rem + 0.3125vw, 3.5938rem);
+      --h5: clamp(3.125rem, 2.8438rem + 0.3125vw, 3.2188rem);
+      --h6: clamp(2.5rem, 2.3125rem + 0.2083vw, 2.5625rem);
+      --h7: clamp(2rem, 1.8125rem + 0.2083vw, 2.0625rem);
+      --h8: clamp(1.5rem, 1.4063rem + 0.1042vw, 1.5313rem);
+      --h9: clamp(1.25rem, 1.1563rem + 0.1042vw, 1.2813rem);
+    }
+  }
+
+  .h-1 { font-size: var(--h1); }
+  .h-2 { font-size: var(--h2); }
+  .h-3 { font-size: var(--h3); }
+  .h-4 { font-size: var(--h4); }
+  .h-5 { font-size: var(--h5); }
+  .h-6 { font-size: var(--h6); }
+  .h-7 { font-size: var(--h7); }
+  .h-8 { font-size: var(--h8); }
+  .h-9 { font-size: var(--h9); }
+</style>
 
 BEFORE </BODY> CODE
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
 <script>
-  if (window.mhLoad) mhLoad("sites/imprint-engine/src/script.js", "js");
+  document.addEventListener("DOMContentLoaded", function () {
+    if (window.mhLoad) mhLoad("sites/imprint-engine/src/script.js", "js").catch(console.error);
+  }, { once: true });
 </script>
-
-
-OPTIONAL
-
-Swiper CSS
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@14.0.5/swiper-bundle.min.css">
-
-Plyr CSS
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.css">
-
-Flowplay
-<script src="https://cdn.jsdelivr.net/gh/videsigns/webflow-tools@latest/Media%20Player/flowplay.js"></script>
-
-Flowplay+
-<script src="https://cdn.jsdelivr.net/gh/videsigns/webflow-tools@latest/Media%20Player/flowplayplus.js"></script>
-
-GSAP Observer
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Observer.min.js"></script>
-
-GSAP Flip
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
-
-GSAP ScrambleText
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrambleTextPlugin.min.js"></script>
-
-Swiper JS
-<script src="https://cdn.jsdelivr.net/npm/swiper@14.0.5/swiper-bundle.min.js"></script>
-
-Lottie
-<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.13.0/build/player/lottie.min.js"></script>
-
-Plyr JS
-<script src="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.min.js"></script>

@@ -245,8 +245,8 @@ test("shared non-home ripple behavior retains its original duration and style re
 test("drop-text animation initializes globally and skips missing layouts, rings, or libraries", () => {
   const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "dropTextAnimation", "flexGrowAnimation", "onDesktop", "onMobile"];
   const calls = [];
-  new Function(...names, `${section("function initSite()", "\n$(initSite);")}\ninitSite();`)(
-    ...names.map((name) => () => calls.push(name))
+  new Function("isWebflowEditor", "window", ...names, `${section("function initSite()", "\n$(initSite);")}\ninitSite();`)(
+    () => false, { gsap: {} }, ...names.map((name) => () => { calls.push(name); return null; })
   );
   assert.equal(calls.filter((name) => name === "dropTextAnimation").length, 1);
   assert.ok(calls.indexOf("dropTextAnimation") < calls.indexOf("onDesktop"));
@@ -265,7 +265,7 @@ test("drop-text layouts play independently at the viewport midpoint and retain t
     assert.equal(options.trigger, layouts[index]);
     assert.equal(options.start, "top 50%");
     assert.equal(options.scrub, undefined);
-    assert.equal(options.onLeave, undefined);
+    assert.equal(typeof options.onLeave, "function");
     assert.equal(options.onEnterBack, undefined);
   });
   assert.ok(layouts.every(({ rings }) => rings.every((ring) => ring.autoAlpha === 0)));
@@ -273,7 +273,9 @@ test("drop-text layouts play independently at the viewport midpoint and retain t
   timelines[0].pause().time(0.7);
   assert.ok(layouts[0].rings.every((ring) => ring.autoAlpha > 0));
   assert.ok(layouts[1].rings.every((ring) => ring.autoAlpha === 0));
-  timelines[0].progress(1);
+  triggers[0].options.onLeave();
+  assert.equal(timelines[0].progress(), 1);
+  assert.equal(timelines[0].paused(), true);
   assert.equal(timelines[0].duration(), 1.38);
   assert.equal(timelines[0].repeat(), 0);
   layouts[0].rings.forEach((ring, index) => {

@@ -42,7 +42,19 @@
 [footer-svg-pixel-layer] {
   pointer-events: none;
   opacity: 0;
-  will-change: opacity;
+}
+
+[accord-item]:focus-visible,
+[cat-select]:focus-visible,
+[filter-tab]:focus-visible,
+[flex-grow-item]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* Readable purple text on light surfaces; keep the original brand artwork. */
+[readable-brand-text] {
+  color: #7e40c5;
 }
 
 [lander-ripples] {

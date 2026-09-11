@@ -256,7 +256,9 @@ test("flex-grow initializes globally before desktop/mobile branches", () => {
   const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "dropTextAnimation", "flexGrowAnimation", "onDesktop", "onMobile"];
   const calls = [];
   const init = source.slice(source.indexOf("function initSite()"), source.indexOf("\n$(initSite);"));
-  new Function(...names, `${init}\ninitSite();`)(...names.map((name) => () => calls.push(name)));
+  new Function("isWebflowEditor", "window", ...names, `${init}\ninitSite();`)(
+    () => false, { gsap: {} }, ...names.map((name) => () => { calls.push(name); return null; })
+  );
   assert.equal(calls.filter((name) => name === "flexGrowAnimation").length, 1);
   assert.ok(calls.indexOf("flexGrowAnimation") < calls.indexOf("onDesktop"));
 });

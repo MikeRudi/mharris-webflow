@@ -5,14 +5,15 @@
 - Webflow: Imprint Engine v1
 - Staging: https://imprint-engine-v1.webflow.io/home-staged
 
-## CDN
+## Webflow loading
 
-```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/MikeRudi/mharris-webflow@main/sites/imprint-engine/src/styles.css">
-<script defer src="https://cdn.jsdelivr.net/gh/MikeRudi/mharris-webflow@main/sites/imprint-engine/src/script.js"></script>
-```
+Use `webflow-custom-code.txt` for the current site-level head/footer setup.
+The development loader resolves GitHub `main` once, fetches CSS and JS together
+from that commit, and executes after the deferred libraries and Webflow's jQuery
+are ready. Refresh staging after pushing changes.
 
-See `webflow-custom-code.txt` for the full copy-paste Webflow library setup.
+Keep development on this loader to avoid jsDelivr branch-cache delays.
+Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
@@ -26,6 +27,9 @@ See `webflow-custom-code.txt` for the full copy-paste Webflow library setup.
 
 ## Animation regression checks
 
+See [animation-controls.md](animation-controls.md) for the other functions'
+control groups, timing units, footer rendering and keyboard behavior.
+
 Run `node --test sites/imprint-engine/tests/*.test.mjs` from the repo
 root. The tests use GSAP 3.15.0 (fetched from the pinned CDN if not installed)
 to check grouped percentage timing, linked starts and stagger, reversal,
@@ -38,3 +42,7 @@ and Chrome for the home animation's browser checks. These cover pauses,
 forward/reverse/jump consistency, fast scrolling, sticky boundaries, responsive
 sizes, breakpoint cleanup, and changes to timing controls. See
 [home-animation.md](home-animation.md) for setup and report options.
+
+Run `node sites/imprint-engine/tests/site-interactions.browser.mjs` for keyboard
+and rapid-selection checks, repeated initialization, footer visibility/idle
+work, reduced motion, breakpoint changes, and complete cleanup.
