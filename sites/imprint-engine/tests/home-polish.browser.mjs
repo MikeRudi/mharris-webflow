@@ -58,18 +58,22 @@ try {
     await seek(1); assert.deepEqual(await navHits(), [dark, dark]);
     await seek(0); assert.deepEqual(await navHits(), [white, white]);
   });
-  await check("card framing keeps moving through the opening scenes and finishes at 30%", async () => {
+  await check("card framing rises without moving horizontally and finishes at 30%", async () => {
     const state = await page.evaluate(() => {
       const timeline = gsap.getById("home-sequence"), card = document.querySelector("[home-resting] [perspective-card]");
-      const scales = [0, 0.1, 0.2, 0.3].map((time) => {
-        timeline.time(time, false); return Number(gsap.getProperty(card, "scale"));
+      const frames = [0, 0.1, 0.2, 0.3].map((time) => {
+        timeline.time(time, false);
+        return { scale: Number(gsap.getProperty(card, "scale")), x: Number(gsap.getProperty(card, "x")), y: Number(gsap.getProperty(card, "y")) };
       });
       timeline.time(0);
-      return { scales, labels: timeline.labels };
+      return { frames, labels: timeline.labels, rem: parseFloat(getComputedStyle(document.documentElement).fontSize) };
     });
     near(state.labels["firstScene.sphere:end"], 0.3, 0.00001);
-    near(state.scales[3] / state.scales[0], 0.78, 0.001);
-    const differences = state.scales.slice(1).map((value, index) => state.scales[index] - value);
+    const scales = state.frames.map((frame) => frame.scale);
+    near(scales[3] / scales[0], 0.78, 0.001);
+    state.frames.forEach((frame) => near(frame.x, state.frames[0].x, 0.001));
+    state.frames.forEach((frame, index) => near(frame.y - state.frames[0].y, -2 * index * state.rem, 0.001));
+    const differences = scales.slice(1).map((value, index) => scales[index] - value);
     assert.ok(differences.every((difference) => difference > 0.02));
     differences.forEach((difference) => near(difference, differences[0], 0.001));
     assert.ok(state.labels["finish.clip"] <= 0.55);

@@ -124,7 +124,13 @@ observer, visibility listener, ticker, and timelines.
 `homeCardMotion` controls the slower 48-second idle rate, drag response and
 continuous depth opacity. The scale setters use explicit `scaleX` / `scaleY`;
 GSAP's multi-property `scale` alias does not work as a quickSetter here.
-Framing now lasts through 30% of scroll and cards fade from 24–33%.
+Framing lasts through 30% of scroll and cards fade from 24–33%. Cards rise
+straight up by `6rem` instead of moving to the viewport centre. Their position
+spread is 1.12 horizontally and 0.6 vertically, anchored at the authored top
+and right. This moves lower cards away from the logos and into left-hand space.
+Refresh remeasures the layout without resetting its rotation.
+Idle rotation advances directly on the ticker, independently of drag smoothing;
+its speed increases to 3× across the opening 30% and stays active until fade-out.
 
 Home Staged contains two `[nav-block]` copies: one inside `[home-start]`, the
 other in the page root. `nav-light` means white text; `nav-dark` means dark text.

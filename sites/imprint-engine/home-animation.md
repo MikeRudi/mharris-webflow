@@ -65,7 +65,7 @@ gradient orbit and star rotation use `none` for a constant rate. Card fades use
 
 | Group | Initial start | Main behavior |
 | --- | --- | --- |
-| `firstScene` | 0% | Exit text; card sphere keeps drifting until 30% |
+| `firstScene` | 0% | Exit text; cards rise from their existing positions until 30% |
 | `cards`, `logos` | 24%; after first exit | Cards fade through 33%; logos leave with the next scene |
 | `secondScene` | After first text exit, currently 11% | Enter, hold, then leave |
 | `thirdScene` | After second exit, currently 28.5% | Enter and remain until the clip |
@@ -78,9 +78,19 @@ gradient orbit and star rotation use `none` for a constant rate. Card fades use
 
 The page entrance uses the separate `homeEntrance` controls in seconds. Idle
 card rotation and pointer dragging use `homeCardMotion`: the idle rate is 360
-degrees per 48 seconds, with a 45-degree axis. `opacity.back/front/ease` defines
+degrees per 48 seconds, with a 45-degree axis. `idle.scrollSpeedMultiplier: 3`
+gradually triples rotation speed across the opening 30%, including while scrolling
+or holding that scroll position. Idle advances directly; drag smoothing only
+affects pointer input. Rotation stops after the existing card fade finishes.
+`opacity.back/front/ease` defines
 one continuous depth curve for every card, replacing fixed opacity tiers.
-`framing` controls the sphere's size and vertical offset. All home scroll
+`layout.horizontalSpread: 1.12` spreads card positions left, keeping the right
+edge anchored. `layout.verticalSpread: 0.6` raises the lower rows while keeping
+the top anchored, clearing space above the logos. These change card positions,
+not the shape of the cards. The layout is remeasured on ScrollTrigger refresh.
+`framing.riseYRem: -6` adds a straight upward movement over the same 30%; there
+is no scroll-driven move toward the viewport centre. `framing.scale` retains
+the gradual reduction to 0.78. All home scroll
 sequences, including both ripples, follow scroll in both directions.
 
 `homeAlignment.endDropOffsetRem` positions the end mark relative to the gradient
@@ -116,6 +126,7 @@ The browser suite requires Playwright and Chrome:
 ```sh
 node sites/imprint-engine/tests/home-scroll.browser.mjs
 node sites/imprint-engine/tests/home-polish.browser.mjs
+node sites/imprint-engine/tests/home-cards.browser.mjs
 ```
 
 Use `PLAYWRIGHT_MODULE` for a separately installed Playwright module,
@@ -125,3 +136,5 @@ timing, pauses, fast wheel scrolling, sticky boundaries, responsive drop sizing,
 breakpoint cleanup, and edits to chained timings. The polish suite additionally
 checks card motion/opacity, actual nav hit-testing during the clip, end alignment,
 and full-size gallery artwork during desktop and mobile expansion.
+The card suite compares top/right anchors and logo clearance, checks resize
+stability, measures rotation speed, and tests wheel scrolling and fade/reverse.

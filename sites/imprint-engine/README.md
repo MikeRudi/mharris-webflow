@@ -47,6 +47,9 @@ Run `node sites/imprint-engine/tests/home-polish.browser.mjs` for continuous
 card motion/opacity, nav clipping and footer themes, end-drop alignment, and
 gallery image sizing through desktop/mobile expansion and resize.
 
+Run `node sites/imprint-engine/tests/home-cards.browser.mjs` for card placement,
+logo clearance, stable resize, scroll-accelerated rotation and fade/reverse.
+
 Run `node sites/imprint-engine/tests/site-interactions.browser.mjs` for keyboard
 and rapid-selection checks, repeated initialization, footer visibility/idle
 work, reduced motion, breakpoint changes, and complete cleanup.

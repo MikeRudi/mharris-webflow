@@ -241,18 +241,18 @@ function homeAnimation() {
 
   // CARD BACKGROUND — seconds for idle/drag; framing uses firstScene.sphere above.
   const homeCardMotion = {
-    idle: { cycleSeconds: 48, axisDegrees: 45 },
+    idle: { cycleSeconds: 48, axisDegrees: 45, scrollSpeedMultiplier: 3 },
     drag: { duration: 0.6, ease: "power2.out", degreesPerPixel: 0.25 },
-    framing: { scale: 0.78, radiusScale: 0.9, offsetYRem: 2 },
+    layout: { horizontalSpread: 1.12, verticalSpread: 0.6 },
+    framing: { scale: 0.78, radiusScale: 0.9, offsetYRem: 2, riseYRem: -6 },
     opacity: { back: 0.08, front: 1, ease: "power1.inOut" },
   };
   const cardOpacityEase = gsap.parseEase(homeCardMotion.opacity.ease);
   const $homeResting = $("[home-resting]");
   const $homeRestingDragSurface = $("[home-start]");
   const homeRestingView = { progress: 0 };
-  const homeRestingCenterShift = { x: 0, y: 0 };
-  const homeRestingBaseY =
-    parseFloat(getComputedStyle(document.documentElement).fontSize) * homeCardMotion.framing.offsetYRem;
+  const homeRestingLayoutOffset = { x: 0, y: 0 };
+  let homeRestingRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
   const homeRestingRadiusScale = homeCardMotion.framing.radiusScale;
   const homeRestingMatrix = [1, 0, 0, 0, 1, 0, 0, 0, 1];
   const homeRestingMatrixTemp = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -263,6 +263,7 @@ function homeAnimation() {
   let homeRestingSphere = [];
 
   function buildHomeRestingSphere() {
+    homeRestingRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const restingItems = $homeResting.toArray().map((element, index) => {
       const card = $(element).find("[perspective-card]")[0];
       if (!card) return null;
@@ -310,8 +311,12 @@ function homeAnimation() {
       )
     );
 
-    homeRestingCenterShift.x = window.innerWidth / 2 - centerX;
-    homeRestingCenterShift.y = window.innerHeight / 2 - centerY;
+    // Spread left and lift the lower rows, anchored to the authored top/right.
+    // These are layout offsets, independent of scroll and the rotating matrix.
+    const right = Math.max(...restingItems.map((item) => item.x - centerX)) * homeRestingRadiusScale;
+    const top = Math.min(...restingItems.map((item) => item.y - centerY)) * homeRestingRadiusScale;
+    homeRestingLayoutOffset.x = right * (1 - homeCardMotion.layout.horizontalSpread);
+    homeRestingLayoutOffset.y = top * (1 - homeCardMotion.layout.verticalSpread);
 
     homeRestingSphere = restingItems.map((item) => {
       const screenX = item.x - centerX;
@@ -362,8 +367,7 @@ function homeAnimation() {
       homeCardMotion.framing.scale,
       homeRestingView.progress
     );
-    const viewX = homeRestingCenterShift.x * homeRestingView.progress;
-    const viewY = homeRestingCenterShift.y * homeRestingView.progress;
+    const viewY = homeCardMotion.framing.riseYRem * homeRestingRem * homeRestingView.progress;
 
     homeRestingSphere.forEach((item) => {
       const x =
@@ -393,11 +397,13 @@ function homeAnimation() {
       // Reuse setters: per-frame gsap.set() tweens accumulate in matchMedia.
       item.setZIndex(Math.round(depth + item.radius));
       item.setX(
-        x * homeRestingRadiusScale * viewScale + viewX - item.screenX
+        x * homeRestingRadiusScale * homeCardMotion.layout.horizontalSpread +
+          homeRestingLayoutOffset.x - item.screenX
       );
       item.setY(
-        -y * homeRestingRadiusScale * viewScale +
-          homeRestingBaseY + viewY - item.screenY
+        -y * homeRestingRadiusScale * homeCardMotion.layout.verticalSpread +
+          homeRestingLayoutOffset.y + homeCardMotion.framing.offsetYRem * homeRestingRem +
+          viewY - item.screenY
       );
       item.setScaleX(scale);
       item.setScaleY(scale);
@@ -414,6 +420,11 @@ function homeAnimation() {
     homeRestingPreviousY = homeRestingSmooth.y;
     homeRestingPreviousX = homeRestingSmooth.x;
 
+    rotateHomeRestingMatrix(rotationX, rotationY);
+    renderHomeRestingSphere();
+  }
+
+  function rotateHomeRestingMatrix(rotationX, rotationY) {
     if (rotationX !== 0 || rotationY !== 0) {
       const cosY = Math.cos(rotationY);
       const sinY = Math.sin(rotationY);
@@ -432,8 +443,6 @@ function homeAnimation() {
 
       premultiplyHomeRestingMatrix(homeRestingRotationMatrix);
     }
-
-    renderHomeRestingSphere();
   }
 
   const homeRestingQuickY = gsap.quickTo(homeRestingSmooth, "y", {
@@ -731,13 +740,14 @@ function homeAnimation() {
   function rotateHomeRestingSphere(time, deltaTime) {
     if (!homeRestingIsActive || document.hidden || homeRestingIsDragging) return;
 
-    const rotation = (Math.min(deltaTime, 32) / 1000) * (360 / homeCardMotion.idle.cycleSeconds);
+    const speed = gsap.utils.interpolate(1, homeCardMotion.idle.scrollSpeedMultiplier, homeRestingView.progress);
+    const rotation = (Math.min(deltaTime, 32) / 1000) * (360 / homeCardMotion.idle.cycleSeconds) * speed * Math.PI / 180;
     const direction = (homeCardMotion.idle.axisDegrees * Math.PI) / 180;
 
-    homeRestingInputX += Math.cos(direction) * rotation;
-    homeRestingInputY += Math.sin(direction) * rotation;
-    homeRestingQuickY(homeRestingInputX);
-    homeRestingQuickX(homeRestingInputY);
+    // Advance directly every frame. Drag tweens smooth only pointer input, so
+    // repeatedly restarting them cannot damp or delay the background rotation.
+    rotateHomeRestingMatrix(Math.sin(direction) * rotation, Math.cos(direction) * rotation);
+    renderHomeRestingSphere();
   }
 
   function syncHomeRestingActivity() {
@@ -1037,6 +1047,8 @@ function homeAnimation() {
     animation: homeScrubClock,
     scrub: true,
     onRefresh: () => {
+      buildHomeRestingSphere();
+      renderHomeRestingSphere();
       measureHomeClip();
       const progress = homeFinalDropTween.progress();
       homeFinalDropTween.invalidate();
