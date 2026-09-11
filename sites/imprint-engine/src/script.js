@@ -45,7 +45,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), dropTextAnimation(), flexGrowAnimation()];
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), dropTextAnimation(), flexGrowAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -1819,6 +1819,96 @@ function catalogueAnimation() {
   activate($initial.length ? $initial : $selects.first(), true);
   const unbind = bindControlActivation($selects, "catalogueAnimation", activate);
   return () => { if (transition) transition.kill(); unbind(); restoreSelects(); restoreReveals(); };
+}
+
+function homeBackgroundMotion() {
+  if (!window.gsap || !$("[home-faq], [section-tiles], [compare-section]").length) return null;
+  // BACKGROUND MOTION — seconds; native Webflow classes own artwork and layout.
+  const backgroundMotion = {
+    faq: { xPercent: 4, yPercent: 3, scale: 1.08, duration: 14, ease: "sine.inOut" },
+    ribbon: { xPercent: 5, yPercent: 2, rotation: 1.5, duration: 18, ease: "sine.inOut" },
+    cursor: { duration: 0.3, ease: "power1.out" },
+  };
+  const media = gsap.matchMedia();
+  media.add("(prefers-reduced-motion: no-preference)", () => {
+    const cleanups = [];
+    // Repeat only while the artwork is near the viewport and the tab is visible.
+    function animateVisible(section, targets, motion, name) {
+      if (!section || !targets.length) return;
+      const restore = rememberAttributes($(targets), ["style"]);
+      const timeline = gsap.timeline({ id: name, paused: true, repeat: -1, yoyo: true });
+      targets.forEach((target, index) => {
+        const direction = index % 2 ? -1 : 1;
+        timeline.to(target, { ...motion, xPercent: motion.xPercent * direction,
+          yPercent: motion.yPercent * direction }, 0);
+      });
+      let visible = false;
+      const sync = () => visible && !document.hidden ? timeline.play() : timeline.pause();
+      const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); },
+        { rootMargin: "300px 0px" });
+      observer.observe(section);
+      document.addEventListener("visibilitychange", sync);
+      cleanups.push(() => { observer.disconnect(); document.removeEventListener("visibilitychange", sync); timeline.kill(); restore(); });
+    }
+
+    // FAQ — independently drifting glows extend beyond section edges.
+    $("[home-faq]").each(function () {
+      animateVisible(this, $(this).find("[home-faq-glows]").children().toArray(), backgroundMotion.faq, "home-faq-breath");
+    });
+    // AUDIENCE — the oversized original lined artwork sways behind the cards.
+    $("[section-tiles]").each(function () {
+      animateVisible(this, $(this).find("[home-dna-ribbon]").toArray(), backgroundMotion.ribbon, "home-dna-sway");
+    });
+
+    // COMPARISON — one pointer update per frame, with no idle rendering loop.
+    $("[compare-section]").each(function () {
+      const section = this, glow = $(this).find("[compare-glow]")[0];
+      if (!glow || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+      const restore = rememberAttributes($(glow), ["style"]);
+      const xTo = gsap.quickTo(glow, "x", backgroundMotion.cursor);
+      const yTo = gsap.quickTo(glow, "y", backgroundMotion.cursor);
+      let frame = 0, pointer, listening = false;
+      const cancel = () => { cancelAnimationFrame(frame); frame = 0; };
+      const paint = () => {
+        frame = 0;
+        if (!pointer || document.hidden) return;
+        const rect = glow.getBoundingClientRect();
+        const baseX = rect.left + rect.width / 2 - Number(gsap.getProperty(glow, "x"));
+        const baseY = rect.top + rect.height / 2 - Number(gsap.getProperty(glow, "y"));
+        xTo(pointer.x - baseX); yTo(pointer.y - baseY);
+      };
+      const move = event => {
+        if (event.pointerType === "touch") return;
+        pointer = { x: event.clientX, y: event.clientY };
+        if (!frame) frame = requestAnimationFrame(paint);
+      };
+      const leave = () => { pointer = null; cancel(); xTo(0); yTo(0); };
+      const detach = () => {
+        section.removeEventListener("pointermove", move);
+        section.removeEventListener("pointerleave", leave);
+        listening = false; pointer = null; cancel(); xTo.tween.pause(); yTo.tween.pause();
+      };
+      let visible = false;
+      const sync = () => {
+        if (visible && !document.hidden) {
+          if (!listening) {
+            section.addEventListener("pointermove", move, { passive: true });
+            section.addEventListener("pointerleave", leave);
+            listening = true;
+          }
+        } else detach();
+      };
+      const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); });
+      observer.observe(section);
+      document.addEventListener("visibilitychange", sync);
+      cleanups.push(() => {
+        observer.disconnect(); document.removeEventListener("visibilitychange", sync); detach();
+        xTo.tween.kill(); yTo.tween.kill(); restore();
+      });
+    });
+    return () => cleanups.forEach(cleanup => cleanup());
+  });
+  return () => media.revert();
 }
 
 function homeFaqAnimation() {

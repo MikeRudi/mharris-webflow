@@ -35,6 +35,27 @@ closed questions; it is not transcribed Figma answer copy.
 
 ## FAQ behavior
 
+### Decorative backgrounds
+
+`homeBackgroundMotion()` keeps independent controls in `backgroundMotion`:
+FAQ breathing uses 14 seconds per direction, 4%/3% movement and scale 1.08;
+the DNA ribbon uses 18 seconds, 5%/2% movement and 1.5 degrees of sway.
+Both use `sine.inOut` so the repeated direction change is smooth. Comparison
+cursor tracking uses a 0.3-second `power1.out` response and one update per frame.
+Animations pause outside the viewport (300px breathing margin) and in hidden
+tabs. Reduced motion leaves the authored artwork static. Cleanup restores styles.
+
+Native `[home-faq-glows]` contains two decorative gradient divs, replacing the
+section's painted background. Their transparent edges can extend above the FAQ;
+the right glow fades before the dark footer instead of stopping against it.
+`[home-dna-ribbon]` uses the original lined PNG at 180% width, with native opacity
+and a soft vertical mask. The native `.cat-select:hover` matches `.active`.
+`[compare-glow]` follows the cursor only inside `[compare-section]`, then returns
+to its authored location. All sizing, gradients and hover styles live in Webflow.
+
+Run `tests/home-backgrounds.browser.mjs` for motion, cursor, hover, responsive
+overflow, reduced-motion and cleanup checks (from this site's directory).
+
 Keep `[home-faq]` on the section and `[home-faq-item]`, `[home-faq-button]`,
 `[home-faq-panel]` on each question and answer pair. `homeFaqAnimation()` owns
 only opening/closing, keyboard activation and accessible expanded/hidden state.

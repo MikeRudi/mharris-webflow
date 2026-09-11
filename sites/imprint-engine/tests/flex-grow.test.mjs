@@ -253,7 +253,7 @@ afterEach(() => {
 });
 
 test("flex-grow initializes globally before desktop/mobile branches", () => {
-  const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "homeFaqAnimation", "dropTextAnimation", "flexGrowAnimation", "onDesktop", "onMobile"];
+  const names = ["initLenis", "navTheme", "accordionOne", "filterOne", "catalogueAnimation", "homeFaqAnimation", "homeBackgroundMotion", "dropTextAnimation", "flexGrowAnimation", "onDesktop", "onMobile"];
   const calls = [];
   const init = source.slice(source.indexOf("function initSite()"), source.indexOf("\n$(initSite);"));
   new Function("isWebflowEditor", "window", ...names, `${init}\ninitSite();`)(
