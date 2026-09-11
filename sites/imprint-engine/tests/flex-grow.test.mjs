@@ -270,7 +270,7 @@ test("authored active item wins, then active image, then first valid item", () =
       assertActive(block, expected);
       block.children.forEach((item, index) => {
         assert.equal(item.flexGrow, index === expected ? 1 : 0);
-        assert.equal(item.image.flexGrow, item.flexGrow);
+        assert.equal(item.image.flexGrow, 1);
         assert.equal(item.copy.autoAlpha, index === expected ? 1 : 0);
         assert.equal(item.attributes.get("role"), "button");
         assert.equal(item.attributes.get("tabindex"), "0");
@@ -280,7 +280,7 @@ test("authored active item wins, then active image, then first valid item", () =
   }
 });
 
-test("hover grows item and image together while synchronizing the copy fade", () => {
+test("hover grows the item while its image pane fills the available width", () => {
   const { blocks, timelines } = fixture();
   const [block] = blocks;
   emit(block.children[1], "mouseenter");
@@ -291,7 +291,7 @@ test("hover grows item and image together while synchronizing the copy fade", ()
   assert.equal(block.children[0].flexGrow, 0.75);
   assert.equal(block.children[1].flexGrow, 0.25);
   block.children.forEach((item, index) => {
-    assert.equal(item.flexGrow, item.image.flexGrow);
+    assert.equal(item.image.flexGrow, 1, "The pane must not apply a second growth curve");
     assert.equal(item.copy.autoAlpha, index === 1 ? 1 : 0);
   });
   assertActive(blocks[1], 0);
@@ -428,7 +428,7 @@ test("crossing the 767px breakpoint restores mode-owned styles and preserves sel
     assert.equal(item.image.style.getPropertyValue("margin-top"), "");
     assert.equal(item.content.style.getPropertyValue("color"), "blue");
     assert.equal(item.flexGrow, index === 1 ? 1 : 0);
-    assert.equal(item.image.flexGrow, item.flexGrow);
+    assert.equal(item.image.flexGrow, 1);
   });
   emit(block.children[3], "mouseenter");
   timelines.at(-1).pause().time(0.15);

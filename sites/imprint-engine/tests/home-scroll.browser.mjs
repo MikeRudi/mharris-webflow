@@ -121,7 +121,7 @@ try {
     near(details.start, 0); near(details.end, details.height - details.viewport);
     assert.equal(details.startRule, "top top"); assert.equal(details.endRule, "bottom bottom");
     assert.equal(details.scrub, true); assert.equal(details.clock, 1); assert.equal(details.duration, 1);
-    near(details.labels["finish.clip"], 0.7);
+    near(details.labels["finish.clip"], 0.52);
     await writeFile(join(output, "timeline.json"), JSON.stringify(details, null, 2));
   });
   await check("all home sequences stay still when scrolling stops", async () => {
@@ -132,9 +132,9 @@ try {
       assert.equal(await page.evaluate(() => lenis.isStopped), false);
     }
   });
-  const checkpoints = [0, 0.04, 0.1, 0.2, 0.258, 0.28, 0.3105, 0.311, 0.34, 0.373, 0.4,
-    0.4123, 0.44, 0.451, 0.48, 0.525, 0.568, 0.595, 0.63, 0.67, 0.699, 0.701,
-    0.73, 0.754, 0.78, 0.8, 0.808, 0.838, 0.87, 0.9, 0.947, 0.98, 1];
+  const checkpoints = [0, 0.04, 0.1, 0.13, 0.1797, 0.1803, 0.195, 0.225, 0.24, 0.28, 0.305,
+    0.33, 0.35, 0.38, 0.405, 0.48, 0.5197, 0.5203, 0.56, 0.6, 0.64, 0.67,
+    0.6997, 0.7003, 0.735, 0.775, 0.8, 0.835, 0.87, 0.9, 0.95, 0.98, 1];
   const forward = [];
   await check("33 forward and reverse frames match, including orbit/merge and clip", async () => {
     await seek(0);
@@ -149,11 +149,15 @@ try {
     }
   });
   await check("the second scene holds without a tween fighting its exit", async () => {
-    for (const progress of [0.35, 0.37, 0.39]) {
+    const labels = await page.evaluate(() => gsap.getById("home-sequence").labels);
+    const holdStart = labels["secondScene.enter:end"], holdEnd = labels["secondScene.leave"];
+    for (const fraction of [0.2, 0.5, 0.8]) {
+      const progress = holdStart + (holdEnd - holdStart) * fraction;
       await seek(progress); const current = await frame();
       assert.ok(current.second.every((el) => el.y === 0 && el.opacity === 1));
     }
-    await seek(0.43); assert.ok((await frame()).second.every((el) => el.y < 0 && el.opacity < 1));
+    await seek((holdEnd + labels["secondScene.leave:end"]) / 2);
+    assert.ok((await frame()).second.every((el) => el.y < 0 && el.opacity < 1));
   });
   await check("both home ripples start hidden and reach their intended endpoints", async () => {
     await seek(0); let current = await frame();
@@ -163,8 +167,8 @@ try {
     current.endRings.forEach((ring, index) => { near(ring.scale, 1.1 - index * 0.3); near(ring.opacity, 0.7); });
   });
   await check("drop size and line anchor remain fixed throughout the colour fill", async () => {
-    await seek(0.631); const transform = (await frame()).drops[1].transform;
-    for (const progress of [0.65, 0.68, 0.71, 0.8, 1, 0.8, 0.7, 0.65, 0.631]) {
+    await seek(0.406); const transform = (await frame()).drops[1].transform;
+    for (const progress of [0.43, 0.48, 0.52, 0.7, 1, 0.7, 0.52, 0.48, 0.406]) {
       await seek(progress); assert.equal((await frame()).drops[1].transform, transform);
     }
     const geometry = await page.evaluate(() => {
@@ -178,18 +182,20 @@ try {
     near(x + 111.1 * scale, 720, 0.001); near(y + 168.0556 * scale + 150, 330, 0.001);
   });
   await check("content blur stays off the sticky wrappers and is cleared on return", async () => {
-    await seek(0.808);
+    await seek(0.7);
     const styles = await page.evaluate(() => ({
       wrappers: ["[home-start]", "[layout-end]", "[home-end-target-svg]"].map((s) => getComputedStyle(document.querySelector(s)).filter),
-      children: [...document.querySelector("[home-start]").children].filter((el) => !["SCRIPT", "STYLE"].includes(el.tagName)).map((el) => getComputedStyle(el).filter),
+      children: [...document.querySelector("[home-start]").children].filter((el) => !["SCRIPT", "STYLE"].includes(el.tagName) && !el.querySelector("[nav-block]")).map((el) => getComputedStyle(el).filter),
+      nav: getComputedStyle(document.querySelector("[home-start] [nav-block]").parentElement).filter,
     }));
     assert.ok(styles.wrappers.every((filter) => filter === "none"));
     assert.ok(styles.children.every((filter) => /^blur\(/.test(filter)));
-    await seek(0.69); assert.equal((await frame()).clip, "none");
+    assert.equal(styles.nav, "none");
+    await seek(0.51); assert.equal((await frame()).clip, "none");
     assert.ok((await frame()).blur.every((filter) => filter === "none"));
   });
   await check("sticky layers cover the viewport through the clip and release together", async () => {
-    for (const progress of [0.68, 0.72, 0.78, 0.81, 0.95, 1, 1.03]) {
+    for (const progress of [0.50, 0.54, 0.63, 0.7, 0.95, 1, 1.03]) {
       await seek(progress);
       const geometry = await page.evaluate(() => {
         const rect = (s) => { const r = document.querySelector(s).getBoundingClientRect(); return { top: r.top, bottom: r.bottom }; };
@@ -200,11 +206,11 @@ try {
       if (progress <= 1) { near(geometry.start.top, 0, 0.6); near(geometry.end.bottom, geometry.height, 0.6); }
       else near(geometry.end.bottom, geometry.layout.bottom, 0.6);
       assert.equal(geometry.stopped, false);
-      if ([0.72, 0.78, 0.81, 1, 1.03].includes(progress)) await page.screenshot({ path: join(output, `home-${Math.round(progress * 100)}.png`) });
+      if ([0.54, 0.63, 0.7, 1, 1.03].includes(progress)) await page.screenshot({ path: join(output, `home-${Math.round(progress * 100)}.png`) });
     }
   });
   await check("fast wheel scrolling crosses the finish without a scroll lock or layer gap", async () => {
-    await seek(0.65);
+    await seek(0.48);
     await page.evaluate(() => {
       window.homeFastFrames = [];
       const record = () => {
@@ -225,12 +231,12 @@ try {
     }
   });
   await check("resize during drop shrink preserves its frame and endpoint sizing", async () => {
-    await seek(0.6);
+    await seek(0.38);
     await page.setViewportSize({ width: 1200, height: 800 });
     await page.evaluate(() => ScrollTrigger.refresh());
-    await seek(0.6); const resized = await frame();
-    await seek(1); await seek(0.6); compareFrames(await frame(), resized, "resized shrink");
-    await seek(0.7);
+    await seek(0.38); const resized = await frame();
+    await seek(1); await seek(0.38); compareFrames(await frame(), resized, "resized shrink");
+    await seek(0.406);
     const width = await page.evaluate(() => {
       const svg = document.querySelector("[home-gradient-svg]"), m = svg.getScreenCTM();
       const scale = Number(document.querySelector('[home-gradient-drop="2"]').getAttribute("transform").match(/scale\(([^)]+)\)/)[1]);
@@ -252,19 +258,19 @@ try {
   await check("editing a duration to 0.2 means 20% and moves linked steps without stretching other groups", async () => {
     // Isolate edited configurations from the breakpoint/scroll history above.
     await freshPage();
-    const edited = source.replace('clip: { start: 0, duration: 0.108, ease: "power1.in" }', 'clip: { start: 0, duration: 0.2, ease: "power1.in" }');
+    const edited = source.replace('clip: { start: 0, duration: 0.18, ease: "power1.in" }', 'clip: { start: 0, duration: 0.2, ease: "power1.in" }');
     assert.notEqual(edited, source);
     await page.route("**/script.js", (route) => route.fulfill({ body: edited, contentType: "text/javascript" }));
     await ready();
     const labels = await page.evaluate(() => gsap.getById("home-sequence").labels);
     near(labels["finish.clip:end"] - labels["finish.clip"], 0.2);
-    near(labels["finish.content"], labels["finish.clip:end"] + 0.03);
-    near(labels["gradientDots.spin"], 0.3108);
+    near(labels["finish.content"], labels["finish.clip:end"] + 0.035);
+    near(labels["gradientDots.spin"], 0.18);
     await page.unroute("**/script.js");
   });
   await check("overrunning edits never silently renormalize the full scroll", async () => {
     await freshPage();
-    const edited = source.replace('clip: { start: 0, duration: 0.108, ease: "power1.in" }', 'clip: { start: 0, duration: 0.5, ease: "power1.in" }');
+    const edited = source.replace('clip: { start: 0, duration: 0.18, ease: "power1.in" }', 'clip: { start: 0, duration: 0.5, ease: "power1.in" }');
     await page.route("**/script.js", (route) => route.fulfill({ body: edited, contentType: "text/javascript" }));
     await ready(); await seek(0.5);
     const timing = await page.evaluate(() => ({ time: gsap.getById("home-sequence").time(), progress: ScrollTrigger.getById("home-scroll").progress, clock: ScrollTrigger.getById("home-scroll").animation.duration() }));

@@ -30,7 +30,7 @@ linked starts, examples, and browser checks.
 
 `[layout-start]` is currently `450vh`. One ScrollTrigger runs from `top top`
 to `bottom bottom`, with a fixed 0–1 clock and `scrub: true`. The opening
-scene/drop sequence initially occupies 70% and the finish occupies 30%. Both
+scene/drop sequence reaches the clip at 52%, leaving 48% for the finish. Both
 home ripples, the clip, brackets, final drop, and content follow scroll in both
 directions. There is no timed finish or scroll lock during the scroll sequence.
 The entrance and idle card rotation keep their separate time-based behavior.
@@ -87,14 +87,16 @@ use `transformOrigin: "center center"` to avoid drift inside transformed groups.
 The line reaches the drop before the clip starts. The clip retains its
 12-point clock-hand polygon and pivot at the gradient line. Its measured
 geometry is cached until refresh; completion closes the remaining area fully.
-The blur animates direct children of `[home-start]` once from clear to 1.5rem,
+The blur animates content children of `[home-start]` once from clear to 1.5rem,
 leaving the sticky wrapper and clip edge unfiltered. Returning before the clip
-or leaving desktop removes those child filters.
+or leaving desktop removes those child filters. The embedded nav is excluded
+from the blur.
 
 Webflow owns both overlapping `100vh` sticky layers, the `-100vh` top margin
-on `.layout-end`, and its top padding. Do not override that padding in local
-CSS. The bracket centre follows the Webflow layout and is separate from the
-clip pivot. `.home-end-drop-stage` keeps its native `translate(-50%, -50%)`;
+on `.layout-end`. On desktop, JS adjusts its top padding so the bracket centre
+sits `0.75rem` above the gradient line, controlled by `homeAlignment.endDropOffsetRem`.
+The measured alignment refreshes on resize and restores authored padding on
+cleanup. `.home-end-drop-stage` keeps its native `translate(-50%, -50%)`;
 JavaScript scales only the target SVG in place, to 0.5 initially. Brackets close
 from -72px / 72px and the end content fades in. Both layers leave together
 through normal page scrolling at the exact section boundary.
@@ -118,6 +120,19 @@ and smoothing pause while the tab is hidden, `[home-start]` is out of view,
 or the cards' fade has finished; that endpoint follows the timing controls.
 Returning resumes from the retained position. Desktop cleanup removes the
 observer, visibility listener, ticker, and timelines.
+
+`homeCardMotion` controls the slower 48-second idle rate, drag response and
+continuous depth opacity. The scale setters use explicit `scaleX` / `scaleY`;
+GSAP's multi-property `scale` alias does not work as a quickSetter here.
+Framing now lasts through 30% of scroll and cards fade from 24–33%.
+
+Home Staged contains two `[nav-block]` copies: one inside `[home-start]`, the
+other in the page root. `nav-light` means white text; `nav-dark` means dark text.
+The hero uses `nav-light`; the page copy starts `nav-dark` and switches for the
+footer. Attribute-scoped CSS removes the outer `[layout-start]` stacking context
+only where a hero nav exists, letting hero z-index 21 cover page nav 20 while
+layout-end stays below it. The hero nav wrapper is absolute inside the sticky
+hero so it follows the clip and leaves with the section, including on mobile.
 
 Home Staged's approved `.layout-end` artwork is recorded in
 `sites/imprint-engine/layout-end-svg-replacement.html`. The existing SVG
@@ -148,8 +163,10 @@ is active, starting with the authored active item (then an active image, then
 the first item as fallbacks). The same `.active` state is applied to the item,
 its image wrapper, and its copy. Leaving the gallery keeps the last item open.
 
-On desktop/tablet, the item and image wrapper animate `flexGrow` between `0` and `1` together over
-`0.3s` with `power1.in`. Copy fades over `0.15s`. Interrupted transitions restart
+On desktop/tablet, only the item animates `flexGrow` between `0` and `1` over
+`0.3s` with `power1.in`. Every image pane has `flexGrow: 1` so its width follows
+the item's available space without multiplying two easing curves.
+Copy fades over `0.15s`. Interrupted transitions restart
 from the current rendered values; initial inline values prevent active-class CSS
 from snapping widths before a tween starts. Div items receive keyboard focus,
 button semantics, and `aria-expanded`. Cleanup restores authored styles,
@@ -159,14 +176,11 @@ Sizing is native Webflow CSS, recorded in `flex-grow-webflow.css` for reference;
 do not load that reference file as another runtime stylesheet. Desktop text
 columns are `10em` with `1rem` padding/gaps. The item's non-shrinking basis also
 accounts for its padding, internal gap, and two 1px borders. Image wrappers have
-zero basis/width, `min-width: 0`, and no forced aspect ratio; the absolute image
-fills their available space with the existing `.img-abs` cover styling.
-The active image therefore occupies the remaining row width without overflow.
-On desktop/tablet, `src/styles.css` anchors only the gallery's `.img-abs` crop
-to `right center`. As the panel widens, more artwork reveals toward the left
-instead of both sides. This is `object-position`, not `transform-origin`: the
-image is not being scaled. Item order, flex sizing, and mobile cropping stay
-unchanged.
+zero basis/width, `min-width: 0`, and no forced aspect ratio. The absolute image
+keeps the fully open size using `--gallery-image-width/height` in `src/styles.css`.
+Its parent clips the reveal. JS measures once per initialization, font readiness
+or width change, never per animation frame. Desktop object-position remains
+`right center`; mobile uses the native crop within a full-size 2:1 image.
 Desktop copy is anchored to the bottom of its text column and hidden when
 inactive. Its previous `[text-ch="18"]` limit now lives on the native copy class
 as `max-width: 18ch`, allowing an unrestricted mobile right-hand column.
@@ -265,4 +279,4 @@ need a Webflow publish; the animation comes from the existing GitHub JS loader.
   setting is preferable for visitors with JavaScript disabled; the connector
   currently does not expose that setting.
 - Runtime control groups and lifecycle behavior are documented in
-  `animation-controls.md`. The accepted home scroll choreography is unchanged.
+  `animation-controls.md`. Later motion polishing is recorded in `home-animation.md`.

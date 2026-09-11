@@ -7,9 +7,10 @@ Keep each feature's movement, timing, opacity and visual values together.
 | --- | --- | --- |
 | `initLenis` | `scrollControls` | Scroll smoothing and wheel sensitivity |
 | `homeAnimation` | `homeMotion` | Existing grouped percentage-based scrub; see [home-animation.md](home-animation.md) |
-| `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Desktop image growth, copy fade, mobile expansion and image ratio |
+| `homeAnimation` | `homeCardMotion`, `homeAlignment` | Background rotation, depth opacity, framing and end-drop alignment |
+| `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
-| `navTheme` | `navControls.start` | Where a marked section changes the navigation theme |
+| `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
 | `lineHover` | `lineMotion.enter / leave` | Pointer and keyboard underline timing and direction |
 | `filterOne` | `filterMotion` | Hide, container resize and incoming result trains |
 | `catalogueAnimation` | `catalogueControls` | Initial selection and active state |
@@ -41,6 +42,15 @@ For example, `start: "switch+=0.08"` waits 80 ms after the hide finishes.
 Inside one result, `words.fade.start: 0.1` delays the word fade by 100 ms.
 Rapid selection finishes the previous transition before building the next one,
 so old callbacks cannot re-show stale results.
+
+## Gallery image reveal
+
+Only the desktop item's `flexGrow` is animated. Its image pane fills all available
+space immediately, so the reveal follows the item's exact curve. Each photo stays
+at its fully open width, measured on initialization, font readiness and resize.
+Mobile keeps the photo at its fully open height while its parent expands.
+`galleryMotion.grow` and `galleryMotion.mobile` therefore control both the item
+and its image reveal; there is no separate image zoom or delay.
 
 ## Footer responsiveness
 
@@ -76,6 +86,7 @@ keyboard focus. Existing Webflow state classes remain in use.
 ```sh
 node --test sites/imprint-engine/tests/*.test.mjs
 node sites/imprint-engine/tests/home-scroll.browser.mjs
+node sites/imprint-engine/tests/home-polish.browser.mjs
 node sites/imprint-engine/tests/site-interactions.browser.mjs
 ```
 

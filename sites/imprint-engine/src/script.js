@@ -91,97 +91,97 @@ function homeAnimation() {
   // "<", ">", and ">+=0.02" also work relative to the previous step.
   // Across groups, use "group.step:end" or "group:end".
   const homeMotion = {
-    // 01 — First scene leaves while the card sphere moves to the centre.
+    // 01 — Copy leaves early; the card sphere drifts behind the opening scenes.
     firstScene: {
       start: 0,
-      sphere: { start: 0, duration: 0.14, ease: "power1.in" },
-      move: { start: 0, duration: 0.1869, ease: "power1.in", y: "-20rem", stagger: { amount: 0.0469, from: "end" } },
-      fade: { start: "move", duration: 0.0931, ease: "power1.in", stagger: { amount: 0.0469, from: "end" } },
+      sphere: { start: 0, duration: 0.3, ease: "none" },
+      move: { start: 0, duration: 0.11, ease: "power1.in", y: "-20rem", stagger: { amount: 0.02, from: "end" } },
+      fade: { start: "move", duration: 0.07, ease: "power1.in", stagger: { amount: 0.02, from: "end" } },
     },
-    // 02 — Cards leave, then the logos follow the first scene's exit.
+    // 02 — Cards fade gently; the logos follow the first scene's exit.
     cards: {
-      start: 0.21,
-      move: { start: 0, duration: 0.063, ease: "power1.in", y: "-10rem" },
-      fade: { start: "move", duration: 0.049, ease: "power1.in" },
+      start: 0.24,
+      move: { start: 0, duration: 0.09, ease: "power1.in", y: "-6rem" },
+      fade: { start: "move", duration: 0.09, ease: "power1.inOut" },
     },
     logos: {
       start: "firstScene.move:end",
-      move: { start: 0, duration: 0.063, ease: "power1.in", y: "-10rem" },
-      fade: { start: "move", duration: 0.049, ease: "power1.in" },
+      move: { start: 0, duration: 0.06, ease: "power1.in", y: "-10rem" },
+      fade: { start: "move", duration: 0.06, ease: "power1.in" },
     },
     // 03 — Second scene: enter → hold → leave.
     secondScene: {
-      start: 0.28,
-      enter: { start: 0, duration: 0.0581, ease: "power1.in" },
-      reveal: { start: "enter", duration: 0.0469, ease: "power1.in" },
-      leave: { start: "enter:end+=0.0588", duration: 0.0581, ease: "power1.in", y: "-20rem" },
-      hide: { start: "leave", duration: 0.0469, ease: "power1.in" },
+      start: "firstScene.move:end",
+      enter: { start: 0, duration: 0.065, ease: "power1.in" },
+      reveal: { start: "enter", duration: 0.05, ease: "power1.in" },
+      leave: { start: "enter:end+=0.045", duration: 0.065, ease: "power1.in", y: "-20rem" },
+      hide: { start: "leave", duration: 0.05, ease: "power1.in" },
     },
     // 04 — Third scene enters and holds naturally until the screen opens.
     thirdScene: {
-      start: 0.4669,
-      enter: { start: 0, duration: 0.0581, ease: "power1.in" },
-      reveal: { start: "enter", duration: 0.0469, ease: "power1.in" },
+      start: "secondScene.leave:end",
+      enter: { start: 0, duration: 0.065, ease: "power1.in" },
+      reveal: { start: "enter", duration: 0.05, ease: "power1.in" },
     },
     // 05 — Bottom gradient → ring → rotation → upward merge.
     gradientDots: {
-      start: 0.0777,
-      form: { start: 0, duration: 0.2331, ease: "power1.in" },
-      spin: { start: "form:end", duration: 0.0623, ease: "none", angle: Math.PI / 2 },
-      shrink: { start: "spin", duration: 0.0308, ease: "power1.in", scale: 0.82 },
-      rise: { start: "spin:end", duration: 0.0777, ease: "power1.in", y: -620 },
-      merge: { start: "rise", duration: 0.0777, ease: "power1.in" },
-      fade: { start: "merge+=0.0392", duration: 0.0777, ease: "power1.in" },
+      start: 0.02,
+      form: { start: 0, duration: 0.16, ease: "power1.in" },
+      spin: { start: "form:end", duration: 0.045, ease: "none", angle: Math.PI / 2 },
+      shrink: { start: "spin", duration: 0.025, ease: "power1.in", scale: 0.82 },
+      rise: { start: "spin:end", duration: 0.055, ease: "power1.in", y: -620 },
+      merge: { start: "rise", duration: 0.055, ease: "power1.in" },
+      fade: { start: "merge+=0.025", duration: 0.06, ease: "power1.in" },
     },
     // 06 — Centre drop appears, forms, lands, then resizes in place.
     drop: {
       start: "gradientDots.fade",
-      appear: { start: 0, duration: 0.0546, ease: "power1.in" },
-      merge: { start: 0, duration: 0.1554, ease: "power1.in" },
-      soften: { start: "merge", duration: 0.1554, ease: "power1.in", blur: 22 },
-      land: { start: "merge", duration: 0.1554, ease: "power1.in", y: 150 },
-      resize: { start: "land:end+=0.0063", duration: 0.056, ease: "power1.in", widthEm: 6.5 },
+      appear: { start: 0, duration: 0.035, ease: "power1.in" },
+      merge: { start: 0, duration: 0.1, ease: "power1.in" },
+      soften: { start: "merge", duration: 0.1, ease: "power1.in", blur: 22 },
+      land: { start: "merge", duration: 0.1, ease: "power1.in", y: 150 },
+      resize: { start: "land:end+=0.01", duration: 0.045, ease: "power1.in", widthEm: 6.5 },
     },
     // 07 — Landing ripple: expand and fade, entirely controlled by scroll.
     landingRipple: {
       start: "drop.land:end",
-      expand: { start: 0, duration: 0.12, ease: "power1.in", stagger: 0.012, scale: 1 },
-      reveal: { start: "expand", duration: 0.008, ease: "power1.in", stagger: 0.012, opacity: 0.42 },
-      fade: { start: "reveal+=0.008", duration: 0.112, ease: "power1.in", stagger: 0.012 },
+      expand: { start: 0, duration: 0.15, ease: "power1.in", stagger: 0.018, scale: 1 },
+      reveal: { start: "expand", duration: 0.008, ease: "power1.in", stagger: 0.018, opacity: 0.42 },
+      fade: { start: "reveal+=0.008", duration: 0.142, ease: "power1.in", stagger: 0.018 },
     },
     // 08 — Line draws to the landed drop.
     line: {
       start: "drop.land:end",
-      draw: { start: 0, duration: 0.1323, ease: "power1.in" },
+      draw: { start: 0, duration: 0.17, ease: "power1.in" },
     },
     // 09 — Masked colours fill the resized drop and its blur sharpens.
     dropColours: {
       start: "drop.resize:end",
-      base: { start: 0, duration: 0.056, ease: "power1.in" },
-      move: { start: "base", duration: 0.0595, ease: "power1.in", stagger: 0.0035 },
-      reveal: { start: "base", duration: 0.056, ease: "power1.in", stagger: 0.0035 },
-      sharpen: { start: "base+=0.014", duration: 0.056, ease: "power1.in", blur: 6 },
+      base: { start: 0, duration: 0.07, ease: "power1.in" },
+      move: { start: "base", duration: 0.07, ease: "power1.in", stagger: 0.005 },
+      reveal: { start: "base", duration: 0.07, ease: "power1.in", stagger: 0.005 },
+      sharpen: { start: "base+=0.01", duration: 0.07, ease: "power1.in", blur: 6 },
     },
     // 10 — Line contact → clip opens → drop and brackets settle → content.
     finish: {
       start: "line:end",
-      clip: { start: 0, duration: 0.108, ease: "power1.in" },
-      blur: { start: "clip", duration: 0.108, ease: "power1.in", from: "blur(0rem)", to: "blur(1.5rem)" },
-      starGrow: { start: "clip", duration: 0.024, ease: "power1.in", scale: 2.5 },
-      starRotate: { start: "starGrow", duration: 0.264, ease: "none", rotation: 360 },
-      starSettle: { start: "starGrow:end+=0.054", duration: 0.018, ease: "power1.in", scale: 2.15 },
-      drop: { start: "clip+=0.03", duration: 0.1164, ease: "power1.in", scale: 0.5 },
-      leftBracket: { start: "drop+=0.024", duration: 0.1164, ease: "power1.in" },
-      rightBracket: { start: "leftBracket", duration: 0.1164, ease: "power1.in" },
-      content: { start: "clip:end+=0.03", duration: 0.048, ease: "power1.in" },
+      clip: { start: 0, duration: 0.18, ease: "power1.in" },
+      blur: { start: "clip", duration: 0.18, ease: "power1.in", from: "blur(0rem)", to: "blur(1.5rem)" },
+      starGrow: { start: "clip", duration: 0.04, ease: "power1.in", scale: 2.5 },
+      starRotate: { start: "starGrow", duration: 0.43, ease: "none", rotation: 360 },
+      starSettle: { start: "starGrow:end+=0.07", duration: 0.04, ease: "power1.in", scale: 2.15 },
+      drop: { start: "clip+=0.04", duration: 0.18, ease: "power1.in", scale: 0.5 },
+      leftBracket: { start: "drop+=0.035", duration: 0.18, ease: "power1.in" },
+      rightBracket: { start: "leftBracket", duration: 0.18, ease: "power1.in" },
+      content: { start: "clip:end+=0.035", duration: 0.1, ease: "power1.in" },
     },
     // 11 — Final water rings expand and settle behind the end content.
     endRipple: {
-      start: "finish.clip+=0.081",
-      expand: { start: 0, duration: 0.114, ease: "power1.in", stagger: 0.0108, scale: (index) => 1.1 - index * 0.3 },
-      reveal: { start: "expand", duration: 0.114, ease: "power1.in", stagger: 0.0108, opacity: 0.7 },
+      start: "finish.clip+=0.12",
+      expand: { start: 0, duration: 0.2, ease: "power1.in", stagger: 0.02, scale: (index) => 1.1 - index * 0.3 },
+      reveal: { start: "expand", duration: 0.2, ease: "power1.in", stagger: 0.02, opacity: 0.7 },
       settle: {
-        start: "expand+=0.006", duration: 0.138, ease: "power1.in", stagger: 0.0108,
+        start: "expand+=0.01", duration: 0.28, ease: "power1.in", stagger: 0.02,
         blur: "2.5rem",
         // Decimal alpha avoids GSAP's percentage-alpha colour interpolation snap.
         shadow: "0 0 5rem 3rem rgba(104, 150, 230, 0.6), inset 0 0 5rem 3rem rgba(104, 150, 230, 0.45)",
@@ -189,7 +189,11 @@ function homeAnimation() {
     },
   };
 
-  const $homeStartContent = $("[home-start]").children().not("script, style");
+  // The embedded nav clips with the hero, but stays crisp during the content blur.
+  const $homeStartContent = $("[home-start]").children().not("script, style")
+    .filter((_, element) => !$(element).find("[nav-block]").length);
+  const $homeEnd = $("[layout-end]").first();
+  const restoreHomeEndLayout = rememberAttributes($homeEnd, ["style"]);
   const $homeEndContent = $("[layout-end]")
     .children()
     .not("[home-end-brackets]")
@@ -235,14 +239,21 @@ function homeAnimation() {
 
   gsap.set($homeLogos, { y: homeEntrance.logosMove.fromY });
 
-  // CARD SPHERE — retained idle rotation, framing, and pointer interaction.
+  // CARD BACKGROUND — seconds for idle/drag; framing uses firstScene.sphere above.
+  const homeCardMotion = {
+    idle: { cycleSeconds: 48, axisDegrees: 45 },
+    drag: { duration: 0.6, ease: "power2.out", degreesPerPixel: 0.25 },
+    framing: { scale: 0.78, radiusScale: 0.9, offsetYRem: 2 },
+    opacity: { back: 0.08, front: 1, ease: "power1.inOut" },
+  };
+  const cardOpacityEase = gsap.parseEase(homeCardMotion.opacity.ease);
   const $homeResting = $("[home-resting]");
   const $homeRestingDragSurface = $("[home-start]");
   const homeRestingView = { progress: 0 };
   const homeRestingCenterShift = { x: 0, y: 0 };
   const homeRestingBaseY =
-    parseFloat(getComputedStyle(document.documentElement).fontSize) * 2;
-  const homeRestingRadiusScale = 0.9;
+    parseFloat(getComputedStyle(document.documentElement).fontSize) * homeCardMotion.framing.offsetYRem;
+  const homeRestingRadiusScale = homeCardMotion.framing.radiusScale;
   const homeRestingMatrix = [1, 0, 0, 0, 1, 0, 0, 0, 1];
   const homeRestingMatrixTemp = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   const homeRestingRotationMatrix = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -273,13 +284,14 @@ function homeAnimation() {
         card,
         setX: gsap.quickSetter(card, "x", "px"),
         setY: gsap.quickSetter(card, "y", "px"),
-        setScale: gsap.quickSetter(card, "scale"),
+        // quickSetter needs explicit axes; "scale" is a multi-property alias.
+        setScaleX: gsap.quickSetter(card, "scaleX"),
+        setScaleY: gsap.quickSetter(card, "scaleY"),
         setOpacity: gsap.quickSetter(card, "opacity"),
         setZIndex: gsap.quickSetter(element, "zIndex"),
         x: bounds.left - transformX + bounds.width / 2,
         y: bounds.top - transformY + bounds.height / 2,
         depth: isFront ? 1 : isBack ? -1 : index % 2 === 0 ? 0.35 : -0.35,
-        opacity: isFront ? 1 : isBack ? 0.1 : 0.3,
       };
     }).filter(Boolean);
 
@@ -347,7 +359,7 @@ function homeAnimation() {
   function renderHomeRestingSphere() {
     const viewScale = gsap.utils.interpolate(
       1,
-      0.78,
+      homeCardMotion.framing.scale,
       homeRestingView.progress
     );
     const viewX = homeRestingCenterShift.x * homeRestingView.progress;
@@ -372,11 +384,11 @@ function homeAnimation() {
           1.16,
           1 + ((depth - item.z) / item.radius) * 0.16
         ) * viewScale;
-      const opacity = gsap.utils.clamp(
-        0.08,
-        1,
-        item.opacity + ((depth - item.z) / (item.radius * 2)) * 0.9
-      );
+      // Every card uses the same continuous depth curve: no front/middle/back states.
+      // Cards crossing at the same depth now have the same opacity.
+      const depthProgress = gsap.utils.clamp(0, 1, (depth / item.radius + 1) / 2);
+      const opacity = gsap.utils.interpolate(homeCardMotion.opacity.back,
+        homeCardMotion.opacity.front, cardOpacityEase(depthProgress));
 
       // Reuse setters: per-frame gsap.set() tweens accumulate in matchMedia.
       item.setZIndex(Math.round(depth + item.radius));
@@ -387,7 +399,8 @@ function homeAnimation() {
         -y * homeRestingRadiusScale * viewScale +
           homeRestingBaseY + viewY - item.screenY
       );
-      item.setScale(scale);
+      item.setScaleX(scale);
+      item.setScaleY(scale);
       item.setOpacity(opacity);
     });
   }
@@ -424,13 +437,13 @@ function homeAnimation() {
   }
 
   const homeRestingQuickY = gsap.quickTo(homeRestingSmooth, "y", {
-    duration: 1,
-    ease: "power2",
+    duration: homeCardMotion.drag.duration,
+    ease: homeCardMotion.drag.ease,
     onUpdate: updateHomeRestingSphere,
   });
   const homeRestingQuickX = gsap.quickTo(homeRestingSmooth, "x", {
-    duration: 1,
-    ease: "power2",
+    duration: homeCardMotion.drag.duration,
+    ease: homeCardMotion.drag.ease,
     onUpdate: updateHomeRestingSphere,
   });
 
@@ -446,6 +459,8 @@ function homeAnimation() {
   renderHomeRestingSphere();
 
   // GRADIENT AND CLIP GEOMETRY — artwork measurements, separate from timing.
+  // Align the end mark to the opening drop/line; negative values lift it slightly.
+  const homeAlignment = { endDropOffsetRem: -0.75 };
   const $gradientPieces = $("[home-gradient-piece]");
   const gradientOrbit = { angle: 0, merge: 0 };
   const homeClip = { progress: 0 };
@@ -479,6 +494,15 @@ function homeAnimation() {
       height: home.offsetHeight,
       centerY: lineRect.top + lineRect.height / 2 - homeRect.top,
     };
+    const marker = $homeEnd.find("[home-end-brackets]")[0];
+    if (marker && $homeEnd.length) {
+      const endRect = $homeEnd[0].getBoundingClientRect(), markerRect = marker.getBoundingClientRect();
+      const currentPadding = parseFloat(getComputedStyle($homeEnd[0]).paddingTop) || 0;
+      const em = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const desiredCenter = homeClipBounds.centerY + homeAlignment.endDropOffsetRem * em;
+      const shift = desiredCenter - (markerRect.top + markerRect.height / 2 - endRect.top);
+      $homeEnd.css("padding-top", Math.max(0, currentPadding + shift));
+    }
   }
   measureHomeClip();
 
@@ -707,8 +731,8 @@ function homeAnimation() {
   function rotateHomeRestingSphere(time, deltaTime) {
     if (!homeRestingIsActive || document.hidden || homeRestingIsDragging) return;
 
-    const rotation = (Math.min(deltaTime, 32) / 1000) * (360 / 14);
-    const direction = (45 * Math.PI) / 180;
+    const rotation = (Math.min(deltaTime, 32) / 1000) * (360 / homeCardMotion.idle.cycleSeconds);
+    const direction = (homeCardMotion.idle.axisDegrees * Math.PI) / 180;
 
     homeRestingInputX += Math.cos(direction) * rotation;
     homeRestingInputY += Math.sin(direction) * rotation;
@@ -780,8 +804,8 @@ function homeAnimation() {
 
     homeRestingLastPointerX = event.clientX;
     homeRestingLastPointerY = event.clientY;
-    homeRestingInputX += deltaX / 4;
-    homeRestingInputY += deltaY / 4;
+    homeRestingInputX += deltaX * homeCardMotion.drag.degreesPerPixel;
+    homeRestingInputY += deltaY * homeCardMotion.drag.degreesPerPixel;
     homeRestingQuickY(homeRestingInputX);
     homeRestingQuickX(homeRestingInputY);
     event.preventDefault();
@@ -1061,6 +1085,7 @@ function homeAnimation() {
     homeLoadTimeline.kill();
     homeScrubClock.kill();
     homeTimeline.kill();
+    restoreHomeEndLayout();
     gsap.ticker.remove(rotateHomeRestingSphere);
     homeRestingQuickX.tween.kill();
     homeRestingQuickY.tween.kill();
@@ -1163,16 +1188,18 @@ function flexGrowAnimation() {
         const $content = $item.children("[flex-grow-item-content]").first();
         const $title = $content.children("[text-grow-item-title]").first();
         const $copy = $content.find("[flex-grow-item-copy]");
-        return { $item, $image, $content, $title, $copy };
+        const $art = $image.children("[img-abs]");
+        return { $item, $image, $art, $content, $title, $copy };
       })
       .filter(Boolean);
     if (!items.length) return;
 
-    const $growTargets = $(items.flatMap(({ $item, $image }) => [$item[0], $image[0]]));
+    const $growTargets = $(items.map(({ $item }) => $item[0]));
+    const $imageTargets = $(items.map(({ $image }) => $image[0]));
     const $copyTargets = $(items.flatMap(({ $copy }) => $copy.toArray()));
     const $contentTargets = $(items.flatMap(({ $content }) => $content.toArray()));
     const originalStates = [];
-    const growStyles = rememberStyles($growTargets, ["flex-grow"]);
+    const growStyles = rememberStyles($growTargets.add($imageTargets), ["flex-grow"]);
     const mobileStyles = [
       ...rememberStyles($contentTargets, ["height"]),
       ...rememberStyles($(items.map(({ $image }) => $image[0])), ["height", "margin-top"]),
@@ -1204,6 +1231,19 @@ function flexGrowAnimation() {
           $element,
           active: $element.hasClass("active"),
           attributes: Object.fromEntries(attributes.map((name) => [name, $element.attr(name)])),
+        });
+      });
+    }
+
+    function sizeImageArtwork() {
+      if (!items.some(({ $art }) => $art.length)) return;
+      // One item's worth of free space is shared by the row. Keep every photo at
+      // that full width; only its parent reveals it as the item expands.
+      const openWidth = mobile ? 0 : items.reduce((sum, { $image }) => sum + ($image.width() || 0), 0);
+      items.forEach(({ $image, $art }) => {
+        $art.css({
+          "--gallery-image-width": mobile ? "100%" : `${openWidth}px`,
+          "--gallery-image-height": mobile ? `${$image.width() / galleryMotion.mobile.imageAspectRatio}px` : "100%",
         });
       });
     }
@@ -1259,7 +1299,7 @@ function flexGrowAnimation() {
             overwrite: "auto",
           };
           if ($content.length) timeline.to($content, { height: target.content, ...timing }, galleryMotion.mobile.start);
-          timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, 0);
+          timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, galleryMotion.mobile.start);
         });
       } else if (immediate) {
         gsap.set($growTargets, { flexGrow: grow });
@@ -1290,7 +1330,7 @@ function flexGrowAnimation() {
 
     items.forEach((item) => {
       rememberElements(item.$item, ["style", "role", "tabindex", "aria-expanded"]);
-      rememberElements(item.$image.add(item.$content).add(item.$copy), ["style"]);
+      rememberElements(item.$image.add(item.$art).add(item.$content).add(item.$copy), ["style"]);
       item.$item.attr({ role: "button", tabindex: "0" });
       item.$item
         .off(".flexGrowAnimation")
@@ -1304,7 +1344,9 @@ function flexGrowAnimation() {
         });
     });
 
+    if (!mobile) gsap.set($imageTargets, { flexGrow: 1 });
     activateItem(initialItem, true);
+    sizeImageArtwork();
 
     refreshers.push(() => {
       const nextMobile = window.matchMedia(galleryMotion.mobile.media).matches;
@@ -1313,7 +1355,9 @@ function flexGrowAnimation() {
         restoreStyles(mobile ? mobileStyles : growStyles);
         mobile = nextMobile;
       }
+      if (!mobile) gsap.set($imageTargets, { flexGrow: 1 });
       activateItem(activeItem, true);
+      sizeImageArtwork();
     });
 
     cleanups.push(() => {
@@ -1495,16 +1539,24 @@ function rippleAnimation(
 }
 
 function navTheme() {
-  const $nav = $("[nav-block]").first();
+  const $allNavs = $("[nav-block]");
+  const $heroNavs = $allNavs.filter((_, element) => $(element).closest("[home-start]").length);
+  const $nav = $allNavs.not($heroNavs);
   const $sections = $("[nav-light], [nav-dark]");
-  if (!$nav.length || !$sections.length || !window.gsap || !window.ScrollTrigger) return null;
+  if (!$allNavs.length || !window.gsap || !window.ScrollTrigger) return null;
 
   gsap.registerPlugin(ScrollTrigger);
 
   // NAV CONTROLS — switch themes when a marked section reaches this position.
-  const navControls = { start: "top top" };
+  // Names describe TEXT colour: light text on the dark hero/footer; dark on light.
+  // The hero's own nav is clipped with it, revealing the page nav underneath.
+  const navControls = { start: "top top", heroMode: "nav-light", pageMode: "nav-dark" };
+  const restoreNavs = rememberAttributes($allNavs, ["class"]);
+  $heroNavs.toggleClass("nav-light", navControls.heroMode === "nav-light")
+    .toggleClass("nav-dark", navControls.heroMode === "nav-dark");
   let currentMode;
-  const initialMode = $nav.hasClass("nav-light") ? "nav-light" : "nav-dark";
+  const initialMode = $heroNavs.length ? navControls.pageMode :
+    ($nav.first().hasClass("nav-light") ? "nav-light" : "nav-dark");
   const sections = $sections.toArray().map((element) => ({
     element,
     mode: $(element).is("[nav-light]") ? "nav-light" : "nav-dark",
@@ -1547,7 +1599,7 @@ function navTheme() {
   return () => {
     triggers.forEach((trigger) => trigger.kill());
     ScrollTrigger.removeEventListener("refresh", syncNavMode);
-    setNavMode(initialMode);
+    restoreNavs();
   };
 }
 

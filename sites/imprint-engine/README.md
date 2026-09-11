@@ -43,6 +43,10 @@ forward/reverse/jump consistency, fast scrolling, sticky boundaries, responsive
 sizes, breakpoint cleanup, and changes to timing controls. See
 [home-animation.md](home-animation.md) for setup and report options.
 
+Run `node sites/imprint-engine/tests/home-polish.browser.mjs` for continuous
+card motion/opacity, nav clipping and footer themes, end-drop alignment, and
+gallery image sizing through desktop/mobile expansion and resize.
+
 Run `node sites/imprint-engine/tests/site-interactions.browser.mjs` for keyboard
 and rapid-selection checks, repeated initialization, footer visibility/idle
 work, reduced motion, breakpoint changes, and complete cleanup.

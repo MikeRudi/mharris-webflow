@@ -7,6 +7,25 @@
   opacity: 0;
 }
 
+/* Let the hero (21) sit above the page nav (20), with layout-end (1) below it.
+   A stacking context on layout-start would trap both hero layers below the nav. */
+[layout-start]:has([home-start] [nav-block]) {
+  z-index: auto;
+}
+
+/* Follow the sticky hero and its clip, including when the section leaves view. */
+[home-start] > :has(> [nav-block]) {
+  position: absolute;
+}
+
+/* The gallery clips a full-size photo instead of resizing it on every frame. */
+[flex-grow-item-img] > [img-abs] {
+  width: var(--gallery-image-width, 100%);
+  height: var(--gallery-image-height, 100%);
+  max-width: none;
+  right: auto;
+}
+
 @media screen and (min-width: 768px) {
   [flex-grow-item-img] > [img-abs] {
     object-position: right center;

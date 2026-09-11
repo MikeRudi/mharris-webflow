@@ -51,33 +51,46 @@ finish: {
   start: "line:end",
   clip: { start: 0, duration: 0.2, ease: "power1.in" },
   // Other finish steps remain here.
-  content: { start: "clip:end+=0.03", duration: 0.048, ease: "power1.in" },
+  content: { start: "clip:end+=0.035", duration: 0.1, ease: "power1.in" },
 }
 ```
 
 ## Starting choreography
 
-The original scene/drop sequence occupies the first 70%, and the former autoplay
-ending now occupies the remaining 30%. These are starting timings for polishing.
-Most movements use `power1.in`. The gradient orbit and star rotation use `none`
-for constant angular speed; both eases can be changed in their controls.
+The opening scene/drop sequence reaches the clip at 52%, leaving 48% for the
+finish. Copy transitions overlap the slow background card framing rather than
+waiting for it to finish. Most movements use `power1.in`. Card framing, the
+gradient orbit and star rotation use `none` for a constant rate. Card fades use
+`power1.inOut` to ease smoothly into and out of transparency.
 
 | Group | Initial start | Main behavior |
 | --- | --- | --- |
-| `firstScene` | 0% | Exit text and centre the card sphere |
-| `cards`, `logos` | 21%; after first exit | Hide cards and logos |
-| `secondScene` | 28% | Enter, hold, then leave |
-| `thirdScene` | 46.69% | Enter and remain until the clip |
-| `gradientDots` | 7.77% | Form the ring, rotate, rise, merge |
+| `firstScene` | 0% | Exit text; card sphere keeps drifting until 30% |
+| `cards`, `logos` | 24%; after first exit | Cards fade through 33%; logos leave with the next scene |
+| `secondScene` | After first text exit, currently 11% | Enter, hold, then leave |
+| `thirdScene` | After second exit, currently 28.5% | Enter and remain until the clip |
+| `gradientDots` | 2% | Form the ring, rotate, rise, merge |
 | `drop` | When dots start fading | Form, land, then resize the drop |
-| `landingRipple`, `line` | After landing, initially 56.77% | Water ripple and line drawing |
-| `dropColours` | After resizing, initially 63% | Fill the drop and sharpen it |
-| `finish` | After the line, initially 70% | Clip, star, brackets, drop, content |
-| `endRipple` | After clip start + 8.1% | Expand and settle the final rings |
+| `landingRipple`, `line` | After landing, currently 35% | Water ripple and line drawing |
+| `dropColours` | After resizing, currently 40.5% | Fill the drop and sharpen it |
+| `finish` | After the line, currently 52% | Clip through 70%; drop, brackets and content settle after it |
+| `endRipple` | Clip start + 12%, currently 64% | Expand and settle through 97% |
 
 The page entrance uses the separate `homeEntrance` controls in seconds. Idle
-card rotation and pointer dragging retain their existing behavior. All home
-scroll sequences, including both ripples, follow scroll in both directions.
+card rotation and pointer dragging use `homeCardMotion`: the idle rate is 360
+degrees per 48 seconds, with a 45-degree axis. `opacity.back/front/ease` defines
+one continuous depth curve for every card, replacing fixed opacity tiers.
+`framing` controls the sphere's size and vertical offset. All home scroll
+sequences, including both ripples, follow scroll in both directions.
+
+`homeAlignment.endDropOffsetRem` positions the end mark relative to the gradient
+line; `-0.75` raises its centre slightly above the line. The surrounding content
+moves with it. Alignment is measured on refresh, without moving either sticky
+wrapper or changing the section height.
+
+Home Staged has a white-text nav inside the dark hero and a dark-text page nav.
+The hero clip reveals the page nav naturally. `navTheme()` keeps the hero's theme
+fixed and applies section themes (including the footer) to the page nav.
 
 ## Preview and regression checks
 
@@ -102,10 +115,13 @@ The browser suite requires Playwright and Chrome:
 
 ```sh
 node sites/imprint-engine/tests/home-scroll.browser.mjs
+node sites/imprint-engine/tests/home-polish.browser.mjs
 ```
 
 Use `PLAYWRIGHT_MODULE` for a separately installed Playwright module,
 `HOME_TEST_CHROME` for a browser executable, and `HOME_TEST_OUTPUT` for reports
 and screenshots. The suite checks reverse/jump consistency, fixed percentage
 timing, pauses, fast wheel scrolling, sticky boundaries, responsive drop sizing,
-breakpoint cleanup, and edits to chained timings.
+breakpoint cleanup, and edits to chained timings. The polish suite additionally
+checks card motion/opacity, actual nav hit-testing during the clip, end alignment,
+and full-size gallery artwork during desktop and mobile expansion.
