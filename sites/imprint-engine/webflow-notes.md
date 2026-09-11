@@ -1,15 +1,14 @@
 # Webflow Notes
 
 - Site name: Imprint Engine
-- Webflow link:
-- Live link:
+- Webflow site ID: `6a59f919cc325da48eff4d6d`
+- Staging page: https://imprint-engine-v1.webflow.io/home-staged
 
 ## Custom Code
 
-- Head:
-- Before `</body>`:
-- Page-level code:
-- Embeds:
+- Site head/footer: see `webflow-custom-code.txt`.
+- Home Staged head: desktop entrance visibility/transform rules.
+- Runtime files: `src/script.js` and `src/styles.css`.
 
 ## Classes and Attributes
 
@@ -235,15 +234,19 @@ need a Webflow publish; the animation comes from the existing GitHub JS loader.
 
 ## Libraries
 
-- GSAP:
-- ScrollTrigger:
-- Lenis:
-- Other:
+- GSAP 3.15.0 with ScrollTrigger and Flip.
+- Lenis 1.3.25.
+- SplitType 0.3.4.
+- jQuery supplied by Webflow.
 
 ## Known Issues
 
-- None yet.
-# Performance and accessibility cleanup — 2026-09-11
+- The shared social links still point to `#` until their final URLs are supplied.
+- English is supplied in head code; native locale configuration would also cover
+  visitors with JavaScript disabled.
+- Mobile loading remains below 90 performance; see `performance-review.md`.
+
+## Performance and accessibility cleanup — 2026-09-11
 
 - The five approved light-background buttons on Home Staged now carry
   `readable-brand-text`; its purple text colour lives in `src/styles.css`.
