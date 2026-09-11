@@ -18,7 +18,7 @@ if (gsap?.version !== "3.15.0") {
   new Function("module", "exports", "window", await response.text())(module, module.exports, {});
   ({ gsap } = module.exports);
 }
-const source = await readFile(new URL("../src/script.js", import.meta.url), "utf8");
+const source = (await readFile(new URL("../src/script.js", import.meta.url), "utf8")).replace(/\r\n/g, "\n");
 const start = source.indexOf("function flexGrowAnimation()");
 const end = source.indexOf("\nfunction dropTextAnimation()", start);
 assert.ok(start >= 0 && end > start);
@@ -79,16 +79,19 @@ function outerHeight(element, includeMargin = false) {
   if (!element) return undefined;
   const inline = element.style.getPropertyValue("height");
   if (inline && inline !== "auto") return parseFloat(inline);
-  if (element.classes.has("flex-grow-item-img")) return element.classes.has("active") ? element.width / 2 : 0;
-  if (element.classes.has("flex-grow-item-content")) {
-    return Math.max(0, ...element.children.filter((child) => !child.classes.has("flex-grow-item-copy") || child.classes.has("active")).map((child) => outerHeight(child, true)));
+  if (element.attributes.has("flex-grow-item-img")) return element.classes.has("active") ? element.width / 2 : 0;
+  if (element.attributes.has("flex-grow-item-content")) {
+    return Math.max(0, ...element.children.filter((child) => !child.attributes.has("flex-grow-item-copy") || child.classes.has("active")).map((child) => outerHeight(child, true)));
   }
   return element.naturalHeight + (includeMargin ? element.verticalMargins || 0 : 0);
 }
 
 function wrap(elements) {
   const values = [...elements];
-  const matches = (element, selector) => element.classes.has(selector.slice(1));
+  const matches = (element, selector) => {
+    assert.match(selector, /^\[[a-z-]+\]$/, "Element hooks must use attributes");
+    return element.attributes.has(selector.slice(1, -1));
+  };
   Object.defineProperties(values, {
     toArray: { value: () => values.slice() },
     first: { value: () => wrap(values.slice(0, 1)) },
@@ -149,12 +152,13 @@ function wrap(elements) {
 function fixture({ blockCount = 2, itemCount = 4, activeItems = [], activeImages = [0], images = true, copies = true, contents = true, hasGsap = true, viewportWidth = 1280, loadingFonts = false } = {}) {
   const blocks = Array.from({ length: blockCount }, () => {
     const items = Array.from({ length: itemCount }, (_, index) => {
-      const copy = node("flex-grow-item-copy", { style: "color: purple;" });
+      const copy = node("renamed-copy", { "flex-grow-item-copy": "", style: "color: purple;" });
       copy.naturalHeight = 100;
-      const title = node("text-grow-item-title");
-      const content = node("flex-grow-item-content", { style: "color: blue;" }, copies ? [title, copy] : [title]);
-      const image = node(`flex-grow-item-img${activeImages.includes(index) ? " active" : ""}`);
-      const item = node(`flex-grow-item${activeItems.includes(index) ? " active" : ""}`, {
+      const title = node("renamed-title", { "text-grow-item-title": "" });
+      const content = node("renamed-content", { "flex-grow-item-content": "", style: "color: blue;" }, copies ? [title, copy] : [title]);
+      const image = node(`renamed-image${activeImages.includes(index) ? " active" : ""}`, { "flex-grow-item-img": "" });
+      const item = node(`renamed-item${activeItems.includes(index) ? " active" : ""}`, {
+        "flex-grow-item": "",
         ...(index === 0 ? { role: "group", tabindex: "-1", "aria-expanded": "mixed", style: "color: red;" } : {}),
       }, [...(contents ? [content] : []), ...(images ? [image] : [])]);
       item.image = image;
@@ -163,11 +167,11 @@ function fixture({ blockCount = 2, itemCount = 4, activeItems = [], activeImages
       item.title = title;
       return item;
     });
-    return node("flex-grow-block", {}, items);
+    return node("renamed-block", { "flex-grow-block": "" }, items);
   });
   const $ = (target) => {
     if (typeof target === "string") {
-      assert.equal(target, ".flex-grow-block");
+      assert.equal(target, "[flex-grow-block]");
       return wrap(blocks);
     }
     return wrap(Array.isArray(target) ? target : target ? [target] : []);

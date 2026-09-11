@@ -1,4 +1,4 @@
-.git-test {
+[git-test] {
   background-color: green;
   transition: transform 0.4s ease;
 }
@@ -8,38 +8,38 @@
 }
 
 @media screen and (min-width: 768px) {
-  .flex-grow-item-img > .img-abs {
+  [flex-grow-item-img] > [img-abs] {
     object-position: right center;
   }
 }
 
-.git-test.is-moved-down {
+[git-test].is-moved-down {
   transform: translateY(50%);
 }
 
 @media screen and (max-width: 991px) {
-  .git-test {
+  [git-test] {
     background-color: red;
   }
 
-  .git-test.is-moved-right {
+  [git-test].is-moved-right {
     transform: translateX(50%);
   }
 }
 
-.footer-svg {
+[footer-svg] {
   position: relative;
   isolation: isolate;
   overflow: visible;
 }
 
-.footer-svg > svg.footer-svg-engine {
+[footer-svg] > svg[footer-svg-engine] {
   position: relative;
   z-index: 1;
   overflow: visible;
 }
 
-.footer-svg-pixel-layer {
+[footer-svg-pixel-layer] {
   pointer-events: none;
   opacity: 0;
   will-change: opacity;
