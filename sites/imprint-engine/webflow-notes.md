@@ -147,6 +147,15 @@ brackets are uniformly scaled to their existing height and centres; the supplied
 compound raindrop path is scaled to its existing painted height and centre.
 The brackets use `fill: #5F249F`, and the drop uses `fill: #111111` with no stroke.
 
+## Support accordion active labels
+
+The Support / Infrastructure / Technology label elements carry `[accord-1-title]`.
+`accordionOne()` mirrors the selected row's `.active` class onto its label and
+restores the authored classes on cleanup. Native `.accord-1-title.active` owns
+the original purple-to-blue text gradient (`#674dc7` to `#55a6d1`), text clipping
+and transparent color. Inactive labels retain native `#6f6c65`. The first label
+is authored active in Webflow. Keep the hook when duplicating these labels.
+
 ## Flex Grow Gallery
 
 Home Staged's process gallery uses the existing `.flex-grow-block` structure:

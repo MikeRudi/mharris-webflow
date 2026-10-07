@@ -57,6 +57,25 @@ try {
     assert.equal(await page.locator('[accord-item][aria-expanded="true"]').getAttribute("accord-item"), await page.locator("[accord-item]").nth(2).getAttribute("accord-item"));
     assert.equal(await page.locator('[accord-reveal]:not([inert])').count(), 1);
   });
+  await check("the selected accordion label owns the native text gradient", async () => {
+    for (const index of [0, 1, 2]) {
+      await activate("[accord-item]", index, "Enter");
+      const labels = await page.locator("[accord-item] [accord-1-title]").evaluateAll(es => es.map(e => {
+        const style = getComputedStyle(e);
+        return { active: e.classList.contains("active"), background: style.backgroundImage,
+          clip: style.backgroundClip, color: style.color };
+      }));
+      assert.equal(labels.length, 3);
+      labels.forEach((label, i) => {
+        assert.equal(label.active, i === index);
+        assert.equal(label.background.includes("linear-gradient"), i === index);
+        if (i === index) {
+          assert.equal(label.clip, "text");
+          assert.equal(label.color, "rgba(0, 0, 0, 0)");
+        } else assert.equal(label.color, "rgb(111, 108, 101)");
+      });
+    }
+  });
   await check("catalogue supports Space and exposes only its chosen panel", async () => {
     await activate("[cat-select]", 2, "Space");
     const key = await page.locator("[cat-select]").nth(2).getAttribute("cat-select");

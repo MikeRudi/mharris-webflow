@@ -1981,6 +1981,8 @@ function accordionOne() {
     const $items = $wrap.find("[accord-item]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
     const $panels = $wrap.find("[accord-reveal]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
     if (!$items.length) return;
+    const $labels = $items.find("[accord-1-title]");
+    const restoreLabels = rememberAttributes($labels, ["class"]);
     const $marker = $items.find("[active-marker]").first();
     const marker = $marker[0], markerParent = marker && marker.parentNode, markerNext = marker && marker.nextSibling;
     const restoreItems = rememberAttributes($items, ["class", "aria-expanded", "aria-controls"]);
@@ -2006,6 +2008,9 @@ function accordionOne() {
       }
       $items.removeClass("active").attr("aria-expanded", "false");
       $item.addClass("active").attr("aria-expanded", "true");
+      // Webflow owns the active label's gradient; mirror the selected row state.
+      $labels.removeClass("active");
+      $item.find("[accord-1-title]").addClass("active");
       if (marker) $item.append(marker);
       if (markerState) Flip.from(markerState, {
         duration: accordionMotion.marker.duration, delay: accordionMotion.marker.start,
@@ -2029,7 +2034,7 @@ function accordionOne() {
       unbind(); gsap.killTweensOf($panels);
       if (window.Flip && marker) Flip.killFlipsOf(marker);
       if (markerParent) markerParent.insertBefore(marker, markerNext && markerNext.parentNode === markerParent ? markerNext : null);
-      restoreMarker(); restoreItems(); restorePanels();
+      restoreMarker(); restoreItems(); restorePanels(); restoreLabels();
     });
   });
   return () => cleanups.forEach((cleanup) => cleanup());
