@@ -2273,7 +2273,6 @@ function footerEnginePixels() {
   };
 }
 
-// SMALL DOM HELPERS — used only by this site's interactive controls.
 function rememberAttributes($elements, names) {
   const originals = $elements.toArray().map((element) => ({ element,
     values: names.map((name) => [name, element.getAttribute(name)]) }));
