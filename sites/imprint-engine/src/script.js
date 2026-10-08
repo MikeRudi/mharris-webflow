@@ -1165,8 +1165,9 @@ function teamProfilesAnimation() {
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
     float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2 },
-    drag: { velocityMultiplier: 1, maxSpeed: 1100, sampleMs: 90, releasePauseMs: 100 },
+    drag: { velocityMultiplier: 0.25, maxSpeed: 275, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
+    links: { elasticity: 0.01, settleSeconds: 0.18 }, // At most 1% stretch/compression.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
 
@@ -1186,17 +1187,20 @@ function teamProfilesAnimation() {
     const header = this, $header = $(header), $nodes = $header.find("[team-profile-node]");
     if (!$nodes.length) return;
     const namespace = `.teamProfiles${sectionIndex}`;
-    const $lines = $header.find("[team-profile-lines] line");
+    const $sourceSvgs = $header.find("[team-profile-lines]");
+    const $lines = $sourceSvgs.find("line");
     const restoreNodes = rememberAttributes($nodes, ["style"]);
-    const restoreLines = rememberAttributes($lines, ["x1", "y1", "x2", "y2"]);
+    const restoreSvgs = rememberAttributes($sourceSvgs, ["style"]);
     const nodes = $nodes.toArray().map((element, index) => ({
       element, group: $(element).closest("[team-profile-group]")[0],
       phase: index * 2.39996, speed: 1 + (index % 5) * 0.07,
-      baseX: 0, baseY: 0, x: 0, y: 0, anchorX: 0, anchorY: 0,
-      vx: 0, vy: 0, tx: 0, ty: 0, blend: 0, radiusX: 0, radiusY: 0,
+      baseX: 0, baseY: 0, x: 0, y: 0, vx: 0, vy: 0,
+      tx: 0, ty: 0, blend: 0, floatX: 0, floatY: 0, neighbors: [],
+      minX: 0, maxX: 0, minY: 0, maxY: 0,
     }));
     const byElement = new Map(nodes.map((node) => [node.element, node]));
-    const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement }));
+    const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
+    let layer = null;
     let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0;
     let visible = !window.IntersectionObserver, active = false, destroyed = false;
     let geometryDirty = true, paintDirty = true, drag = null;
@@ -1204,12 +1208,6 @@ function teamProfilesAnimation() {
 
     // GEOMETRY — measure on entry/resize, never all circles inside the frame loop.
     const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-    function limits(node, axis) {
-      const size = axis === "x" ? width : height;
-      const radius = axis === "x" ? node.radiusX : node.radiusY;
-      const min = Math.min(size / 2, radius + teamMotion.walls.inset);
-      return [min, Math.max(min, size - radius - teamMotion.walls.inset)];
-    }
     function measure() {
       const rect = header.getBoundingClientRect();
       if (!rect.width || !rect.height || !header.offsetWidth || !header.offsetHeight) return false;
@@ -1218,17 +1216,19 @@ function teamProfilesAnimation() {
       scaleX = rect.width / width; scaleY = rect.height / height;
       nodes.forEach((node) => {
         const bounds = node.element.getBoundingClientRect();
-        const offsetX = oldWidth ? (node.anchorX - node.baseX) * width / oldWidth : 0;
-        const offsetY = oldHeight ? (node.anchorY - node.baseY) * height / oldHeight : 0;
+        const offsetX = oldWidth ? (node.x - node.baseX) * width / oldWidth : 0;
+        const offsetY = oldHeight ? (node.y - node.baseY) * height / oldHeight : 0;
         node.baseX = (bounds.left + bounds.width / 2 - rect.left) / scaleX - node.tx;
         node.baseY = (bounds.top + bounds.height / 2 - rect.top) / scaleY - node.ty;
-        node.radiusX = bounds.width / scaleX / 2; node.radiusY = bounds.height / scaleY / 2;
-        node.anchorX = node.baseX + offsetX; node.anchorY = node.baseY + offsetY;
-        node.x = clamp(node.anchorX, ...limits(node, "x"));
-        node.y = clamp(node.anchorY, ...limits(node, "y"));
+        node.minX = Math.min(width / 2, bounds.width / scaleX / 2 + teamMotion.walls.inset);
+        node.minY = Math.min(height / 2, bounds.height / scaleY / 2 + teamMotion.walls.inset);
+        node.maxX = Math.max(node.minX, width - node.minX);
+        node.maxY = Math.max(node.minY, height - node.minY);
+        node.x = node.baseX + offsetX; node.y = node.baseY + offsetY;
       });
       const matrices = new Map();
       edges.forEach((edge) => {
+        if (edge.from) return;
         if (!matrices.has(edge.svg)) {
           const matrix = edge.svg.getScreenCTM();
           if (matrix && matrix.a * matrix.d !== matrix.b * matrix.c) {
@@ -1242,7 +1242,7 @@ function teamProfilesAnimation() {
           }
         }
         edge.matrix = matrices.get(edge.svg);
-        if (!edge.matrix || edge.from) return;
+        if (!edge.matrix) return;
         const group = $(edge.svg).closest("[team-profile-group]")[0];
         const candidates = nodes.filter((node) => node.group === group);
         const nearest = (end) => {
@@ -1258,12 +1258,43 @@ function teamProfilesAnimation() {
         };
         // Bind the authored endpoints once. Never rematch circles during a drag.
         edge.from = nearest(1); edge.to = nearest(2);
+        if (edge.from && edge.to && edge.from !== edge.to) {
+          edge.from.neighbors.push(edge.to); edge.to.neighbors.push(edge.from);
+        }
       });
+      edges.forEach((edge) => {
+        if (!edge.from || !edge.to || edge.from === edge.to) return;
+        // Responsive layout may change the authored length; dragging never does.
+        edge.length = Math.hypot(edge.to.baseX - edge.from.baseX, edge.to.baseY - edge.from.baseY);
+        edge.targetLength = edge.length * (1 + edge.stretch);
+      });
+      if (!layer && edges.some((edge) => edge.length)) buildLineLayer();
+      if (layer) layer.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      solveLinks();
       geometryDirty = false;
       return true;
     }
     function svgPoint(matrix, x, y) {
       return { x: matrix.a * x + matrix.c * y + matrix.e, y: matrix.b * x + matrix.d * y + matrix.f };
+    }
+    // One header-sized SVG avoids the nested group/SVG clipping rectangles.
+    // Copy the authored lines (and their colours), leaving Designer markup intact.
+    function buildLineLayer() {
+      layer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      layer.setAttribute("class", "team-profile-lines");
+      layer.setAttribute("team-profile-connector-layer", "");
+      layer.setAttribute("aria-hidden", "true");
+      layer.setAttribute("focusable", "false");
+      layer.setAttribute("preserveAspectRatio", "none");
+      layer.style.cssText = "position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none";
+      edges.forEach((edge) => {
+        if (!edge.length) return;
+        edge.draw = edge.element.cloneNode(false);
+        edge.draw.removeAttribute("id");
+        layer.appendChild(edge.draw);
+      });
+      header.prepend(layer);
+      $sourceSvgs.css("display", "none");
     }
     function paint() {
       nodes.forEach((node) => {
@@ -1271,47 +1302,98 @@ function teamProfilesAnimation() {
         node.element.style.translate = `${node.tx}px ${node.ty}px`;
       });
       edges.forEach((edge) => {
-        if (!edge.matrix || !edge.from || !edge.to) return;
-        [edge.from, edge.to].forEach((node, index) => {
-          const point = svgPoint(edge.matrix, node.x, node.y);
-          edge.element.setAttribute(`x${index + 1}`, point.x.toFixed(3));
-          edge.element.setAttribute(`y${index + 1}`, point.y.toFixed(3));
-        });
+        if (!edge.draw) return;
+        edge.draw.setAttribute("x1", edge.from.x.toFixed(3));
+        edge.draw.setAttribute("y1", edge.from.y.toFixed(3));
+        edge.draw.setAttribute("x2", edge.to.x.toFixed(3));
+        edge.draw.setAttribute("y2", edge.to.y.toFixed(3));
       });
       paintDirty = false;
     }
 
-    // FLOAT + THROW — one clock, exponential drag, and damped wall rebounds.
+    // CONNECTED JOINTS — project length constraints, allowing free joint rotation.
+    // The held circle is pinned; its neighbors share the required correction.
+    function solveLinks() {
+      for (let pass = 0; pass < 160; pass++) {
+        if (drag) { drag.node.x = drag.x; drag.node.y = drag.y; }
+        edges.forEach((edge) => {
+          if (!edge.length) return;
+          const a = edge.from, b = edge.to;
+          const weightA = drag?.node === a ? 0 : 1, weightB = drag?.node === b ? 0 : 1;
+          let dx = b.x - a.x, dy = b.y - a.y, distance = Math.hypot(dx, dy);
+          if (distance < 0.0001) {
+            dx = b.baseX - a.baseX; dy = b.baseY - a.baseY; distance = edge.length;
+            dx /= distance; dy /= distance; distance = 0;
+          } else { dx /= distance; dy /= distance; }
+          const correction = (distance - edge.targetLength) / (weightA + weightB);
+          a.x += dx * correction * weightA; a.y += dy * correction * weightA;
+          b.x -= dx * correction * weightB; b.y -= dy * correction * weightB;
+        });
+        nodes.forEach((node) => {
+          node.x = clamp(node.x, node.minX, node.maxX);
+          node.y = clamp(node.y, node.minY, node.maxY);
+        });
+        const settled = edges.every((edge) => !edge.length ||
+          Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < 0.015);
+        if (settled) break;
+      }
+    }
+    function connectedTo(node) {
+      const members = new Set([node]);
+      members.forEach((item) => item.neighbors.forEach((neighbor) => members.add(neighbor)));
+      return members;
+    }
+
+    // FLOAT + THROW — small physics steps keep chains stable even on slow frames.
+    function step(dt) {
+      const moving = !reducedMotion.matches;
+      if (moving) clock += dt;
+      const decay = Math.exp(-teamMotion.throw.friction * dt);
+      const travel = teamMotion.throw.friction > 0 ? (1 - decay) / teamMotion.throw.friction : dt;
+      nodes.forEach((node) => {
+        if (!moving || drag?.members.has(node)) return;
+        node.x += node.vx * travel; node.y += node.vy * travel;
+        node.vx *= decay; node.vy *= decay;
+        if (Math.hypot(node.vx, node.vy) < teamMotion.throw.stopSpeed) node.vx = node.vy = 0;
+        node.blend = Math.min(1, node.blend + dt / teamMotion.float.resumeSeconds);
+        const blend = node.blend * node.blend * (3 - 2 * node.blend);
+        const phase = clock * Math.PI * 2 / teamMotion.float.cycleSeconds * node.speed + node.phase;
+        const floatX = Math.sin(phase) * teamMotion.float.x * blend;
+        const floatY = Math.cos(phase * 0.83) * teamMotion.float.y * blend;
+        node.x += floatX - node.floatX; node.y += floatY - node.floatY;
+        node.floatX = floatX; node.floatY = floatY;
+      });
+      if (drag) { drag.node.x = drag.x; drag.node.y = drag.y; }
+      edges.forEach((edge) => {
+        if (!edge.length) return;
+        if (drag?.members.has(edge.from)) {
+          const extension = Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) / edge.length - 1;
+          edge.stretch = moving ? clamp(extension, -teamMotion.links.elasticity, teamMotion.links.elasticity) : 0;
+        } else edge.stretch *= moving ? Math.exp(-dt / teamMotion.links.settleSeconds) : 0;
+        edge.targetLength = edge.length * (1 + edge.stretch);
+      });
+      solveLinks();
+      nodes.forEach((node) => {
+        if ((node.x <= node.minX + 0.02 && node.vx < 0) || (node.x >= node.maxX - 0.02 && node.vx > 0)) node.vx *= -teamMotion.walls.bounce;
+        if ((node.y <= node.minY + 0.02 && node.vy < 0) || (node.y >= node.maxY - 0.02 && node.vy > 0)) node.vy *= -teamMotion.walls.bounce;
+      });
+      // Transfer radial velocity through the links; tangential velocity can rotate them.
+      for (let pass = 0; pass < 4; pass++) edges.forEach((edge) => {
+        if (!edge.length || drag?.members.has(edge.from)) return;
+        const a = edge.from, b = edge.to, dx = b.x - a.x, dy = b.y - a.y;
+        const squareLength = dx * dx + dy * dy;
+        if (!squareLength) return;
+        const impulse = ((b.vx - a.vx) * dx + (b.vy - a.vy) * dy) / squareLength / 2;
+        a.vx += impulse * dx; a.vy += impulse * dy;
+        b.vx -= impulse * dx; b.vy -= impulse * dy;
+      });
+    }
     function tick(time, deltaMs) {
       if (!active || destroyed) return;
       if (geometryDirty && !measure()) return;
       const dt = Math.min(deltaMs, 50) / 1000;
-      if (!reducedMotion.matches) {
-        clock += dt;
-        const decay = Math.exp(-teamMotion.throw.friction * dt);
-        const travel = teamMotion.throw.friction > 0 ? (1 - decay) / teamMotion.throw.friction : dt;
-        nodes.forEach((node) => {
-          if (drag?.node === node) return;
-          node.anchorX += node.vx * travel; node.anchorY += node.vy * travel;
-          node.vx *= decay; node.vy *= decay;
-          if (Math.hypot(node.vx, node.vy) < teamMotion.throw.stopSpeed) node.vx = node.vy = 0;
-          node.blend = Math.min(1, node.blend + dt / teamMotion.float.resumeSeconds);
-          const blend = node.blend * node.blend * (3 - 2 * node.blend);
-          const phase = clock * Math.PI * 2 / teamMotion.float.cycleSeconds * node.speed + node.phase;
-          const floatX = Math.sin(phase) * teamMotion.float.x * blend;
-          const floatY = Math.cos(phase * 0.83) * teamMotion.float.y * blend;
-          node.x = node.anchorX + floatX; node.y = node.anchorY + floatY;
-          [["x", "anchorX", "vx", floatX], ["y", "anchorY", "vy", floatY]].forEach(([axis, anchor, velocity, drift]) => {
-            const [min, max] = limits(node, axis);
-            const bounded = clamp(node[axis], min, max);
-            if (bounded === node[axis]) return;
-            if ((node[axis] < min && node[velocity] < 0) || (node[axis] > max && node[velocity] > 0)) {
-              node[velocity] *= -teamMotion.walls.bounce;
-            }
-            node[axis] = bounded; node[anchor] = bounded - drift;
-          });
-        });
-      }
+      const steps = Math.max(1, Math.ceil(dt * 120));
+      for (let index = 0; index < steps; index++) step(dt / steps);
       paint();
       syncActivity();
     }
@@ -1325,8 +1407,7 @@ function teamProfilesAnimation() {
       const now = performance.now();
       const previous = drag.samples[drag.samples.length - 1];
       if (x !== previous.x || y !== previous.y) {
-        node.x = node.anchorX = clamp(x, ...limits(node, "x"));
-        node.y = node.anchorY = clamp(y, ...limits(node, "y"));
+        drag.x = clamp(x, node.minX, node.maxX); drag.y = clamp(y, node.minY, node.maxY);
         drag.lastMove = now;
         // Track the pointer, including beyond a wall, so an outward release
         // rebounds rather than losing its velocity against the clamped circle.
@@ -1339,16 +1420,22 @@ function teamProfilesAnimation() {
     function finishDrag(throwIt = false) {
       if (!drag) return;
       const current = drag, node = current.node;
+      // Include the final pointer position before releasing the pinned joint.
+      if (!destroyed) step(0);
       drag = null;
-      node.vx = node.vy = 0; node.blend = 0;
+      let vx = 0, vy = 0;
       const samples = current.samples, first = samples[0], last = samples[samples.length - 1];
       if (throwIt && !reducedMotion.matches && performance.now() - current.lastMove < teamMotion.drag.releasePauseMs && last.time > first.time) {
         const seconds = (last.time - first.time) / 1000;
-        node.vx = (last.x - first.x) / seconds * teamMotion.drag.velocityMultiplier;
-        node.vy = (last.y - first.y) / seconds * teamMotion.drag.velocityMultiplier;
-        const speed = Math.hypot(node.vx, node.vy), cap = Math.min(1, teamMotion.drag.maxSpeed / speed);
-        node.vx *= cap; node.vy *= cap;
+        vx = (last.x - first.x) / seconds * teamMotion.drag.velocityMultiplier;
+        vy = (last.y - first.y) / seconds * teamMotion.drag.velocityMultiplier;
+        const speed = Math.hypot(vx, vy), cap = Math.min(1, teamMotion.drag.maxSpeed / speed);
+        vx *= cap; vy *= cap;
       }
+      current.members.forEach((member) => {
+        member.vx = vx; member.vy = vy;
+        member.blend = member.floatX = member.floatY = 0;
+      });
       node.element.style.cursor = "grab";
       if (node.element.hasPointerCapture?.(current.pointerId)) node.element.releasePointerCapture(current.pointerId);
       paintDirty = true; syncActivity();
@@ -1358,8 +1445,9 @@ function teamProfilesAnimation() {
       if (!node || drag || original.button !== 0 || original.isPrimary === false || !visible || document.hidden) return;
       if (geometryDirty && !measure()) return;
       const rect = header.getBoundingClientRect(), now = performance.now();
-      node.anchorX = node.x; node.anchorY = node.y; node.vx = node.vy = 0; node.blend = 0;
-      drag = { node, pointerId: original.pointerId,
+      const members = connectedTo(node);
+      members.forEach((member) => { member.vx = member.vy = 0; });
+      drag = { node, members, x: node.x, y: node.y, pointerId: original.pointerId,
         offsetX: (original.clientX - rect.left) / scaleX - node.x,
         offsetY: (original.clientY - rect.top) / scaleY - node.y,
         samples: [{ x: node.x, y: node.y, time: now }], lastMove: now };
@@ -1395,7 +1483,7 @@ function teamProfilesAnimation() {
       syncActivity();
     }
     function motionChanged() {
-      nodes.forEach((node) => { node.anchorX = node.x; node.anchorY = node.y; node.vx = node.vy = node.blend = 0; });
+      nodes.forEach((node) => { node.vx = node.vy = node.blend = node.floatX = node.floatY = 0; });
       paintDirty = true; syncActivity();
     }
     const observer = window.IntersectionObserver && new IntersectionObserver(([entry]) => {
@@ -1422,7 +1510,8 @@ function teamProfilesAnimation() {
       $header.off(namespace); $(document).off(namespace); $(window).off(namespace);
       document.removeEventListener("visibilitychange", visibilityChanged);
       reducedMotion.removeEventListener("change", motionChanged);
-      restoreNodes(); restoreLines();
+      if (layer) layer.remove();
+      restoreNodes(); restoreSvgs();
     });
   });
   return () => {
