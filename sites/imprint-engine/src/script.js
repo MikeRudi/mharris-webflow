@@ -1845,6 +1845,13 @@ function flexGrowAnimation() {
       duration: 0.3,
       ease: "power1.in",
     },
+    // Dimensions are authored on .flex-grow-block in Webflow; timing follows grow.
+    spacing: {
+      contentWidthProperty: "--gallery-open-content-width",
+      gapProperty: "--gallery-open-gap",
+      inactiveMinWidth: 0,
+      inactiveGap: 0,
+    },
     copy: {
       start: 0,
       active: 1,
@@ -1890,7 +1897,11 @@ function flexGrowAnimation() {
     const $copyTargets = $(items.flatMap(({ $copy }) => $copy.toArray()));
     const $contentTargets = $(items.flatMap(({ $content }) => $content.toArray()));
     const originalStates = [];
-    const growStyles = rememberStyles($growTargets.add($imageTargets), ["flex-grow"]);
+    const growStyles = [
+      ...rememberStyles($growTargets.add($imageTargets), ["flex-grow"]),
+      ...rememberStyles($growTargets, ["column-gap"]),
+      ...rememberStyles($contentTargets, ["min-width"]),
+    ];
     const mobileStyles = [
       ...rememberStyles($contentTargets, ["height"]),
       ...rememberStyles($(items.map(({ $image }) => $image[0])), ["height", "margin-top"]),
@@ -1926,26 +1937,20 @@ function flexGrowAnimation() {
       });
     }
 
-    function sizeClosedItems() {
-      if (mobile) return;
-      // Closed width fits the number/title; the open text column keeps its native width.
-      items.forEach(({ $item, $title }) => {
-        const width = $title.outerWidth();
-        if (width > 0) $item.css("--gallery-closed-content-width", `${width}px`);
-      });
-    }
-
     function sizeImageArtwork() {
       if (!items.some(({ $art }) => $art.length)) return;
-      // One item's worth of free space is shared by the row. Keep every photo at
-      // that full width; only its parent reveals it as the item expands.
-      const openWidth = mobile ? 0 : items.reduce((sum, { $image }) => sum + ($image.width() || 0), 0);
-      items.forEach(({ $image, $art }) => {
+      const selected = activeItem;
+      // Intrinsic closed widths differ (01 versus 04). Measure each fully open
+      // pane before paint, only on init/fonts/resize; never during its animation.
+      items.forEach((entry) => {
+        const { $image, $art } = entry;
+        if (!mobile) activateItem(entry, true);
         $art.css({
-          "--gallery-image-width": mobile ? "100%" : `${openWidth}px`,
+          "--gallery-image-width": mobile ? "100%" : `${$image.width()}px`,
           "--gallery-image-height": mobile ? `${$image.width() / galleryMotion.mobile.imageAspectRatio}px` : "100%",
         });
       });
+      if (!mobile) activateItem(selected, true);
     }
 
     function activateItem(item, immediate = false) {
@@ -1964,6 +1969,7 @@ function flexGrowAnimation() {
         entry.$item.toggleClass("active", active).attr("aria-expanded", String(active));
         entry.$image.toggleClass("active", active);
         entry.$copy.toggleClass("active", active);
+        entry.$content.toggleClass("flex-grow-content-open", active);
       });
 
       const grow = (_, element) =>
@@ -2001,15 +2007,32 @@ function flexGrowAnimation() {
           if ($content.length) timeline.to($content, { height: target.content, ...timing }, galleryMotion.mobile.start);
           timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, galleryMotion.mobile.start);
         });
-      } else if (immediate) {
-        gsap.set($growTargets, { flexGrow: grow });
       } else {
-        timeline.to($growTargets, {
-          flexGrow: grow,
+        const nativeSpacing = getComputedStyle($blocks.filter((_, block) => block.contains(item.$item[0]))[0]);
+        const openWidth = nativeSpacing.getPropertyValue(galleryMotion.spacing.contentWidthProperty).trim();
+        const openGap = nativeSpacing.getPropertyValue(galleryMotion.spacing.gapProperty).trim();
+        const timing = {
           duration: galleryMotion.grow.duration,
           ease: galleryMotion.grow.ease,
           overwrite: "auto",
-        }, galleryMotion.grow.start);
+        };
+        items.forEach((entry) => {
+          const active = entry === item;
+          const itemSpacing = {
+            flexGrow: grow(0, entry.$item[0]),
+            columnGap: active ? openGap || "1rem" : galleryMotion.spacing.inactiveGap,
+          };
+          const contentSpacing = {
+            minWidth: active ? openWidth || "10em" : galleryMotion.spacing.inactiveMinWidth,
+          };
+          if (immediate) {
+            gsap.set(entry.$item, itemSpacing);
+            gsap.set(entry.$content, contentSpacing);
+          } else {
+            timeline.to(entry.$item, { ...itemSpacing, ...timing }, galleryMotion.grow.start);
+            timeline.to(entry.$content, { ...contentSpacing, ...timing }, galleryMotion.grow.start);
+          }
+        });
       }
 
       if ($copyTargets.length) {
@@ -2030,7 +2053,7 @@ function flexGrowAnimation() {
 
     items.forEach((item) => {
       rememberElements(item.$item, ["style", "role", "tabindex", "aria-expanded"]);
-      rememberElements(item.$image.add(item.$art).add(item.$content).add(item.$copy), ["style"]);
+      rememberElements(item.$image.add(item.$art).add(item.$content).add(item.$copy), ["style", "class"]);
       item.$item.attr({ role: "button", tabindex: "0" });
       item.$item
         .off(".flexGrowAnimation")
@@ -2044,7 +2067,6 @@ function flexGrowAnimation() {
         });
     });
 
-    sizeClosedItems();
     if (!mobile) gsap.set($imageTargets, { flexGrow: 1 });
     activateItem(initialItem, true);
     sizeImageArtwork();
@@ -2056,7 +2078,6 @@ function flexGrowAnimation() {
         restoreStyles(mobile ? mobileStyles : growStyles);
         mobile = nextMobile;
       }
-      sizeClosedItems();
       if (!mobile) gsap.set($imageTargets, { flexGrow: 1 });
       activateItem(activeItem, true);
       sizeImageArtwork();
