@@ -1847,11 +1847,10 @@ function flexGrowAnimation() {
       ease: "power1.inOut",
     },
     copy: {
-      start: 0,
       active: 1,
       inactive: 0,
-      duration: 0.2,
-      ease: "power1.in",
+      hide: { duration: 0.2, ease: "power1.in" },
+      reveal: { delay: 0, duration: 0.2, ease: "power1.in" },
     },
     mobile: {
       start: 0,
@@ -1971,7 +1970,18 @@ function flexGrowAnimation() {
       const visibility = (_, element) =>
         $(element).hasClass("active") ? galleryMotion.copy.active : galleryMotion.copy.inactive;
 
-      if (!immediate) timeline = gsap.timeline();
+      // Fade first, resize with hidden copy, then reveal at the final width.
+      const resizeMotion = mobile ? galleryMotion.mobile : galleryMotion.grow;
+      const resizeStart = ($copyTargets.length ? galleryMotion.copy.hide.duration : 0) + resizeMotion.start;
+      const revealStart = resizeStart + resizeMotion.duration + galleryMotion.copy.reveal.delay;
+      if (!immediate) {
+        timeline = gsap.timeline();
+        if ($copyTargets.length) timeline.to($copyTargets, {
+          autoAlpha: galleryMotion.copy.inactive,
+          ...galleryMotion.copy.hide,
+          overwrite: "auto",
+        }, 0);
+      }
 
       if (mobile) {
         // Measure natural text wrapping, then restore the current frame before tweening.
@@ -1998,8 +2008,8 @@ function flexGrowAnimation() {
             ease: galleryMotion.mobile.ease,
             overwrite: "auto",
           };
-          if ($content.length) timeline.to($content, { height: target.content, ...timing }, galleryMotion.mobile.start);
-          timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, galleryMotion.mobile.start);
+          if ($content.length) timeline.to($content, { height: target.content, ...timing }, resizeStart);
+          timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, resizeStart);
         });
       } else {
         const timing = {
@@ -2027,21 +2037,21 @@ function flexGrowAnimation() {
             gsap.set(entry.$item, itemSpacing);
             gsap.set(entry.$content, contentSpacing);
           } else {
-            timeline.to(entry.$item, { ...itemSpacing, ...timing }, galleryMotion.grow.start);
-            timeline.to(entry.$content, { ...contentSpacing, ...timing }, galleryMotion.grow.start);
+            timeline.to(entry.$item, { ...itemSpacing, ...timing }, resizeStart);
+            timeline.to(entry.$content, { ...contentSpacing, ...timing }, resizeStart);
           }
         });
       }
 
       if ($copyTargets.length) {
         if (immediate) gsap.set($copyTargets, { autoAlpha: visibility });
-        else {
-          timeline.to($copyTargets, {
-            autoAlpha: visibility,
-            duration: galleryMotion.copy.duration,
-            ease: galleryMotion.copy.ease,
+        else if (item) {
+          timeline.to(item.$copy, {
+            autoAlpha: galleryMotion.copy.active,
+            duration: galleryMotion.copy.reveal.duration,
+            ease: galleryMotion.copy.reveal.ease,
             overwrite: "auto",
-          }, galleryMotion.copy.start);
+          }, revealStart);
         }
       }
     }
