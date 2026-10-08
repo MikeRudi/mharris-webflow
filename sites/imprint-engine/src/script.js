@@ -2872,10 +2872,9 @@ function compareGradientAnimation() {
 }
 
 function homeBackgroundMotion() {
-  if (!window.gsap || !$("[home-faq], [section-tiles]").length) return null;
+  if (!window.gsap || !$("[section-tiles]").length) return null;
   // BACKGROUND MOTION — seconds; native Webflow classes own artwork and layout.
   const backgroundMotion = {
-    faq: { xPercent: 4, yPercent: 3, scale: 1.08, duration: 14, ease: "sine.inOut" },
     ribbon: { xPercent: 5, yPercent: 2, rotation: 1.5, duration: 18, ease: "sine.inOut" },
   };
   const media = gsap.matchMedia();
@@ -2900,10 +2899,6 @@ function homeBackgroundMotion() {
       cleanups.push(() => { observer.disconnect(); document.removeEventListener("visibilitychange", sync); timeline.kill(); restore(); });
     }
 
-    // FAQ — independently drifting glows extend beyond section edges.
-    $("[home-faq]").each(function () {
-      animateVisible(this, $(this).find("[home-faq-glows]").children().toArray(), backgroundMotion.faq, "home-faq-breath");
-    });
     // AUDIENCE — the oversized original lined artwork sways behind the cards.
     $("[section-tiles]").each(function () {
       animateVisible(this, $(this).find("[home-dna-ribbon]").toArray(), backgroundMotion.ribbon, "home-dna-sway");
