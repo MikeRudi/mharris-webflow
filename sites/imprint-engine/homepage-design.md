@@ -37,17 +37,19 @@ closed questions; it is not transcribed Figma answer copy.
 
 ### Decorative backgrounds
 
-`homeBackgroundMotion()` keeps independent controls in `backgroundMotion`:
-FAQ breathing uses 14 seconds per direction, 4%/3% movement and scale 1.08;
-the DNA ribbon uses 18 seconds, 5%/2% movement and 1.5 degrees of sway.
-Both use `sine.inOut` so the repeated direction change is smooth. Comparison
-cursor tracking uses a 0.3-second `power1.out` response and one update per frame.
+`homeBackgroundMotion()` controls the DNA ribbon: 18 seconds, 5%/2% movement
+and 1.5 degrees of sway. The FAQ uses the same `[gradient-breath-1]` hook and
+`gradientBreathOne()` controls as the team gradients. Both use `sine.inOut`
+so the repeated direction change is smooth.
 Animations pause outside the viewport (300px breathing margin) and in hidden
 tabs. Reduced motion leaves the authored artwork static. Cleanup restores styles.
 
-Native `[home-faq-glows]` contains two decorative gradient divs, replacing the
-section's painted background. Their transparent edges can extend above the FAQ;
-the right glow fades before the dark footer instead of stopping against it.
+In v2, the old `[home-faq-glows]` wrapper and its two radial backgrounds are
+replaced by native `.faq-gradient-1` and `.faq-gradient-2` divs directly inside
+`.home-faq-section`. They copy the team gradients' `15.4em` by `22.4em` size,
+`5.5vw` blur, rounded shape and percentage positions, using purple `#AB56F2`.
+They sit behind `.home-faq-layout`, ignore pointer events, and can extend
+beyond the section. The old FAQ-specific breathing branch was removed.
 `[home-dna-ribbon]` uses the original lined PNG at 180% width, with native opacity
 and a soft vertical mask. The native `.cat-select:hover` matches `.active`.
 The v2 comparison now uses native `[compare-gradient]` and the separate

@@ -364,6 +364,19 @@ still. Cleanup kills only these triggers/timelines and clears their ring styles.
 class settings as reference copies, not live dependencies. Designer changes
 need a Webflow publish; the animation comes from the existing GitHub JS loader.
 
+## v2 FAQ gradients — 2026-10-08
+
+`Accordion 04` now contains `.faq-gradient-1` and `.faq-gradient-2` directly
+inside `.home-faq-section`, replacing the old `.home-faq-glows` wrapper and
+its two radial backgrounds. These native divs copy the team gradients' shape,
+`15.4em` by `22.4em` dimensions, `5.5vw` blur and percentage placement, with
+purple `#AB56F2` fill. Both use `[gradient-breath-1]`, so the team and FAQ
+gradients share the controls at the top of `gradientBreathOne()`. Their native
+classes remain separate so colours can be edited independently. The old
+FAQ-only breathing branch in `homeBackgroundMotion()` was removed; that
+function now controls the DNA ribbon only. FAQ content and component props
+are unchanged. Publish Webflow to apply the native replacements.
+
 ## v2 team profile network — 2026-10-08
 
 Imprint Engine v2 (`6abbde0cb7e6f39d52509b6c`), Home
