@@ -299,6 +299,10 @@ Hovering a photo scales its clip and its connected circles' clips to 1.15, while
 their images scale to 0.95 (0.25 seconds, power1.in). Connected placeholder images
 fade to opacity 1 over 0.2 seconds. Leaving restores their original appearance.
 The inner clips animate independently of the circles' physics and connector anchors.
+Native Webflow `team-profile-image` sizing is 110% width/height, max-width none,
+left/top 50%, right/bottom auto and translate(-50%, -50%), with a centred transform
+origin. The existing team-specific style supplies this on `img-abs`; at hover's
+0.95 image scale it still covers 104.5% of the clip, preventing exposed edges.
 
 `teamProfilesAnimation()` owns desktop movement only. `section-teams`, `teams-layout`, `teams-header`,
 `team-profile-group`, `team-profile-node` and `team-profile-lines` are the behavior
