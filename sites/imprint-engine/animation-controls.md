@@ -8,7 +8,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `initLenis` | `scrollControls` | Scroll smoothing and wheel sensitivity |
 | `homeAnimation` | `homeMotion` | Existing grouped percentage-based scrub; see [home-animation.md](home-animation.md) |
 | `homeAnimation` | `homeCardMotion`, `homeAlignment` | Background rotation, depth opacity, framing and end-drop alignment |
-| `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / collision / walls` | Desktop circle drift, connected dragging, collisions and header-wall bounces |
+| `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / collision / walls` | Desktop circle drift, connected dragging, collisions and section-wall bounces |
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
@@ -60,28 +60,31 @@ The `teamMotion` controls are at the top of the function:
 
 - `float.x / y`: drift distance in pixels; `cycleSeconds`: how slowly circles float.
 - `float.resumeSeconds`: gentle drift fade-in after grabbing/releasing a circle.
-- `float.jointVariation`: individual drift within a connected group (`0.15`); most
-  drift is shared so idle motion remains gentle.
+- `float.jointVariation`: independent drift within a connected group (`1`),
+  allowing the white circles to move around their photo instead of keeping a rigid pose.
 - `drag.velocityMultiplier / maxSpeed`: release strength and maximum px/second;
   `0.85 / 935` keeps throws at 85% of the original power.
-- `drag.maxDistance`: maximum distance from the circle's position when grabbed
-  (`300`px). This is a radius, including diagonal drags, and resets on each grab.
-  Release momentum can carry the circle farther after the pointer is released.
+- `drag.releaseDistance`: automatically let go after `300`px of dragged path,
+  even while the mouse button is held. Bends count toward this distance. Further
+  pointer movement is ignored until a new press; the released circle keeps its momentum.
+- `drag.followMomentum`: momentum given to outer circles as their joint moves
+  (`0.6`). Each circle keeps its own velocity during the grab and after release.
 - `drag.sampleMs / releasePauseMs`: recent pointer samples and the pause that cancels a throw.
 - `throw.friction`: higher values slow throws sooner; `stopSpeed`: settling threshold.
 - `links.elasticity / settleSeconds`: maximum stretch/compression (default `0.01`,
   or 1%) and the soft return toward the authored connection length.
 - `collision.gap / bounce`: clearance between circle outlines (`1`px) and impact
   restitution (`0.45`). Collisions cover circles in every group in the header.
-- `walls.inset / bounce`: clearance inside the header and energy retained on rebound.
+- `walls.inset / bounce`: clearance inside `.section-teams` and energy retained
+  on rebound. The header is only a fallback if no enclosing team section exists.
 
 Circles connected by lines form a jointed network. Dragging any circle pulls its
 connected neighbors; distance constraints preserve each authored link length with
 only the small allowed elastic movement. Joints rotate freely, without a hard
 angle limit or forced group translation. Circles push each other on contact and
 share momentum on impact; connections and walls are solved alongside collisions.
-Release momentum is shared with that connected network, while unconnected circles
-remain independent. Circles settle around their new position after a throw.
+Only the held circle receives the release impulse; its connected circles retain
+their own swing. Circles settle around their new position after a throw.
 
 The original SVG endpoints identify connected circles once. Animated copies of the
 lines render in one header-sized SVG, outside the smaller group boxes so those
@@ -89,8 +92,8 @@ boxes cannot clip a moving connection. Its lines keep their authored colours.
 The original SVGs are hidden only during desktop animation and restored on cleanup.
 Small physics steps and cached circle geometry avoid per-frame layout measurements.
 Fast pointer jumps are swept in small spatial steps to prevent tunnelling through
-another circle. Velocity samples use the bounded drag position, so moving the
-pointer past the 300px limit does not add throw power.
+another circle. The final segment stops exactly at the release distance before
+letting go. Circles can then travel farther through momentum inside the section.
 No extra animation library, runtime stylesheet or Webflow embed is required.
 
 The frame loop stops off-screen and while the tab is hidden. Reduced motion keeps

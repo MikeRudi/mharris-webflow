@@ -15,13 +15,14 @@ const [jquery, gsap] = await Promise.all([
 ]);
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const errors = [], results = [];
-const pairs = [["01", "03"], ["01", "04"], ["01", "05"], ["05", "06"], ["06", "02"], ["02", "07"], ["02", "08"],
-  ["11", "09"], ["09", "12"], ["09", "13"], ["13", "10"], ["14", "10"], ["10", "15"], ["16", "17"]];
-const selector = (id = "01") => `.team-profile-node.is-${id}`;
+const pairs = [["01", "03"], ["01", "04"], ["01", "05"], ["06", "02"], ["02", "07"], ["02", "08"],
+  ["11", "09"], ["09", "12"], ["09", "13"], ["14", "10"], ["10", "15"], ["16", "17"], ["17", "22"], ["18", "23"], ["19", "24"]];
+const selector = (id = "01") => `.team-profile-node:is(.is-${id}, .team-profile-position-${id})`;
 const near = (a, b, tolerance = 1) => assert.ok(Math.abs(a - b) <= tolerance, `${a} differs from ${b}`);
 async function check(name, fn) {
   try { await fn(); results.push(true); console.log(`PASS ${name}`); }
   catch (error) { results.push(false); console.error(`FAIL ${name}: ${error.stack}`); }
+  finally { await Promise.all(browser.contexts().map(context=>context.close())); }
 }
 async function open({ width = 1440, reducedMotion = "no-preference", duplicate = false, code = source, scene = null } = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion });
@@ -68,7 +69,7 @@ async function anchored(page) {
       [...(layer || header).querySelectorAll(layer ? 'line' : '.team-profile-lines line')].forEach((line, i) => {
         const matrix = line.ownerSVGElement.getScreenCTM();
         pairs[i].forEach((id, j) => {
-          const rect = header.querySelector(`.team-profile-node.is-${id}`).getBoundingClientRect();
+          const rect = header.querySelector(`.team-profile-node:is(.is-${id},.team-profile-position-${id})`).getBoundingClientRect();
           const point = new DOMPoint(Number(line.getAttribute(`x${j+1}`)), Number(line.getAttribute(`y${j+1}`))).matrixTransform(matrix);
           max = Math.max(max, Math.hypot(point.x - rect.left - rect.width / 2, point.y - rect.top - rect.height / 2));
         });
@@ -78,11 +79,11 @@ async function anchored(page) {
   }, pairs);
   assert.ok(error < 0.15, `Line misses its circle center by ${error}px`);
 }
-async function dragBy(page, dx, dy, { hold = 0, id = "01" } = {}) {
+async function dragBy(page, dx, dy, { hold = 0, id = "01", steps = 8 } = {}) {
   const start = await center(page, id);
   await page.mouse.move(start.x, start.y); await page.mouse.down();
-  for (let i = 1; i <= 8; i++) {
-    await page.mouse.move(start.x + dx * i / 8, start.y + dy * i / 8);
+  for (let i = 1; i <= steps; i++) {
+    await page.mouse.move(start.x + dx * i / steps, start.y + dy * i / steps);
     await page.waitForTimeout(12);
   }
   await page.waitForTimeout(18);
@@ -97,7 +98,7 @@ async function linkLengths(page) {
     const header=document.querySelector('.teams-header');
     return pairs.map(pair=>{
       const points=pair.map(id=>{
-        const e=header.querySelector(`.team-profile-node.is-${id}`),r=e.getBoundingClientRect();
+        const e=header.querySelector(`.team-profile-node:is(.is-${id},.team-profile-position-${id})`),r=e.getBoundingClientRect();
         const [tx=0,ty=0]=e.style.translate.split(' ').map(parseFloat);
         return {x:r.x+r.width/2,y:r.y+r.height/2,bx:r.x+r.width/2-(tx||0),by:r.y+r.height/2-(ty||0)};
       });
@@ -121,16 +122,34 @@ async function separated(page) {
   assert.deepEqual(overlaps, [], 'Circle outlines must not overlap');
 }
 try {
-  await check("all 21 circles drift gently; 14 connectors stay at their centers with no frame layout reads", async () => {
+  await check("all 24 circles drift gently; 15 connectors stay at their centers with no frame layout reads", async () => {
     const page = await open(); await page.waitForTimeout(1300);
     const first = await center(page); await page.evaluate(() => { window.nodeReads = 0; });
     await page.waitForTimeout(900);
     assert.equal(await page.evaluate(() => window.nodeReads), 0);
     const second = await center(page); assert.ok(Math.hypot(second.x-first.x, second.y-first.y) > 1);
     await anchored(page);
-    assert.equal(await page.locator('[team-profile-node]').count(), 21);
-    assert.equal(await page.locator('.team-profile-image.is-hidden').evaluateAll(es => es.filter(e => getComputedStyle(e).opacity === '0').length), 12);
+    assert.equal(await page.locator('[team-profile-node]').count(), 24);
+    assert.equal(await page.locator('.team-profile-image.is-hidden').evaluateAll(es => es.filter(e => getComputedStyle(e).opacity === '0').length), 15);
     assert.equal(await page.locator('.cta').evaluate(e => { const r=e.getBoundingClientRect(); return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===e; }), true);
+    await page.close();
+  });
+  await check("nine photo circles have the requested connection counts; white circles are single leaves",async()=>{
+    const page=await open();await anchored(page);
+    const counts=await page.evaluate(pairs=>{
+      const result={photos:[],white:[]};
+      document.querySelectorAll('.team-profile-node').forEach(node=>{
+        const id=node.className.match(/(?:is-|position-)(\d+)/)[1];
+        const degree=pairs.filter(pair=>pair.includes(id)).length;
+        const hidden=getComputedStyle(node.querySelector('img')).opacity==='0';
+        result[hidden?'white':'photos'].push(degree);
+        if(hidden)for(const pair of pairs.filter(pair=>pair.includes(id))){
+          const other=pair.find(item=>item!==id),target=document.querySelector(`.team-profile-node:is(.is-${other},.team-profile-position-${other})`);
+          if(getComputedStyle(target.querySelector('img')).opacity==='0')throw new Error('A white circle connects to another white circle');
+        }
+      });return result;
+    },pairs);
+    assert.deepEqual(counts.photos.sort(),[0,0,1,1,2,2,3,3,3]);assert.deepEqual(counts.white,Array(15).fill(1));
     await page.close();
   });
   await check("drag tracks the pointer immediately and release glides in the same direction before slowing", async () => {
@@ -148,7 +167,7 @@ try {
     const still=source.replace('float: { x: 12, y: 9','float: { x: 0, y: 0');
     const distances=[];
     for(const code of [still,still.replace('velocityMultiplier: 0.85, maxSpeed: 935','velocityMultiplier: 1, maxSpeed: 1100')]){
-      const page=await open({code,scene:'solo'});const {held}=await dragBy(page,280,0,{id:'18'});
+      const page=await open({code,scene:'solo'});const {held}=await dragBy(page,280,0,{id:'18',steps:2});
       await page.waitForTimeout(250);distances.push((await center(page,'18')).x-held.x);await page.close();
     }
     near(distances[0]/distances[1],0.85,0.09);
@@ -166,17 +185,17 @@ try {
     await page.close();
   });
   await check("a paused release and pointer cancellation do not launch stale momentum", async () => {
-    const page = await open();
-    const { held } = await dragBy(page, 120, 0, { hold: 180 });
-    await page.waitForTimeout(300); const stopped = await center(page); near(stopped.x, held.x, 5);
-    const p = await center(page); await page.mouse.move(p.x,p.y); await page.mouse.down();
+    const page = await open({scene:'solo'});
+    const { held } = await dragBy(page, 120, 0, { hold: 180,id:'18' });
+    await page.waitForTimeout(300); const stopped = await center(page,'18'); near(stopped.x, held.x, 5);
+    const p = await center(page,'18'); await page.mouse.move(p.x,p.y); await page.mouse.down();
     await page.mouse.move(p.x+120,p.y); await page.waitForTimeout(20);
     await page.evaluate(() => document.dispatchEvent(new PointerEvent('pointercancel',{pointerId:1,bubbles:true})));
-    await page.mouse.up(); const canceled = await center(page);
-    await page.waitForTimeout(300); near((await center(page)).x, canceled.x, 5);
+    await page.mouse.up(); const canceled = await center(page,'18');
+    await page.waitForTimeout(300); near((await center(page,'18')).x, canceled.x, 5);
     await page.close();
   });
-  await check("dragging is capped at 300px radially, including diagonal jumps and repeated grabs", async () => {
+  await check("300px of dragging releases capture automatically, including a bent path", async () => {
     const page = await open({scene:'solo',reducedMotion:'reduce'});
     for (const [dx,dy] of [[600,0],[-600,0],[500,500],[-500,-500]]) {
       await page.evaluate(() => initSite()); await page.waitForTimeout(100);
@@ -185,7 +204,26 @@ try {
       const next=await dragBy(page,-dx/4,-dy/4,{id:'18'});
       near(next.held.x-next.start.x,-dx/4,0.1);near(next.held.y-next.start.y,-dy/4,0.1);
     }
+    await page.evaluate(()=>initSite());await page.waitForTimeout(80);
+    const p=await center(page,'18');await page.mouse.move(p.x,p.y);await page.mouse.down();
+    await page.mouse.move(p.x+180,p.y);await page.waitForTimeout(30);
+    assert.equal(await page.locator(selector('18')).evaluate(e=>e.style.cursor),'grabbing');
+    await page.mouse.move(p.x+59,p.y);await page.waitForTimeout(30);
+    assert.equal(await page.locator(selector('18')).evaluate(e=>e.style.cursor),'grab');
+    assert.equal(await page.locator(selector('18')).evaluate(e=>e.hasPointerCapture(1)),false);
+    const released=await center(page,'18');near(released.x-p.x,60,0.1);
+    await page.mouse.move(p.x+240,p.y+100);await page.waitForTimeout(50);
+    near((await center(page,'18')).x,released.x,0.1);await page.mouse.up();
     await page.close();
+  });
+  await check("connected circles keep swinging while their photo is held and after release",async()=>{
+    const page=await open();const p=await center(page,'17');await page.mouse.move(p.x,p.y);await page.mouse.down();
+    await page.mouse.move(p.x+110,p.y+80,{steps:6});await page.waitForTimeout(30);
+    const first=await linkLengths(page);await page.waitForTimeout(180);const second=await linkLengths(page);
+    assert.ok([11,12].some(i=>Math.abs(second[i].angle-first[i].angle)>0.02),'Outer circles froze while the photo was held');
+    await page.mouse.up();await page.waitForTimeout(180);const third=await linkLengths(page);
+    assert.ok([11,12].some(i=>Math.abs(third[i].angle-second[i].angle)>0.02),'Outer circles lost their swing on release');
+    await constrained(page);await page.close();
   });
   await check("a fast drag cannot tunnel through another circle; a throw transfers momentum on impact",async()=>{
     const page=await open({scene:'pair',reducedMotion:'reduce'});
@@ -199,20 +237,23 @@ try {
     await page.emulateMedia({reducedMotion:'no-preference'});
     await page.evaluate(()=>initSite());await page.waitForTimeout(100);
     const before=await center(page,'19');
-    await dragBy(page,120,0,{id:'18'});await page.waitForTimeout(250);
+    await dragBy(page,120,0,{id:'18',steps:2});await page.waitForTimeout(250);
     assert.ok((await center(page,'19')).x>before.x+25,'Impact should transfer velocity to the other circle');
     await separated(page);await page.close();
   });
-  await check("all four header walls contain circles and reflect throws within the drag limit",async()=>{
+  await check("all four section walls contain circles and allow movement beyond the header",async()=>{
     const page=await open({scene:'solo'});
     for(const [dx,dy] of [[200,0],[-200,0],[0,200],[0,-200]]){
       await page.evaluate(({dx,dy})=>{
         initSite.cleanup();const header=document.querySelector('.teams-header'),node=header.querySelector('.is-18');
-        node.style.left=`${dx>0?header.clientWidth-260:dx<0?200:640}px`;
-        node.style.top=`${dy>0?header.clientHeight-260:dy<0?200:295}px`;initSite();
+        const section=header.closest('.section-teams').getBoundingClientRect(),h=header.getBoundingClientRect();
+        node.style.left=`${dx>0?section.right-h.left-260:dx<0?section.left-h.left+200:640}px`;
+        node.style.top=`${dy>0?section.bottom-h.top-260:dy<0?section.top-h.top+200:295}px`;initSite();
       },{dx,dy});await page.waitForTimeout(100);
       const {held}=await dragBy(page,dx,dy,{id:'18'});await page.waitForTimeout(180);
       const bounced=await center(page,'18');assert.ok(dx?(bounced.x-held.x)*Math.sign(dx)<-5:(bounced.y-held.y)*Math.sign(dy)<-5);
+      const h=await page.locator('.teams-header').boundingBox();
+      assert.ok(dx>0?held.x>h.x+h.width:dx<0?held.x<h.x:dy>0?held.y>h.y+h.height:held.y<h.y,'Still bouncing at header bounds');
       await separated(page);
     }
     await page.close();
@@ -233,11 +274,11 @@ try {
     });
     for(const id of Array.from({length:17},(_,i)=>String(i+1).padStart(2,'0'))){
       await page.evaluate(()=>initSite());await page.waitForTimeout(80);
-      const p=await center(page,id);await page.mouse.move(p.x,p.y);await page.mouse.down();
       for(const [x,y] of [[1400,100],[1400,680],[50,680],[50,50],[700,350]]){
+        const p=await center(page,id);await page.mouse.move(p.x,p.y);await page.mouse.down();
         await page.mouse.move(x,y);await page.waitForTimeout(25);
-        const held=await center(page,id);assert.ok(Math.hypot(held.x-p.x,held.y-p.y)<=301,`Drag exceeded 300px for ${id}`);
         await constrained(page);await anchored(page);
+        await page.mouse.up();
       }
       await page.mouse.up();await page.waitForTimeout(120);await constrained(page);
     }
@@ -265,7 +306,7 @@ try {
     assert.equal(await page.locator('[team-profile-node]').count(),0);
     assert.equal(await page.locator('[team-profile-connector-layer]').count(),0);
     await page.setViewportSize({width:1440,height:900}); await page.waitForTimeout(200);
-    assert.equal(await page.locator('[team-profile-node]').count(),21);
+    assert.equal(await page.locator('[team-profile-node]').count(),24);
     for(let i=0;i<3;i++){await page.evaluate(()=>initSite());await page.waitForTimeout(50);}
     await page.setViewportSize({width:800,height:900}); await page.waitForTimeout(150);
     assert.equal(await page.locator('[team-profile-node]').count(),0);
@@ -279,7 +320,7 @@ try {
     assert.equal(await page.evaluate(()=>lineWrites),writes);near((await center(page)).x,before.x,0.01);
     const {held}=await dragBy(page,150,20);await page.waitForTimeout(200);near((await center(page)).x,held.x,0.01);
     await anchored(page);await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForTimeout(800);
-    assert.ok(Math.abs((await center(page)).x-held.x)>1);await page.close();
+    const resumed=await center(page);assert.ok(Math.hypot(resumed.x-held.x,resumed.y-held.y)>1);await page.close();
   });
   await check("duplicate sections keep independent endpoints and cleanup", async () => {
     const page=await open({duplicate:true});await dragBy(page,100,10);await anchored(page);
