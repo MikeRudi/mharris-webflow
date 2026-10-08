@@ -8,6 +8,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `initLenis` | `scrollControls` | Scroll smoothing and wheel sensitivity |
 | `homeAnimation` | `homeMotion` | Existing grouped percentage-based scrub; see [home-animation.md](home-animation.md) |
 | `homeAnimation` | `homeCardMotion`, `homeAlignment` | Background rotation, depth opacity, framing and end-drop alignment |
+| `teamProfilesAnimation` | `teamMotion.float / drag / throw / walls` | Desktop circle drift, direct dragging, release momentum and header-wall bounces |
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
@@ -51,6 +52,30 @@ at its fully open width, measured on initialization, font readiness and resize.
 Mobile keeps the photo at its fully open height while its parent expands.
 `galleryMotion.grow` and `galleryMotion.mobile` therefore control both the item
 and its image reveal; there is no separate image zoom or delay.
+
+## Team circles (v2)
+
+`teamProfilesAnimation()` is called inside `onDesktop()` (992px and wider).
+The `teamMotion` controls are at the top of the function:
+
+- `float.x / y`: drift distance in pixels; `cycleSeconds`: how slowly circles float.
+- `float.resumeSeconds`: gentle drift fade-in after grabbing/releasing a circle.
+- `drag.velocityMultiplier / maxSpeed`: release strength and maximum px/second.
+- `drag.sampleMs / releasePauseMs`: recent pointer samples and the pause that cancels a throw.
+- `throw.friction`: higher values slow throws sooner; `stopSpeed`: settling threshold.
+- `walls.inset / bounce`: clearance inside the header and energy retained on rebound.
+
+Circles settle around their new position after a throw. The existing SVG endpoints
+are matched to the authored circle centers once, then remain bound to those same
+circles. Cached SVG coordinate transforms keep lines attached during dragging,
+floating, resizing and page scrolling. No per-frame circle layout measurements,
+extra animation library, runtime stylesheet or Webflow embed is required.
+
+The frame loop stops off-screen and while the tab is hidden. Reduced motion keeps
+direct dragging but disables drifting and momentum. Leaving desktop or reinitializing
+restores native styles and line coordinates. Run
+`node sites/imprint-engine/tests/team-profiles.browser.mjs` to check these behaviors
+against the saved v2 Designer geometry, independently of publishing.
 
 ## Footer responsiveness
 

@@ -261,6 +261,35 @@ still. Cleanup kills only these triggers/timelines and clears their ring styles.
 class settings as reference copies, not live dependencies. Designer changes
 need a Webflow publish; the animation comes from the existing GitHub JS loader.
 
+## v2 team profile network — 2026-10-08
+
+Imprint Engine v2 (`6abbde0cb7e6f39d52509b6c`), Home
+(`6abbde0cb7e6f39d52509b36`), currently loads this folder's existing JS through
+its GitHub development loader. Its new team artwork is native Webflow content:
+
+```txt
+.teams-header
+  .team-profiles
+    .team-profile-canvas
+      .team-profile-group.is-left / .is-right / .is-top / .is-floating
+        svg.team-profile-lines > line
+        .team-profile-node.is-01 ... .is-21
+          .team-profile-clip (relative, circular clip, white background)
+            .img-abs.team-profile-image [.is-hidden]
+```
+
+There are 21 circles, 12 hidden placeholder images and 14 `#E0E0E0` lines.
+`teamProfilesAnimation()` owns desktop movement only. `teams-header`,
+`team-profile-group`, `team-profile-node` and `team-profile-lines` are the behavior
+attributes. The initializer adds missing hooks from these known native classes
+at runtime because some imported elements currently have only their classes.
+Future Designer copies may carry the matching attributes directly. Cleanup removes
+only hooks it added. Keep connector endpoints on their circle centers in Designer;
+the animation binds the original pairs once and preserves those pairs after resize.
+
+The section's native markup must be published in Webflow before it can appear on
+staging; saving the JS alone does not publish Designer content.
+
 ## Libraries
 
 - GSAP 3.15.0 with ScrollTrigger and Flip.
