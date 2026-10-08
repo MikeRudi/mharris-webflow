@@ -45,7 +45,8 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation()];
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
+    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -2888,6 +2889,7 @@ function testimonialEnvelopeAnimation() {
     hover: {
       reveal: { duration: 0.4, ease: "power1.in" },
       return: { duration: 0.4, ease: "power1.out" },
+      // Fractions of envelope height; 0.12 means 12%.
       minimumLift: 0.12, contentGap: 0.025, minimumInserted: 0.08,
     },
   };
