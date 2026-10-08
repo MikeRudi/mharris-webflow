@@ -1164,16 +1164,95 @@ function teamProfilesAnimation() {
 
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
-    layout: { hiddenCircles: ["02", "06", "07", "08"] }, // Remove one photo and its three white satellites.
-    hover: { clipScale: 1.15, imageScale: 0.95, duration: 0.25, fadeDuration: 0.2, releaseHoldSeconds: 0.4, releaseFadeDuration: 0.6, releaseFadeEase: "power1.out", ease: "power1.in" },
-    float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2, jointVariation: 1 },
-    drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.8, sampleMs: 90, releasePauseMs: 100 },
-    throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
-    links: { elasticity: 0.06, settleSeconds: 0.65, photoMass: 6 }, // Photos lead; lighter satellites follow.
-    collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
-    spacing: { range: 32, strength: 60, delaySeconds: 0.75, rampSeconds: 1.25 }, // Slowly separate circles that linger together.
-    repel: { gap: -4, maxOverlapRatio: 0.1, range: 12, strength: 360 }, // Push away sooner, with only a little overlap.
-    walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
+    // VISIBLE CIRCLES — omit one photo and its three white satellites.
+    layout: {
+      hiddenCircles: ["02", "06", "07", "08"],
+      photoOpacityThreshold: 0.01,
+    },
+
+    // HOVER + RELEASE — scale, image reveal, then the delayed fade after a drag.
+    hover: {
+      clipScale: 1.15,
+      imageScale: 0.95,
+      duration: 0.25,
+      ease: "power1.in",
+      revealedOpacity: 1,
+      fadeDuration: 0.2,
+      fadeEase: "power1.in",
+      releaseHoldSeconds: 0.4,
+      releaseFadeDuration: 1.2,
+      releaseFadeEase: "power1.out",
+    },
+
+    // IDLE FLOAT — movement, timing and variation between circles.
+    float: {
+      x: 12, y: 9,
+      cycleSeconds: 14,
+      resumeSeconds: 1.2,
+      jointVariation: 1,
+      phaseStep: 2.39996, // Radians between circles' starting phases.
+      speedVariants: 5,
+      speedVariation: 0.07,
+      verticalSpeedRatio: 0.83,
+    },
+
+    // DRAG + THROW — grab length, release power, follower movement and slowing.
+    drag: {
+      velocityMultiplier: 0.68,
+      maxSpeed: 748,
+      holdSeconds: 0.1,
+      followMomentum: 0.8,
+      heldWeight: 0.1, // How much the held circle can yield during collisions.
+      sampleMs: 90,
+      releasePauseMs: 100,
+    },
+    throw: {
+      friction: 2.6, // Higher values stop a throw sooner.
+      stopSpeed: 3,
+    },
+
+    // CONNECTIONS + CONTACT — photos lead; lighter satellites follow.
+    links: {
+      elasticity: 0.06,
+      settleSeconds: 0.65,
+      photoMass: 6,
+    },
+    collision: {
+      gap: 1,
+      bounce: 0.45,
+    },
+    spacing: {
+      range: 32,
+      strength: 60,
+      delaySeconds: 0.75,
+      rampSeconds: 1.25,
+    },
+
+    // CONTENT + SECTION EDGES — gentle push from copy; rebound at outer walls.
+    repel: {
+      gap: -4,
+      maxOverlapRatio: 0.1,
+      range: 12,
+      strength: 360,
+    },
+    walls: {
+      inset: 2,
+      bounce: 0.72, // 0 = no rebound; 1 = no energy lost.
+    },
+
+    // ADVANCED PHYSICS — precision and frame stability; normally leave unchanged.
+    physics: {
+      solverIterations: 160,
+      momentumIterations: 4,
+      stepsPerSecond: 120,
+      maxFrameMs: 50,
+      minStepPx: 1,
+      maxStepPx: 4,
+      linkTolerancePx: 0.015,
+      contactTolerancePx: 0.02,
+      minDistancePx: 0.001,
+      lineDecimals: 3,
+    },
   };
 
   // The new Designer artwork still has some class-only elements. Add matching
@@ -1211,8 +1290,8 @@ function teamProfilesAnimation() {
       clip: element.querySelector("[team-profile-clip]"),
       image: element.querySelector("[team-profile-image]") || element.querySelector("img"),
       enabled: !teamMotion.layout.hiddenCircles.some((id) => element.classList.contains(`is-${id}`) || element.classList.contains(`team-profile-position-${id}`)),
-      draggable: [...element.querySelectorAll("img")].some((image) => Number(getComputedStyle(image).opacity) > 0.01 && getComputedStyle(image).visibility !== "hidden"),
-      phase: index * 2.39996, speed: 1 + (index % 5) * 0.07,
+      draggable: [...element.querySelectorAll("img")].some((image) => Number(getComputedStyle(image).opacity) > teamMotion.layout.photoOpacityThreshold && getComputedStyle(image).visibility !== "hidden"),
+      phase: index * teamMotion.float.phaseStep, speed: 1 + (index % teamMotion.float.speedVariants) * teamMotion.float.speedVariation,
       baseX: 0, baseY: 0, x: 0, y: 0, vx: 0, vy: 0,
       tx: 0, ty: 0, blend: 0, floatX: 0, floatY: 0, neighbors: [],
       minX: 0, maxX: 0, minY: 0, maxY: 0,
@@ -1230,7 +1309,7 @@ function teamProfilesAnimation() {
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b, nearSeconds: 0 })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
     let layer = null, contentBoxes = [];
-    let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0, motionStep = 4;
+    let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0, motionStep = teamMotion.physics.maxStepPx;
     let visible = !window.IntersectionObserver, active = false, destroyed = false;
     let geometryDirty = true, paintDirty = true, drag = null;
     allNodes.forEach((node) => {
@@ -1320,7 +1399,7 @@ function teamProfilesAnimation() {
           member.network = members; member.floatPhase = node.phase; member.floatSpeed = node.speed;
         });
       });
-      motionStep = Math.max(1, Math.min(4, ...nodes.map((node) => node.radius / 2)));
+      motionStep = Math.max(teamMotion.physics.minStepPx, Math.min(teamMotion.physics.maxStepPx, ...nodes.map((node) => node.radius / 2)));
       if (!layer && edges.some((edge) => edge.length)) buildLineLayer();
       if (layer) layer.setAttribute("viewBox", `0 0 ${width} ${height}`);
       solveLinks();
@@ -1356,10 +1435,10 @@ function teamProfilesAnimation() {
       });
       edges.forEach((edge) => {
         if (!edge.draw) return;
-        edge.draw.setAttribute("x1", edge.from.x.toFixed(3));
-        edge.draw.setAttribute("y1", edge.from.y.toFixed(3));
-        edge.draw.setAttribute("x2", edge.to.x.toFixed(3));
-        edge.draw.setAttribute("y2", edge.to.y.toFixed(3));
+        edge.draw.setAttribute("x1", edge.from.x.toFixed(teamMotion.physics.lineDecimals));
+        edge.draw.setAttribute("y1", edge.from.y.toFixed(teamMotion.physics.lineDecimals));
+        edge.draw.setAttribute("x2", edge.to.x.toFixed(teamMotion.physics.lineDecimals));
+        edge.draw.setAttribute("y2", edge.to.y.toFixed(teamMotion.physics.lineDecimals));
       });
       paintDirty = false;
     }
@@ -1367,17 +1446,17 @@ function teamProfilesAnimation() {
     // CONNECTED JOINTS + COLLISIONS — free angles, nearly fixed link lengths.
     // Solve both together so a bump also moves the circles attached to that circle.
     function inverseMass(node) {
-      return (drag?.node === node ? 0.1 : 1) / (node.draggable ? teamMotion.links.photoMass : 1);
+      return (drag?.node === node ? teamMotion.drag.heldWeight : 1) / (node.draggable ? teamMotion.links.photoMass : 1);
     }
     function solveLinks() {
-      for (let pass = 0; pass < 160; pass++) {
+      for (let pass = 0; pass < teamMotion.physics.solverIterations; pass++) {
         edges.forEach((edge) => {
           if (!edge.length) return;
           const a = edge.from, b = edge.to;
           // Let the grabbed circle yield a little when its network is squeezed.
           const weightA = inverseMass(a), weightB = inverseMass(b);
           const dx = b.x - a.x, dy = b.y - a.y;
-          const distance = Math.hypot(dx, dy) || 0.001;
+          const distance = Math.hypot(dx, dy) || teamMotion.physics.minDistancePx;
           const correction = (distance - edge.targetLength) / distance / (weightA + weightB);
           const correctionX = dx * correction, correctionY = dy * correction;
           a.x += correctionX * weightA; a.y += correctionY * weightA;
@@ -1389,8 +1468,8 @@ function teamProfilesAnimation() {
           node.y = clamp(node.y, node.minY, node.maxY);
         });
         const settled = edges.every((edge) => !edge.length ||
-          Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < 0.015) &&
-          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015);
+          Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < teamMotion.physics.linkTolerancePx) &&
+          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - teamMotion.physics.linkTolerancePx);
         if (settled) break;
       }
     }
@@ -1398,9 +1477,9 @@ function teamProfilesAnimation() {
       pairs.forEach(({ a, b }) => {
         const dx = b.x - a.x, dy = b.y - a.y;
         const minimum = a.radius + b.radius + teamMotion.collision.gap;
-        if (dx * dx + dy * dy > (minimum + 0.02) ** 2) return;
+        if (dx * dx + dy * dy > (minimum + teamMotion.physics.contactTolerancePx) ** 2) return;
         const distance = Math.hypot(dx, dy);
-        const nx = distance > 0.001 ? dx / distance : 1, ny = distance > 0.001 ? dy / distance : 0;
+        const nx = distance > teamMotion.physics.minDistancePx ? dx / distance : 1, ny = distance > teamMotion.physics.minDistancePx ? dy / distance : 0;
         // The held circle can yield slightly when squeezed against a wall.
         const weightA = inverseMass(a), weightB = inverseMass(b);
         const correction = Math.max(0, minimum - distance) / (weightA + weightB);
@@ -1432,7 +1511,7 @@ function teamProfilesAnimation() {
         if (!ramp) return;
         const proximity = 1 - clamp(gap / controls.range, 0, 1);
         const push = controls.strength * proximity * proximity * ramp * ramp * (3 - 2 * ramp) * dt;
-        const nx = distance > 0.001 ? dx / distance : 1, ny = distance > 0.001 ? dy / distance : 0;
+        const nx = distance > teamMotion.physics.minDistancePx ? dx / distance : 1, ny = distance > teamMotion.physics.minDistancePx ? dy / distance : 0;
         const wa = inverseMass(a), wb = inverseMass(b), total = wa + wb;
         a.vx -= nx * push * 2 * wa / total; a.vy -= ny * push * 2 * wa / total;
         b.vx += nx * push * 2 * wb / total; b.vy += ny * push * 2 * wb / total;
@@ -1446,7 +1525,7 @@ function teamProfilesAnimation() {
       const dy = node.y - clamp(node.y, box.top, box.bottom);
       const gap = Math.max(teamMotion.repel.gap, -node.radius * teamMotion.repel.maxOverlapRatio);
       const distance = Math.hypot(dx, dy), radius = Math.max(0, node.radius + gap);
-      if (distance > 0.001) return { nx: dx / distance, ny: dy / distance, clearance: distance - radius };
+      if (distance > teamMotion.physics.minDistancePx) return { nx: dx / distance, ny: dy / distance, clearance: distance - radius };
       const exits = [{ nx: -1, ny: 0, depth: node.x - box.left }, { nx: 1, ny: 0, depth: box.right - node.x },
         { nx: 0, ny: -1, depth: node.y - box.top }, { nx: 0, ny: 1, depth: box.bottom - node.y }];
       const exit = exits.reduce((best, next) => next.depth < best.depth ? next : best);
@@ -1469,7 +1548,7 @@ function teamProfilesAnimation() {
       if (!drag.pending) return;
       const root = drag.node, dx = drag.x - root.x, dy = drag.y - root.y;
       const before = [...drag.members].map((node) => ({ node, x: node.x, y: node.y }));
-      const now = performance.now(), seconds = Math.max(1 / 120, (now - drag.appliedAt) / 1000);
+      const now = performance.now(), seconds = Math.max(1 / teamMotion.physics.stepsPerSecond, (now - drag.appliedAt) / 1000);
       drag.pending = false; drag.appliedAt = now;
       // Sweep through fast pointer jumps in small steps; no circle can teleport
       // through another circle between pointer events, including linked neighbors.
@@ -1529,7 +1608,7 @@ function teamProfilesAnimation() {
         const variation = node.network.size > 1 ? teamMotion.float.jointVariation : 0;
         // Float the group together, with a little independent movement at joints.
         const floatX = (Math.sin(phase) + Math.sin(jointPhase) * variation) * teamMotion.float.x * blend;
-        const floatY = (Math.cos(phase * 0.83) + Math.cos(jointPhase * 0.83) * variation) * teamMotion.float.y * blend;
+        const floatY = (Math.cos(phase * teamMotion.float.verticalSpeedRatio) + Math.cos(jointPhase * teamMotion.float.verticalSpeedRatio) * variation) * teamMotion.float.y * blend;
         node.x += floatX - node.floatX; node.y += floatY - node.floatY;
         node.floatX = floatX; node.floatY = floatY;
       });
@@ -1537,11 +1616,11 @@ function teamProfilesAnimation() {
       updateLinkLengths(dt);
       solveLinks();
       nodes.forEach((node) => {
-        if ((node.x <= node.minX + 0.02 && node.vx < 0) || (node.x >= node.maxX - 0.02 && node.vx > 0)) node.vx *= -teamMotion.walls.bounce;
-        if ((node.y <= node.minY + 0.02 && node.vy < 0) || (node.y >= node.maxY - 0.02 && node.vy > 0)) node.vy *= -teamMotion.walls.bounce;
+        if ((node.x <= node.minX + teamMotion.physics.contactTolerancePx && node.vx < 0) || (node.x >= node.maxX - teamMotion.physics.contactTolerancePx && node.vx > 0)) node.vx *= -teamMotion.walls.bounce;
+        if ((node.y <= node.minY + teamMotion.physics.contactTolerancePx && node.vy < 0) || (node.y >= node.maxY - teamMotion.physics.contactTolerancePx && node.vy > 0)) node.vy *= -teamMotion.walls.bounce;
       });
       // Share momentum along connections, allowing their joints to turn freely.
-      for (let pass = 0; pass < 4; pass++) edges.forEach((edge) => {
+      for (let pass = 0; pass < teamMotion.physics.momentumIterations; pass++) edges.forEach((edge) => {
         if (!edge.length) return;
         const a = edge.from, b = edge.to, dx = b.x - a.x, dy = b.y - a.y;
         const weightA = drag?.node === a ? 0 : inverseMass(a), weightB = drag?.node === b ? 0 : inverseMass(b);
@@ -1555,16 +1634,16 @@ function teamProfilesAnimation() {
     function tick(time, deltaMs) {
       if (!active || destroyed) return;
       if (geometryDirty && !measure()) return;
-      const dt = Math.min(deltaMs, 50) / 1000;
+      const dt = Math.min(deltaMs, teamMotion.physics.maxFrameMs) / 1000;
       const speed = Math.max(...nodes.map((node) => Math.hypot(node.vx, node.vy)));
-      const steps = Math.max(1, Math.ceil(dt * 120), Math.ceil(speed * dt / motionStep));
+      const steps = Math.max(1, Math.ceil(dt * teamMotion.physics.stepsPerSecond), Math.ceil(speed * dt / motionStep));
       for (let index = 0; index < steps; index++) step(dt / steps);
       paint();
       syncActivity();
     }
 
     // PHOTO HOVER — animate only the inner clip/image, leaving physics anchors intact.
-    function setHover(node, immediate = false, fadeDuration = teamMotion.hover.fadeDuration, fadeEase = teamMotion.hover.ease) {
+    function setHover(node, immediate = false, fadeDuration = teamMotion.hover.fadeDuration, fadeEase = teamMotion.hover.fadeEase) {
       clearTimeout(hoverReleaseTimer); hoverReleaseTimer = null;
       if (hovered === node) return;
       const previous = hovered ? connectedTo(hovered) : new Set();
@@ -1580,7 +1659,7 @@ function teamProfilesAnimation() {
         if (member.image) {
           gsap.to(member.image, { scale: member.imageScale * (active ? controls.imageScale : 1),
             duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto" });
-          gsap.to(member.image, { opacity: active ? 1 : member.imageOpacity,
+          gsap.to(member.image, { opacity: active ? controls.revealedOpacity : member.imageOpacity,
             duration: instant ? 0 : fadeDuration, ease: fadeEase, overwrite: "auto" });
         }
       });
