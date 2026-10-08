@@ -1926,6 +1926,15 @@ function flexGrowAnimation() {
       });
     }
 
+    function sizeClosedItems() {
+      if (mobile) return;
+      // Closed width fits the number/title; the open text column keeps its native width.
+      items.forEach(({ $item, $title }) => {
+        const width = $title.outerWidth();
+        if (width > 0) $item.css("--gallery-closed-content-width", `${width}px`);
+      });
+    }
+
     function sizeImageArtwork() {
       if (!items.some(({ $art }) => $art.length)) return;
       // One item's worth of free space is shared by the row. Keep every photo at
@@ -2035,6 +2044,7 @@ function flexGrowAnimation() {
         });
     });
 
+    sizeClosedItems();
     if (!mobile) gsap.set($imageTargets, { flexGrow: 1 });
     activateItem(initialItem, true);
     sizeImageArtwork();
@@ -2046,6 +2056,7 @@ function flexGrowAnimation() {
         restoreStyles(mobile ? mobileStyles : growStyles);
         mobile = nextMobile;
       }
+      sizeClosedItems();
       if (!mobile) gsap.set($imageTargets, { flexGrow: 1 });
       activateItem(activeItem, true);
       sizeImageArtwork();
