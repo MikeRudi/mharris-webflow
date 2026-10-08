@@ -304,15 +304,19 @@ Designer markup remains as listed above and is restored when desktop JS cleans u
 Only the eight revealed-photo circles are draggable; white circles follow their
 connections and collisions without accepting pointer interaction.
 Hovering a photo scales its clip and its connected circles' clips to 1.15, while
-their images scale to 0.85 (0.4 seconds, power1.in). One tween applies the equal
-15% scale changes together. Connected placeholder images
+their images scale to 0.85. Connected circles additionally scale their outer node
+to 1.3; the directly hovered photo keeps its original outer size. One tween applies
+all scales together using `teamMotion.hover.duration` and `.ease` (currently
+0.3 seconds, power1.out). `connectedParentScale` controls the extra enlargement.
+Connected placeholder images
 fade to opacity 1 over 0.2 seconds. Leaving restores their original appearance.
 Dragging keeps that hover appearance through release and for another 0.4 seconds,
 then restores the photo and its connected circles only once the pointer is outside
 the dragged circle. Staying over it keeps the reveal active; leaving afterwards
 uses the same release fade. Connected images fade out over
-1.2 seconds with power1.out after release; scale restoration uses the same 0.4-second timing.
-The inner clips animate independently of the circles' physics and connector anchors.
+1.2 seconds with power1.out after release; scale restoration uses the shared hover timing.
+Hover scaling keeps the circles' centers and connector anchors intact; resize
+measurements exclude the temporary parent enlargement.
 Native Webflow `team-profile-image` sizing is 120% width/height, max-width none,
 left/top 50%, right/bottom auto and translate(-50%, -50%), with a centred transform
 origin. The existing team-specific style supplies this on `img-abs`; at hover's
