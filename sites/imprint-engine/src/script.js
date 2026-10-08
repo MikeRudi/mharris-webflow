@@ -1165,9 +1165,10 @@ function teamProfilesAnimation() {
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
     float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2, jointVariation: 0.15 },
-    drag: { velocityMultiplier: 0.85, maxSpeed: 935, groupFollow: 0.98, sampleMs: 90, releasePauseMs: 100 },
+    drag: { velocityMultiplier: 0.85, maxSpeed: 935, maxDistance: 300, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
-    links: { elasticity: 0.01, settleSeconds: 0.18, rotationDegrees: 2 },
+    links: { elasticity: 0.01, settleSeconds: 0.18 },
+    collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
 
@@ -1199,9 +1200,10 @@ function teamProfilesAnimation() {
       minX: 0, maxX: 0, minY: 0, maxY: 0,
     }));
     const byElement = new Map(nodes.map((node) => [node.element, node]));
+    const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
     let layer = null;
-    let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0;
+    let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0, motionStep = 4;
     let visible = !window.IntersectionObserver, active = false, destroyed = false;
     let geometryDirty = true, paintDirty = true, drag = null;
     $nodes.css({ pointerEvents: "auto", cursor: "grab", touchAction: "none", userSelect: "none" });
@@ -1220,6 +1222,7 @@ function teamProfilesAnimation() {
         const offsetY = oldHeight ? (node.y - node.baseY) * height / oldHeight : 0;
         node.baseX = (bounds.left + bounds.width / 2 - rect.left) / scaleX - node.tx;
         node.baseY = (bounds.top + bounds.height / 2 - rect.top) / scaleY - node.ty;
+        node.radius = Math.max(bounds.width / scaleX, bounds.height / scaleY) / 2;
         node.minX = Math.min(width / 2, bounds.width / scaleX / 2 + teamMotion.walls.inset);
         node.minY = Math.min(height / 2, bounds.height / scaleY / 2 + teamMotion.walls.inset);
         node.maxX = Math.max(node.minX, width - node.minX);
@@ -1266,7 +1269,6 @@ function teamProfilesAnimation() {
         if (!edge.from || !edge.to || edge.from === edge.to) return;
         // Responsive layout may change the authored length; dragging never does.
         edge.length = Math.hypot(edge.to.baseX - edge.from.baseX, edge.to.baseY - edge.from.baseY);
-        edge.restAngle = Math.atan2(edge.to.baseY - edge.from.baseY, edge.to.baseX - edge.from.baseX);
         edge.targetLength = edge.length * (1 + edge.stretch);
       });
       nodes.forEach((node) => {
@@ -1276,6 +1278,7 @@ function teamProfilesAnimation() {
           member.network = members; member.floatPhase = node.phase; member.floatSpeed = node.speed;
         });
       });
+      motionStep = Math.max(1, Math.min(4, ...nodes.map((node) => node.radius / 2)));
       if (!layer && edges.some((edge) => edge.length)) buildLineLayer();
       if (layer) layer.setAttribute("viewBox", `0 0 ${width} ${height}`);
       solveLinks();
@@ -1319,55 +1322,88 @@ function teamProfilesAnimation() {
       paintDirty = false;
     }
 
-    // CONNECTED JOINTS — preserve the layout with only a small angular give.
-    // The angle limit is relative to the authored layout, so it cannot accumulate.
-    const angleLimit = teamMotion.links.rotationDegrees * Math.PI / 180;
-    const angleDifference = (angle, reference) => Math.atan2(Math.sin(angle - reference), Math.cos(angle - reference));
+    // CONNECTED JOINTS + COLLISIONS — free angles, nearly fixed link lengths.
+    // Solve both together so a bump also moves the circles attached to that circle.
     function solveLinks() {
       for (let pass = 0; pass < 160; pass++) {
-        if (drag) { drag.node.x = drag.x; drag.node.y = drag.y; }
         edges.forEach((edge) => {
           if (!edge.length) return;
           const a = edge.from, b = edge.to;
           const weightA = drag?.node === a ? 0 : 1, weightB = drag?.node === b ? 0 : 1;
           const dx = b.x - a.x, dy = b.y - a.y;
-          const angle = edge.restAngle + clamp(angleDifference(Math.atan2(dy, dx), edge.restAngle), -angleLimit, angleLimit);
-          const correctionX = (dx - Math.cos(angle) * edge.targetLength) / (weightA + weightB);
-          const correctionY = (dy - Math.sin(angle) * edge.targetLength) / (weightA + weightB);
+          const distance = Math.hypot(dx, dy) || 0.001;
+          const correction = (distance - edge.targetLength) / distance / (weightA + weightB);
+          const correctionX = dx * correction, correctionY = dy * correction;
           a.x += correctionX * weightA; a.y += correctionY * weightA;
           b.x -= correctionX * weightB; b.y -= correctionY * weightB;
         });
+        resolveCollisions();
         nodes.forEach((node) => {
           node.x = clamp(node.x, node.minX, node.maxX);
           node.y = clamp(node.y, node.minY, node.maxY);
         });
-        const settled = edges.every((edge) => !edge.length || (
-          Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < 0.015 &&
-          Math.abs(angleDifference(Math.atan2(edge.to.y - edge.from.y, edge.to.x - edge.from.x), edge.restAngle)) <= angleLimit + 0.0001));
+        if (drag) {
+          const point = limitDrag(drag.node.x, drag.node.y);
+          drag.node.x = point.x; drag.node.y = point.y;
+        }
+        const settled = edges.every((edge) => !edge.length ||
+          Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < 0.015) &&
+          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015);
         if (settled) break;
       }
+    }
+    function resolveCollisions() {
+      pairs.forEach(({ a, b }) => {
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const minimum = a.radius + b.radius + teamMotion.collision.gap;
+        if (dx * dx + dy * dy > (minimum + 0.02) ** 2) return;
+        const distance = Math.hypot(dx, dy);
+        const nx = distance > 0.001 ? dx / distance : 1, ny = distance > 0.001 ? dy / distance : 0;
+        // The held circle can yield slightly when squeezed against a wall.
+        const weightA = drag?.node === a ? 0.1 : 1, weightB = drag?.node === b ? 0.1 : 1;
+        const correction = Math.max(0, minimum - distance) / (weightA + weightB);
+        a.x -= nx * correction * weightA; a.y -= ny * correction * weightA;
+        b.x += nx * correction * weightB; b.y += ny * correction * weightB;
+        const closing = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+        if (closing >= 0 || reducedMotion.matches) return;
+        const impulse = -(1 + teamMotion.collision.bounce) * closing / (weightA + weightB);
+        a.vx -= nx * impulse * weightA; a.vy -= ny * impulse * weightA;
+        b.vx += nx * impulse * weightB; b.vy += ny * impulse * weightB;
+      });
     }
     function connectedTo(node) {
       const members = new Set([node]);
       members.forEach((item) => item.neighbors.forEach((neighbor) => members.add(neighbor)));
       return members;
     }
-    function setDragTarget(x, y) {
-      const root = drag.node;
-      let minX = -Infinity, maxX = Infinity, minY = -Infinity, maxY = Infinity;
-      // The whole connected shape must fit inside the walls. Pinning one circle
-      // beyond that range would force its neighbors to stretch or swing around it.
-      drag.members.forEach((member) => {
-        const dx = member.x - root.x, dy = member.y - root.y;
-        minX = Math.max(minX, member.minX - dx); maxX = Math.min(maxX, member.maxX - dx);
-        minY = Math.max(minY, member.minY - dy); maxY = Math.min(maxY, member.maxY - dy);
+    function limitDrag(x, y) {
+      const dx = x - drag.startX, dy = y - drag.startY;
+      const amount = Math.min(1, teamMotion.drag.maxDistance / (Math.hypot(dx, dy) || 1));
+      return { x: clamp(drag.startX + dx * amount, drag.node.minX, drag.node.maxX),
+        y: clamp(drag.startY + dy * amount, drag.node.minY, drag.node.maxY) };
+    }
+    function advanceDrag() {
+      const root = drag.node, dx = drag.x - root.x, dy = drag.y - root.y;
+      // Sweep through fast pointer jumps in small steps; no circle can teleport
+      // through another circle between pointer events, including linked neighbors.
+      const count = Math.max(1, Math.ceil(Math.hypot(dx, dy) / motionStep));
+      const startX = root.x, startY = root.y;
+      for (let index = 1; index <= count; index++) {
+        const x = startX + dx * index / count, y = startY + dy * index / count;
+        root.x = x; root.y = y;
+        updateLinkLengths(0);
+        solveLinks();
+      }
+    }
+    function updateLinkLengths(dt) {
+      edges.forEach((edge) => {
+        if (!edge.length) return;
+        if (drag?.members.has(edge.from)) {
+          const extension = Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) / edge.length - 1;
+          edge.stretch = reducedMotion.matches ? 0 : clamp(extension, -teamMotion.links.elasticity, teamMotion.links.elasticity);
+        } else edge.stretch *= reducedMotion.matches ? 0 : Math.exp(-dt / teamMotion.links.settleSeconds);
+        edge.targetLength = edge.length * (1 + edge.stretch);
       });
-      drag.x = clamp(x, minX, maxX); drag.y = clamp(y, minY, maxY);
-      const dx = (drag.x - root.x) * teamMotion.drag.groupFollow;
-      const dy = (drag.y - root.y) * teamMotion.drag.groupFollow;
-      // Carry almost all pointer movement through the group immediately. The
-      // remaining small lag supplies the elastic feel without large joint swings.
-      drag.members.forEach((member) => { member.x += dx; member.y += dy; });
     }
 
     // FLOAT + THROW — small physics steps keep chains stable even on slow frames.
@@ -1393,21 +1429,14 @@ function teamProfilesAnimation() {
         node.x += floatX - node.floatX; node.y += floatY - node.floatY;
         node.floatX = floatX; node.floatY = floatY;
       });
-      if (drag) { drag.node.x = drag.x; drag.node.y = drag.y; }
-      edges.forEach((edge) => {
-        if (!edge.length) return;
-        if (drag?.members.has(edge.from)) {
-          const extension = Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) / edge.length - 1;
-          edge.stretch = moving ? clamp(extension, -teamMotion.links.elasticity, teamMotion.links.elasticity) : 0;
-        } else edge.stretch *= moving ? Math.exp(-dt / teamMotion.links.settleSeconds) : 0;
-        edge.targetLength = edge.length * (1 + edge.stretch);
-      });
+      if (drag) advanceDrag();
+      updateLinkLengths(dt);
       solveLinks();
       nodes.forEach((node) => {
         if ((node.x <= node.minX + 0.02 && node.vx < 0) || (node.x >= node.maxX - 0.02 && node.vx > 0)) node.vx *= -teamMotion.walls.bounce;
         if ((node.y <= node.minY + 0.02 && node.vy < 0) || (node.y >= node.maxY - 0.02 && node.vy > 0)) node.vy *= -teamMotion.walls.bounce;
       });
-      // Transfer velocity through the links and stop outward spin at the angle limit.
+      // Share momentum along connections, allowing their joints to turn freely.
       for (let pass = 0; pass < 4; pass++) edges.forEach((edge) => {
         if (!edge.length || drag?.members.has(edge.from)) return;
         const a = edge.from, b = edge.to, dx = b.x - a.x, dy = b.y - a.y;
@@ -1416,20 +1445,14 @@ function teamProfilesAnimation() {
         const impulse = ((b.vx - a.vx) * dx + (b.vy - a.vy) * dy) / squareLength / 2;
         a.vx += impulse * dx; a.vy += impulse * dy;
         b.vx -= impulse * dx; b.vy -= impulse * dy;
-        const angle = angleDifference(Math.atan2(dy, dx), edge.restAngle);
-        const spin = (b.vy - a.vy) * dx - (b.vx - a.vx) * dy;
-        if (Math.abs(angle) >= angleLimit - 0.0001 && angle * spin > 0) {
-          const angularImpulse = spin / squareLength / 2;
-          a.vx -= angularImpulse * dy; a.vy += angularImpulse * dx;
-          b.vx += angularImpulse * dy; b.vy -= angularImpulse * dx;
-        }
       });
     }
     function tick(time, deltaMs) {
       if (!active || destroyed) return;
       if (geometryDirty && !measure()) return;
       const dt = Math.min(deltaMs, 50) / 1000;
-      const steps = Math.max(1, Math.ceil(dt * 120));
+      const speed = Math.max(...nodes.map((node) => Math.hypot(node.vx, node.vy)));
+      const steps = Math.max(1, Math.ceil(dt * 120), Math.ceil(speed * dt / motionStep));
       for (let index = 0; index < steps; index++) step(dt / steps);
       paint();
       syncActivity();
@@ -1438,18 +1461,18 @@ function teamProfilesAnimation() {
     // POINTER DRAG — direct movement; only the last short motion sets the throw.
     function moveDrag(event) {
       if (!drag || event.pointerId !== drag.pointerId) return;
-      const rect = header.getBoundingClientRect(), node = drag.node;
-      const x = (event.clientX - rect.left) / scaleX - drag.offsetX;
-      const y = (event.clientY - rect.top) / scaleY - drag.offsetY;
+      const rect = header.getBoundingClientRect();
+      const { x, y } = limitDrag((event.clientX - rect.left) / scaleX - drag.offsetX,
+        (event.clientY - rect.top) / scaleY - drag.offsetY);
       const now = performance.now();
       const previous = drag.samples[drag.samples.length - 1];
       if (x !== previous.x || y !== previous.y) {
-        setDragTarget(x, y);
+        drag.x = x; drag.y = y;
         drag.lastMove = now;
-        // Track the pointer, including beyond a wall, so an outward release
-        // rebounds rather than losing its velocity against the clamped circle.
+        // Sample bounded movement: moving past the 300px limit adds no power.
         drag.samples.push({ x, y, time: now });
-        while (drag.samples.length > 1 && drag.samples[0].time < now - teamMotion.drag.sampleMs) drag.samples.shift();
+        // Keep at least one velocity interval when a slow frame delays an event.
+        while (drag.samples.length > 2 && drag.samples[0].time < now - teamMotion.drag.sampleMs) drag.samples.shift();
       }
       paintDirty = true; syncActivity();
       event.preventDefault();
@@ -1484,7 +1507,7 @@ function teamProfilesAnimation() {
       const rect = header.getBoundingClientRect(), now = performance.now();
       const members = connectedTo(node);
       members.forEach((member) => { member.vx = member.vy = 0; });
-      drag = { node, members, x: node.x, y: node.y, pointerId: original.pointerId,
+      drag = { node, members, x: node.x, y: node.y, startX: node.x, startY: node.y, pointerId: original.pointerId,
         offsetX: (original.clientX - rect.left) / scaleX - node.x,
         offsetY: (original.clientY - rect.top) / scaleY - node.y,
         samples: [{ x: node.x, y: node.y, time: now }], lastMove: now };
