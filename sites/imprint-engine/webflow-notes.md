@@ -124,6 +124,9 @@ JS expands each from 0.08 to 1 over 29% of the scrub with 2% stagger, reaching
 the authored final size at 97%. Blur and borders stay native throughout; no
 animated shadows or filter repaint are needed. Desktop cleanup restores ring
 transforms/opacity and content stacking order.
+The ripple wrapper sits at z-index -1 inside the drop stage. The brackets SVG
+is positioned relative at z-index 2 so the blue rings paint behind both the
+drop and brackets; the remaining end content retains its foreground stacking.
 
 The page-load entrance stops Lenis and restarts it on completion. Early native
 scroll input finishes the entrance before rendering the corresponding scroll

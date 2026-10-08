@@ -8,9 +8,13 @@
   height: 0;
   aspect-ratio: auto;
   overflow: visible;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   transform: translate(-50%, -50%);
+}
+.home-end-brackets-svg {
+  position: relative;
+  z-index: 2;
 }
 .home-end-ripple {
   position: absolute;
