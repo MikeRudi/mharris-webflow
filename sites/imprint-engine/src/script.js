@@ -1172,9 +1172,8 @@ function teamProfilesAnimation() {
 
     // HOVER + RELEASE — scale, image reveal, then the delayed fade after a drag.
     hover: {
-      clipScale: 1.15,
-      imageScale: 0.95,
-      duration: 0.25,
+      scaleAmount: 0.15, // Clip +15%, image -15%; shared timing below.
+      duration: 0.4,
       ease: "power1.in",
       revealedOpacity: 1,
       fadeDuration: 0.2,
@@ -1652,13 +1651,14 @@ function teamProfilesAnimation() {
       const controls = teamMotion.hover, instant = immediate || reducedMotion.matches;
       new Set([...previous, ...next]).forEach((member) => {
         const active = next.has(member);
-        if (member.clip) gsap.to(member.clip, {
-          scale: member.clipScale * (active ? controls.clipScale : 1),
+        const scaleTargets = [member.clip, member.image].filter(Boolean);
+        if (scaleTargets.length) gsap.to(scaleTargets, {
+          scale: (_index, target) => target === member.clip
+            ? member.clipScale * (active ? 1 + controls.scaleAmount : 1)
+            : member.imageScale * (active ? 1 - controls.scaleAmount : 1),
           duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto",
         });
         if (member.image) {
-          gsap.to(member.image, { scale: member.imageScale * (active ? controls.imageScale : 1),
-            duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto" });
           gsap.to(member.image, { opacity: active ? controls.revealedOpacity : member.imageOpacity,
             duration: instant ? 0 : fadeDuration, ease: fadeEase, overwrite: "auto" });
         }
