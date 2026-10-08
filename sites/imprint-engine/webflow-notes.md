@@ -287,8 +287,9 @@ its GitHub development loader. Its new team artwork is native Webflow content:
 
 One native `.gradient-float-1` div sits directly inside `.section-teams`, before
 `.teams-layout`, as the left-side red glow preview. It uses the selected Figma
-Ellipse 589's `#FF9AA4` fill and rotated 246 × 358px proportions, scaled with
-the viewport from the 1441px reference. Native rounded corners and a blur filter
+Ellipse 589's `#FF9AA4` fill with a `15.4em × 22.4em` size. Positioning uses
+`top: 10.4%` and `left: -8.5%`, with no transform. The native blur is `5.5vw`.
+Native rounded corners and the blur filter
 create the soft edge; there is no embed or runtime CSS. It sits at z-index 0,
 behind the existing layout at 1, with pointer events disabled and `aria-hidden`.
 Its matching `gradient-float-1` attribute is available for later animation.
