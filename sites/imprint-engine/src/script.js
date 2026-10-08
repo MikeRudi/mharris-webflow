@@ -2918,7 +2918,13 @@ function testimonialEnvelopeAnimation() {
 
     function measure() {
       const height = envelope.clientHeight, mouth = $pocket[0].offsetTop;
-      $cards.each(function () {
+      const cards = $cards.toArray();
+      const restingTops = cards.map(card => {
+        const angle = Number(gsap.getProperty(card, "rotation")) * Math.PI / 180;
+        return card.offsetTop + card.offsetHeight / 2 * (1 - Math.cos(angle))
+          - card.offsetWidth / 2 * Math.abs(Math.sin(angle));
+      });
+      $cards.each(function (index) {
         const content = this.querySelector("[testimonial-card-content]");
         if (!content) return;
         const angle = Number(gsap.getProperty(this, "rotation")) * Math.PI / 180;
@@ -2926,7 +2932,9 @@ function testimonialEnvelopeAnimation() {
         const contentBottom = cy + (content.offsetTop + content.offsetHeight - cy) * Math.cos(angle)
           + Math.max((content.offsetLeft - cx) * Math.sin(angle),
             (content.offsetLeft + content.offsetWidth - cx) * Math.sin(angle));
-        const reveal = this.offsetTop + contentBottom - mouth + height * envelopeMotion.hover.contentGap;
+        // Rear cards rise above the cards in front; their stacking order never changes.
+        const revealEdge = Math.min(mouth, ...restingTops.slice(index + 1));
+        const reveal = this.offsetTop + contentBottom - revealEdge + height * envelopeMotion.hover.contentGap;
         const tuckedBottom = this.offsetTop + cy + cy * Math.cos(angle) - cx * Math.abs(Math.sin(angle));
         const maximum = tuckedBottom - mouth - height * envelopeMotion.hover.minimumInserted;
         lifts.set(this, Math.max(0, Math.min(maximum, Math.max(height * envelopeMotion.hover.minimumLift, reveal))));
@@ -2937,15 +2945,13 @@ function testimonialEnvelopeAnimation() {
     function revealCard(card) {
       if (!open || !ready) return;
       active = card;
-      $cards.each(function (index) {
+      $cards.each(function () {
         const selected = this === card;
         const motion = envelopeMotion.hover[selected ? "reveal" : "return"];
         gsap.to(this, {
           y: selected ? -lifts.get(this) : 0, yPercent: 0,
           duration: seconds(motion.duration), ease: motion.ease, overwrite: true,
         });
-        // Keep the whole selected card above the other cards, below the purple pocket.
-        gsap.set(this, { zIndex: selected ? 10 : index + 1 });
       });
     }
 
@@ -2958,7 +2964,7 @@ function testimonialEnvelopeAnimation() {
       gsap.killTweensOf($moving);
       $button.attr({ "aria-expanded": String(open), "aria-label": open ? "Close testimonials" : "Open testimonials" });
       $cards.attr({ tabindex: open ? "0" : "-1", "aria-hidden": String(!open) });
-      gsap.set($cards, { pointerEvents: "none", zIndex: index => index + 1 });
+      gsap.set($cards, { pointerEvents: "none" });
       gsap.set($openHit, { visibility: open ? "visible" : "hidden" });
       gsap.set($flap, { pointerEvents: open ? "none" : "auto" });
       const motion = envelopeMotion[open ? "open" : "close"];
