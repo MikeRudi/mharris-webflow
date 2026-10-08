@@ -285,14 +285,16 @@ Imprint Engine v2 (`6abbde0cb7e6f39d52509b6c`), Home
 (`6abbde0cb7e6f39d52509b36`), currently loads this folder's existing JS through
 its GitHub development loader. Its new team artwork is native Webflow content:
 
-One native `.gradient-float-1` div sits directly inside `.section-teams`, before
-`.teams-layout`, as the left-side red glow preview. It uses the selected Figma
-Ellipse 589's `#FF9AA4` fill with a `15.4em × 22.4em` size. Positioning uses
-`top: 10.4%` and `left: -8.5%`, with no transform. The native blur is `5.5vw`.
-Native rounded corners and the blur filter
-create the soft edge; there is no embed or runtime CSS. It sits at z-index 0,
-behind the existing layout at 1, with pointer events disabled and `aria-hidden`.
-Its matching `gradient-float-1` attribute is available for later animation.
+Two native divs, `.team-gradient-1` and `.team-gradient-2`, sit directly inside
+`.section-teams`, before `.teams-layout`, as the left and right red glows.
+Both use the selected Figma Ellipse 589's `#FF9AA4` fill, `15.4em × 22.4em` size,
+`top: 10.4%` and `blur(5.5vw)`, with no transform. The first uses `left: -8.5%`;
+the second mirrors it with `right: -8.5%` and `left: auto`.
+Native rounded corners and the blur filter create the soft edges; there is no
+embed or runtime CSS. Both sit at z-index 0 behind the existing layout at 1,
+with pointer events disabled and `aria-hidden`. Matching `team-gradient-1` and
+`team-gradient-2` attributes are available for later animation. The first class
+and hook replace the former `gradient-float-1` name.
 
 Native `.section-teams` uses `user-select: none` to prevent text highlighting.
 The header's `.btn-2-brand` has custom `class="text-selectable"`; that standalone
