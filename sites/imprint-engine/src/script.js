@@ -235,7 +235,7 @@ function homeAnimation() {
     ),
     {
       y: "10rem",
-      opacity: 0,
+      autoAlpha: 0, // Invisible scenes must not cover the visible scene's buttons.
       willChange: "transform, opacity",
     }
   );
@@ -845,9 +845,9 @@ function homeAnimation() {
   homeLoadTimeline
     .to($("[home-start-up]").not("[home-resting]"), { scale: homeEntrance.scale.to, duration: homeEntrance.scale.duration, ease: homeEntrance.scale.ease }, homeEntrance.scale.start)
     .to($("[home-start-up]"), { y: 0, duration: homeEntrance.move.duration, ease: homeEntrance.move.ease, stagger: homeEntrance.move.stagger }, homeEntrance.move.start)
-    .to($("[home-start-up]"), { opacity: 1, duration: homeEntrance.fade.duration, ease: homeEntrance.fade.ease, stagger: homeEntrance.fade.stagger }, homeEntrance.fade.start)
+    .to($("[home-start-up]"), { autoAlpha: 1, duration: homeEntrance.fade.duration, ease: homeEntrance.fade.ease, stagger: homeEntrance.fade.stagger }, homeEntrance.fade.start)
     .to($homeLogos, { y: 0, duration: homeEntrance.logosMove.duration, ease: homeEntrance.logosMove.ease, stagger: homeEntrance.logosMove.stagger }, homeEntrance.logosMove.start)
-    .to($homeLogos, { opacity: 1, duration: homeEntrance.logosFade.duration, ease: homeEntrance.logosFade.ease, stagger: homeEntrance.logosFade.stagger }, homeEntrance.logosFade.start);
+    .to($homeLogos, { autoAlpha: 1, duration: homeEntrance.logosFade.duration, ease: homeEntrance.logosFade.ease, stagger: homeEntrance.logosFade.stagger }, homeEntrance.logosFade.start);
 
   // BUILD THE SCRUB SEQUENCE — timing stays in homeMotion above.
   const homeTimeline = gsap.timeline({ paused: true, id: "home-sequence" });
@@ -890,33 +890,33 @@ function homeAnimation() {
       { progress: 1, onUpdate: renderHomeRestingSphere }, motion.sphere);
     const $content = $("[home-start-up]").not("[home-resting]");
     addHomeStep(group, "move", $content, { y: 0, scale: 1 }, { y: motion.move.y, scale: motion.move.scale }, motion.move);
-    addHomeStep(group, "fade", $content, { opacity: 1 }, { opacity: 0 }, motion.fade);
+    addHomeStep(group, "fade", $content, { autoAlpha: 1 }, { autoAlpha: 0 }, motion.fade);
   });
 
   // 02 — Cards and logos leave in their own groups.
   addHomeGroup("cards", (group, motion) => {
     addHomeStep(group, "move", $homeResting, { y: 0 }, { y: motion.move.y }, motion.move);
-    addHomeStep(group, "fade", $homeResting, { opacity: 1 }, { opacity: 0 }, motion.fade);
+    addHomeStep(group, "fade", $homeResting, { autoAlpha: 1 }, { autoAlpha: 0 }, motion.fade);
   });
   addHomeGroup("logos", (group, motion) => {
     addHomeStep(group, "move", $homeLogos, { y: 0 }, { y: motion.move.y }, motion.move);
-    addHomeStep(group, "fade", $homeLogos, { opacity: 1 }, { opacity: 0 }, motion.fade);
+    addHomeStep(group, "fade", $homeLogos, { autoAlpha: 1 }, { autoAlpha: 0 }, motion.fade);
   });
 
   // 03 — Second scene: the delay before leave is the hold; no competing tween.
   addHomeGroup("secondScene", (group, motion) => {
     const $content = $("[home-second-up]");
     addHomeStep(group, "enter", $content, { y: motion.enter.fromY, scale: motion.enter.fromScale }, { y: 0, scale: motion.enter.scale }, motion.enter);
-    addHomeStep(group, "reveal", $content, { opacity: 0 }, { opacity: 1 }, motion.reveal);
+    addHomeStep(group, "reveal", $content, { autoAlpha: 0 }, { autoAlpha: 1 }, motion.reveal);
     addHomeStep(group, "leave", $content, { y: 0, scale: motion.enter.scale }, { y: motion.leave.y, scale: motion.leave.scale }, motion.leave);
-    addHomeStep(group, "hide", $content, { opacity: 1 }, { opacity: 0 }, motion.hide);
+    addHomeStep(group, "hide", $content, { autoAlpha: 1 }, { autoAlpha: 0 }, motion.hide);
   });
 
   // 04 — Third scene remains in place until the clip reveals the next layer.
   addHomeGroup("thirdScene", (group, motion) => {
     const $content = $("[home-third-up]");
     addHomeStep(group, "enter", $content, { y: motion.enter.fromY, scale: motion.enter.fromScale }, { y: 0, scale: motion.enter.scale }, motion.enter);
-    addHomeStep(group, "reveal", $content, { opacity: 0 }, { opacity: 1 }, motion.reveal);
+    addHomeStep(group, "reveal", $content, { autoAlpha: 0 }, { autoAlpha: 1 }, motion.reveal);
   });
 
   // 05 — Gradient formation and orbit. One renderer owns the dot positions.
@@ -1115,7 +1115,7 @@ function homeAnimation() {
       $(
         "[home-resting], [home-start-up], [home-second-up], [home-third-up], [home-logo-up]"
       ),
-      { clearProps: "transform,opacity,will-change" }
+      { clearProps: "transform,opacity,visibility,will-change" }
     );
     gsap.set($homeResting.find("[perspective-card]"), {
       clearProps: "transform,opacity,will-change",
