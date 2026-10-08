@@ -309,7 +309,7 @@ or compression. Their joints rotate freely, keeping independent momentum during
 grabs and releases. Each grab automatically releases after 0.1 seconds,
 even if the mouse button remains down. Circles collide across all groups, with a 1px
 gap and a soft rebound, while links and section walls remain constrained. Connector
-segments collide with other circles and separate from unrelated crossing lines.
+lines stay anchored and flexible but do not participate in collisions.
 Fast pointer jumps are swept through small steps to prevent passing through circles.
 Release velocity and its cap remain 20% gentler; stronger follow momentum, slower
 elastic settling and heavier photos let connected groups travel more freely. Momentum can

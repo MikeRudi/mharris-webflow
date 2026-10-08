@@ -80,8 +80,6 @@ The `teamMotion` controls are at the top of the function:
   photos retain more momentum and pull their lighter satellites along.
 - `collision.gap / bounce`: clearance between circle outlines (`1`px) and impact
   restitution (`0.45`). Collisions cover circles in every group in the header.
-- `collision.lineGap`: circles collide with connector segments with `2`px clearance;
-  unrelated connector crossings also separate. Lines sharing a joint can still rotate.
 - `repel.gap`: `-18` allows the circle outline to overlap content before full force.
   Applies to `.text`, `.btn-2-brand` and `.team-list` inside `.teams-layout`.
   Nested content shares its parent's rectangle; hooks are added at runtime.
@@ -105,7 +103,7 @@ boxes cannot clip a moving connection. Its lines keep their authored colours.
 The original SVGs are hidden only during desktop animation and restored on cleanup.
 Small physics steps and cached circle geometry avoid per-frame layout measurements.
 Fast pointer jumps are swept in small spatial steps to prevent tunnelling through
-another circle or connector. Content applies a gradual force. The grab timer is cleared on release,
+another circle. Lines remain anchored but do not collide. Content applies a gradual force. The grab timer is cleared on release,
 cancellation and cleanup. Circles keep gliding after the timer releases them.
 No extra animation library, runtime stylesheet or Webflow embed is required.
 
