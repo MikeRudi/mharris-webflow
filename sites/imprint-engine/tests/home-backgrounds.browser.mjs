@@ -34,19 +34,11 @@ try {
  assert.equal(await page.evaluate(()=>gsap.getById('home-dna-sway').paused()),false);
  assert.ok(await page.locator('[home-dna-ribbon]').evaluate(e=>e.offsetWidth>e.parentElement.clientWidth*1.5));
  if(output)await page.screenshot({path:output+'/dna-background.png'});
- await visit('[compare-section]');
- const box=await page.locator('[compare-section]').boundingBox();
- const x=box.x+box.width*.35,y=Math.max(100,Math.min(750,box.y+box.height*.45));
- await page.mouse.move(x,y);await page.waitForTimeout(500);
- const center=await page.locator('[compare-glow]').evaluate(e=>{const b=e.getBoundingClientRect();return{x:b.x+b.width/2,y:b.y+b.height/2}});
- assert.ok(Math.abs(center.x-x)<2 && Math.abs(center.y-y)<2,JSON.stringify({center,x,y}));
- await page.mouse.move(1,1);await page.waitForTimeout(500);
- assert.ok(await page.locator('[compare-glow]').evaluate(e=>Math.abs(gsap.getProperty(e,'x'))<1));
  await visit('[cat-select]');
  const active=await page.locator('[cat-select].active').evaluate(e=>getComputedStyle(e).backgroundImage);
  await page.locator('[cat-select]:not(.active)').first().hover({force:true});
  assert.equal(await page.locator('[cat-select]:hover').first().evaluate(e=>getComputedStyle(e).backgroundImage),active);
- console.log('PASS unclipped FAQ layers, visible breathing/ribbon motion, cursor tracking and native catalogue hover');
+ console.log('PASS unclipped FAQ layers, visible breathing/ribbon motion and native catalogue hover');
  for(const width of [1440,768,390]) {
   await page.setViewportSize({width,height:900});await visit('[home-faq]');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));

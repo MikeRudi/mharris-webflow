@@ -12,6 +12,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
 | `compareDropAnimation` | `dropMotion.scroll / draw` | Centre-screen drop hold, trailing line and release at the final comparison row |
+| `compareGradientAnimation` | `gradientMotion.arrive / reveal / follow / trail / leave / performance` | Invisible arrival, cursor reveal, fading paint trail and parked exit |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
 | `lineHover` | `lineMotion.enter / leave` | Pointer and keyboard underline timing and direction |
 | `filterOne` | `filterMotion` | Hide, container resize and incoming result trains |
@@ -42,6 +43,22 @@ normalised timeline (`draw.duration: 1`), not a timed autoplay animation.
 The release point updates after responsive/copy/font changes, and all inline
 styles and triggers are restored on cleanup. Run `tests/compare-drop.browser.mjs`
 for the focused first-build check.
+
+## Comparison gradient
+
+The controls at the top of `compareGradientAnimation()` use seconds and pixels:
+- `arrive`: movement duration/ease before the hidden gradient is revealed.
+- `reveal`: opacity 1, duration 0.3, ease `power1.in`.
+- `follow.responseSeconds`: cursor response; smaller values follow more closely.
+- `trail`: fixed layer count, per-layer response, opacity, spread and fade response.
+- `leave`: minimum/maximum catch-up time, catch distance and final fade timing/ease.
+- `performance`: settling thresholds and frame-delta cap. The frame loop sleeps
+  once the head and trail settle, and stops immediately when hidden/offscreen.
+
+Edit the native `.compare-gradient` class for size, percentage placement, colour
+and blur. Runtime trail layers reuse it. Run `tests/compare-gradient.browser.mjs`
+for the focused first-build check; the earlier background test no longer expects
+the removed `[compare-glow]` behavior.
 
 ## Filter trains
 

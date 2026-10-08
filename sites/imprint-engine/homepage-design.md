@@ -50,8 +50,11 @@ section's painted background. Their transparent edges can extend above the FAQ;
 the right glow fades before the dark footer instead of stopping against it.
 `[home-dna-ribbon]` uses the original lined PNG at 180% width, with native opacity
 and a soft vertical mask. The native `.cat-select:hover` matches `.active`.
-`[compare-glow]` follows the cursor only inside `[compare-section]`, then returns
-to its authored location. All sizing, gradients and hover styles live in Webflow.
+The v2 comparison now uses native `[compare-gradient]` and the separate
+`compareGradientAnimation()` function. It arrives invisibly, reveals, follows
+the cursor with a fading trail, then parks and fades at the exit point. The old
+`[compare-glow]` element/cursor branch was removed. Sizing, gradients and hover
+styles live in Webflow.
 
 Run `tests/home-backgrounds.browser.mjs` for motion, cursor, hover, responsive
 overflow, reduced-motion and cleanup checks (from this site's directory).

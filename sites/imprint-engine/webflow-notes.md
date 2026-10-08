@@ -201,8 +201,8 @@ Their custom `class` attributes use the existing typography system:
 Each replacement text block is bound to the same original component property.
 Heading roles/levels retain the original accessible hierarchy. The logo is
 preserved inside a Div Block, and `.compare-copy` owns the 0.75rem title/copy
-gap. Existing layout classes, SVG artwork and `[compare-glow]` cursor motion
-remain in place. These edits are saved in Designer; publishing is separate.
+gap. Existing layout classes and SVG artwork remain in place. These edits are
+saved in Designer; publishing is separate.
 
 The comparison drop uses native `compare-drop-track`, `compare-drop-line` and
 `compare-drop` div classes, each with its matching behavior attribute. The
@@ -219,6 +219,23 @@ scrub, draws its trail from the authored starting point, and releases when
 the drop's bottom reaches the final row's bottom. The movement reverses with
 scroll and adds no pin spacer or layout height. Reduced motion keeps the
 drop static. Component text properties are untouched by this addition.
+
+The old `.compare-glow` element and its cursor branch in `homeBackgroundMotion()`
+have been removed. The replacement is a native Div Block with class and behavior
+attribute `compare-gradient`, directly inside the comparison component. Native
+styling uses `left: 58%`, `top: 20%`, `width: 22em`, `height: 26em`, cyan
+`rgba(1, 163, 183, 0.55)` from the Figma reference, `blur(5.5vw)`, and initial
+opacity 0. Its authored transform is `none`; only runtime cursor movement uses
+translation. `.compare-layout` has z-index 1 to keep content above the artwork.
+
+`compareGradientAnimation()` owns the pointer behavior separately. The gradient
+arrives invisibly in 0.14s, then reveals from 0 to 1 over 0.3s with `power1.in`.
+Four reusable copies of the same native artwork follow at increasing delays;
+their opacity fades as they converge, so they never pile up into a bright blob
+at rest. On pointer exit, the head parks at the exit point, the trail catches up,
+then everything fades out. It does not return to its original percentage position.
+The frame loop stops at rest and when hidden/offscreen. Touch/reduced-motion
+visitors receive no decorative cursor effect; cleanup removes all trail copies.
 
 ## Flex Grow Gallery
 
