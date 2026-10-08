@@ -318,7 +318,13 @@ Native changes need a Webflow publish; the JS uses the existing site loader.
 ## Drop Text Section
 
 Home Staged contains `.drop-text-section > .drop-text-layout`. The existing
-`.drop-text-content` and its text are preserved. The new sibling is:
+`.drop-text-content` and its text are preserved. In v2's `Homepage Drop with
+Text` component, both text blocks use the native `.text` base with typography
+classes in the custom `class` attribute. The heading keeps `weight-600 h-6
+text-center` and `text-ch="15"`; the paragraph keeps `p-1 text-center` and
+`text-ch="35"`. The heading has `role="heading"` and `aria-level="2"`. The
+original Heading and Description component properties remain linked to those
+same text blocks. The artwork sibling is:
 
 ```txt
 .drop-text-artwork (decorative, aria-hidden)
@@ -331,20 +337,19 @@ Home Staged contains `.drop-text-section > .drop-text-layout`. The existing
 ```
 
 Native Webflow styles control the layout, not `src/styles.css`. The artwork
-column is `45%` wide and `28em` tall. The mark is `9.125em` wide; the gradient
-drop is `4.75em` wide with an automatic proportional SVG height. It reuses the
-home drop silhouette with layered purple shading from the supplied Figma
-reference. Brackets use the approved `#5F249F` paths. Native SVG definitions
-use the unique IDs `drop-text-purple-fill` and `drop-text-soft-edge`; after WHTML
-insertion, set the SVG tags to the case-sensitive `radialGradient` and
-`feGaussianBlur` (the importer lowercases them).
+column is `45%` wide and `28em` tall. The mark is `8em` wide; the drop is `4em`
+wide with an automatic proportional SVG height. It reuses the exact black
+outline path, transform and viewBox from the final home-animation drop, with
+`#111111` fill and a transparent centre. The old purple fill layers, gradient
+and blur definitions are removed. Brackets retain their approved `#5F249F`
+paths and `1.7em` width.
 
 The square ripple container is `32em` wide, falling to `28em` on tablet and
 `24em` on mobile portrait. Its three rings have their own classes, so neither
-home ripple animation selects them. `.drop-text-section` hides decorative
-overflow; at tablet and below the section becomes auto-height, its layout
-stacks with a `3em` gap, and the text's desktop `7em` left padding becomes zero.
-Original desktop text typography, spacing and the `80vh` section height remain.
+home ripple animation selects them. `.drop-text-section` uses auto height,
+an `80vh` minimum height and visible overflow so the artwork is not clipped.
+At tablet and below its layout stacks with a `3em` gap, and the text's desktop
+`7em` left padding becomes zero. Original text typography and spacing remain.
 
 `dropTextAnimation()` initializes globally for desktop and mobile. Each layout
 gets its own ScrollTrigger at `top 50%`: enter plays the ripple, leave-back
