@@ -45,7 +45,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), dropTextAnimation(), flexGrowAnimation()];
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), compareDropAnimation(), dropTextAnimation(), flexGrowAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -2541,6 +2541,87 @@ function gradientBreathOne() {
       document.removeEventListener("visibilitychange", sync);
       gradients.forEach(({ tween }) => tween.kill());
       restore();
+    };
+  });
+  return () => media.revert();
+}
+
+function compareDropAnimation() {
+  // COMPARISON DROP — native Webflow classes control size, colour and glow.
+  const dropMotion = {
+    scroll: { screenPosition: 0.5, startOffset: 0, endInset: 0, scrub: true },
+    // Linear movement and direct scrub keep the drop exactly at screenPosition.
+    draw: { duration: 1, ease: "none" },
+  };
+  const $sections = $("[compare-section]");
+  if (!$sections.length || !window.gsap || !window.ScrollTrigger) return null;
+  gsap.registerPlugin(ScrollTrigger);
+
+  const media = gsap.matchMedia();
+  media.add("(prefers-reduced-motion: no-preference)", () => {
+    const cleanups = [];
+    let refreshFrame = null, destroyed = false;
+    const scheduleRefresh = () => {
+      if (destroyed || refreshFrame !== null) return;
+      refreshFrame = requestAnimationFrame(() => {
+        refreshFrame = null;
+        ScrollTrigger.refresh();
+      });
+    };
+
+    $sections.each(function (index) {
+      const $section = $(this);
+      const track = $section.find("[compare-drop-track]")[0];
+      const drop = $section.find("[compare-drop]")[0];
+      const line = $section.find("[compare-drop-line]")[0];
+      const lastRow = $section.find("[compare-row]").last()[0];
+      if (!track || !drop || !line || !lastRow) return;
+      const restore = rememberAttributes($([drop, line]), ["style"]);
+      let halfHeight = 0, travel = 0;
+
+      // 01 — Measure from the authored top to the bottom of the final row.
+      function measure() {
+        halfHeight = drop.offsetHeight / 2;
+        travel = Math.max(0, lastRow.getBoundingClientRect().bottom
+          - track.getBoundingClientRect().top - halfHeight * 2
+          - dropMotion.scroll.startOffset - dropMotion.scroll.endInset);
+        gsap.set(line, { top: dropMotion.scroll.startOffset + halfHeight, height: travel });
+      }
+      measure();
+      gsap.set(drop, { y: dropMotion.scroll.startOffset });
+      gsap.set(line, { scaleY: 0, transformOrigin: "50% 0%" });
+
+      // 02 — Match scroll pixel for pixel, holding the drop at mid-screen.
+      // Both ends stay inside the section; no pin spacer changes its layout.
+      const timeline = gsap.timeline({ paused: true })
+        .fromTo(drop, { y: () => dropMotion.scroll.startOffset }, {
+          y: () => dropMotion.scroll.startOffset + travel, ...dropMotion.draw,
+        }, 0)
+        .fromTo(line, { scaleY: 0 }, { scaleY: 1, ...dropMotion.draw }, 0);
+      const trigger = ScrollTrigger.create({
+        id: `compare-drop-${index + 1}`,
+        trigger: track,
+        start: () => `${dropMotion.scroll.startOffset + halfHeight}px ${dropMotion.scroll.screenPosition * 100}%`,
+        end: (self) => self.start + Math.max(1, travel),
+        animation: timeline,
+        scrub: dropMotion.scroll.scrub,
+        invalidateOnRefresh: true,
+        onRefreshInit: measure,
+      });
+
+      // 03 — Remeasure when copy, fonts or responsive layout changes height.
+      const observer = window.ResizeObserver && new ResizeObserver(scheduleRefresh);
+      if (observer) { observer.observe(this); observer.observe(lastRow); }
+      cleanups.push(() => {
+        if (observer) observer.disconnect();
+        trigger.kill(); timeline.kill(); restore();
+      });
+    });
+    if (document.fonts) document.fonts.ready.then(scheduleRefresh);
+    return () => {
+      destroyed = true;
+      if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
+      cleanups.forEach((cleanup) => cleanup());
     };
   });
   return () => media.revert();
