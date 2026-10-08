@@ -308,7 +308,9 @@ their images scale to 0.85 (0.4 seconds, power1.in). One tween applies the equal
 15% scale changes together. Connected placeholder images
 fade to opacity 1 over 0.2 seconds. Leaving restores their original appearance.
 Dragging keeps that hover appearance through release and for another 0.4 seconds,
-then restores the photo and its connected circles. Connected images fade out over
+then restores the photo and its connected circles only once the pointer is outside
+the dragged circle. Staying over it keeps the reveal active; leaving afterwards
+uses the same release fade. Connected images fade out over
 1.2 seconds with power1.out after release; scale restoration uses the same 0.4-second timing.
 The inner clips animate independently of the circles' physics and connector anchors.
 Native Webflow `team-profile-image` sizing is 120% width/height, max-width none,
