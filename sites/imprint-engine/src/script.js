@@ -2585,7 +2585,8 @@ function compareDropAnimation() {
         travel = Math.max(0, lastRow.getBoundingClientRect().bottom
           - track.getBoundingClientRect().top - halfHeight * 2
           - dropMotion.scroll.startOffset - dropMotion.scroll.endInset);
-        gsap.set(line, { top: dropMotion.scroll.startOffset + halfHeight, height: travel });
+        line.style.top = `${dropMotion.scroll.startOffset + halfHeight}px`;
+        line.style.height = `${travel}px`;
       }
       measure();
       gsap.set(drop, { y: dropMotion.scroll.startOffset });
