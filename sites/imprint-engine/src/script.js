@@ -1836,7 +1836,7 @@ function flexGrowAnimation() {
   const $blocks = $("[flex-grow-block]");
   if (!$blocks.length || !window.gsap) return null;
 
-  // GALLERY CONTROLS — desktop growth, copy fade, and mobile expansion in seconds.
+  // GALLERY CONTROLS — growth/active spacing, copy fade, and mobile expansion in seconds.
   const galleryMotion = {
     grow: {
       start: 0,
