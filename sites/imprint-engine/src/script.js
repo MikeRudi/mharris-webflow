@@ -1165,7 +1165,7 @@ function teamProfilesAnimation() {
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
     layout: { hiddenCircles: ["02", "06", "07", "08"] }, // Remove one photo and its three white satellites.
-    hover: { clipScale: 1.15, imageScale: 0.95, duration: 0.25, fadeDuration: 0.2, ease: "power1.in" },
+    hover: { clipScale: 1.15, imageScale: 0.95, duration: 0.25, fadeDuration: 0.2, releaseHoldSeconds: 0.4, ease: "power1.in" },
     float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2, jointVariation: 1 },
     drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.8, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
@@ -1225,7 +1225,7 @@ function teamProfilesAnimation() {
       node.imageScale = node.image ? Number(gsap.getProperty(node.image, "scaleX")) : 1;
       node.imageOpacity = node.image ? Number(getComputedStyle(node.image).opacity) : 0;
     });
-    let hovered = null;
+    let hovered = null, hoverReleaseTimer = null;
     const byElement = new Map(nodes.map((node) => [node.element, node]));
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b, nearSeconds: 0 })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
@@ -1565,6 +1565,7 @@ function teamProfilesAnimation() {
 
     // PHOTO HOVER — animate only the inner clip/image, leaving physics anchors intact.
     function setHover(node, immediate = false) {
+      clearTimeout(hoverReleaseTimer); hoverReleaseTimer = null;
       if (hovered === node) return;
       const previous = hovered ? connectedTo(hovered) : new Set();
       const next = node ? connectedTo(node) : new Set();
@@ -1587,10 +1588,11 @@ function teamProfilesAnimation() {
     $header.on(`pointerenter${namespace}`, "[team-profile-node]", function (event) {
       const node = byElement.get(this);
       if (!node?.draggable || event.originalEvent?.pointerType === "touch") return;
+      if (drag || (hoverReleaseTimer && hovered === node)) return;
       if (geometryDirty && !measure()) return;
       setHover(node);
     }).on(`pointerleave${namespace}`, "[team-profile-node]", function () {
-      if (hovered === byElement.get(this)) setHover(null);
+      if (!drag && !hoverReleaseTimer && hovered === byElement.get(this)) setHover(null);
     });
 
     // POINTER DRAG — direct movement; only the last short motion sets the throw.
@@ -1634,6 +1636,13 @@ function teamProfilesAnimation() {
         member.blend = member.floatX = member.floatY = 0;
       });
       node.element.style.cursor = "grab";
+      if (!destroyed && throwIt) {
+        setHover(node);
+        hoverReleaseTimer = setTimeout(() => {
+          hoverReleaseTimer = null;
+          if (!destroyed && !drag && hovered === node) setHover(null);
+        }, teamMotion.hover.releaseHoldSeconds * 1000);
+      } else if (!destroyed) setHover(null);
       if (node.element.hasPointerCapture?.(current.pointerId)) node.element.releasePointerCapture(current.pointerId);
       paintDirty = true; syncActivity();
     }
@@ -1644,6 +1653,7 @@ function teamProfilesAnimation() {
       const rect = header.getBoundingClientRect(), now = performance.now();
       const members = connectedTo(node);
       node.vx = node.vy = 0;
+      setHover(node);
       drag = { node, members, x: node.x, y: node.y, pending: false, appliedAt: now, pointerId: original.pointerId,
         releaseAt: now + teamMotion.drag.holdSeconds * 1000,
         offsetX: (original.clientX - rect.left) / scaleX - node.x,
@@ -1708,6 +1718,7 @@ function teamProfilesAnimation() {
     syncActivity();
     cleanups.push(() => {
       destroyed = true; finishDrag(); syncActivity();
+      clearTimeout(hoverReleaseTimer);
       if (observer) observer.disconnect();
       if (resizeObserver) resizeObserver.disconnect();
       $header.off(namespace); $(document).off(namespace); $(window).off(namespace);
