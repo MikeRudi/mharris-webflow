@@ -56,16 +56,20 @@ and its image reveal; there is no separate image zoom or delay.
 ## Team circles (v2)
 
 `teamProfilesAnimation()` is called inside `onDesktop()` (992px and wider).
-The `teamMotion` controls are at the top of the function:
+All `teamMotion` controls are at the top of the function, under labelled feature
+headings. Distances are pixels, durations are seconds (except names ending `Ms`),
+and strengths are acceleration in pixels/second². Advanced solver controls are last.
 
 - `layout.hiddenCircles`: hide photo `02` and its white circles `06/07/08` in the
   desktop animation. Eight photos remain, with two groups of three connections.
 - Only circles containing a revealed image accept pointer selection/dragging.
+  `layout.photoOpacityThreshold` sets the minimum initial opacity (`0.01`).
 - `hover.clipScale / imageScale`: hovered photos and their connected circles scale
   the clip to `1.15` and the image to `0.95`, over `0.25` seconds with `power1.in`.
-  Connected images fade to opacity `1` over `hover.fadeDuration: 0.2` seconds.
+  `hover.revealedOpacity: 1`, `hover.fadeDuration: 0.2` and `hover.fadeEase: "power1.in"`
+  control the connected image reveal independently of scaling.
   `hover.releaseHoldSeconds: 0.4` keeps the whole hovered group revealed after a
-  drag releases, then restores it. `hover.releaseFadeDuration: 0.6` controls the
+  drag releases, then restores it. `hover.releaseFadeDuration: 1.2` controls the
   connected images' opacity fade after release, with `hover.releaseFadeEase: "power1.out"`;
   normal hover timing stays unchanged.
   Leaving restores original scales/opacity with the same timing; reduced motion is instant.
@@ -73,6 +77,8 @@ The `teamMotion` controls are at the top of the function:
 - `float.resumeSeconds`: gentle drift fade-in after grabbing/releasing a circle.
 - `float.jointVariation`: independent drift within a connected group (`1`),
   allowing the white circles to move around their photo instead of keeping a rigid pose.
+- `float.phaseStep / speedVariants / speedVariation / verticalSpeedRatio`: starting
+  phase spacing, repeating speed variation and vertical rhythm; previous values retained.
 - `drag.velocityMultiplier / maxSpeed`: release strength and maximum px/second;
   `0.68 / 748` makes throws 20% gentler than the previous settings.
 - `drag.holdSeconds`: automatically let go after `0.1` seconds,
@@ -81,6 +87,7 @@ The `teamMotion` controls are at the top of the function:
 - `drag.followMomentum`: momentum given to outer circles as their joint moves
   (`0.8`). Each circle keeps its own velocity during the grab and after release.
 - `drag.sampleMs / releasePauseMs`: recent pointer samples and the pause that cancels a throw.
+- `drag.heldWeight`: how much a grabbed circle can yield to contacts (`0.1`).
 - `throw.friction`: higher values slow throws sooner; `stopSpeed`: settling threshold.
 - `links.elasticity / settleSeconds`: maximum stretch/compression (`0.06`,
   or 6%) and the slower return toward the authored length (`0.65` seconds).
@@ -102,6 +109,9 @@ The `teamMotion` controls are at the top of the function:
   with content size changes observed; no content layout reads each frame.
 - `walls.inset / bounce`: clearance inside `.section-teams` and energy retained
   on rebound. The header is only a fallback if no enclosing team section exists.
+- `physics`: solver/momentum iterations, physics steps per second, maximum frame
+  time, spatial step limits, distance/contact tolerances and connector decimal precision.
+  These retain their existing values and normally do not need tuning.
 
 Circles connected by lines form a jointed network. Dragging any circle pulls its
 connected neighbors; distance constraints preserve each authored link length with
