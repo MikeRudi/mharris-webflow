@@ -298,6 +298,8 @@ connections and collisions without accepting pointer interaction.
 Hovering a photo scales its clip and its connected circles' clips to 1.15, while
 their images scale to 0.95 (0.25 seconds, power1.in). Connected placeholder images
 fade to opacity 1 over 0.2 seconds. Leaving restores their original appearance.
+Dragging keeps that hover appearance through release and for another 0.4 seconds,
+then restores the photo and its connected circles with the normal hover-out tween.
 The inner clips animate independently of the circles' physics and connector anchors.
 Native Webflow `team-profile-image` sizing is 110% width/height, max-width none,
 left/top 50%, right/bottom auto and translate(-50%, -50%), with a centred transform
