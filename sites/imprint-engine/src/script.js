@@ -1172,7 +1172,7 @@ function teamProfilesAnimation() {
     links: { elasticity: 0.06, settleSeconds: 0.65, photoMass: 6 }, // Photos lead; lighter satellites follow.
     collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
     spacing: { range: 32, strength: 60, delaySeconds: 0.75, rampSeconds: 1.25 }, // Slowly separate circles that linger together.
-    repel: { gap: -18, maxOverlapRatio: 0.35, range: 12, strength: 360 }, // Some overlap, scaled for small white circles too.
+    repel: { gap: -4, maxOverlapRatio: 0.1, range: 12, strength: 360 }, // Push away sooner, with only a little overlap.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
 
