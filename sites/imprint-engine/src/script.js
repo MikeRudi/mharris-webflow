@@ -1303,7 +1303,7 @@ function teamProfilesAnimation() {
       node.imageScale = node.image ? Number(gsap.getProperty(node.image, "scaleX")) : 1;
       node.imageOpacity = node.image ? Number(getComputedStyle(node.image).opacity) : 0;
     });
-    let hovered = null, hoverReleaseTimer = null;
+    let hovered = null, hoverReleaseTimer = null, releasedHover = null;
     const byElement = new Map(nodes.map((node) => [node.element, node]));
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b, nearSeconds: 0 })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
@@ -1645,6 +1645,7 @@ function teamProfilesAnimation() {
     function setHover(node, immediate = false, fadeDuration = teamMotion.hover.fadeDuration, fadeEase = teamMotion.hover.fadeEase) {
       clearTimeout(hoverReleaseTimer); hoverReleaseTimer = null;
       if (hovered === node) return;
+      releasedHover = null;
       const previous = hovered ? connectedTo(hovered) : new Set();
       const next = node ? connectedTo(node) : new Set();
       hovered = node;
@@ -1671,7 +1672,10 @@ function teamProfilesAnimation() {
       if (geometryDirty && !measure()) return;
       setHover(node);
     }).on(`pointerleave${namespace}`, "[team-profile-node]", function () {
-      if (!drag && !hoverReleaseTimer && hovered === byElement.get(this)) setHover(null);
+      if (!drag && !hoverReleaseTimer && hovered === byElement.get(this)) {
+        if (releasedHover === hovered) setHover(null, false, teamMotion.hover.releaseFadeDuration, teamMotion.hover.releaseFadeEase);
+        else setHover(null);
+      }
     });
 
     // POINTER DRAG — direct movement; only the last short motion sets the throw.
@@ -1717,9 +1721,13 @@ function teamProfilesAnimation() {
       node.element.style.cursor = "grab";
       if (!destroyed && throwIt) {
         setHover(node);
+        releasedHover = node;
         hoverReleaseTimer = setTimeout(() => {
           hoverReleaseTimer = null;
-          if (!destroyed && !drag && hovered === node) setHover(null, false, teamMotion.hover.releaseFadeDuration, teamMotion.hover.releaseFadeEase);
+          // Pointer capture has ended: keep the reveal while the circle is still hovered.
+          if (!destroyed && !drag && hovered === node && !node.element.matches(":hover")) {
+            setHover(null, false, teamMotion.hover.releaseFadeDuration, teamMotion.hover.releaseFadeEase);
+          }
         }, teamMotion.hover.releaseHoldSeconds * 1000);
       } else if (!destroyed) setHover(null);
       if (node.element.hasPointerCapture?.(current.pointerId)) node.element.releasePointerCapture(current.pointerId);
