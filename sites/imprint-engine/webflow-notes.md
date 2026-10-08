@@ -173,6 +173,8 @@ restores the authored classes on cleanup. Native `.accord-1-title.active` owns
 the original purple-to-blue text gradient (`#674dc7` to `#55a6d1`), text clipping
 and transparent color. Inactive labels retain native `#6f6c65`. The first label
 is authored active in Webflow. Keep the hook when duplicating these labels.
+The child `[accord-1-arrow]` also reveals on row hover or keyboard focus via
+the attribute selectors in `src/styles.css`; the active row's arrow stays visible.
 
 Accordion 01's grey dividers come from the reveal/background shells and 1px
 gaps. The selected `[accord-reveal]` now becomes fully visible immediately;
