@@ -8,6 +8,11 @@
 
 - Site head/footer: see `webflow-custom-code.txt`.
 - Home Staged head: desktop entrance visibility/transform rules.
+- v2 Home head: `home-head-code.html` holds synchronous desktop opacity rules
+  matching `homeAnimation()` initial states. These must stay in page settings,
+  because the GitHub-loaded stylesheet arrives too late to prevent a first-paint
+  flash. GSAP's inline opacity values take over; the CSS has no `!important` and
+  does not apply below 992px.
 - Runtime files: `src/script.js` and `src/styles.css`.
 
 ## Classes and Attributes

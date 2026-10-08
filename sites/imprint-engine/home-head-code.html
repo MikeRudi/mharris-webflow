@@ -1,0 +1,22 @@
+<style id="home-animation-initial-state">
+  /* Match homeAnimation() before the asynchronous site code arrives. */
+  @media screen and (min-width: 992px) {
+    [home-resting],
+    [home-start-up],
+    [home-second-up],
+    [home-third-up],
+    [home-logo-up],
+    [home-gradient-piece],
+    [home-gradient-drop],
+    [home-gradient-line],
+    [home-drop-purple-base],
+    [home-drop-colors],
+    [home-drop-star],
+    [ripple-ring],
+    [home-end-ripple],
+    [layout-end] > :not([home-end-brackets]),
+    [layout-end] [home-end-brackets-svg] {
+      opacity: 0;
+    }
+  }
+</style>
