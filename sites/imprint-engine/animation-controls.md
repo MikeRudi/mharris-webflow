@@ -88,8 +88,8 @@ The `teamMotion` controls are at the top of the function:
   up to `60`px/second². It begins after `spacing.delaySeconds: 0.75` nearby,
   then builds over `spacing.rampSeconds: 1.25`. Directly linked circles keep their
   authored distance; other nearby circles gently separate without stretching links.
-- `repel.gap`: `-18` allows the circle outline to overlap content before full force.
-  `repel.maxOverlapRatio: 0.35` limits that overlap to 35% of each circle's radius,
+- `repel.gap`: `-4` allows slight overlap before full force.
+  `repel.maxOverlapRatio: 0.1` limits that overlap to 10% of each circle's radius,
   so small white circles still feel the push before disappearing into the content.
   Applies to `.text`, `.btn-2-brand` and `.team-list` inside `.teams-layout`.
   Nested content shares its parent's rectangle; hooks are added at runtime.
