@@ -277,8 +277,10 @@ classes, and accessibility attributes.
 
 Sizing is native Webflow CSS, recorded in `flex-grow-webflow.css` for reference;
 do not load that reference file as another runtime stylesheet. Desktop text
-columns are `10em` with `1rem` padding/gaps. The item's non-shrinking basis also
-accounts for its padding, internal gap, and two 1px borders. Image wrappers have
+columns fit the number/title using `max-content` with `1rem` left/right padding.
+Items use an automatic non-shrinking basis. Closed items have no image gap;
+the active item's gap opens to `1rem` over `0.3s` with an ease-in curve.
+Image wrappers have
 zero basis/width, `min-width: 0`, and no forced aspect ratio. The absolute image
 keeps the fully open size using `--gallery-image-width/height` in `src/styles.css`.
 Its parent clips the reveal. JS measures once per initialization, font readiness
@@ -288,7 +290,7 @@ Desktop copy is anchored to the bottom of its text column and hidden when
 inactive. Its previous `[text-ch="18"]` limit now lives on the native copy class
 as `max-width: 18ch`, allowing an unrestricted mobile right-hand column.
 
-At tablet widths, text columns reduce to `7em`, spacing to `0.75rem`, and the
+At tablet widths, text columns also fit their content, spacing is `0.75rem`, and the
 row height increases to `30em`. At `767px` and below, the gallery matches the
 mobile reference: a centered heading/button, number/title on the left, copy
 on the right, and a full-width 2:1 image underneath. Closed rows show only their
