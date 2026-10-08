@@ -1170,7 +1170,7 @@ function teamProfilesAnimation() {
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
     links: { elasticity: 0.06, settleSeconds: 0.65, photoMass: 6 }, // Photos lead; lighter satellites follow.
     collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
-    repel: { gap: -18, range: 12, strength: 240 }, // Allow some overlap, then ease circles out slowly.
+    repel: { gap: -18, maxOverlapRatio: 0.35, range: 12, strength: 360 }, // Some overlap, scaled for small white circles too.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
 
@@ -1410,7 +1410,8 @@ function teamProfilesAnimation() {
     function contentContact(node, box) {
       const dx = node.x - clamp(node.x, box.left, box.right);
       const dy = node.y - clamp(node.y, box.top, box.bottom);
-      const distance = Math.hypot(dx, dy), radius = Math.max(0, node.radius + teamMotion.repel.gap);
+      const gap = Math.max(teamMotion.repel.gap, -node.radius * teamMotion.repel.maxOverlapRatio);
+      const distance = Math.hypot(dx, dy), radius = Math.max(0, node.radius + gap);
       if (distance > 0.001) return { nx: dx / distance, ny: dy / distance, clearance: distance - radius };
       const exits = [{ nx: -1, ny: 0, depth: node.x - box.left }, { nx: 1, ny: 0, depth: box.right - node.x },
         { nx: 0, ny: -1, depth: node.y - box.top }, { nx: 0, ny: 1, depth: box.bottom - node.y }];
