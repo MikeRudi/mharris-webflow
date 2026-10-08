@@ -633,3 +633,52 @@ or additions to `src/styles.css`.
 - Component props remain connected. The homepage's 44 `.text` blocks retained
   identical text, classes and measured typography. Changes were published and
   verified on `https://imprint-engine-v2.webflow.io/` only.
+
+## Homepage lander cards CMS — 2026-10-08
+
+- Site: Imprint Engine v2 (`6abbde0cb7e6f39d52509b6c`), Home page
+  `6abbde0cb7e6f39d52509b36`, Landing Animation component
+  `8c8ed45d-0f4d-7df2-d835-9d8210b05ddb`.
+- Collection **Homepage Lander Cards** (`6ac73e48eb7dd3860149bb9c`) contains
+  the 10 unique original labels and WebP images. The 13 original placements
+  remain; repeated products share a CMS record.
+- Original outer wrappers now have native base `perspective-card-position`
+  (position absolute). Their existing placement class is in the custom `class`
+  attribute. Keep `[home-resting]` and `[home-start-up]`, their three opacity
+  parents, and their order unchanged.
+- Inside each outer wrapper: `home-card-cms` (native Collection List Wrapper,
+  width 10.5em) → `home-card-list` → `home-card-item` → `perspective-card`.
+  The existing `[perspective-card]`, image wrapper, `img-abs` and tag structure
+  remain. Each list uses **Selected items** with exactly one CMS record selected
+  by ID, so renaming a record does not disconnect it.
+- The image is natively bound to **Image**; the label is natively bound to
+  **Name**, using base `text` and custom `class="perspective-card-text weight-700"`.
+  Solo Stove also has standalone `text-italic` in its class attribute, preserving
+  its original italic label. Empty states use `home-card-empty` (display none).
+- To replace a product, edit its CMS record or change **Select items** on the
+  appropriate `home-card-cms` wrapper. Keep exactly one selected item per list.
+  Publish CMS/Designer changes to show them on the website. New CMS records do
+  not create extra animated positions automatically.
+
+| Placement class attribute | Selected CMS item |
+| --- | --- |
+| `perspective-cards-3` | Custom Products |
+| `perspective-cards-1` | Apparel |
+| `perspective-cards-4` | Merchandise |
+| `perspective-cards-2` | Jumpsuit |
+| `perspective-cards-3b` | Personalized Gifts |
+| `perspective-cards-1b` | Electronics |
+| `perspective-cards-4b` | kits |
+| `perspective-cards-2b` | socks |
+| `perspective-cards-5b` | Merchandise |
+| `perspective-cards-4c` | Pants |
+| `perspective-cards-2c` | Solo Stove |
+| `perspective-cards-1c` | Apparel |
+| `perspective-cards-3c` | Custom Products |
+
+Published and checked on v2 staging: 13 lists, one card each, all original labels
+and image mappings correct, all images loaded. At 1440×1000 every original
+wrapper retained its exact top/left/width/height and opacity parent. The scroll
+range remains 0–3500px and the timeline duration remains 1. All 13 cards rotate
+and respond to dragging; forward/reverse scrolling restores their opacity and
+position without JavaScript errors. No animation JS, CSS or controls changed.

@@ -2,8 +2,8 @@
 
 ## Links
 
-- Webflow: Imprint Engine v1
-- Staging: https://imprint-engine-v1.webflow.io/home-staged
+- Webflow: Imprint Engine v2
+- Staging: https://imprint-engine-v2.webflow.io/
 
 ## Webflow loading
 
@@ -24,6 +24,10 @@ Use pinned jsDelivr releases when switching to stable production code.
 - Edit `homeMotion` inside `homeAnimation()` to tune the home scroll sequence.
   See [home-animation.md](home-animation.md) for percentages, linked starts,
   grouped controls, and the local staging preview.
+- The 13 lander card positions use native lists from **Homepage Lander Cards**.
+  Edit the collection's Name and Image fields, then publish. Each position selects
+  one record; adding a CMS item alone does not add another animated position.
+  See `webflow-notes.md` for the list structure and item mapping.
 
 ## Animation regression checks
 
