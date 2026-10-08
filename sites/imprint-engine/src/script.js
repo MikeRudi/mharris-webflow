@@ -1849,6 +1849,8 @@ function flexGrowAnimation() {
     spacing: {
       contentWidthProperty: "--gallery-open-content-width",
       gapProperty: "--gallery-open-gap",
+      fallbackContentWidth: "10em",
+      fallbackGap: "1rem",
       inactiveMinWidth: 0,
       inactiveGap: 0,
     },
@@ -1875,6 +1877,7 @@ function flexGrowAnimation() {
   let destroyed = false;
 
   $blocks.each(function () {
+    const block = this;
     const items = $(this)
       .children("[flex-grow-item]")
       .toArray()
@@ -2008,7 +2011,7 @@ function flexGrowAnimation() {
           timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, galleryMotion.mobile.start);
         });
       } else {
-        const nativeSpacing = getComputedStyle($blocks.filter((_, block) => block.contains(item.$item[0]))[0]);
+        const nativeSpacing = getComputedStyle(block);
         const openWidth = nativeSpacing.getPropertyValue(galleryMotion.spacing.contentWidthProperty).trim();
         const openGap = nativeSpacing.getPropertyValue(galleryMotion.spacing.gapProperty).trim();
         const timing = {
@@ -2020,10 +2023,10 @@ function flexGrowAnimation() {
           const active = entry === item;
           const itemSpacing = {
             flexGrow: grow(0, entry.$item[0]),
-            columnGap: active ? openGap || "1rem" : galleryMotion.spacing.inactiveGap,
+            columnGap: active ? openGap || galleryMotion.spacing.fallbackGap : galleryMotion.spacing.inactiveGap,
           };
           const contentSpacing = {
-            minWidth: active ? openWidth || "10em" : galleryMotion.spacing.inactiveMinWidth,
+            minWidth: active ? openWidth || galleryMotion.spacing.fallbackContentWidth : galleryMotion.spacing.inactiveMinWidth,
           };
           if (immediate) {
             gsap.set(entry.$item, itemSpacing);
