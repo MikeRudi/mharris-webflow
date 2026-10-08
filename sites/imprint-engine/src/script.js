@@ -1173,6 +1173,7 @@ function teamProfilesAnimation() {
     // HOVER + RELEASE — scale, image reveal, then the delayed fade after a drag.
     hover: {
       scaleAmount: 0.15, // Clip +15%, image -15%; shared timing below.
+      connectedParentScale: 1.3, // Extra overall scale for connected circles only.
       duration: 0.3,
       ease: "power1.out",
       revealedOpacity: 1,
@@ -1296,9 +1297,10 @@ function teamProfilesAnimation() {
       minX: 0, maxX: 0, minY: 0, maxY: 0,
     }));
     const nodes = allNodes.filter((node) => node.enabled);
-    const hoverElements = nodes.flatMap((node) => [node.clip, node.image]).filter(Boolean);
+    const hoverElements = nodes.flatMap((node) => [node.element, node.clip, node.image]).filter(Boolean);
     const restoreHover = rememberAttributes($(hoverElements), ["style"]);
     nodes.forEach((node) => {
+      node.parentScale = Number(gsap.getProperty(node.element, "scaleX"));
       node.clipScale = node.clip ? Number(gsap.getProperty(node.clip, "scaleX")) : 1;
       node.imageScale = node.image ? Number(gsap.getProperty(node.image, "scaleX")) : 1;
       node.imageOpacity = node.image ? Number(getComputedStyle(node.image).opacity) : 0;
@@ -1340,9 +1342,12 @@ function teamProfilesAnimation() {
         const offsetY = oldHeight ? (node.y - node.baseY) * height / oldHeight : 0;
         node.baseX = (bounds.left + bounds.width / 2 - rect.left) / scaleX - node.tx;
         node.baseY = (bounds.top + bounds.height / 2 - rect.top) / scaleY - node.ty;
-        node.radius = Math.max(bounds.width / scaleX, bounds.height / scaleY) / 2;
-        const radiusX = bounds.width / scaleX / 2 + teamMotion.walls.inset;
-        const radiusY = bounds.height / scaleY / 2 + teamMotion.walls.inset;
+        // Keep resize measurements independent of the temporary hover enlargement.
+        const hoverScale = node.parentScale ? Number(gsap.getProperty(node.element, "scaleX")) / node.parentScale : 1;
+        const nodeWidth = bounds.width / scaleX / hoverScale, nodeHeight = bounds.height / scaleY / hoverScale;
+        node.radius = Math.max(nodeWidth, nodeHeight) / 2;
+        const radiusX = nodeWidth / 2 + teamMotion.walls.inset;
+        const radiusY = nodeHeight / 2 + teamMotion.walls.inset;
         node.minX = (walls.left - rect.left) / scaleX + Math.min(walls.width / scaleX / 2, radiusX);
         node.minY = (walls.top - rect.top) / scaleY + Math.min(walls.height / scaleY / 2, radiusY);
         node.maxX = Math.max(node.minX, (walls.right - rect.left) / scaleX - radiusX);
@@ -1641,7 +1646,7 @@ function teamProfilesAnimation() {
       syncActivity();
     }
 
-    // PHOTO HOVER — animate only the inner clip/image, leaving physics anchors intact.
+    // PHOTO HOVER — inner clip/image plus connected parents; centers remain anchored.
     function setHover(node, immediate = false, fadeDuration = teamMotion.hover.fadeDuration, fadeEase = teamMotion.hover.fadeEase) {
       clearTimeout(hoverReleaseTimer); hoverReleaseTimer = null;
       if (hovered === node) return;
@@ -1652,9 +1657,11 @@ function teamProfilesAnimation() {
       const controls = teamMotion.hover, instant = immediate || reducedMotion.matches;
       new Set([...previous, ...next]).forEach((member) => {
         const active = next.has(member);
-        const scaleTargets = [member.clip, member.image].filter(Boolean);
+        const scaleTargets = [member.element, member.clip, member.image].filter(Boolean);
         if (scaleTargets.length) gsap.to(scaleTargets, {
-          scale: (_index, target) => target === member.clip
+          scale: (_index, target) => target === member.element
+            ? member.parentScale * (active && member !== node ? controls.connectedParentScale : 1)
+            : target === member.clip
             ? member.clipScale * (active ? 1 + controls.scaleAmount : 1)
             : member.imageScale * (active ? 1 - controls.scaleAmount : 1),
           duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto",
