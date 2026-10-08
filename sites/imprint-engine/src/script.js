@@ -1165,7 +1165,7 @@ function teamProfilesAnimation() {
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
     layout: { hiddenCircles: ["02", "06", "07", "08"] }, // Remove one photo and its three white satellites.
-    hover: { clipScale: 1.15, imageScale: 0.95, duration: 0.25, fadeDuration: 0.2, releaseHoldSeconds: 0.4, ease: "power1.in" },
+    hover: { clipScale: 1.15, imageScale: 0.95, duration: 0.25, fadeDuration: 0.2, releaseHoldSeconds: 0.4, releaseFadeDuration: 0.6, ease: "power1.in" },
     float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2, jointVariation: 1 },
     drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.8, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
@@ -1564,7 +1564,7 @@ function teamProfilesAnimation() {
     }
 
     // PHOTO HOVER — animate only the inner clip/image, leaving physics anchors intact.
-    function setHover(node, immediate = false) {
+    function setHover(node, immediate = false, fadeDuration = teamMotion.hover.fadeDuration) {
       clearTimeout(hoverReleaseTimer); hoverReleaseTimer = null;
       if (hovered === node) return;
       const previous = hovered ? connectedTo(hovered) : new Set();
@@ -1581,7 +1581,7 @@ function teamProfilesAnimation() {
           gsap.to(member.image, { scale: member.imageScale * (active ? controls.imageScale : 1),
             duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto" });
           gsap.to(member.image, { opacity: active ? 1 : member.imageOpacity,
-            duration: instant ? 0 : controls.fadeDuration, ease: controls.ease, overwrite: "auto" });
+            duration: instant ? 0 : fadeDuration, ease: controls.ease, overwrite: "auto" });
         }
       });
     }
@@ -1640,7 +1640,7 @@ function teamProfilesAnimation() {
         setHover(node);
         hoverReleaseTimer = setTimeout(() => {
           hoverReleaseTimer = null;
-          if (!destroyed && !drag && hovered === node) setHover(null);
+          if (!destroyed && !drag && hovered === node) setHover(null, false, teamMotion.hover.releaseFadeDuration);
         }, teamMotion.hover.releaseHoldSeconds * 1000);
       } else if (!destroyed) setHover(null);
       if (node.element.hasPointerCapture?.(current.pointerId)) node.element.releasePointerCapture(current.pointerId);
