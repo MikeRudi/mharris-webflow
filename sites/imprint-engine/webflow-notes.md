@@ -242,6 +242,10 @@ visitors receive no decorative cursor effect; cleanup removes all trail copies.
 
 ## Flex Grow Gallery
 
+Accordion 03's native `flex-grow-title` divider and `flex-grow-item` borders use
+the reference's P+B v1 treatment: `linear-gradient(90deg, #674dc7 24.52%, #55a6d1 69.71%)`,
+with `border-image-slice: 1`. Edit these colours in Webflow, not runtime CSS.
+
 Home Staged's process gallery uses the existing `.flex-grow-block` structure:
 
 ```txt
