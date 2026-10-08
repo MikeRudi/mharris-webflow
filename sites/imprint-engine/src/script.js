@@ -45,7 +45,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), flexGrowAnimation()];
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -2870,6 +2870,152 @@ function compareGradientAnimation() {
   });
   return () => { media.revert(); restoreOriginals(); };
 }
+
+function testimonialEnvelopeAnimation() {
+  // ENVELOPE CONTROLS — seconds; card travel is measured so all its text clears the pocket.
+  const envelopeMotion = {
+    closed: { cardYPercent: 60, backYPercent: 8 },
+    open: {
+      flap: { start: 0, duration: 0.3, ease: "power1.in" },
+      back: { start: 0, duration: 0.5, ease: "power1.in" },
+      cards: { start: 0.12, duration: 0.6, ease: "power1.in", stagger: 0.06 },
+    },
+    close: {
+      cards: { start: 0, duration: 0.3, ease: "power1.in", stagger: 0.03 },
+      back: { start: 0.15, duration: 0.3, ease: "power1.in" },
+      flap: { start: 0.18, duration: 0.3, ease: "power1.in" },
+    },
+    hover: {
+      reveal: { duration: 0.4, ease: "power1.in" },
+      return: { duration: 0.4, ease: "power1.out" },
+      minimumLift: 0.12, contentGap: 0.025, minimumInserted: 0.08,
+    },
+  };
+  const $envelopes = $("[testimonial-envelope]");
+  if (!window.gsap || !$envelopes.length) return null;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const canHover = window.matchMedia("(hover: hover) and (pointer: fine)");
+  const cleanups = [];
+
+  $envelopes.each(function () {
+    const envelope = this, $envelope = $(this);
+    const $cards = $envelope.find("[testimonial-card]");
+    const $back = $envelope.find("[testimonial-envelope-open]");
+    const $flap = $envelope.find("[testimonial-envelope-closed]");
+    const $openHit = $envelope.find("[testimonial-envelope-open-hit]");
+    const $toggles = $envelope.find("[testimonial-envelope-toggle]");
+    const $button = $toggles.filter('[role="button"]').first();
+    const $pocket = $button;
+    if (!$cards.length || !$back.length || !$flap.length || !$button.length) return;
+    const $moving = $cards.add($back).add($flap).add($openHit);
+    const restore = rememberAttributes($moving.add($button), ["style", "tabindex", "aria-expanded", "aria-label", "aria-hidden"]);
+    let open = false, ready = false, active = null, transition = null, disposed = false;
+    let hovered = null, focused = null;
+    const lifts = new Map();
+    const seconds = value => reducedMotion.matches ? 0 : value;
+
+    function measure() {
+      const height = envelope.clientHeight, mouth = $pocket[0].offsetTop;
+      $cards.each(function () {
+        const content = this.querySelector("[testimonial-card-content]");
+        if (!content) return;
+        const angle = Number(gsap.getProperty(this, "rotation")) * Math.PI / 180;
+        const cx = this.offsetWidth / 2, cy = this.offsetHeight / 2;
+        const contentBottom = cy + (content.offsetTop + content.offsetHeight - cy) * Math.cos(angle)
+          + Math.max((content.offsetLeft - cx) * Math.sin(angle),
+            (content.offsetLeft + content.offsetWidth - cx) * Math.sin(angle));
+        const reveal = this.offsetTop + contentBottom - mouth + height * envelopeMotion.hover.contentGap;
+        const tuckedBottom = this.offsetTop + cy + cy * Math.cos(angle) - cx * Math.abs(Math.sin(angle));
+        const maximum = tuckedBottom - mouth - height * envelopeMotion.hover.minimumInserted;
+        lifts.set(this, Math.max(0, Math.min(maximum, Math.max(height * envelopeMotion.hover.minimumLift, reveal))));
+      });
+      if (open && ready && active) gsap.set(active, { y: -lifts.get(active), yPercent: 0 });
+    }
+
+    function revealCard(card) {
+      if (!open || !ready) return;
+      active = card;
+      $cards.each(function (index) {
+        const selected = this === card;
+        const motion = envelopeMotion.hover[selected ? "reveal" : "return"];
+        gsap.to(this, {
+          y: selected ? -lifts.get(this) : 0, yPercent: 0,
+          duration: seconds(motion.duration), ease: motion.ease, overwrite: true,
+        });
+        // Keep the whole selected card above the other cards, below the purple pocket.
+        gsap.set(this, { zIndex: selected ? 10 : index + 1 });
+      });
+    }
+
+    function setOpen(next, immediate = false) {
+      open = next; ready = false; active = null; hovered = null; focused = null;
+      if (!open && $cards.toArray().some(card => card.contains(document.activeElement))) {
+        $button[0].focus({ preventScroll: true });
+      }
+      if (transition) transition.kill();
+      gsap.killTweensOf($moving);
+      $button.attr({ "aria-expanded": String(open), "aria-label": open ? "Close testimonials" : "Open testimonials" });
+      $cards.attr({ tabindex: open ? "0" : "-1", "aria-hidden": String(!open) });
+      gsap.set($cards, { pointerEvents: "none", zIndex: index => index + 1 });
+      gsap.set($openHit, { visibility: open ? "visible" : "hidden" });
+      gsap.set($flap, { pointerEvents: open ? "none" : "auto" });
+      const motion = envelopeMotion[open ? "open" : "close"];
+      const time = value => immediate ? 0 : seconds(value);
+      transition = gsap.timeline({ onComplete: () => {
+        ready = open;
+        if (!open) return;
+        gsap.set($cards, { pointerEvents: "auto" });
+        const underPointer = canHover.matches ? $cards.toArray().find(card => card.matches(":hover")) : null;
+        if (underPointer) { hovered = underPointer; revealCard(underPointer); }
+      } });
+      transition.to($flap, { autoAlpha: open ? 0 : 1, duration: time(motion.flap.duration), ease: motion.flap.ease }, time(motion.flap.start));
+      transition.to($back, { autoAlpha: open ? 1 : 0, yPercent: open ? 0 : envelopeMotion.closed.backYPercent,
+        duration: time(motion.back.duration), ease: motion.back.ease }, time(motion.back.start));
+      transition.to($cards, { autoAlpha: open ? 1 : 0, y: 0, yPercent: open ? 0 : envelopeMotion.closed.cardYPercent,
+        duration: time(motion.cards.duration), stagger: time(motion.cards.stagger), ease: motion.cards.ease }, time(motion.cards.start));
+    }
+
+    $toggles.on("click.testimonialEnvelope", event => { event.preventDefault(); setOpen(!open); });
+    $button.on("keydown.testimonialEnvelope", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault(); setOpen(!open);
+    });
+    $cards.on("mouseenter.testimonialEnvelope", function () {
+      if (canHover.matches) { hovered = this; revealCard(this); }
+    }).on("mouseleave.testimonialEnvelope", function () {
+      if (hovered === this) hovered = null;
+      if (canHover.matches) revealCard(focused || hovered);
+    }).on("focusin.testimonialEnvelope", function () {
+      focused = this; revealCard(this);
+    }).on("focusout.testimonialEnvelope", function () {
+      if (focused === this) focused = null;
+      revealCard(hovered);
+    }).on("click.testimonialEnvelope", function () {
+      if (!canHover.matches) revealCard(this);
+    }).on("keydown.testimonialEnvelope", function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault(); revealCard(this);
+    });
+    $envelope.on("keydown.testimonialEnvelope", event => {
+      if (event.key === "Escape" && open) { setOpen(false); $button[0].focus(); }
+    });
+    const resize = new ResizeObserver(measure);
+    resize.observe(envelope);
+    $cards.each((_, el) => resize.observe(el));
+    $cards.find("[testimonial-card-content]").each((_, el) => resize.observe(el));
+    const motionChanged = () => setOpen(open, true);
+    reducedMotion.addEventListener("change", motionChanged);
+    measure(); setOpen(false, true);
+    if (document.fonts) document.fonts.ready.then(() => { if (!disposed) measure(); });
+    cleanups.push(() => {
+      disposed = true; if (transition) transition.kill(); gsap.killTweensOf($moving);
+      resize.disconnect(); reducedMotion.removeEventListener("change", motionChanged);
+      $envelope.add($toggles).add($cards).off(".testimonialEnvelope"); restore();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
+
 
 function homeBackgroundMotion() {
   if (!window.gsap || !$("[section-tiles]").length) return null;
