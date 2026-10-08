@@ -1170,6 +1170,7 @@ function teamProfilesAnimation() {
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
     links: { elasticity: 0.06, settleSeconds: 0.65, photoMass: 6 }, // Photos lead; lighter satellites follow.
     collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
+    spacing: { range: 32, strength: 60, delaySeconds: 0.75, rampSeconds: 1.25 }, // Slowly separate circles that linger together.
     repel: { gap: -18, maxOverlapRatio: 0.35, range: 12, strength: 360 }, // Some overlap, scaled for small white circles too.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
@@ -1215,7 +1216,7 @@ function teamProfilesAnimation() {
     }));
     const nodes = allNodes.filter((node) => node.enabled);
     const byElement = new Map(nodes.map((node) => [node.element, node]));
-    const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b })));
+    const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b, nearSeconds: 0 })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
     let layer = null, contentBoxes = [];
     let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0, motionStep = 4;
@@ -1406,6 +1407,28 @@ function teamProfilesAnimation() {
       members.forEach((item) => item.neighbors.forEach((neighbor) => members.add(neighbor)));
       return members;
     }
+    // GENTLE SPACING — build pressure over time, without fighting a direct link.
+    function repelCircles(dt) {
+      const separating = new Set(), controls = teamMotion.spacing;
+      pairs.forEach((pair) => {
+        const { a, b } = pair, dx = b.x - a.x, dy = b.y - a.y;
+        const distance = Math.hypot(dx, dy), gap = distance - a.radius - b.radius;
+        if (gap >= controls.range || a.neighbors.includes(b) || drag?.node === a || drag?.node === b) {
+          pair.nearSeconds = 0; return;
+        }
+        pair.nearSeconds = Math.min(controls.delaySeconds + controls.rampSeconds, pair.nearSeconds + dt);
+        const ramp = clamp((pair.nearSeconds - controls.delaySeconds) / controls.rampSeconds, 0, 1);
+        if (!ramp) return;
+        const proximity = 1 - clamp(gap / controls.range, 0, 1);
+        const push = controls.strength * proximity * proximity * ramp * ramp * (3 - 2 * ramp) * dt;
+        const nx = distance > 0.001 ? dx / distance : 1, ny = distance > 0.001 ? dy / distance : 0;
+        const wa = inverseMass(a), wb = inverseMass(b), total = wa + wb;
+        a.vx -= nx * push * 2 * wa / total; a.vy -= ny * push * 2 * wa / total;
+        b.vx += nx * push * 2 * wb / total; b.vy += ny * push * 2 * wb / total;
+        separating.add(a); separating.add(b);
+      });
+      return separating;
+    }
     // CONTENT REPULSION — negative gap permits overlap; force eases circles out.
     function contentContact(node, box) {
       const dx = node.x - clamp(node.x, box.left, box.right);
@@ -1478,6 +1501,7 @@ function teamProfilesAnimation() {
     function step(dt) {
       const moving = !reducedMotion.matches;
       if (moving) clock += dt;
+      const separating = moving ? repelCircles(dt) : null;
       const decay = Math.exp(-teamMotion.throw.friction * dt);
       const travel = teamMotion.throw.friction > 0 ? (1 - decay) / teamMotion.throw.friction : dt;
       nodes.forEach((node) => {
@@ -1485,7 +1509,7 @@ function teamProfilesAnimation() {
         const repelling = repelContent(node, dt);
         node.x += node.vx * travel; node.y += node.vy * travel;
         node.vx *= decay; node.vy *= decay;
-        if (!repelling && Math.hypot(node.vx, node.vy) < teamMotion.throw.stopSpeed) node.vx = node.vy = 0;
+        if (!repelling && !separating.has(node) && Math.hypot(node.vx, node.vy) < teamMotion.throw.stopSpeed) node.vx = node.vy = 0;
         node.blend = Math.min(1, node.blend + dt / teamMotion.float.resumeSeconds);
         const blend = node.blend * node.blend * (3 - 2 * node.blend);
         const cycle = clock * Math.PI * 2 / teamMotion.float.cycleSeconds;
