@@ -8,7 +8,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `initLenis` | `scrollControls` | Scroll smoothing and wheel sensitivity |
 | `homeAnimation` | `homeMotion` | Existing grouped percentage-based scrub; see [home-animation.md](home-animation.md) |
 | `homeAnimation` | `homeCardMotion`, `homeAlignment` | Background rotation, depth opacity, framing and end-drop alignment |
-| `teamProfilesAnimation` | `teamMotion.float / drag / throw / walls` | Desktop circle drift, direct dragging, release momentum and header-wall bounces |
+| `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / walls` | Desktop circle drift, connected dragging, release momentum and header-wall bounces |
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
@@ -60,17 +60,24 @@ The `teamMotion` controls are at the top of the function:
 
 - `float.x / y`: drift distance in pixels; `cycleSeconds`: how slowly circles float.
 - `float.resumeSeconds`: gentle drift fade-in after grabbing/releasing a circle.
+- `float.jointVariation`: individual drift within a connected group (`0.15`); most
+  drift is shared so connections keep their designed angles.
 - `drag.velocityMultiplier / maxSpeed`: release strength and maximum px/second;
-  `0.25 / 275` keeps throws at one quarter of the original power.
+  `0.85 / 935` keeps throws at 85% of the original power.
+- `drag.groupFollow`: how much pointer movement immediately carries the connected
+  group (`0.98`); the remaining 2% provides a little elastic lag.
 - `drag.sampleMs / releasePauseMs`: recent pointer samples and the pause that cancels a throw.
 - `throw.friction`: higher values slow throws sooner; `stopSpeed`: settling threshold.
 - `links.elasticity / settleSeconds`: maximum stretch/compression (default `0.01`,
   or 1%) and the soft return toward the authored connection length.
+- `links.rotationDegrees`: maximum line tilt from the authored angle (`2` degrees
+  in either direction). Repeated drags cannot accumulate additional rotation.
 - `walls.inset / bounce`: clearance inside the header and energy retained on rebound.
 
 Circles connected by lines form a jointed network. Dragging any circle pulls its
 connected neighbors; distance constraints preserve each authored link length with
-only the small allowed elastic movement. Joint angles remain free to rotate.
+only the small allowed elastic movement and angular give. Drag limits account for
+the whole connected shape so reaching a header wall cannot force large rotations.
 Release momentum is shared with that connected network, while unconnected circles
 remain independent. Circles settle around their new position after a throw.
 

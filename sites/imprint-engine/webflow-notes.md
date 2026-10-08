@@ -287,9 +287,11 @@ Future Designer copies may carry the matching attributes directly. Cleanup remov
 only hooks it added. Keep connector endpoints on their circle centers in Designer;
 the animation binds the original pairs once and preserves those pairs after resize.
 
-Connected circles now use distance constraints with at most 1% elastic extension
-or compression. Moving one circle pulls the connected network while its joints
-rotate. Release velocity and its cap are one quarter of the original settings.
+Connected circles use distance constraints with at most 1% elastic extension
+or compression and 2 degrees of rotation either side of each authored line angle.
+Moving one circle carries its connected network with a small elastic lag; drag
+bounds account for the whole group. Release velocity and its cap are 85% of the
+original settings. Connected circles share most of their gentle idle drift.
 JavaScript draws animated line copies in a single `[team-profile-connector-layer]`
 SVG directly inside the header, avoiding the nested group/SVG clipping boxes. It
 keeps native source SVGs intact and restores their visibility on desktop cleanup.

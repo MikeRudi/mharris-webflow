@@ -93,13 +93,17 @@ async function linkLengths(page) {
         return {x:r.x+r.width/2,y:r.y+r.height/2,bx:r.x+r.width/2-(tx||0),by:r.y+r.height/2-(ty||0)};
       });
       const [a,b]=points;
-      return {length:Math.hypot(b.x-a.x,b.y-a.y),rest:Math.hypot(b.bx-a.bx,b.by-a.by),angle:Math.atan2(b.y-a.y,b.x-a.x)};
+      return {length:Math.hypot(b.x-a.x,b.y-a.y),rest:Math.hypot(b.bx-a.bx,b.by-a.by),angle:Math.atan2(b.y-a.y,b.x-a.x),restAngle:Math.atan2(b.by-a.by,b.bx-a.bx)};
     });
   },pairs);
 }
 async function constrained(page, tolerance=0.011) {
   const lengths=await linkLengths(page);
   lengths.forEach((edge,i)=>assert.ok(Math.abs(edge.length/edge.rest-1)<tolerance,`Link ${i}: ${JSON.stringify(edge)}`));
+  lengths.forEach((edge,i)=>{
+    const angle=Math.atan2(Math.sin(edge.angle-edge.restAngle),Math.cos(edge.angle-edge.restAngle))*180/Math.PI;
+    assert.ok(Math.abs(angle)<=2.03,`Link ${i} rotated ${angle} degrees`);
+  });
 }
 try {
   await check("all 21 circles drift gently; 14 connectors stay at their centers with no frame layout reads", async () => {
@@ -119,27 +123,27 @@ try {
     const { start, held } = await dragBy(page, 180, 45);
     near(held.x-start.x, 180, 2); near(held.y-start.y, 45, 2);
     await page.waitForTimeout(220); const fast = await center(page);
-    assert.ok(fast.x > held.x + 15 && fast.x < held.x + 65);
+    assert.ok(fast.x > held.x + 60 && fast.x < held.x + 180);
     await page.waitForTimeout(1500); const settled = await center(page);
     await page.waitForTimeout(220); const slow = await center(page);
     assert.ok(Math.abs(slow.x-settled.x) < (fast.x-held.x) / 5);
     await anchored(page); await constrained(page); await page.close();
   });
-  await check("release power is one quarter of the previous setting",async()=>{
+  await check("release power is close to the original, reduced only to 85%",async()=>{
     const still=source.replace('float: { x: 12, y: 9','float: { x: 0, y: 0');
     const distances=[];
-    for(const code of [still,still.replace('velocityMultiplier: 0.25, maxSpeed: 275','velocityMultiplier: 1, maxSpeed: 1100')]){
-      const page=await open({code});const {held}=await dragBy(page,100,0,{id:'18'});
+    for(const code of [still,still.replace('velocityMultiplier: 0.85, maxSpeed: 935','velocityMultiplier: 1, maxSpeed: 1100')]){
+      const page=await open({code});const {held}=await dragBy(page,500,0,{id:'18'});
       await page.waitForTimeout(250);distances.push((await center(page,'18')).x-held.x);await page.close();
     }
-    near(distances[0]/distances[1],0.25,0.065);
+    near(distances[0]/distances[1],0.85,0.09);
   });
-  await check("dragging a joint moves its linked circles, rotates connections, and allows only 1% elasticity",async()=>{
+  await check("dragging moves the connected shape with only 2 degrees of rotation and 1% elasticity",async()=>{
     const page=await open(); const before=await linkLengths(page);const neighbor=await center(page,'03');
     await dragBy(page,240,110,{hold:100});
     const after=await linkLengths(page),moved=await center(page,'03');
     assert.ok(Math.hypot(moved.x-neighbor.x,moved.y-neighbor.y)>50);
-    assert.ok(after.some((edge,i)=>Math.abs(edge.angle-before[i].angle)>0.2));
+    assert.ok(after.some((edge,i)=>Math.abs(edge.angle-before[i].angle)>0.002));
     await constrained(page);await page.waitForTimeout(1200);await constrained(page,0.001);
     assert.equal(await page.locator('[team-profile-connector-layer]').count(),1);
     assert.equal(await page.locator('[team-profile-connector-layer]').evaluate(e=>e.parentElement.matches('.teams-header')&&getComputedStyle(e).overflow==='visible'),true);
