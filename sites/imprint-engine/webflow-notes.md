@@ -614,3 +614,22 @@ or additions to `src/styles.css`.
   currently does not expose that setting.
 - Runtime control groups and lifecycle behavior are documented in
   `animation-controls.md`. Later motion polishing is recorded in `home-animation.md`.
+
+## Page naming and interim semantics — 2026-10-08
+
+- In Imprint Engine v2, all 45 `Shop By ...` pages are now `Solutions by ...`.
+  The five Product, Service, Team, Industry and Use Case folders use the same
+  naming. Page and folder slugs now start with `solutions-by-`.
+- All 53 page/template SEO titles match their page names; descriptions remain
+  blank. CMS template titles are temporary placeholders for the final SEO pass.
+- Shared navigation already used `Solutions`. All 47 static staging pages were
+  checked: HTTP 200, expected title, no remaining `Shop by` copy or old-path links.
+- Home keeps text blocks and their existing styling. Its heading hierarchy uses
+  `role="heading"` with one level 1, section level 2 and subsection level 3;
+  body copy uses `role="paragraph"`. There are 47 heading roles and 37 paragraph
+  roles, including hidden accordion panels and the shared footer.
+- The user explicitly deferred actual H1/H2/H3/paragraph tag conversion to the
+  final SEO pass. ARIA headings are accessibility semantics, not native H tags.
+- Component props remain connected. The homepage's 44 `.text` blocks retained
+  identical text, classes and measured typography. Changes were published and
+  verified on `https://imprint-engine-v2.webflow.io/` only.
