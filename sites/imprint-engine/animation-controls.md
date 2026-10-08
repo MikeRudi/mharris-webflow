@@ -81,9 +81,11 @@ The `teamMotion` controls are at the top of the function:
 - `collision.gap / bounce`: clearance between circle outlines (`1`px) and impact
   restitution (`0.45`). Collisions cover circles in every group in the header.
 - `repel.gap`: `-18` allows the circle outline to overlap content before full force.
+  `repel.maxOverlapRatio: 0.35` limits that overlap to 35% of each circle's radius,
+  so small white circles still feel the push before disappearing into the content.
   Applies to `.text`, `.btn-2-brand` and `.team-list` inside `.teams-layout`.
   Nested content shares its parent's rectangle; hooks are added at runtime.
-- `repel.range / strength`: force fades in over `12`px, up to `240`px/second².
+- `repel.range / strength`: force fades in over `12`px, up to `360`px/second².
   There is no hard snap out of content. Geometry is cached on entry/resize,
   with content size changes observed; no content layout reads each frame.
 - `walls.inset / bounce`: clearance inside `.section-teams` and energy retained

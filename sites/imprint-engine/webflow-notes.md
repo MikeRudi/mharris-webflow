@@ -326,7 +326,9 @@ The text, button and team list inside `.teams-layout` repel circles. The initial
 bridges their `.text`, `.btn-2-brand` and `.team-list` classes to matching attributes,
 scoped to that layout. Each outer content rectangle supplies one gradual outward
 force, permitting some overlap instead of snapping circles out. The soft field
-uses a -18px gap, 12px falloff and 240px/second² maximum acceleration.
+uses a -18px gap (overlap capped at 35% of each circle's radius), 12px falloff
+and 360px/second² maximum acceleration. The size-relative overlap keeps small
+white circles responsive to the same content repulsion as photos.
 Content rectangles are cached and remeasured on entry, resize, font readiness
 or observed content size changes. No native Webflow changes are needed for this behavior.
 
