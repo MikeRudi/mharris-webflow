@@ -63,6 +63,13 @@
   opacity: 0;
 }
 
+/* A row's hover/focus reveals its child arrow; active arrows stay visible. */
+[accord-item]:hover [accord-1-arrow],
+[accord-item]:focus-visible [accord-1-arrow],
+[accord-item].active [accord-1-arrow] {
+  opacity: 1;
+}
+
 [accord-item]:focus-visible,
 [cat-select]:focus-visible,
 [filter-tab]:focus-visible,
