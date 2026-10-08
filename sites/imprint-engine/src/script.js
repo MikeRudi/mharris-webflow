@@ -1148,9 +1148,6 @@ function homeAnimation() {
         clearProps: "transform,opacity,visibility,will-change",
       }
     );
-    gsap.set($("[home-end-ripple]"), {
-      clearProps: "filter,box-shadow",
-    });
   };
 }
 
