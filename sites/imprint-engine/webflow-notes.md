@@ -176,7 +176,8 @@ is authored active in Webflow. Keep the hook when duplicating these labels.
 
 Accordion 01's grey dividers come from the reveal/background shells and 1px
 gaps. The selected `[accord-reveal]` now becomes fully visible immediately;
-only its copy, button and image content fades. Runtime attribute hooks mirror
+its copy, buttons and images also switch instantly (`reveal.duration: 0`), with
+no opacity fade. Marker movement keeps its existing timing. Runtime attribute hooks mirror
 the existing `ac-1-top-flex`, `ac-1-btn`, `ac-1-card-flex`, `ac-1-card-img` and
 `ac-1-img-single` classes. Inactive panels remain hidden/inert, and interrupted
 reveals are cancelled. The native divider/background shells are not animated.
