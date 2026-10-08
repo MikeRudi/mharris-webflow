@@ -267,10 +267,13 @@ the first item as fallbacks). The same `.active` state is applied to the item,
 its image wrapper, and its copy. Leaving the gallery keeps the last item open.
 
 On desktop/tablet, the item animates `flexGrow` between `0` and `1` over
-`0.3s` with `power1.in`. The native active image gap and content minimum width
+`0.4s` with `power1.inOut`. The native active image gap and content minimum width
 animate on that same timeline. Every image pane has `flexGrow: 1` so its width follows
 the item's available space without multiplying two easing curves.
-Copy fades over `0.15s`. Interrupted transitions restart
+Copy fades out over `0.2s` before resizing begins, stays hidden during resizing,
+then the selected copy fades in over `0.2s` once expansion finishes. Edit
+`galleryMotion.copy.hide` and `.reveal` separately; grow/mobile `start` is a delay
+after the fade-out. Interrupted transitions restart
 from the current rendered values; initial inline values prevent active-class CSS
 from snapping widths before a tween starts. Div items receive keyboard focus,
 button semantics, and `aria-expanded`. Cleanup restores authored styles,
