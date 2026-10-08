@@ -2844,52 +2844,6 @@ function homeBackgroundMotion() {
       animateVisible(this, $(this).find("[home-dna-ribbon]").toArray(), backgroundMotion.ribbon, "home-dna-sway");
     });
 
-    // COMPARISON — one pointer update per frame, with no idle rendering loop.
-    $("[compare-section]").each(function () {
-      const section = this, glow = $(this).find("[compare-glow]")[0];
-      if (!glow || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-      const restore = rememberAttributes($(glow), ["style"]);
-      const xTo = gsap.quickTo(glow, "x", backgroundMotion.cursor);
-      const yTo = gsap.quickTo(glow, "y", backgroundMotion.cursor);
-      let frame = 0, pointer, listening = false;
-      const cancel = () => { cancelAnimationFrame(frame); frame = 0; };
-      const paint = () => {
-        frame = 0;
-        if (!pointer || document.hidden) return;
-        const rect = glow.getBoundingClientRect();
-        const baseX = rect.left + rect.width / 2 - Number(gsap.getProperty(glow, "x"));
-        const baseY = rect.top + rect.height / 2 - Number(gsap.getProperty(glow, "y"));
-        xTo(pointer.x - baseX); yTo(pointer.y - baseY);
-      };
-      const move = event => {
-        if (event.pointerType === "touch") return;
-        pointer = { x: event.clientX, y: event.clientY };
-        if (!frame) frame = requestAnimationFrame(paint);
-      };
-      const leave = () => { pointer = null; cancel(); xTo(0); yTo(0); };
-      const detach = () => {
-        section.removeEventListener("pointermove", move);
-        section.removeEventListener("pointerleave", leave);
-        listening = false; pointer = null; cancel(); xTo.tween.pause(); yTo.tween.pause();
-      };
-      let visible = false;
-      const sync = () => {
-        if (visible && !document.hidden) {
-          if (!listening) {
-            section.addEventListener("pointermove", move, { passive: true });
-            section.addEventListener("pointerleave", leave);
-            listening = true;
-          }
-        } else detach();
-      };
-      const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); });
-      observer.observe(section);
-      document.addEventListener("visibilitychange", sync);
-      cleanups.push(() => {
-        observer.disconnect(); document.removeEventListener("visibilitychange", sync); detach();
-        xTo.tween.kill(); yTo.tween.kill(); restore();
-      });
-    });
     return () => cleanups.forEach(cleanup => cleanup());
   });
   return () => media.revert();
