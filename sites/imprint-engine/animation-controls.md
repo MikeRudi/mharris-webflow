@@ -60,20 +60,30 @@ The `teamMotion` controls are at the top of the function:
 
 - `float.x / y`: drift distance in pixels; `cycleSeconds`: how slowly circles float.
 - `float.resumeSeconds`: gentle drift fade-in after grabbing/releasing a circle.
-- `drag.velocityMultiplier / maxSpeed`: release strength and maximum px/second.
+- `drag.velocityMultiplier / maxSpeed`: release strength and maximum px/second;
+  `0.25 / 275` keeps throws at one quarter of the original power.
 - `drag.sampleMs / releasePauseMs`: recent pointer samples and the pause that cancels a throw.
 - `throw.friction`: higher values slow throws sooner; `stopSpeed`: settling threshold.
+- `links.elasticity / settleSeconds`: maximum stretch/compression (default `0.01`,
+  or 1%) and the soft return toward the authored connection length.
 - `walls.inset / bounce`: clearance inside the header and energy retained on rebound.
 
-Circles settle around their new position after a throw. The existing SVG endpoints
-are matched to the authored circle centers once, then remain bound to those same
-circles. Cached SVG coordinate transforms keep lines attached during dragging,
-floating, resizing and page scrolling. No per-frame circle layout measurements,
-extra animation library, runtime stylesheet or Webflow embed is required.
+Circles connected by lines form a jointed network. Dragging any circle pulls its
+connected neighbors; distance constraints preserve each authored link length with
+only the small allowed elastic movement. Joint angles remain free to rotate.
+Release momentum is shared with that connected network, while unconnected circles
+remain independent. Circles settle around their new position after a throw.
+
+The original SVG endpoints identify connected circles once. Animated copies of the
+lines render in one header-sized SVG, outside the smaller group boxes so those
+boxes cannot clip a moving connection. Its lines keep their authored colours.
+The original SVGs are hidden only during desktop animation and restored on cleanup.
+Small physics steps and cached circle geometry avoid per-frame layout measurements.
+No extra animation library, runtime stylesheet or Webflow embed is required.
 
 The frame loop stops off-screen and while the tab is hidden. Reduced motion keeps
 direct dragging but disables drifting and momentum. Leaving desktop or reinitializing
-restores native styles and line coordinates. Run
+restores native styles and removes the generated connector layer. Run
 `node sites/imprint-engine/tests/team-profiles.browser.mjs` to check these behaviors
 against the saved v2 Designer geometry, independently of publishing.
 

@@ -287,6 +287,15 @@ Future Designer copies may carry the matching attributes directly. Cleanup remov
 only hooks it added. Keep connector endpoints on their circle centers in Designer;
 the animation binds the original pairs once and preserves those pairs after resize.
 
+Connected circles now use distance constraints with at most 1% elastic extension
+or compression. Moving one circle pulls the connected network while its joints
+rotate. Release velocity and its cap are one quarter of the original settings.
+JavaScript draws animated line copies in a single `[team-profile-connector-layer]`
+SVG directly inside the header, avoiding the nested group/SVG clipping boxes. It
+keeps native source SVGs intact and restores their visibility on desktop cleanup.
+The runtime layer has the single base class `team-profile-lines`; no new Designer
+combo classes or CSS embeds are added.
+
 The section's native markup must be published in Webflow before it can appear on
 staging; saving the JS alone does not publish Designer content.
 
