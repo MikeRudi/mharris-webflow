@@ -2498,7 +2498,7 @@ function catalogueAnimation() {
 function gradientBreathOne() {
   // GRADIENT BREATH — one inhale, then the same motion reverses for the exhale.
   const gradientMotion = {
-    breath: { scale: 4.08, duration: 14, ease: "sine.inOut", repeatDelay: 0 },
+    breath: { scale: 2.08, duration: 14, ease: "sine.inOut", repeatDelay: 0 },
     drift: { xPercent: 4, yPercent: 3, alternateDirection: true },
     visibility: { rootMargin: "300px 0px" },
   };
