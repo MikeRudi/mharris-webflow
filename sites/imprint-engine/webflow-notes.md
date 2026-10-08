@@ -275,6 +275,11 @@ create the soft edge; there is no embed or runtime CSS. It sits at z-index 0,
 behind the existing layout at 1, with pointer events disabled and `aria-hidden`.
 Its matching `gradient-float-1` attribute is available for later animation.
 
+Native `.section-teams` uses `user-select: none` to prevent text highlighting.
+The header's `.btn-2-brand` has custom `class="text-selectable"`; that standalone
+native class restores `user-select: text` for the button only. Link clicking and
+circle dragging are unaffected.
+
 ```txt
 .section-teams > .teams-layout > .teams-header
   .team-profiles
