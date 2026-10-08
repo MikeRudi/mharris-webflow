@@ -204,6 +204,22 @@ preserved inside a Div Block, and `.compare-copy` owns the 0.75rem title/copy
 gap. Existing layout classes, SVG artwork and `[compare-glow]` cursor motion
 remain in place. These edits are saved in Designer; publishing is separate.
 
+The comparison drop uses native `compare-drop-track`, `compare-drop-line` and
+`compare-drop` div classes, each with its matching behavior attribute. The
+track is absolutely centred in `.compare-layout`; all `.compare-row` elements
+have `[compare-row]`. Figma's Group 14588 provided the `#B26BFF` purple.
+Per the user's follow-up, the artwork reuses the existing drop path from
+`drop-text-artwork.html`, sized to 1em by 1.5333em inside `.compare-drop`.
+Its native colour and drop-shadow remain editable there; `.compare-drop-svg`
+fills the wrapper. A one-pixel purple gradient line trails behind it.
+No CSS embed is used.
+
+`compareDropAnimation()` keeps the drop at 50% of the viewport during the
+scrub, draws its trail from the authored starting point, and releases when
+the drop's bottom reaches the final row's bottom. The movement reverses with
+scroll and adds no pin spacer or layout height. Reduced motion keeps the
+drop static. Component text properties are untouched by this addition.
+
 ## Flex Grow Gallery
 
 Home Staged's process gallery uses the existing `.flex-grow-block` structure:

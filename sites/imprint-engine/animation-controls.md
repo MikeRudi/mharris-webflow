@@ -11,6 +11,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / collision / repel / walls` | Desktop circle drift, connected dragging, content repulsion, collisions and section-wall bounces |
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
+| `compareDropAnimation` | `dropMotion.scroll / draw` | Centre-screen drop hold, trailing line and release at the final comparison row |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
 | `lineHover` | `lineMotion.enter / leave` | Pointer and keyboard underline timing and direction |
 | `filterOne` | `filterMotion` | Hide, container resize and incoming result trains |
@@ -28,6 +29,19 @@ begins immediately. Timeline-based groups also accept GSAP positions such as
 
 Most interaction eases use `power1.in`. The drop-text ripple keeps its existing
 outward easing; its expansion, opacity and settling can each be changed independently.
+
+## Comparison drop
+
+`dropMotion.scroll.screenPosition: 0.5` holds the drop at the viewport centre.
+`startOffset` and `endInset` are pixels measured inside the comparison layout.
+The drop's size, colour, glow and line artwork are controlled natively in Webflow.
+Keep `scrub: true` and `draw.ease: "none"` for an exact screen hold; smoothing
+or easing would let the drop lag behind the scroll. The drop and line share a
+normalised timeline (`draw.duration: 1`), not a timed autoplay animation.
+
+The release point updates after responsive/copy/font changes, and all inline
+styles and triggers are restored on cleanup. Run `tests/compare-drop.browser.mjs`
+for the focused first-build check.
 
 ## Filter trains
 
