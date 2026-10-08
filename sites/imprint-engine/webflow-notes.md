@@ -290,7 +290,7 @@ white-to-white or shared connections:
 | 18, 19 | 1 | 23, 24 |
 | 20, 21 | 0 | None |
 
-`teamProfilesAnimation()` owns desktop movement only. `section-teams`, `teams-header`,
+`teamProfilesAnimation()` owns desktop movement only. `section-teams`, `teams-layout`, `teams-header`,
 `team-profile-group`, `team-profile-node` and `team-profile-lines` are the behavior
 attributes. The initializer adds missing hooks from these known native classes
 at runtime because some imported elements currently have only their classes.
@@ -300,11 +300,11 @@ the animation binds the original pairs once and preserves those pairs after resi
 
 Connected circles use distance constraints with at most 1% elastic extension
 or compression. Their joints rotate freely, keeping independent momentum during
-grabs and releases. Each grab automatically releases after 300px of dragged path,
+grabs and releases. Each grab automatically releases after 0.1 seconds,
 even if the mouse button remains down. Circles collide across all groups, with a 1px
 gap and a soft rebound, while links and section walls remain constrained. Fast
 pointer jumps are swept through small steps to prevent passing through circles.
-Release velocity and its cap remain 85% of the original settings; momentum can
+Release velocity, its cap and follow momentum are 20% gentler than the previous settings; momentum can
 carry a circle farther after automatic release. The enclosing `.section-teams`
 sets all four walls and visibility/resize observation; positions and SVG coordinates
 remain relative to the header, with visible overflow.
@@ -313,6 +313,13 @@ SVG directly inside the header, avoiding the nested group/SVG clipping boxes. It
 keeps native source SVGs intact and restores their visibility on desktop cleanup.
 The runtime layer has the single base class `team-profile-lines`; no new Designer
 combo classes or CSS embeds are added.
+
+The text, button and team list inside `.teams-layout` repel circles. The initializer
+bridges their `.text`, `.btn-2-brand` and `.team-list` classes to matching attributes,
+scoped to that layout. It protects each outer content rectangle once, including the
+full circle radius and a 16px gap, with a soft outward force starting 70px farther
+out. Content rectangles are cached and remeasured on entry, resize, font readiness
+or observed content size changes. No native Webflow changes are needed for this behavior.
 
 The three added circles use native `DivBlock` containers with base class
 `team-profile-node` and custom `class="team-profile-position-22"` (or 23/24).

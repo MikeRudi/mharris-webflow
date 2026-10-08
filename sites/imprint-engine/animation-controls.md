@@ -8,7 +8,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `initLenis` | `scrollControls` | Scroll smoothing and wheel sensitivity |
 | `homeAnimation` | `homeMotion` | Existing grouped percentage-based scrub; see [home-animation.md](home-animation.md) |
 | `homeAnimation` | `homeCardMotion`, `homeAlignment` | Background rotation, depth opacity, framing and end-drop alignment |
-| `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / collision / walls` | Desktop circle drift, connected dragging, collisions and section-wall bounces |
+| `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / collision / repel / walls` | Desktop circle drift, connected dragging, content repulsion, collisions and section-wall bounces |
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
@@ -63,18 +63,25 @@ The `teamMotion` controls are at the top of the function:
 - `float.jointVariation`: independent drift within a connected group (`1`),
   allowing the white circles to move around their photo instead of keeping a rigid pose.
 - `drag.velocityMultiplier / maxSpeed`: release strength and maximum px/second;
-  `0.85 / 935` keeps throws at 85% of the original power.
-- `drag.releaseDistance`: automatically let go after `300`px of dragged path,
-  even while the mouse button is held. Bends count toward this distance. Further
+  `0.68 / 748` makes throws 20% gentler than the previous settings.
+- `drag.holdSeconds`: automatically let go after `0.1` seconds,
+  even while the mouse button is held and even if the pointer is stationary. Further
   pointer movement is ignored until a new press; the released circle keeps its momentum.
 - `drag.followMomentum`: momentum given to outer circles as their joint moves
-  (`0.6`). Each circle keeps its own velocity during the grab and after release.
+  (`0.48`). Each circle keeps its own velocity during the grab and after release.
 - `drag.sampleMs / releasePauseMs`: recent pointer samples and the pause that cancels a throw.
 - `throw.friction`: higher values slow throws sooner; `stopSpeed`: settling threshold.
 - `links.elasticity / settleSeconds`: maximum stretch/compression (default `0.01`,
   or 1%) and the soft return toward the authored connection length.
 - `collision.gap / bounce`: clearance between circle outlines (`1`px) and impact
   restitution (`0.45`). Collisions cover circles in every group in the header.
+- `repel.gap`: keep the full circle outline `16`px from `.text`, `.btn-2-brand`
+  and `.team-list` inside `.teams-layout`. Nested text inside a button/list shares
+  its parent's protected rectangle. Existing classes gain matching runtime hooks.
+- `repel.range / strength`: start pushing within another `70`px of that clearance;
+  strength is outward acceleration (`700`px/second²), fading smoothly with distance.
+- `repel.bounce`: gentle rebound against content (`0.15`). Geometry is cached on
+  entry/resize, with content size changes observed; no content layout reads each frame.
 - `walls.inset / bounce`: clearance inside `.section-teams` and energy retained
   on rebound. The header is only a fallback if no enclosing team section exists.
 
@@ -92,8 +99,8 @@ boxes cannot clip a moving connection. Its lines keep their authored colours.
 The original SVGs are hidden only during desktop animation and restored on cleanup.
 Small physics steps and cached circle geometry avoid per-frame layout measurements.
 Fast pointer jumps are swept in small spatial steps to prevent tunnelling through
-another circle. The final segment stops exactly at the release distance before
-letting go. Circles can then travel farther through momentum inside the section.
+another circle or into protected content. The grab timer is cleared on release,
+cancellation and cleanup. Circles keep gliding after the timer releases them.
 No extra animation library, runtime stylesheet or Webflow embed is required.
 
 The frame loop stops off-screen and while the tab is hidden. Reduced motion keeps

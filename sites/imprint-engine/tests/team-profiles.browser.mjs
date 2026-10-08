@@ -24,12 +24,19 @@ async function check(name, fn) {
   catch (error) { results.push(false); console.error(`FAIL ${name}: ${error.stack}`); }
   finally { await Promise.all(browser.contexts().map(context=>context.close())); }
 }
-async function open({ width = 1440, reducedMotion = "no-preference", duplicate = false, code = source, scene = null } = {}) {
+async function open({ width = 1440, reducedMotion = "no-preference", duplicate = false, code = source, scene = null, content = false } = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setContent(fixture, { waitUntil: "domcontentloaded" });
   await page.addScriptTag({ content: jquery });
   await page.addScriptTag({ content: gsap });
+  if (content) await page.evaluate(() => {
+    const section=document.querySelector('.section-teams'),header=section.querySelector('.teams-header');
+    const layout=document.createElement('div');layout.className='teams-layout';section.append(layout);layout.append(header);
+    header.querySelector('.heading').classList.add('text');header.querySelector('.cta').classList.add('btn-2-brand');
+    const list=document.createElement('div');list.className='team-list';list.style.cssText='height:90px;width:70%;margin:30px auto 0';
+    list.innerHTML='<p class="text">Teams content</p>';layout.append(list);
+  });
   if (scene) await page.evaluate(scene => {
     const header = document.querySelector('.teams-header');
     ['18', '19'].slice(0, scene === 'solo' ? 1 : 2).forEach((id, i) => {
@@ -42,10 +49,11 @@ async function open({ width = 1440, reducedMotion = "no-preference", duplicate =
   await page.evaluate((duplicate) => {
     if (duplicate) document.querySelector('.section-teams').after(document.querySelector('.section-teams').cloneNode(true));
     window.originalArtwork = [...document.querySelectorAll('.team-profile-node, .team-profile-lines line')].map(e => e.outerHTML);
-    window.nodeReads = 0; window.lineWrites = 0;
+    window.nodeReads = 0; window.contentReads = 0; window.lineWrites = 0;
     const bounds = Element.prototype.getBoundingClientRect, set = Element.prototype.setAttribute;
     Element.prototype.getBoundingClientRect = function () {
       if (this.classList.contains('team-profile-node')) window.nodeReads++;
+      if (this.matches('.teams-layout .text,.teams-layout .btn-2-brand,.teams-layout .team-list')) window.contentReads++;
       return bounds.call(this);
     };
     Element.prototype.setAttribute = function (name, value) {
@@ -79,7 +87,7 @@ async function anchored(page) {
   }, pairs);
   assert.ok(error < 0.15, `Line misses its circle center by ${error}px`);
 }
-async function dragBy(page, dx, dy, { hold = 0, id = "01", steps = 8 } = {}) {
+async function dragBy(page, dx, dy, { hold = 0, id = "01", steps = 2 } = {}) {
   const start = await center(page, id);
   await page.mouse.move(start.x, start.y); await page.mouse.down();
   for (let i = 1; i <= steps; i++) {
@@ -121,7 +129,57 @@ async function separated(page) {
   });
   assert.deepEqual(overlaps, [], 'Circle outlines must not overlap');
 }
+async function contentClear(page) {
+  const overlaps=await page.evaluate(()=>{
+    const layout=document.querySelector('.teams-layout');
+    const boxes=[...layout.querySelectorAll('.text,.btn-2-brand,.team-list')].filter(e=>!e.parentElement.closest('.text,.btn-2-brand,.team-list')).map(e=>({id:e.className,r:e.getBoundingClientRect()}));
+    return [...layout.querySelectorAll('.team-profile-node')].flatMap(e=>{
+      const r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;
+      return boxes.map(({id,r:box})=>({circle:e.className,box:id,overlap:r.width/2+16-Math.hypot(x-Math.max(box.left,Math.min(box.right,x)),y-Math.max(box.top,Math.min(box.bottom,y)))}));
+    }).filter(pair=>pair.overlap>0.1);
+  });
+  assert.deepEqual(overlaps,[],'Circles must leave 16px around protected content');
+}
 try {
+  await check("text, button and team list repel whole circles without per-frame layout reads",async()=>{
+    const page=await open({content:true});await page.waitForTimeout(500);
+    await contentClear(page);await anchored(page);await constrained(page);
+    await page.evaluate(()=>{nodeReads=contentReads=0});await page.waitForTimeout(250);
+    assert.equal(await page.evaluate(()=>nodeReads+contentReads),0);
+    for(const target of ['.heading','.cta','.team-list']){
+      const box=await page.locator(target).boundingBox(),p=await center(page,'02');
+      await page.mouse.move(p.x,p.y);await page.mouse.down();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+      await page.waitForTimeout(160);await page.mouse.up();await contentClear(page);await constrained(page);await anchored(page);
+    }
+    for(const width of [1100,1920,1440]){
+      await page.setViewportSize({width,height:1000});await page.waitForTimeout(180);await contentClear(page);await constrained(page);await anchored(page);
+    }
+    await page.locator('.heading').evaluate(e=>e.style.fontSize='58px');await page.waitForTimeout(180);await contentClear(page);
+    await page.evaluate(()=>initSite.cleanup());
+    assert.equal(await page.locator('[teams-layout],[text],[btn-2-brand],[team-list]').count(),0);
+    await page.close();
+  });
+  await check("repulsion starts gently outside content; reduced motion stays still after clearing content",async()=>{
+    const code=source.replace('float: { x: 12, y: 9','float: { x: 0, y: 0');
+    const page=await open({content:true,scene:'solo',code});
+    await page.evaluate(()=>{
+      initSite.cleanup();const header=document.querySelector('.teams-header'),h=header.getBoundingClientRect(),box=document.querySelector('.heading').getBoundingClientRect(),node=header.querySelector('.is-18');
+      node.style.left=`${box.left-h.left-60-16-25}px`;node.style.top=`${box.top-h.top+box.height/2-30}px`;initSite();
+    });await page.waitForTimeout(100);
+    const before=await center(page,'18');await page.waitForTimeout(650);const after=await center(page,'18');
+    assert.ok(after.x<before.x-10,JSON.stringify({before,after}));await contentClear(page);
+    await page.emulateMedia({reducedMotion:'reduce'});await page.waitForTimeout(100);
+    const still=await center(page,'18');await page.waitForTimeout(250);near((await center(page,'18')).x,still.x,0.01);
+    await page.close();
+  });
+  await check("cleanup during a grab clears its timer and restores the artwork",async()=>{
+    const page=await open({scene:'solo',reducedMotion:'reduce'}),p=await center(page,'18');
+    await page.mouse.move(p.x,p.y);await page.mouse.down();await page.mouse.move(p.x+80,p.y);
+    await page.evaluate(()=>initSite.cleanup());await page.waitForTimeout(150);await page.mouse.up();
+    assert.deepEqual(await page.locator('.team-profile-node, .team-profile-lines line').evaluateAll(es=>es.map(e=>e.outerHTML.replace(/ style=""/g,''))),await page.evaluate(()=>originalArtwork));
+    await page.evaluate(()=>initSite());await page.waitForTimeout(120);
+    const next=await dragBy(page,70,0,{id:'18'});near(next.held.x-next.start.x,70,0.1);await page.close();
+  });
   await check("all 24 circles drift gently; 15 connectors stay at their centers with no frame layout reads", async () => {
     const page = await open(); await page.waitForTimeout(1300);
     const first = await center(page); await page.evaluate(() => { window.nodeReads = 0; });
@@ -153,7 +211,7 @@ try {
     await page.close();
   });
   await check("drag tracks the pointer immediately and release glides in the same direction before slowing", async () => {
-    const page = await open({scene:'solo'});
+    const page = await open({scene:'solo',code:source.replace('holdSeconds: 0.1','holdSeconds: 1')});
     const { start, held } = await dragBy(page, 180, 45, {id:'18'});
     near(held.x-start.x, 180, 2); near(held.y-start.y, 45, 2);
     await page.waitForTimeout(220); const fast = await center(page,'18');
@@ -163,14 +221,14 @@ try {
     assert.ok(Math.abs(slow.x-settled.x) < (fast.x-held.x) / 5);
     await separated(page); await page.close();
   });
-  await check("release power is close to the original, reduced only to 85%",async()=>{
-    const still=source.replace('float: { x: 12, y: 9','float: { x: 0, y: 0');
+  await check("throw velocity is 20% gentler than the previous version",async()=>{
+    const still=source.replace('float: { x: 12, y: 9','float: { x: 0, y: 0').replace('holdSeconds: 0.1','holdSeconds: 1');
     const distances=[];
-    for(const code of [still,still.replace('velocityMultiplier: 0.85, maxSpeed: 935','velocityMultiplier: 1, maxSpeed: 1100')]){
+    for(const code of [still,still.replace('velocityMultiplier: 0.68, maxSpeed: 748','velocityMultiplier: 0.85, maxSpeed: 935')]){
       const page=await open({code,scene:'solo'});const {held}=await dragBy(page,280,0,{id:'18',steps:2});
       await page.waitForTimeout(250);distances.push((await center(page,'18')).x-held.x);await page.close();
     }
-    near(distances[0]/distances[1],0.85,0.09);
+    near(distances[0]/distances[1],0.8,0.09);
   });
   await check("dragging restores free joint rotation while keeping 1% elasticity",async()=>{
     const page=await open(); const before=await linkLengths(page);const neighbor=await center(page,'03');
@@ -184,8 +242,9 @@ try {
     assert.equal(await page.locator('[team-profile-lines]').evaluateAll(es=>es.every(e=>getComputedStyle(e).display==='none')),true);
     await page.close();
   });
-  await check("a paused release and pointer cancellation do not launch stale momentum", async () => {
-    const page = await open({scene:'solo'});
+  await check("a paused manual release and pointer cancellation do not launch stale momentum", async () => {
+    // Longer test hold isolates the existing manual-release sampling from auto-release.
+    const page = await open({scene:'solo',code:source.replace('holdSeconds: 0.1','holdSeconds: 1')});
     const { held } = await dragBy(page, 120, 0, { hold: 180,id:'18' });
     await page.waitForTimeout(300); const stopped = await center(page,'18'); near(stopped.x, held.x, 5);
     const p = await center(page,'18'); await page.mouse.move(p.x,p.y); await page.mouse.down();
@@ -195,29 +254,28 @@ try {
     await page.waitForTimeout(300); near((await center(page,'18')).x, canceled.x, 5);
     await page.close();
   });
-  await check("300px of dragging releases capture automatically, including a bent path", async () => {
+  await check("100ms grabs release automatically; later pointer movement cannot move the released circle", async () => {
     const page = await open({scene:'solo',reducedMotion:'reduce'});
-    for (const [dx,dy] of [[600,0],[-600,0],[500,500],[-500,-500]]) {
-      await page.evaluate(() => initSite()); await page.waitForTimeout(100);
-      const {start,held}=await dragBy(page,dx,dy,{id:'18'});
-      near(Math.hypot(held.x-start.x,held.y-start.y),300,0.1);
-      const next=await dragBy(page,-dx/4,-dy/4,{id:'18'});
-      near(next.held.x-next.start.x,-dx/4,0.1);near(next.held.y-next.start.y,-dy/4,0.1);
-    }
-    await page.evaluate(()=>initSite());await page.waitForTimeout(80);
+    await page.evaluate(()=>{
+      const node=document.querySelector('.is-18');window.releaseTimes=[];let began;
+      node.addEventListener('pointerdown',()=>began=performance.now());
+      new MutationObserver(()=>{if(began&&node.style.cursor==='grab'){releaseTimes.push(performance.now()-began);began=null;}}).observe(node,{attributes:true,attributeFilter:['style']});
+    });
     const p=await center(page,'18');await page.mouse.move(p.x,p.y);await page.mouse.down();
-    await page.mouse.move(p.x+180,p.y);await page.waitForTimeout(30);
-    assert.equal(await page.locator(selector('18')).evaluate(e=>e.style.cursor),'grabbing');
-    await page.mouse.move(p.x+59,p.y);await page.waitForTimeout(30);
+    await page.mouse.move(p.x+180,p.y);await page.waitForTimeout(140);
     assert.equal(await page.locator(selector('18')).evaluate(e=>e.style.cursor),'grab');
     assert.equal(await page.locator(selector('18')).evaluate(e=>e.hasPointerCapture(1)),false);
-    const released=await center(page,'18');near(released.x-p.x,60,0.1);
+    const elapsed=await page.evaluate(()=>releaseTimes[0]);assert.ok(elapsed>=95&&elapsed<150,`${elapsed}ms hold`);
+    const released=await center(page,'18');near(released.x-p.x,180,0.1);
     await page.mouse.move(p.x+240,p.y+100);await page.waitForTimeout(50);
     near((await center(page,'18')).x,released.x,0.1);await page.mouse.up();
+    const next=await dragBy(page,-70,20,{id:'18'});near(next.held.x-next.start.x,-70,0.1);
+    const still=await center(page,'18');await page.mouse.move(still.x,still.y);await page.mouse.down();await page.waitForTimeout(140);
+    assert.equal(await page.locator(selector('18')).evaluate(e=>e.style.cursor),'grab');near((await center(page,'18')).x,still.x,0.1);await page.mouse.up();
     await page.close();
   });
   await check("connected circles keep swinging while their photo is held and after release",async()=>{
-    const page=await open();const p=await center(page,'17');await page.mouse.move(p.x,p.y);await page.mouse.down();
+    const page=await open({code:source.replace('holdSeconds: 0.1','holdSeconds: 1')});const p=await center(page,'17');await page.mouse.move(p.x,p.y);await page.mouse.down();
     await page.mouse.move(p.x+110,p.y+80,{steps:6});await page.waitForTimeout(30);
     const first=await linkLengths(page);await page.waitForTimeout(180);const second=await linkLengths(page);
     assert.ok([11,12].some(i=>Math.abs(second[i].angle-first[i].angle)>0.02),'Outer circles froze while the photo was held');
@@ -229,9 +287,9 @@ try {
     const page=await open({scene:'pair',reducedMotion:'reduce'});
     const a=await center(page,'18'),b=await center(page,'19');
     await page.mouse.move(a.x,a.y);await page.mouse.down();
-    await page.mouse.move(a.x+900,a.y);await page.waitForTimeout(30);
+    await page.mouse.move(a.x+300,a.y);await page.waitForTimeout(30);
     const held=await center(page,'18'),pushed=await center(page,'19');
-    assert.ok(held.x-a.x<=300.1);assert.ok(pushed.x>=held.x+60,JSON.stringify({held,pushed}));
+    near(held.x-a.x,300,1);assert.ok(pushed.x>=held.x+60,JSON.stringify({held,pushed}));
     assert.ok(pushed.x>b.x+100);await separated(page);
     await page.waitForTimeout(120);await page.mouse.up();
     await page.emulateMedia({reducedMotion:'no-preference'});
