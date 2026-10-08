@@ -293,7 +293,13 @@ the second mirrors it with `right: -8.5%` and `left: auto`.
 Native rounded corners and the blur filter create the soft edges; there is no
 embed or runtime CSS. Both sit at z-index 0 behind the existing layout at 1,
 with pointer events disabled and `aria-hidden`. Matching `team-gradient-1` and
-`team-gradient-2` attributes are available for later animation. The first class
+`team-gradient-2` attributes identify each glow. Both also have `gradient-breath-1`,
+which runs the reusable `gradientBreathOne()` function from `initSite()`.
+Its controls sit at the top: scale to 1.08 over 14 seconds with `sine.inOut`,
+then reverse, drifting 4% horizontally and 3% vertically in opposite directions.
+It pauses offscreen or in hidden tabs, respects reduced motion, and restores
+native styles on cleanup. Colour, dimensions and blur remain owned by Webflow.
+The existing FAQ breathing animation remains separate. The first class
 and hook replace the former `gradient-float-1` name.
 
 Native `.section-teams` uses `user-select: none` to prevent text highlighting.

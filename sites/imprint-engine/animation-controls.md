@@ -158,6 +158,25 @@ Offscreen, hidden-tab and reduced-motion states suspend the footer. Leaving the
 desktop breakpoint removes its generated layer. A stationary pointer causes no
 additional drawing.
 
+## Reusable gradient breathing
+
+Add the empty `gradient-breath-1` attribute to any gradient in Webflow.
+`gradientBreathOne()` runs from `initSite()` on desktop and mobile, using the
+same slow drift/scale as the FAQ glows. Edit `gradientMotion` at its top:
+
+- `breath.scale`: largest scale (1.08).
+- `breath.duration`: seconds for each inhale or exhale (14; full cycle 28).
+- `breath.ease`: smoothing (`sine.inOut`).
+- `breath.repeatDelay`: pause between directions (0 seconds).
+- `drift.xPercent` / `yPercent`: movement as percentages of the gradient's size (4 / 3).
+- `drift.alternateDirection`: alternate movement direction between gradients (true).
+- `visibility.rootMargin`: distance outside the viewport at which it can run (`300px 0px`).
+
+Webflow controls the resting position, size, colour and blur. The animation
+pauses outside its visibility margin and in hidden tabs, and stays static when
+reduced motion is requested. A focused initial lifecycle check lives in
+`tests/gradient-breath.browser.mjs`.
+
 ## Lifecycle and accessibility
 
 `initSite()` first cleans up any previous initialization. Each feature returns a
