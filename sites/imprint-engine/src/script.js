@@ -1165,18 +1165,22 @@ function teamProfilesAnimation() {
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
     float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2, jointVariation: 1 },
-    drag: { velocityMultiplier: 0.85, maxSpeed: 935, releaseDistance: 300, followMomentum: 0.6, sampleMs: 90, releasePauseMs: 100 },
+    drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.48, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
     links: { elasticity: 0.01, settleSeconds: 0.18 },
     collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
+    repel: { gap: 16, range: 70, strength: 700, bounce: 0.15 }, // Keep the content clear, with a soft push near it.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
 
   // The new Designer artwork still has some class-only elements. Add matching
   // runtime hooks once; all motion below uses attributes. No Webflow edit needed.
   const addedHooks = [];
-  ["section-teams", "teams-header", "team-profile-group", "team-profile-node", "team-profile-lines"].forEach((name) => {
-    $(name === "teams-header" || name === "section-teams" ? `.${name}` : `.teams-header .${name}, [teams-header] .${name}`)
+  ["section-teams", "teams-layout", "teams-header", "team-profile-group", "team-profile-node", "team-profile-lines", "text", "btn-2-brand", "team-list"].forEach((name) => {
+    const selector = ["text", "btn-2-brand", "team-list"].includes(name)
+      ? `.teams-layout .${name}, [teams-layout] .${name}`
+      : ["teams-header", "teams-layout", "section-teams"].includes(name) ? `.${name}` : `.teams-header .${name}, [teams-header] .${name}`;
+    $(selector)
       .each(function () {
         if (!this.hasAttribute(name)) { this.setAttribute(name, ""); addedHooks.push([this, name]); }
       });
@@ -1187,7 +1191,13 @@ function teamProfilesAnimation() {
   $("[teams-header]").each(function (sectionIndex) {
     const header = this, $header = $(header), $nodes = $header.find("[team-profile-node]");
     const boundary = $header.closest("[section-teams]")[0] || header;
+    const layout = $header.closest("[teams-layout]")[0] || boundary;
     if (!$nodes.length) return;
+    // A list/button already protects its contents; avoid overlapping duplicate zones.
+    const $content = $(layout).find("[text], [btn-2-brand], [team-list]").filter(function () {
+      return !$(this).closest("[team-profile-node]").length &&
+        !$(this).parentsUntil(layout).filter("[text], [btn-2-brand], [team-list]").length;
+    });
     const namespace = `.teamProfiles${sectionIndex}`;
     const $sourceSvgs = $header.find("[team-profile-lines]");
     const $lines = $sourceSvgs.find("line");
@@ -1203,7 +1213,7 @@ function teamProfilesAnimation() {
     const byElement = new Map(nodes.map((node) => [node.element, node]));
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
-    let layer = null;
+    let layer = null, contentBoxes = [];
     let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0, motionStep = 4;
     let visible = !window.IntersectionObserver, active = false, destroyed = false;
     let geometryDirty = true, paintDirty = true, drag = null;
@@ -1215,9 +1225,16 @@ function teamProfilesAnimation() {
       const rect = header.getBoundingClientRect();
       if (!rect.width || !rect.height || !header.offsetWidth || !header.offsetHeight) return false;
       const oldWidth = width, oldHeight = height;
-      width = header.offsetWidth; height = header.offsetHeight;
+      // Keep fractional CSS sizes so SVG endpoints and translated circles align.
+      width = $header.outerWidth(); height = $header.outerHeight();
       scaleX = rect.width / width; scaleY = rect.height / height;
       const walls = boundary.getBoundingClientRect();
+      contentBoxes = $content.toArray().map((element) => {
+        const box = element.getBoundingClientRect();
+        return box.width && box.height ? { left: (box.left - rect.left) / scaleX,
+          right: (box.right - rect.left) / scaleX, top: (box.top - rect.top) / scaleY,
+          bottom: (box.bottom - rect.top) / scaleY } : null;
+      }).filter(Boolean);
       nodes.forEach((node) => {
         const bounds = node.element.getBoundingClientRect();
         const offsetX = oldWidth ? (node.x - node.baseX) * width / oldWidth : 0;
@@ -1333,7 +1350,8 @@ function teamProfilesAnimation() {
         edges.forEach((edge) => {
           if (!edge.length) return;
           const a = edge.from, b = edge.to;
-          const weightA = drag?.node === a ? 0 : 1, weightB = drag?.node === b ? 0 : 1;
+          // Let the grabbed circle yield a little when its network is squeezed.
+          const weightA = drag?.node === a ? 0.1 : 1, weightB = drag?.node === b ? 0.1 : 1;
           const dx = b.x - a.x, dy = b.y - a.y;
           const distance = Math.hypot(dx, dy) || 0.001;
           const correction = (distance - edge.targetLength) / distance / (weightA + weightB);
@@ -1342,13 +1360,15 @@ function teamProfilesAnimation() {
           b.x -= correctionX * weightB; b.y -= correctionY * weightB;
         });
         resolveCollisions();
+        nodes.forEach(keepContentClear);
         nodes.forEach((node) => {
           node.x = clamp(node.x, node.minX, node.maxX);
           node.y = clamp(node.y, node.minY, node.maxY);
         });
         const settled = edges.every((edge) => !edge.length ||
           Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < 0.015) &&
-          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015);
+          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015) &&
+          nodes.every((node) => contentBoxes.every((box) => contentContact(node, box).clearance >= -0.015));
         if (settled) break;
       }
     }
@@ -1376,6 +1396,53 @@ function teamProfilesAnimation() {
       members.forEach((item) => item.neighbors.forEach((neighbor) => members.add(neighbor)));
       return members;
     }
+    // CONTENT REPULSION — cached rectangles; circles use their full visible radius.
+    function contentContact(node, box) {
+      const dx = node.x - clamp(node.x, box.left, box.right);
+      const dy = node.y - clamp(node.y, box.top, box.bottom);
+      const distance = Math.hypot(dx, dy), radius = node.radius + teamMotion.repel.gap;
+      if (distance > 0.001) return { nx: dx / distance, ny: dy / distance, clearance: distance - radius };
+      const exits = [{ nx: -1, ny: 0, depth: node.x - box.left }, { nx: 1, ny: 0, depth: box.right - node.x },
+        { nx: 0, ny: -1, depth: node.y - box.top }, { nx: 0, ny: 1, depth: box.bottom - node.y }];
+      const exit = exits.reduce((best, next) => next.depth < best.depth ? next : best);
+      return { nx: exit.nx, ny: exit.ny, clearance: -exit.depth - radius };
+    }
+    function keepContentClear(node) {
+      const contacts = contentBoxes.map((box) => contentContact(node, box)).filter((contact) => contact.clearance < 0);
+      if (!contacts.length) return;
+      const radius = node.radius + teamMotion.repel.gap;
+      const exits = contacts.map((contact) => ({ x: node.x - contact.nx * contact.clearance, y: node.y - contact.ny * contact.clearance }));
+      // Treat nearby content as one obstacle: escaping the button must not push
+      // a circle into the heading. Also choose an exit inside the section walls.
+      contentBoxes.forEach((box) => exits.push({ x: box.left - radius, y: node.y }, { x: box.right + radius, y: node.y },
+        { x: node.x, y: box.top - radius }, { x: node.x, y: box.bottom + radius }));
+      const valid = exits.filter((point) => point.x >= node.minX && point.x <= node.maxX && point.y >= node.minY && point.y <= node.maxY &&
+        contentBoxes.every((box) => contentContact({ ...point, radius: node.radius }, box).clearance >= -0.001));
+      if (!valid.length) return;
+      const { x, y } = valid.reduce((best, next) => Math.hypot(next.x - node.x, next.y - node.y) <
+        Math.hypot(best.x - node.x, best.y - node.y) ? next : best);
+      const dx = x - node.x, dy = y - node.y, distance = Math.hypot(dx, dy);
+      if (!distance) return;
+      const nx = dx / distance, ny = dy / distance, incoming = node.vx * nx + node.vy * ny;
+      node.x = x; node.y = y;
+      if (incoming < 0) {
+        node.vx -= nx * incoming * (1 + teamMotion.repel.bounce);
+        node.vy -= ny * incoming * (1 + teamMotion.repel.bounce);
+      }
+    }
+    function repelContent(node, dt) {
+      let repelling = false;
+      contentBoxes.forEach((box) => {
+        const { nx, ny, clearance } = contentContact(node, box);
+        if (clearance >= teamMotion.repel.range) return;
+        repelling = true;
+        const proximity = 1 - clamp(clearance / teamMotion.repel.range, 0, 1);
+        const push = teamMotion.repel.strength * proximity * proximity * dt;
+        node.vx += nx * push; node.vy += ny * push;
+      });
+      capVelocity(node);
+      return repelling;
+    }
     function advanceDrag() {
       if (!drag.pending) return;
       const root = drag.node, dx = drag.x - root.x, dy = drag.y - root.y;
@@ -1391,6 +1458,9 @@ function teamProfilesAnimation() {
         root.x = x; root.y = y;
         updateLinkLengths(0);
         solveLinks();
+        // Stop a blocked sweep at the obstacle instead of repeatedly forcing the
+        // network through it. The next pointer event can move around the obstacle.
+        if (Math.hypot(root.x - x, root.y - y) > motionStep) break;
       }
       if (!reducedMotion.matches) before.forEach(({ node, x, y }) => {
         if (node === root) return;
@@ -1424,9 +1494,10 @@ function teamProfilesAnimation() {
       const travel = teamMotion.throw.friction > 0 ? (1 - decay) / teamMotion.throw.friction : dt;
       nodes.forEach((node) => {
         if (!moving || drag?.node === node) return;
+        const repelling = repelContent(node, dt);
         node.x += node.vx * travel; node.y += node.vy * travel;
         node.vx *= decay; node.vy *= decay;
-        if (Math.hypot(node.vx, node.vy) < teamMotion.throw.stopSpeed) node.vx = node.vy = 0;
+        if (!repelling && Math.hypot(node.vx, node.vy) < teamMotion.throw.stopSpeed) node.vx = node.vy = 0;
         node.blend = Math.min(1, node.blend + dt / teamMotion.float.resumeSeconds);
         const blend = node.blend * node.blend * (3 - 2 * node.blend);
         const cycle = clock * Math.PI * 2 / teamMotion.float.cycleSeconds;
@@ -1472,34 +1543,26 @@ function teamProfilesAnimation() {
     // POINTER DRAG — direct movement; only the last short motion sets the throw.
     function moveDrag(event) {
       if (!drag || event.pointerId !== drag.pointerId) return;
+      if (performance.now() >= drag.releaseAt) { finishDrag(true); return; }
       const rect = header.getBoundingClientRect();
-      let x = clamp((event.clientX - rect.left) / scaleX - drag.offsetX, drag.node.minX, drag.node.maxX);
-      let y = clamp((event.clientY - rect.top) / scaleY - drag.offsetY, drag.node.minY, drag.node.maxY);
-      const distance = Math.hypot(x - drag.x, y - drag.y);
-      const remaining = Math.max(0, teamMotion.drag.releaseDistance - drag.distance);
-      const release = distance >= remaining - 0.01;
-      if (release && distance) {
-        x = drag.x + (x - drag.x) * remaining / distance;
-        y = drag.y + (y - drag.y) * remaining / distance;
-      }
-      drag.distance += Math.min(distance, remaining);
+      const x = clamp((event.clientX - rect.left) / scaleX - drag.offsetX, drag.node.minX, drag.node.maxX);
+      const y = clamp((event.clientY - rect.top) / scaleY - drag.offsetY, drag.node.minY, drag.node.maxY);
       const now = performance.now();
       const previous = drag.samples[drag.samples.length - 1];
       if (x !== previous.x || y !== previous.y) {
         drag.x = x; drag.y = y; drag.pending = true;
         drag.lastMove = now;
-        // Apply the last part of the path, then release even if the button is held.
         drag.samples.push({ x, y, time: now });
         // Keep at least one velocity interval when a slow frame delays an event.
         while (drag.samples.length > 2 && drag.samples[0].time < now - teamMotion.drag.sampleMs) drag.samples.shift();
       }
       paintDirty = true; syncActivity();
       event.preventDefault();
-      if (release) finishDrag(true);
     }
     function finishDrag(throwIt = false) {
       if (!drag) return;
       const current = drag, node = current.node;
+      clearTimeout(current.releaseTimer);
       // Include the final pointer position before releasing the pinned joint.
       if (!destroyed) step(0);
       drag = null;
@@ -1528,12 +1591,15 @@ function teamProfilesAnimation() {
       const rect = header.getBoundingClientRect(), now = performance.now();
       const members = connectedTo(node);
       node.vx = node.vy = 0;
-      drag = { node, members, x: node.x, y: node.y, distance: 0, pending: false, appliedAt: now, pointerId: original.pointerId,
+      drag = { node, members, x: node.x, y: node.y, pending: false, appliedAt: now, pointerId: original.pointerId,
+        releaseAt: now + teamMotion.drag.holdSeconds * 1000,
         offsetX: (original.clientX - rect.left) / scaleX - node.x,
         offsetY: (original.clientY - rect.top) / scaleY - node.y,
         samples: [{ x: node.x, y: node.y, time: now }], lastMove: now };
       node.element.style.cursor = "grabbing";
       try { node.element.setPointerCapture(original.pointerId); } catch {}
+      const current = drag;
+      current.releaseTimer = setTimeout(() => { if (drag === current) finishDrag(true); }, teamMotion.drag.holdSeconds * 1000);
       event.preventDefault(); syncActivity();
     }).on(`dragstart${namespace}`, "[team-profile-node]", (event) => event.preventDefault())
       .on(`lostpointercapture${namespace}`, "[team-profile-node]", (event) => {
@@ -1578,7 +1644,9 @@ function teamProfilesAnimation() {
     if (resizeObserver) {
       resizeObserver.observe(header);
       if (boundary !== header) resizeObserver.observe(boundary);
+      if (layout !== boundary && layout !== header) resizeObserver.observe(layout);
       $nodes.each(function () { resizeObserver.observe(this); });
+      $content.each(function () { resizeObserver.observe(this); });
     }
     $(window).on(`resize${namespace}`, invalidateGeometry);
     document.addEventListener("visibilitychange", visibilityChanged);
