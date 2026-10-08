@@ -2675,9 +2675,9 @@ function compareGradientAnimation() {
       const lead = layers[layers.length - 1];
       function measure() {
         rect = section.getBoundingClientRect();
-        const box = gradient.getBoundingClientRect();
-        origin = { x: box.left + box.width / 2 - rect.left - head.x,
-          y: box.top + box.height / 2 - rect.top - head.y };
+        // offset geometry ignores the animated transform, including rapid re-entry.
+        origin = { x: section.clientLeft + gradient.offsetLeft + gradient.offsetWidth / 2,
+          y: section.clientTop + gradient.offsetTop + gradient.offsetHeight / 2 };
       }
       function aim(event) {
         pointer = { x: event.clientX, y: event.clientY };
