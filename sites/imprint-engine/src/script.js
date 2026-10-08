@@ -178,16 +178,17 @@ function homeAnimation() {
       rightBracket: { start: "leftBracket", duration: 0.18, ease: "power1.in" },
       content: { start: "clip:end+=0.035", duration: 0.1, ease: "power1.in" },
     },
-    // 11 — Final water rings expand and settle behind the end content.
+    // 11 — Perspective water rings; final size, colour and blur are native Webflow styles.
     endRipple: {
       start: "finish.clip+=0.12",
-      expand: { start: 0, duration: 0.2, ease: "power1.in", stagger: 0.02, scale: (index) => 1.1 - index * 0.3 },
-      reveal: { start: "expand", duration: 0.2, ease: "power1.in", stagger: 0.02, opacity: 0.7 },
+      expand: { start: 0, duration: 0.2, ease: "power1.in", stagger: 0.02, fromScale: 0.08, scale: 1 },
+      reveal: {
+        start: "expand", duration: 0.2, ease: "power1.in", stagger: 0.02,
+        opacity: { outer: 0.4, middle: 0.4, inner: 0.6 },
+      },
       settle: {
         start: "expand+=0.01", duration: 0.28, ease: "power1.in", stagger: 0.02,
-        blur: "2.5rem",
-        // Decimal alpha avoids GSAP's percentage-alpha colour interpolation snap.
-        shadow: "0 0 5rem 3rem rgba(104, 150, 230, 0.6), inset 0 0 5rem 3rem rgba(104, 150, 230, 0.45)",
+        fromBlur: "0.5em",
       },
     },
   };
@@ -724,7 +725,7 @@ function homeAnimation() {
   });
 
   gsap.set($("[home-end-ripple]"), {
-    scale: 0.08,
+    scale: homeMotion.endRipple.expand.fromScale,
     autoAlpha: 0,
     transformOrigin: "center",
   });
@@ -998,18 +999,19 @@ function homeAnimation() {
     addHomeStep(group, "content", $homeEndContent, { opacity: 0 }, { opacity: 1 }, motion.content);
   });
 
-  // 11 — Settled end rings. Their authored shadows are restored on reverse.
+  // 11 — Webflow owns the flattened ellipses; the scrub preserves their final geometry.
   addHomeGroup("endRipple", (group, motion) => {
     const $rings = $("[home-end-ripple]");
-    const styles = $rings.toArray().map((ring) => {
-      const style = getComputedStyle(ring);
-      return { filter: style.filter === "none" ? "blur(0rem)" : style.filter, shadow: style.boxShadow };
-    });
-    addHomeStep(group, "expand", $rings, { scale: 0.08 }, { scale: motion.expand.scale }, motion.expand);
-    addHomeStep(group, "reveal", $rings, { autoAlpha: 0 }, { autoAlpha: motion.reveal.opacity }, motion.reveal);
+    const filters = $rings.toArray().map(ring => getComputedStyle(ring).filter);
+    addHomeStep(group, "expand", $rings,
+      { scale: motion.expand.fromScale }, { scale: motion.expand.scale }, motion.expand);
+    addHomeStep(group, "reveal", $rings, { autoAlpha: 0 }, {
+      autoAlpha: (index, ring) => motion.reveal.opacity[ring.getAttribute("home-end-ripple")]
+        ?? motion.reveal.opacity[["outer", "middle", "inner"][index]],
+    }, motion.reveal);
     addHomeStep(group, "settle", $rings,
-      { filter: (index) => styles[index].filter, boxShadow: (index) => styles[index].shadow },
-      { filter: `blur(${motion.settle.blur})`, boxShadow: motion.settle.shadow }, motion.settle);
+      { filter: `blur(${motion.settle.fromBlur})` },
+      { filter: (index) => filters[index] === "none" ? "blur(0px)" : filters[index] }, motion.settle);
   });
 
   // A fixed 0–1 clock keeps percentages literal even if edited steps exceed 1.
