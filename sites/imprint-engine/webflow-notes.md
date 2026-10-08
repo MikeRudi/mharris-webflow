@@ -310,6 +310,9 @@ grabs and releases. Each grab automatically releases after 0.1 seconds,
 even if the mouse button remains down. Circles collide across all groups, with a 1px
 gap and a soft rebound, while links and section walls remain constrained. Connector
 lines stay anchored and flexible but do not participate in collisions.
+Circles lingering within 32px of each other gain a gentle separating force after
+0.75 seconds, building over 1.25 seconds to at most 60px/second². This excludes
+directly linked pairs and active grabs, preserving connection lengths and dragging.
 Fast pointer jumps are swept through small steps to prevent passing through circles.
 Release velocity and its cap remain 20% gentler; stronger follow momentum, slower
 elastic settling and heavier photos let connected groups travel more freely. Momentum can

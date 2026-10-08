@@ -80,6 +80,10 @@ The `teamMotion` controls are at the top of the function:
   photos retain more momentum and pull their lighter satellites along.
 - `collision.gap / bounce`: clearance between circle outlines (`1`px) and impact
   restitution (`0.45`). Collisions cover circles in every group in the header.
+- `spacing.range / strength`: a weaker repulsion within `32`px between outlines,
+  up to `60`px/second². It begins after `spacing.delaySeconds: 0.75` nearby,
+  then builds over `spacing.rampSeconds: 1.25`. Directly linked circles keep their
+  authored distance; other nearby circles gently separate without stretching links.
 - `repel.gap`: `-18` allows the circle outline to overlap content before full force.
   `repel.maxOverlapRatio: 0.35` limits that overlap to 35% of each circle's radius,
   so small white circles still feel the push before disappearing into the content.
