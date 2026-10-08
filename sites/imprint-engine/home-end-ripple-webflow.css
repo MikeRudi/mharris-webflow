@@ -1,0 +1,47 @@
+/* Native Webflow reference only — do not load as a runtime stylesheet.
+   Figma Ellipses 10–12, inspected 2026-10-08 at 1440px / 16px em. */
+.home-end-ripples {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 90em;
+  height: 0;
+  aspect-ratio: auto;
+  overflow: visible;
+  z-index: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.home-end-ripple {
+  position: absolute;
+  display: block;
+  left: 50%;
+  top: 5em;
+  right: auto;
+  bottom: auto;
+  width: 154.8125em;
+  height: 30.4375em;
+  box-sizing: border-box;
+  border: 5em solid #b7d1ff;
+  border-radius: 50%;
+  background-color: transparent;
+  box-shadow: none;
+  filter: blur(1.65em);
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+/* Standalone modifiers assigned through the custom class attribute. */
+.home-end-ripple-middle {
+  width: 93.0625em;
+  height: 20.9375em;
+  top: 3.375em;
+}
+.home-end-ripple-inner {
+  width: 60.5625em;
+  height: 13.8125em;
+  top: 2em;
+  opacity: 0.6;
+}

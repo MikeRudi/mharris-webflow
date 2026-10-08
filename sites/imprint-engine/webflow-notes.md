@@ -112,11 +112,18 @@ JavaScript scales only the target SVG in place, to 0.5 initially. Brackets close
 from -72px / 72px and the end content fades in. Both layers leave together
 through normal page scrolling at the exact section boundary.
 
-The landing ripple expands and fades away on scrub. The final ripple expands
-to 1.1 / 0.8 / 0.5 and settles into blue shadows with 2.5rem blur and 0.7 opacity.
-It stays visible behind the end artwork and content at z-index 2. Use decimal
-`rgba()` alpha for tweened shadows: GSAP 3.15 misinterpolates percentage alpha.
-Desktop cleanup restores ring styles and content stacking order.
+The landing ripple expands and fades away on scrub. The final ripple matches
+Figma Ellipses 10–12: inner 969×221, middle 1489×335, outer 2477×487 at the
+1440px reference width, with 80px borders, #B7D1FF, 26.4px blur, multiply blending,
+and inner/middle/outer opacity 0.6/0.4/0.4. Native dimensions use em, with centres
+32/54/80px below the drop centre at the reference width to retain the perspective.
+All three keep `.home-end-ripple` as their base; middle/inner modifiers use the
+custom `class` attribute and the behavior hook identifies outer/middle/inner.
+See `home-end-ripple-webflow.css` for the native style reference, not a runtime file.
+JS expands each from 0.08 to 1 over 29% of the scrub with 2% stagger, reaching
+the authored final size at 97%. Blur and borders stay native throughout; no
+animated shadows or filter repaint are needed. Desktop cleanup restores ring
+transforms/opacity and content stacking order.
 
 The page-load entrance stops Lenis and restarts it on completion. Early native
 scroll input finishes the entrance before rendering the corresponding scroll

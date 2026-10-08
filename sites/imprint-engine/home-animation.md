@@ -76,6 +76,13 @@ gradient orbit and star rotation use `none` for a constant rate. Card fades use
 | `finish` | After the line, currently 52% | Clip through 70%; drop, brackets and content settle after it |
 | `endRipple` | Clip start + 12%, currently 64% | Expand and settle through 97% |
 
+`endRipple.expand` controls growth from `fromScale: 0.08` to the native size
+(`scale: 1`), over `0.29` of the scroll with `0.02` stagger. Its `reveal.opacity`
+controls outer/middle/inner strength independently (0.4/0.4/0.6). The flattened
+ellipse dimensions, vertical offsets, thick borders and blur are authored in
+Webflow, matching the selected Figma ellipses; JS does not replace that artwork
+with shadows.
+
 The page entrance uses the separate `homeEntrance` controls in seconds. Idle
 card rotation and pointer dragging use `homeCardMotion`: the idle rate is 360
 degrees per 48 seconds, with a 45-degree axis. `idle.scrollSpeedMultiplier: 3`
