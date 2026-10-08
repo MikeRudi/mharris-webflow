@@ -1842,8 +1842,8 @@ function flexGrowAnimation() {
       start: 0,
       active: 1,
       inactive: 0,
-      duration: 0.6,
-      ease: "expo.out",
+      duration: 0.4,
+      ease: "power1.inOut",
     },
     copy: {
       start: 0,
