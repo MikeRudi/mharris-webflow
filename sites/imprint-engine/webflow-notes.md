@@ -39,6 +39,12 @@ scene/drop sequence reaches the clip at 52%, leaving 48% for the finish. Both
 home ripples, the clip, brackets, final drop, and content follow scroll in both
 directions. There is no timed finish or scroll lock during the scroll sequence.
 The entrance and idle card rotation keep their separate time-based behavior.
+
+The opening, second and third scene fades use GSAP `autoAlpha` so fully hidden
+scenes also have `visibility: hidden`. Their full-screen wrappers therefore do
+not intercept the visible `.home-start-btns` links. The hero drag handler already
+ignores links/buttons; fade timings and native button styles are unchanged.
+Breakpoint cleanup clears visibility together with the other animation styles.
 Most scroll motion uses `power1.in`; orbit and star rotation initially use
 `none`, with their own editable controls.
 
