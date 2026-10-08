@@ -145,6 +145,13 @@ only where a hero nav exists, letting hero z-index 21 cover page nav 20 while
 layout-end stays below it. The hero nav wrapper is absolute inside the sticky
 hero so it follows the clip and leaves with the section, including on mobile.
 
+v2's shared Navigation component publishes both copies with `nav-dark` and has
+no theme prop. `home-head-code.html` therefore supplies the hero-only light text,
+translucent background/border and nav stacking rules synchronously in Home's
+page head. This matches the existing `nav-light` appearance before the async JS
+switches its state class. The separate page nav still uses the normal scroll
+theme logic. Keep these initial colours aligned with native navigation styles.
+
 Home Staged's approved `.layout-end` artwork is recorded in
 `sites/imprint-engine/layout-end-svg-replacement.html`. The existing SVG
 containers, viewBoxes, classes, and animation hooks are preserved. The supplied

@@ -20,3 +20,23 @@
     }
   }
 </style>
+
+<style id="home-nav-initial-state">
+  /* The hero nav always uses light text; the page nav keeps its scroll themes. */
+  [home-start] [nav-block] {
+    color: #fff;
+    background-color: #8989890a;
+    border-color: #ffffff3d;
+    column-gap: normal;
+    row-gap: normal;
+  }
+
+  /* Keep the hero nav above the page nav before the async stylesheet loads. */
+  [layout-start]:has([home-start] [nav-block]) {
+    z-index: auto;
+  }
+
+  [home-start] > :has(> [nav-block]) {
+    position: absolute;
+  }
+</style>
