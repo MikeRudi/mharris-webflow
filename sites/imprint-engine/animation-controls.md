@@ -11,6 +11,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / collision / repel / walls` | Desktop circle drift, connected dragging, content repulsion, collisions and section-wall bounces |
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
+| `testimonialEnvelopeAnimation` | `envelopeMotion.closed / open / close / hover` | Closed flap fade, card peeking, full-content hover lift and envelope toggling |
 | `compareDropAnimation` | `dropMotion.scroll / draw` | Centre-screen drop hold, trailing line and release at the final comparison row |
 | `compareGradientAnimation` | `gradientMotion.arrive / reveal / follow / trail / leave / performance` | Invisible arrival, cursor reveal, fading paint trail and parked exit |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |
@@ -30,6 +31,20 @@ begins immediately. Timeline-based groups also accept GSAP positions such as
 
 Most interaction eases use `power1.in`. The drop-text ripple keeps its existing
 outward easing; its expansion, opacity and settling can each be changed independently.
+
+## Testimonial envelope
+
+`envelopeMotion.open` and `.close` each group the flap, purple back and cards,
+with separate `start`, `duration`, `ease` and card `stagger` controls. The closed
+flap fades away rather than rotating. The function runs globally, including touch.
+
+Hover reveals the whole card content above the envelope mouth, accounting for
+the card's angle. `hover.minimumLift`, `contentGap` and `minimumInserted` are
+fractions of envelope height; they control the minimum lift, clear space below
+the content and how much paper remains tucked inside. Native Webflow styles
+control the card height, resting stack, artwork, clipping and responsive layout.
+Touch taps and keyboard focus also reveal a card. Purple areas toggle open/closed;
+Escape closes and restores focus. Reduced motion settles immediately.
 
 ## Comparison drop
 

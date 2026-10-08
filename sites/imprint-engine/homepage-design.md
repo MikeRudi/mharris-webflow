@@ -73,8 +73,10 @@ The initializer returns a cleanup and restores authored attributes.
 
 - The process photograph visible in Figma is absent from the available site
   assets; the existing placeholder remains until the original is supplied.
-- The envelope is a native geometric approximation. Exact paper texture,
-  typography/logos and complete testimonial text require the source artwork.
+- The v2 envelope now uses the supplied paper-texture assets and an interactive
+  closed/open/hover stack. Text remains editable native `.text` blocks. John and
+  Emily's cards still contain only the original name/company copy; their full
+  quotes were not present in the component and have not been invented.
 - The Wall of Love destination is not present among the site's pages. Its
   reference label is static until a real destination is supplied.
 - Existing social and other placeholder links remain to be completed.

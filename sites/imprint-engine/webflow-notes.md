@@ -315,6 +315,52 @@ and 04 Deploy. Existing image assets and body copy are preserved for editing
 in Webflow. The first item, image, and copy are authored active in Designer.
 Native changes need a Webflow publish; the JS uses the existing site loader.
 
+## v2 testimonial envelope — 2026-10-08
+
+`Testimonials 01` (`75501620-ec18-b292-2f8d-988bcd52a869`) now renders its root
+as a div. It contains a native `.testimonial-layout`, heading text block,
+layered envelope and `.btn-2-black` label. All nine text elements have `.text`
+as their only native base, with typography in the custom `class` attribute.
+There were no component props to relink. Existing names/company/quote copy is
+preserved. The Wall of Love label has `[line-hover-item]` and a `[line-hover]`
+underline; it has no destination, as requested.
+
+All four supplied PNGs were resized to 1400px wide and compressed to WebP with
+transparency preserved, from 32,106,842 bytes to 223,764 bytes combined. The
+compressed reference copies are in `assets/envelope/`; runtime images come
+from the Webflow asset library, not the repository vault:
+
+| Asset | Webflow asset ID | Bytes |
+| --- | --- | --- |
+| envelope-bottom.webp | 6ac72b014b9d233dd71c2885 | 56,694 |
+| envelope-top.webp | 6ac72b028030aee2939aa132 | 58,256 |
+| envelope-bottom-crop.webp | 6ac72b02d1f9a887cf0cd3e9 | 52,992 |
+| envelope-top-crop.webp | 6ac72b0295180e47249f0fa7 | 55,822 |
+
+The open back uses the full-canvas top. The pocket uses the cropped bottom;
+the closed flap uses the cropped top, clipped above the fold and mirrored
+vertically in native Webflow. Images use `.img-abs` with separate modifier
+classes in the `class` attribute. Three purple hit areas toggle the envelope;
+the front pocket is the single keyboard button. Transparent corners allow
+pointer access to the cards. The card mask follows the outer pocket edges,
+with generous room above so lifted cards and the back flap stay visible.
+
+`testimonialEnvelopeAnimation()` runs from `initSite()` on desktop and mobile.
+Native styles start the envelope closed before JS. Opening fades out the closed
+flap while the back and cards reveal. Hover/focus/tap lifts one card enough to
+show all its existing content while retaining paper inside the pocket. Purple
+clicks reverse the state; interrupted transitions start from current positions.
+All timings, eases and travel controls are in `envelopeMotion` at the top.
+Resize/content/font changes recalculate card clearance. Cleanup restores native
+styles and attributes and removes observers/events. Reduced motion is instant.
+
+`testimonial-envelope.html` and `testimonial-envelope-webflow.css` are references
+to the native structure/styles, not runtime dependencies. First-build checks used
+the staging CSS/fonts with the exact native changes at 1440, 1024, 768, 390 and
+320px; all cards showed their content without horizontal overflow. Purple-area
+clicks, rapid toggles, mouse hover, keyboard, touch, reduced motion and re-init
+were checked. Native changes still require a Webflow publish.
+
 ## Drop Text Section
 
 Home Staged contains `.drop-text-section > .drop-text-layout`. The existing
