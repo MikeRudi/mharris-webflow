@@ -1843,7 +1843,7 @@ function flexGrowAnimation() {
       active: 1,
       inactive: 0,
       duration: 0.3,
-      ease: "power1.in",
+      ease: "expo.in",
     },
     copy: {
       start: 0,
