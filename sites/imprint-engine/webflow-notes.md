@@ -295,6 +295,10 @@ connectors, leaving 20 visible circles (8 photos, 12 white) and 12 lines. Native
 Designer markup remains as listed above and is restored when desktop JS cleans up.
 Only the eight revealed-photo circles are draggable; white circles follow their
 connections and collisions without accepting pointer interaction.
+Hovering a photo scales its clip and its connected circles' clips to 1.15, while
+their images scale to 0.95 (0.25 seconds, power1.in). Connected placeholder images
+fade to opacity 1 over 0.2 seconds. Leaving restores their original appearance.
+The inner clips animate independently of the circles' physics and connector anchors.
 
 `teamProfilesAnimation()` owns desktop movement only. `section-teams`, `teams-layout`, `teams-header`,
 `team-profile-group`, `team-profile-node` and `team-profile-lines` are the behavior

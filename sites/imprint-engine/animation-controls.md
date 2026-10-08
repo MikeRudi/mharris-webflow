@@ -61,6 +61,10 @@ The `teamMotion` controls are at the top of the function:
 - `layout.hiddenCircles`: hide photo `02` and its white circles `06/07/08` in the
   desktop animation. Eight photos remain, with two groups of three connections.
 - Only circles containing a revealed image accept pointer selection/dragging.
+- `hover.clipScale / imageScale`: hovered photos and their connected circles scale
+  the clip to `1.15` and the image to `0.95`, over `0.25` seconds with `power1.in`.
+  Connected images fade to opacity `1` over `hover.fadeDuration: 0.2` seconds.
+  Leaving restores original scales/opacity with the same timing; reduced motion is instant.
 - `float.x / y`: drift distance in pixels; `cycleSeconds`: how slowly circles float.
 - `float.resumeSeconds`: gentle drift fade-in after grabbing/releasing a circle.
 - `float.jointVariation`: independent drift within a connected group (`1`),
