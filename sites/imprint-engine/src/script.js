@@ -181,14 +181,10 @@ function homeAnimation() {
     // 11 — Perspective water rings; final size, colour and blur are native Webflow styles.
     endRipple: {
       start: "finish.clip+=0.12",
-      expand: { start: 0, duration: 0.2, ease: "power1.in", stagger: 0.02, fromScale: 0.08, scale: 1 },
+      expand: { start: 0, duration: 0.29, ease: "power1.in", stagger: 0.02, fromScale: 0.08, scale: 1 },
       reveal: {
         start: "expand", duration: 0.2, ease: "power1.in", stagger: 0.02,
         opacity: { outer: 0.4, middle: 0.4, inner: 0.6 },
-      },
-      settle: {
-        start: "expand+=0.01", duration: 0.28, ease: "power1.in", stagger: 0.02,
-        fromBlur: "0.5em",
       },
     },
   };
@@ -1002,16 +998,12 @@ function homeAnimation() {
   // 11 — Webflow owns the flattened ellipses; the scrub preserves their final geometry.
   addHomeGroup("endRipple", (group, motion) => {
     const $rings = $("[home-end-ripple]");
-    const filters = $rings.toArray().map(ring => getComputedStyle(ring).filter);
     addHomeStep(group, "expand", $rings,
       { scale: motion.expand.fromScale }, { scale: motion.expand.scale }, motion.expand);
     addHomeStep(group, "reveal", $rings, { autoAlpha: 0 }, {
       autoAlpha: (index, ring) => motion.reveal.opacity[ring.getAttribute("home-end-ripple")]
         ?? motion.reveal.opacity[["outer", "middle", "inner"][index]],
     }, motion.reveal);
-    addHomeStep(group, "settle", $rings,
-      { filter: `blur(${motion.settle.fromBlur})` },
-      { filter: (index) => filters[index] === "none" ? "blur(0px)" : filters[index] }, motion.settle);
   });
 
   // A fixed 0–1 clock keeps percentages literal even if edited steps exceed 1.
