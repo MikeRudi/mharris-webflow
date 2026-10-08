@@ -46,6 +46,7 @@ For fast Webflow testing, `scripts/watch-push.js` can watch a site's `src` folde
 
 ## Webflow Designer Access
 
+- If Webflow MCP is needed and cannot be connected to or accessed, tell the user immediately. Do not silently retry repeatedly or switch to computer control.
 - The user mainly works directly in Webflow.
 - Use the Webflow plugin primarily to inspect context, selected elements, pages, classes, structure, and what the user is referring to.
 - Do not edit, create, move, delete, style, publish, upload, or otherwise change anything inside Webflow unless the user explicitly asks for that specific Webflow action.
