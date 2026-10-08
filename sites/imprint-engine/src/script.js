@@ -1169,7 +1169,7 @@ function teamProfilesAnimation() {
     drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.8, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
     links: { elasticity: 0.06, settleSeconds: 0.65, photoMass: 6 }, // Photos lead; lighter satellites follow.
-    collision: { gap: 1, bounce: 0.45, lineGap: 2 }, // Circles and connectors both take part.
+    collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
     repel: { gap: -18, range: 12, strength: 240 }, // Allow some overlap, then ease circles out slowly.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
@@ -1372,14 +1372,13 @@ function teamProfilesAnimation() {
           b.x -= correctionX * weightB; b.y -= correctionY * weightB;
         });
         resolveCollisions();
-        const lineContact = resolveLineCollisions();
         nodes.forEach((node) => {
           node.x = clamp(node.x, node.minX, node.maxX);
           node.y = clamp(node.y, node.minY, node.maxY);
         });
         const settled = edges.every((edge) => !edge.length ||
           Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < 0.015) &&
-          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015) && !lineContact;
+          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015);
         if (settled) break;
       }
     }
@@ -1406,63 +1405,6 @@ function teamProfilesAnimation() {
       const members = new Set([node]);
       members.forEach((item) => item.neighbors.forEach((neighbor) => members.add(neighbor)));
       return members;
-    }
-    // CONNECTOR COLLISIONS — circles push the closest point on a line; unrelated
-    // lines separate when they cross. Shared photo joints remain free to rotate.
-    function resolveLineCollisions() {
-      let contact = false;
-      const liveEdges = edges.filter((edge) => edge.length);
-      liveEdges.forEach((edge) => {
-        const a = edge.from, b = edge.to;
-        nodes.forEach((node) => {
-          if (node === a || node === b) return;
-          const dx = b.x - a.x, dy = b.y - a.y, square = dx * dx + dy * dy;
-          if (!square) return;
-          const t = clamp(((node.x - a.x) * dx + (node.y - a.y) * dy) / square, 0, 1);
-          const x = node.x - a.x - dx * t, y = node.y - a.y - dy * t;
-          const distance = Math.hypot(x, y), depth = node.radius + teamMotion.collision.lineGap - distance;
-          if (depth <= 0.015) return;
-          contact = true;
-          const nx = distance > 0.001 ? x / distance : -dy / Math.sqrt(square);
-          const ny = distance > 0.001 ? y / distance : dx / Math.sqrt(square);
-          const wa = inverseMass(a), wb = inverseMass(b), wn = inverseMass(node);
-          const weight = wn + wa * (1 - t) ** 2 + wb * t * t;
-          const move = depth / weight;
-          node.x += nx * move * wn; node.y += ny * move * wn;
-          a.x -= nx * move * wa * (1 - t); a.y -= ny * move * wa * (1 - t);
-          b.x -= nx * move * wb * t; b.y -= ny * move * wb * t;
-          const closing = (node.vx - a.vx * (1 - t) - b.vx * t) * nx + (node.vy - a.vy * (1 - t) - b.vy * t) * ny;
-          if (closing >= 0 || reducedMotion.matches) return;
-          const impulse = -(1 + teamMotion.collision.bounce) * closing / weight;
-          node.vx += nx * impulse * wn; node.vy += ny * impulse * wn;
-          a.vx -= nx * impulse * wa * (1 - t); a.vy -= ny * impulse * wa * (1 - t);
-          b.vx -= nx * impulse * wb * t; b.vy -= ny * impulse * wb * t;
-        });
-      });
-      liveEdges.forEach((first, index) => liveEdges.slice(index + 1).forEach((second) => {
-        const a = first.from, b = first.to, c = second.from, d = second.to;
-        if (a === c || a === d || b === c || b === d) return;
-        const cross = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
-        if (cross(a, b, c) * cross(a, b, d) >= 0 || cross(c, d, a) * cross(c, d, b) >= 0) return;
-        // Smallest translation along either segment's normal separates the crossing.
-        const options = [];
-        [[a, b], [c, d]].forEach(([p, q]) => {
-          const length = Math.hypot(q.x - p.x, q.y - p.y);
-          if (!length) return;
-          const nx = -(q.y - p.y) / length, ny = (q.x - p.x) / length;
-          const project = (node) => node.x * nx + node.y * ny;
-          const aa = project(a), bb = project(b), cc = project(c), dd = project(d);
-          options.push({ nx, ny, depth: Math.max(aa, bb) - Math.min(cc, dd) + teamMotion.collision.lineGap },
-            { nx: -nx, ny: -ny, depth: Math.max(cc, dd) - Math.min(aa, bb) + teamMotion.collision.lineGap });
-        });
-        if (!options.length) return;
-        const hit = options.reduce((best, next) => next.depth < best.depth ? next : best);
-        const wa = inverseMass(a) + inverseMass(b), wb = inverseMass(c) + inverseMass(d), total = wa + wb;
-        [a, b].forEach((node) => { node.x -= hit.nx * hit.depth * wa / total; node.y -= hit.ny * hit.depth * wa / total; });
-        [c, d].forEach((node) => { node.x += hit.nx * hit.depth * wb / total; node.y += hit.ny * hit.depth * wb / total; });
-        contact = true;
-      }));
-      return contact;
     }
     // CONTENT REPULSION — negative gap permits overlap; force eases circles out.
     function contentContact(node, box) {
