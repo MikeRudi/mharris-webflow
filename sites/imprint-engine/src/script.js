@@ -1173,8 +1173,8 @@ function teamProfilesAnimation() {
     // HOVER + RELEASE — scale, image reveal, then the delayed fade after a drag.
     hover: {
       scaleAmount: 0.15, // Clip +15%, image -15%; shared timing below.
-      duration: 0.4,
-      ease: "power1.in",
+      duration: 0.3,
+      ease: "power1.out",
       revealedOpacity: 1,
       fadeDuration: 0.2,
       fadeEase: "power1.in",
