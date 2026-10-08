@@ -89,6 +89,13 @@ Production preference after stable releases:
 - Group animation controls by feature and state, such as `wordAnimation.hide` and `wordAnimation.reveal`.
 - Include movement values, duration, ease, stagger, fade timing, and fade ease in grouped animation controls.
 
+## Animation Refinements and Testing
+
+- Test a new function or animation when first building it.
+- Once the user is refining an existing function or animation, make the requested changes quickly, save locally, and push to GitHub so the user can refresh and judge the result.
+- Let the user test refinement changes first. Do not run browser sessions, regression suites, or add new tests for each refinement, including physics/collision adjustments.
+- Resume targeted testing if the user asks for it or reports that a refinement is not working after trying it. Until then, keep verification to a quick syntax check and focused code review.
+
 ## Before Editing a Site
 
 Check:

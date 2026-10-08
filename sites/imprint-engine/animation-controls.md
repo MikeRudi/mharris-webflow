@@ -58,6 +58,9 @@ and its image reveal; there is no separate image zoom or delay.
 `teamProfilesAnimation()` is called inside `onDesktop()` (992px and wider).
 The `teamMotion` controls are at the top of the function:
 
+- `layout.hiddenCircles`: hide photo `02` and its white circles `06/07/08` in the
+  desktop animation. Eight photos remain, with two groups of three connections.
+- Only circles containing a revealed image accept pointer selection/dragging.
 - `float.x / y`: drift distance in pixels; `cycleSeconds`: how slowly circles float.
 - `float.resumeSeconds`: gentle drift fade-in after grabbing/releasing a circle.
 - `float.jointVariation`: independent drift within a connected group (`1`),
@@ -68,20 +71,23 @@ The `teamMotion` controls are at the top of the function:
   even while the mouse button is held and even if the pointer is stationary. Further
   pointer movement is ignored until a new press; the released circle keeps its momentum.
 - `drag.followMomentum`: momentum given to outer circles as their joint moves
-  (`0.48`). Each circle keeps its own velocity during the grab and after release.
+  (`0.8`). Each circle keeps its own velocity during the grab and after release.
 - `drag.sampleMs / releasePauseMs`: recent pointer samples and the pause that cancels a throw.
 - `throw.friction`: higher values slow throws sooner; `stopSpeed`: settling threshold.
-- `links.elasticity / settleSeconds`: maximum stretch/compression (default `0.01`,
-  or 1%) and the soft return toward the authored connection length.
+- `links.elasticity / settleSeconds`: maximum stretch/compression (`0.06`,
+  or 6%) and the slower return toward the authored length (`0.65` seconds).
+- `links.photoMass`: photos have six times the mass of white circles, so connected
+  photos retain more momentum and pull their lighter satellites along.
 - `collision.gap / bounce`: clearance between circle outlines (`1`px) and impact
   restitution (`0.45`). Collisions cover circles in every group in the header.
-- `repel.gap`: keep the full circle outline `16`px from `.text`, `.btn-2-brand`
-  and `.team-list` inside `.teams-layout`. Nested text inside a button/list shares
-  its parent's protected rectangle. Existing classes gain matching runtime hooks.
-- `repel.range / strength`: start pushing within another `70`px of that clearance;
-  strength is outward acceleration (`700`px/second²), fading smoothly with distance.
-- `repel.bounce`: gentle rebound against content (`0.15`). Geometry is cached on
-  entry/resize, with content size changes observed; no content layout reads each frame.
+- `collision.lineGap`: circles collide with connector segments with `2`px clearance;
+  unrelated connector crossings also separate. Lines sharing a joint can still rotate.
+- `repel.gap`: `-18` allows the circle outline to overlap content before full force.
+  Applies to `.text`, `.btn-2-brand` and `.team-list` inside `.teams-layout`.
+  Nested content shares its parent's rectangle; hooks are added at runtime.
+- `repel.range / strength`: force fades in over `12`px, up to `240`px/second².
+  There is no hard snap out of content. Geometry is cached on entry/resize,
+  with content size changes observed; no content layout reads each frame.
 - `walls.inset / bounce`: clearance inside `.section-teams` and energy retained
   on rebound. The header is only a fallback if no enclosing team section exists.
 
@@ -99,15 +105,16 @@ boxes cannot clip a moving connection. Its lines keep their authored colours.
 The original SVGs are hidden only during desktop animation and restored on cleanup.
 Small physics steps and cached circle geometry avoid per-frame layout measurements.
 Fast pointer jumps are swept in small spatial steps to prevent tunnelling through
-another circle or into protected content. The grab timer is cleared on release,
+another circle or connector. Content applies a gradual force. The grab timer is cleared on release,
 cancellation and cleanup. Circles keep gliding after the timer releases them.
 No extra animation library, runtime stylesheet or Webflow embed is required.
 
 The frame loop stops off-screen and while the tab is hidden. Reduced motion keeps
 direct dragging but disables drifting and momentum. Leaving desktop or reinitializing
-restores native styles and removes the generated connector layer. Run
-`node sites/imprint-engine/tests/team-profiles.browser.mjs` to check these behaviors
-against the saved v2 Designer geometry, independently of publishing.
+restores native styles and removes the generated connector layer. During refinement,
+the user refreshes and tests first; see the project rules. The existing browser suite
+captures the earlier 24-circle/1%-elasticity baseline and needs its expectations
+updated before a future requested test pass.
 
 ## Footer responsiveness
 

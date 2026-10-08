@@ -290,6 +290,12 @@ white-to-white or shared connections:
 | 18, 19 | 1 | 23, 24 |
 | 20, 21 | 0 | None |
 
+Desktop refinement: JS hides photo `02`, white circles `06/07/08` and their three
+connectors, leaving 20 visible circles (8 photos, 12 white) and 12 lines. Native
+Designer markup remains as listed above and is restored when desktop JS cleans up.
+Only the eight revealed-photo circles are draggable; white circles follow their
+connections and collisions without accepting pointer interaction.
+
 `teamProfilesAnimation()` owns desktop movement only. `section-teams`, `teams-layout`, `teams-header`,
 `team-profile-group`, `team-profile-node` and `team-profile-lines` are the behavior
 attributes. The initializer adds missing hooks from these known native classes
@@ -298,13 +304,15 @@ Future Designer copies may carry the matching attributes directly. Cleanup remov
 only hooks it added. Keep connector endpoints on their circle centers in Designer;
 the animation binds the original pairs once and preserves those pairs after resize.
 
-Connected circles use distance constraints with at most 1% elastic extension
+Connected circles use distance constraints with at most 6% elastic extension
 or compression. Their joints rotate freely, keeping independent momentum during
 grabs and releases. Each grab automatically releases after 0.1 seconds,
 even if the mouse button remains down. Circles collide across all groups, with a 1px
-gap and a soft rebound, while links and section walls remain constrained. Fast
-pointer jumps are swept through small steps to prevent passing through circles.
-Release velocity, its cap and follow momentum are 20% gentler than the previous settings; momentum can
+gap and a soft rebound, while links and section walls remain constrained. Connector
+segments collide with other circles and separate from unrelated crossing lines.
+Fast pointer jumps are swept through small steps to prevent passing through circles.
+Release velocity and its cap remain 20% gentler; stronger follow momentum, slower
+elastic settling and heavier photos let connected groups travel more freely. Momentum can
 carry a circle farther after automatic release. The enclosing `.section-teams`
 sets all four walls and visibility/resize observation; positions and SVG coordinates
 remain relative to the header, with visible overflow.
@@ -316,9 +324,10 @@ combo classes or CSS embeds are added.
 
 The text, button and team list inside `.teams-layout` repel circles. The initializer
 bridges their `.text`, `.btn-2-brand` and `.team-list` classes to matching attributes,
-scoped to that layout. It protects each outer content rectangle once, including the
-full circle radius and a 16px gap, with a soft outward force starting 70px farther
-out. Content rectangles are cached and remeasured on entry, resize, font readiness
+scoped to that layout. Each outer content rectangle supplies one gradual outward
+force, permitting some overlap instead of snapping circles out. The soft field
+uses a -18px gap, 12px falloff and 240px/second² maximum acceleration.
+Content rectangles are cached and remeasured on entry, resize, font readiness
 or observed content size changes. No native Webflow changes are needed for this behavior.
 
 The three added circles use native `DivBlock` containers with base class
