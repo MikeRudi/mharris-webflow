@@ -2730,10 +2730,11 @@ function compareGradientAnimation() {
           head.x = start.x + (target.x - start.x) * arrivalEase(progress);
           head.y = start.y + (target.y - start.y) * arrivalEase(progress);
           if (progress === 1) {
-            phase = "active";
+            phase = "revealing";
             trails.forEach(layer => { layer.x = head.x; layer.y = head.y; });
             gsap.to(opacity, { value: gradientMotion.reveal.opacity,
-              duration: gradientMotion.reveal.duration, ease: gradientMotion.reveal.ease });
+              duration: gradientMotion.reveal.duration, ease: gradientMotion.reveal.ease,
+              onComplete: () => { phase = "active"; } });
           }
         } else if (inside) {
           const blend = mix(gradientMotion.follow.responseSeconds, delta);
@@ -2766,7 +2767,7 @@ function compareGradientAnimation() {
           layers.forEach(layer => layer.setOpacity(0)); stop(); return;
         }
         const moving = Math.hypot(target.x - head.x, target.y - head.y) > gradientMotion.performance.positionEpsilon;
-        if (moving || settling || phase === "arriving" || phase === "leaving" || gsap.isTweening(opacity)) wake();
+        if (moving || settling || phase !== "active") wake();
         else stop();
       }
 
