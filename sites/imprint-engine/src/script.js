@@ -2698,7 +2698,7 @@ function accordionOne() {
   // ACCORDION CONTROLS — seconds; marker movement and content reveal are independent.
   const accordionMotion = {
     marker: { start: 0, duration: 0.3, ease: "power1.in" },
-    reveal: { start: 0, duration: 0.3, ease: "power1.in" },
+    reveal: { start: 0, duration: 0, ease: "power1.in" }, // Instant content switch.
   };
   const cleanups = [];
   const addedHooks = [];
