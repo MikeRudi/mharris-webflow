@@ -1845,15 +1845,6 @@ function flexGrowAnimation() {
       duration: 0.3,
       ease: "power1.in",
     },
-    // Dimensions are authored on .flex-grow-block in Webflow; timing follows grow.
-    spacing: {
-      contentWidthProperty: "--gallery-open-content-width",
-      gapProperty: "--gallery-open-gap",
-      fallbackContentWidth: "10em",
-      fallbackGap: "1rem",
-      inactiveMinWidth: 0,
-      inactiveGap: 0,
-    },
     copy: {
       start: 0,
       active: 1,
@@ -1877,7 +1868,6 @@ function flexGrowAnimation() {
   let destroyed = false;
 
   $blocks.each(function () {
-    const block = this;
     const items = $(this)
       .children("[flex-grow-item]")
       .toArray()
@@ -2011,23 +2001,27 @@ function flexGrowAnimation() {
           timeline.to($image, { height: target.image, marginTop: target.gap, ...timing }, galleryMotion.mobile.start);
         });
       } else {
-        const nativeSpacing = getComputedStyle(block);
-        const openWidth = nativeSpacing.getPropertyValue(galleryMotion.spacing.contentWidthProperty).trim();
-        const openGap = nativeSpacing.getPropertyValue(galleryMotion.spacing.gapProperty).trim();
         const timing = {
           duration: galleryMotion.grow.duration,
           ease: galleryMotion.grow.ease,
           overwrite: "auto",
         };
         items.forEach((entry) => {
-          const active = entry === item;
+          // Read the new state's native Webflow spacing, then restore the current
+          // frame before tweening. Widths and padding stay authored in Webflow.
+          const current = [
+            ...rememberStyles(entry.$item, ["column-gap"]),
+            ...rememberStyles(entry.$content, ["min-width"]),
+          ];
+          current.forEach(({ element, property }) => element.style.removeProperty(property));
           const itemSpacing = {
             flexGrow: grow(0, entry.$item[0]),
-            columnGap: active ? openGap || galleryMotion.spacing.fallbackGap : galleryMotion.spacing.inactiveGap,
+            columnGap: entry.$item.css("column-gap"),
           };
           const contentSpacing = {
-            minWidth: active ? openWidth || galleryMotion.spacing.fallbackContentWidth : galleryMotion.spacing.inactiveMinWidth,
+            minWidth: entry.$content.css("min-width"),
           };
+          restoreStyles(current);
           if (immediate) {
             gsap.set(entry.$item, itemSpacing);
             gsap.set(entry.$content, contentSpacing);
