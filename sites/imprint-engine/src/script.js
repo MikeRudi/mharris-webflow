@@ -1165,6 +1165,7 @@ function teamProfilesAnimation() {
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
     layout: { hiddenCircles: ["02", "06", "07", "08"] }, // Remove one photo and its three white satellites.
+    hover: { clipScale: 1.15, imageScale: 0.95, duration: 0.25, fadeDuration: 0.2, ease: "power1.in" },
     float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2, jointVariation: 1 },
     drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.8, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
@@ -1178,7 +1179,7 @@ function teamProfilesAnimation() {
   // The new Designer artwork still has some class-only elements. Add matching
   // runtime hooks once; all motion below uses attributes. No Webflow edit needed.
   const addedHooks = [];
-  ["section-teams", "teams-layout", "teams-header", "team-profile-group", "team-profile-node", "team-profile-lines", "text", "btn-2-brand", "team-list"].forEach((name) => {
+  ["section-teams", "teams-layout", "teams-header", "team-profile-group", "team-profile-node", "team-profile-clip", "team-profile-image", "team-profile-lines", "text", "btn-2-brand", "team-list"].forEach((name) => {
     const selector = ["text", "btn-2-brand", "team-list"].includes(name)
       ? `.teams-layout .${name}, [teams-layout] .${name}`
       : ["teams-header", "teams-layout", "section-teams"].includes(name) ? `.${name}` : `.teams-header .${name}, [teams-header] .${name}`;
@@ -1207,6 +1208,8 @@ function teamProfilesAnimation() {
     const restoreSvgs = rememberAttributes($sourceSvgs, ["style"]);
     const allNodes = $nodes.toArray().map((element, index) => ({
       element, group: $(element).closest("[team-profile-group]")[0],
+      clip: element.querySelector("[team-profile-clip]"),
+      image: element.querySelector("[team-profile-image]") || element.querySelector("img"),
       enabled: !teamMotion.layout.hiddenCircles.some((id) => element.classList.contains(`is-${id}`) || element.classList.contains(`team-profile-position-${id}`)),
       draggable: [...element.querySelectorAll("img")].some((image) => Number(getComputedStyle(image).opacity) > 0.01 && getComputedStyle(image).visibility !== "hidden"),
       phase: index * 2.39996, speed: 1 + (index % 5) * 0.07,
@@ -1215,6 +1218,14 @@ function teamProfilesAnimation() {
       minX: 0, maxX: 0, minY: 0, maxY: 0,
     }));
     const nodes = allNodes.filter((node) => node.enabled);
+    const hoverElements = nodes.flatMap((node) => [node.clip, node.image]).filter(Boolean);
+    const restoreHover = rememberAttributes($(hoverElements), ["style"]);
+    nodes.forEach((node) => {
+      node.clipScale = node.clip ? Number(gsap.getProperty(node.clip, "scaleX")) : 1;
+      node.imageScale = node.image ? Number(gsap.getProperty(node.image, "scaleX")) : 1;
+      node.imageOpacity = node.image ? Number(getComputedStyle(node.image).opacity) : 0;
+    });
+    let hovered = null;
     const byElement = new Map(nodes.map((node) => [node.element, node]));
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b, nearSeconds: 0 })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
@@ -1552,6 +1563,36 @@ function teamProfilesAnimation() {
       syncActivity();
     }
 
+    // PHOTO HOVER — animate only the inner clip/image, leaving physics anchors intact.
+    function setHover(node, immediate = false) {
+      if (hovered === node) return;
+      const previous = hovered ? connectedTo(hovered) : new Set();
+      const next = node ? connectedTo(node) : new Set();
+      hovered = node;
+      const controls = teamMotion.hover, instant = immediate || reducedMotion.matches;
+      new Set([...previous, ...next]).forEach((member) => {
+        const active = next.has(member);
+        if (member.clip) gsap.to(member.clip, {
+          scale: member.clipScale * (active ? controls.clipScale : 1),
+          duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto",
+        });
+        if (member.image) {
+          gsap.to(member.image, { scale: member.imageScale * (active ? controls.imageScale : 1),
+            duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto" });
+          gsap.to(member.image, { opacity: active ? 1 : member.imageOpacity,
+            duration: instant ? 0 : controls.fadeDuration, ease: controls.ease, overwrite: "auto" });
+        }
+      });
+    }
+    $header.on(`pointerenter${namespace}`, "[team-profile-node]", function (event) {
+      const node = byElement.get(this);
+      if (!node?.draggable || event.originalEvent?.pointerType === "touch") return;
+      if (geometryDirty && !measure()) return;
+      setHover(node);
+    }).on(`pointerleave${namespace}`, "[team-profile-node]", function () {
+      if (hovered === byElement.get(this)) setHover(null);
+    });
+
     // POINTER DRAG — direct movement; only the last short motion sets the throw.
     function moveDrag(event) {
       if (!drag || event.pointerId !== drag.pointerId) return;
@@ -1624,7 +1665,7 @@ function teamProfilesAnimation() {
         if (event.type === "pointerup") moveDrag(original);
         finishDrag(event.type === "pointerup");
       });
-    $(window).on(`blur${namespace}`, () => finishDrag());
+    $(window).on(`blur${namespace}`, () => { finishDrag(); setHover(null, true); });
 
     // LIFECYCLE — no off-screen frames; desktop cleanup restores native artwork.
     function syncActivity() {
@@ -1637,7 +1678,7 @@ function teamProfilesAnimation() {
     }
     function invalidateGeometry() { finishDrag(); geometryDirty = paintDirty = true; syncActivity(); }
     function visibilityChanged() {
-      if (document.hidden) finishDrag();
+      if (document.hidden) { finishDrag(); setHover(null, true); }
       else geometryDirty = true;
       syncActivity();
     }
@@ -1647,7 +1688,7 @@ function teamProfilesAnimation() {
     }
     const observer = window.IntersectionObserver && new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (!visible) finishDrag();
+      if (!visible) { finishDrag(); setHover(null, true); }
       else geometryDirty = true;
       syncActivity();
     });
@@ -1673,6 +1714,9 @@ function teamProfilesAnimation() {
       document.removeEventListener("visibilitychange", visibilityChanged);
       reducedMotion.removeEventListener("change", motionChanged);
       if (layer) layer.remove();
+      gsap.killTweensOf(hoverElements);
+      gsap.set(hoverElements, { clearProps: "transform,opacity" });
+      restoreHover();
       restoreNodes(); restoreSvgs();
     });
   });
