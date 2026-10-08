@@ -45,7 +45,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), dropTextAnimation(), flexGrowAnimation()];
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), dropTextAnimation(), flexGrowAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -2493,6 +2493,57 @@ function catalogueAnimation() {
   activate($initial.length ? $initial : $selects.first(), true);
   const unbind = bindControlActivation($selects, "catalogueAnimation", activate);
   return () => { if (transition) transition.kill(); unbind(); restoreSelects(); restoreReveals(); };
+}
+
+function gradientBreathOne() {
+  // GRADIENT BREATH — one inhale, then the same motion reverses for the exhale.
+  const gradientMotion = {
+    breath: { scale: 1.08, duration: 14, ease: "sine.inOut", repeatDelay: 0 },
+    drift: { xPercent: 4, yPercent: 3, alternateDirection: true },
+    visibility: { rootMargin: "300px 0px" },
+  };
+  const $gradients = $("[gradient-breath-1]");
+  if (!window.gsap || !$gradients.length) return null;
+
+  const media = gsap.matchMedia();
+  media.add("(prefers-reduced-motion: no-preference)", () => {
+    const restore = rememberAttributes($gradients, ["style"]);
+    const gradients = new Map();
+    $gradients.each(function (index) {
+      const direction = gradientMotion.drift.alternateDirection && index % 2 ? -1 : 1;
+      const tween = gsap.to(this, {
+        ...gradientMotion.breath,
+        xPercent: gradientMotion.drift.xPercent * direction,
+        yPercent: gradientMotion.drift.yPercent * direction,
+        repeat: -1, yoyo: true, paused: true,
+      });
+      gradients.set(this, { tween, visible: !window.IntersectionObserver });
+    });
+
+    // Pause offscreen/hidden tabs; resume the same breath when visible again.
+    const sync = () => gradients.forEach(({ tween, visible }) => {
+      if (visible && !document.hidden) tween.play();
+      else tween.pause();
+    });
+    const observer = window.IntersectionObserver && new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const gradient = gradients.get(entry.target);
+        if (gradient) gradient.visible = entry.isIntersecting;
+      });
+      sync();
+    }, { rootMargin: gradientMotion.visibility.rootMargin });
+    if (observer) gradients.forEach((_gradient, element) => observer.observe(element));
+    document.addEventListener("visibilitychange", sync);
+    sync();
+
+    return () => {
+      if (observer) observer.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+      gradients.forEach(({ tween }) => tween.kill());
+      restore();
+    };
+  });
+  return () => media.revert();
 }
 
 function homeBackgroundMotion() {
