@@ -1847,10 +1847,10 @@ function flexGrowAnimation() {
       ease: "power1.inOut",
     },
     copy: {
-      start: 0,
+      start: 0.3,
       active: 1,
       inactive: 0,
-      duration: 0.15,
+      duration: 0.2,
       ease: "power1.in",
     },
     mobile: {
