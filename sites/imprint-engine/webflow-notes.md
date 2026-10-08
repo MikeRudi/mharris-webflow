@@ -361,6 +361,15 @@ the staging CSS/fonts with the exact native changes at 1440, 1024, 768, 390 and
 clicks, rapid toggles, mouse hover, keyboard, touch, reduced motion and re-init
 were checked. Native changes still require a Webflow publish.
 
+The first published check exposed missing `[testimonial-envelope]`,
+`[testimonial-cards]` and three `[testimonial-card-content]` hooks: the WHTML
+imported wrappers rejected attribute writes despite some success responses.
+Those five wrappers were replaced with native Div Blocks through the element
+builder, retaining their children and styles. A fresh read confirmed all hooks,
+then staging was published and real open/hover/close clicks passed with no JS
+errors. Always verify saved attributes and the published DOM, not only tool
+success messages. Publish to staging before functional Webflow testing.
+
 ## Drop Text Section
 
 Home Staged contains `.drop-text-section > .drop-text-layout`. The existing
