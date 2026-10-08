@@ -45,7 +45,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), compareDropAnimation(), dropTextAnimation(), flexGrowAnimation()];
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), flexGrowAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -2629,13 +2629,189 @@ function compareDropAnimation() {
   return () => { media.revert(); restoreOriginals(); };
 }
 
+function compareGradientAnimation() {
+  // COMPARISON GRADIENT — artwork, em size, % placement and blur live in Webflow.
+  const gradientMotion = {
+    arrive: { duration: 0.14, ease: "power1.out" },
+    reveal: { opacity: 1, duration: 0.3, ease: "power1.in" },
+    follow: { responseSeconds: 0.07 },
+    trail: { count: 4, responseSeconds: 0.1, responseStep: 0.025,
+      opacity: 0.26, spread: 90, fadeResponseSeconds: 0.12 },
+    leave: { minCatchUp: 0.35, maxCatchUp: 0.9, catchDistance: 4,
+      duration: 0.6, ease: "power1.out" },
+    performance: { positionEpsilon: 0.15, opacityEpsilon: 0.002, maxFrameSeconds: 0.05 },
+  };
+  const $sections = $("[compare-section]");
+  if (!$sections.length || !window.gsap) return null;
+  const restoreOriginals = rememberAttributes($sections.find("[compare-gradient]"), ["style"]);
+  const media = gsap.matchMedia();
+  media.add("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
+    const cleanups = [];
+    $sections.each(function () {
+      const section = this, gradient = $(this).find("[compare-gradient]")[0];
+      if (!gradient) return;
+      const restore = rememberAttributes($(gradient), ["style"]);
+      const opacity = { value: 0 }, head = { x: 0, y: 0 };
+      const target = { x: 0, y: 0 }, start = { x: 0, y: 0 };
+      let rect, origin, pointer, frame = 0, lastTime = 0, elapsed = 0;
+      let inside = false, phase = "hidden";
+      const arrivalEase = gsap.parseEase(gradientMotion.arrive.ease);
+
+      // 01 — Reuse a fixed pool of native-styled layers; never stamp new nodes per move.
+      const trails = Array.from({ length: gradientMotion.trail.count }, () => {
+        const element = gradient.cloneNode(false);
+        element.removeAttribute("id"); element.removeAttribute("compare-gradient");
+        element.setAttribute("compare-gradient-trail", "");
+        gradient.parentNode.insertBefore(element, gradient);
+        return { element, x: 0, y: 0, alpha: 0 };
+      });
+      const layers = [...trails, { element: gradient, ...head }];
+      layers.forEach(layer => {
+        layer.setX = gsap.quickSetter(layer.element, "x", "px");
+        layer.setY = gsap.quickSetter(layer.element, "y", "px");
+        layer.setOpacity = gsap.quickSetter(layer.element, "opacity");
+        layer.setOpacity(0);
+      });
+      const lead = layers[layers.length - 1];
+      function measure() {
+        rect = section.getBoundingClientRect();
+        const box = gradient.getBoundingClientRect();
+        origin = { x: box.left + box.width / 2 - rect.left - head.x,
+          y: box.top + box.height / 2 - rect.top - head.y };
+      }
+      function aim(event) {
+        pointer = { x: event.clientX, y: event.clientY };
+        rect = section.getBoundingClientRect();
+        target.x = Math.max(0, Math.min(rect.width, pointer.x - rect.left)) - origin.x;
+        target.y = Math.max(0, Math.min(rect.height, pointer.y - rect.top)) - origin.y;
+      }
+      const mix = (seconds, delta) => 1 - Math.exp(-delta / Math.max(0.001, seconds));
+      function stop() {
+        cancelAnimationFrame(frame); frame = 0; lastTime = 0;
+        layers.forEach(layer => layer.element.style.removeProperty("will-change"));
+      }
+      function wake() {
+        if (frame || document.hidden) return;
+        layers.forEach(layer => { layer.element.style.willChange = "transform, opacity"; });
+        frame = requestAnimationFrame(render);
+      }
+
+      // 02 — Reach the pointer while invisible, then reveal over 0.3s.
+      function enter(event) {
+        if (event.pointerType === "touch" || document.hidden) return;
+        measure(); aim(event); inside = true; phase = "arriving"; elapsed = 0;
+        start.x = head.x; start.y = head.y;
+        gsap.killTweensOf(opacity); opacity.value = 0;
+        layers.forEach(layer => layer.setOpacity(0));
+        trails.forEach(layer => { layer.x = head.x; layer.y = head.y; layer.alpha = 0; });
+        wake();
+      }
+      function move(event) {
+        if (event.pointerType === "touch") return;
+        if (!inside) { enter(event); return; }
+        aim(event); wake();
+      }
+      function leave(event) {
+        if (!inside) return;
+        if (event) aim(event);
+        inside = false; phase = "leaving"; elapsed = 0;
+        // Park at the exit point; the trail catches this stationary destination.
+        head.x = target.x; head.y = target.y;
+        gsap.killTweensOf(opacity); wake();
+      }
+
+      // 03 — Follow the cursor; delayed layers stretch into a fading painted trail.
+      function render(time) {
+        frame = 0;
+        const delta = Math.min(gradientMotion.performance.maxFrameSeconds, lastTime ? (time - lastTime) / 1000 : 1 / 60);
+        lastTime = time; elapsed += delta;
+        if (phase === "arriving") {
+          const progress = Math.min(1, elapsed / Math.max(0.001, gradientMotion.arrive.duration));
+          head.x = start.x + (target.x - start.x) * arrivalEase(progress);
+          head.y = start.y + (target.y - start.y) * arrivalEase(progress);
+          if (progress === 1) {
+            phase = "active";
+            trails.forEach(layer => { layer.x = head.x; layer.y = head.y; });
+            gsap.to(opacity, { value: gradientMotion.reveal.opacity,
+              duration: gradientMotion.reveal.duration, ease: gradientMotion.reveal.ease });
+          }
+        } else if (inside) {
+          const blend = mix(gradientMotion.follow.responseSeconds, delta);
+          head.x += (target.x - head.x) * blend; head.y += (target.y - head.y) * blend;
+        }
+        lead.setX(head.x); lead.setY(head.y); lead.setOpacity(opacity.value);
+        let previous = head, maxDistance = 0, settling = false;
+        trails.forEach((layer, index) => {
+          const blend = mix(gradientMotion.trail.responseSeconds + index * gradientMotion.trail.responseStep, delta);
+          layer.x += (previous.x - layer.x) * blend; layer.y += (previous.y - layer.y) * blend;
+          const distance = Math.hypot(head.x - layer.x, head.y - layer.y);
+          maxDistance = Math.max(maxDistance, distance);
+          // Fade at rest instead of stacking several bright copies on the head.
+          const alpha = opacity.value * gradientMotion.trail.opacity
+            * Math.min(1, distance / gradientMotion.trail.spread);
+          layer.alpha += (alpha - layer.alpha) * mix(gradientMotion.trail.fadeResponseSeconds, delta);
+          layer.setX(layer.x); layer.setY(layer.y); layer.setOpacity(layer.alpha);
+          settling ||= distance > gradientMotion.performance.positionEpsilon || layer.alpha > gradientMotion.performance.opacityEpsilon;
+          previous = layer;
+        });
+
+        // 04 — Let the tail converge, then fade everything without returning home.
+        if (phase === "leaving" && ((elapsed >= gradientMotion.leave.minCatchUp
+          && maxDistance <= gradientMotion.leave.catchDistance) || elapsed >= gradientMotion.leave.maxCatchUp)) {
+          phase = "fading";
+          gsap.to(opacity, { value: 0, duration: gradientMotion.leave.duration,
+            ease: gradientMotion.leave.ease, onComplete: () => { phase = "hidden"; } });
+        }
+        if (phase === "hidden") {
+          layers.forEach(layer => layer.setOpacity(0)); stop(); return;
+        }
+        const moving = Math.hypot(target.x - head.x, target.y - head.y) > gradientMotion.performance.positionEpsilon;
+        if (moving || settling || phase === "arriving" || phase === "leaving" || gsap.isTweening(opacity)) wake();
+        else stop();
+      }
+
+      // 05 — No background work offscreen, in hidden tabs, or after cleanup.
+      function hide() {
+        inside = false; phase = "hidden"; opacity.value = 0;
+        gsap.killTweensOf(opacity); stop();
+        layers.forEach(layer => layer.setOpacity(0));
+      }
+      const visibility = () => { if (document.hidden) hide(); };
+      function reposition() {
+        if (!inside || !pointer) return;
+        measure();
+        if (pointer.x < rect.left || pointer.x > rect.right || pointer.y < rect.top || pointer.y > rect.bottom) leave();
+        else { aim({ clientX: pointer.x, clientY: pointer.y }); wake(); }
+      }
+      const observer = window.IntersectionObserver && new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) hide(); });
+      if (observer) observer.observe(section);
+      section.addEventListener("pointerenter", enter);
+      section.addEventListener("pointermove", move, { passive: true });
+      section.addEventListener("pointerleave", leave);
+      window.addEventListener("resize", reposition);
+      window.addEventListener("scroll", reposition, { passive: true });
+      document.addEventListener("visibilitychange", visibility);
+      cleanups.push(() => {
+        hide(); if (observer) observer.disconnect();
+        section.removeEventListener("pointerenter", enter);
+        section.removeEventListener("pointermove", move);
+        section.removeEventListener("pointerleave", leave);
+        window.removeEventListener("resize", reposition); window.removeEventListener("scroll", reposition);
+        document.removeEventListener("visibilitychange", visibility);
+        trails.forEach(layer => layer.element.remove()); restore();
+      });
+    });
+    return () => cleanups.forEach(cleanup => cleanup());
+  });
+  return () => { media.revert(); restoreOriginals(); };
+}
+
 function homeBackgroundMotion() {
-  if (!window.gsap || !$("[home-faq], [section-tiles], [compare-section]").length) return null;
+  if (!window.gsap || !$("[home-faq], [section-tiles]").length) return null;
   // BACKGROUND MOTION — seconds; native Webflow classes own artwork and layout.
   const backgroundMotion = {
     faq: { xPercent: 4, yPercent: 3, scale: 1.08, duration: 14, ease: "sine.inOut" },
     ribbon: { xPercent: 5, yPercent: 2, rotation: 1.5, duration: 18, ease: "sine.inOut" },
-    cursor: { duration: 0.3, ease: "power1.out" },
   };
   const media = gsap.matchMedia();
   media.add("(prefers-reduced-motion: no-preference)", () => {
