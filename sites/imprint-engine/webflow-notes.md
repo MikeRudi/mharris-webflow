@@ -267,6 +267,14 @@ Imprint Engine v2 (`6abbde0cb7e6f39d52509b6c`), Home
 (`6abbde0cb7e6f39d52509b36`), currently loads this folder's existing JS through
 its GitHub development loader. Its new team artwork is native Webflow content:
 
+One native `.gradient-float-1` div sits directly inside `.section-teams`, before
+`.teams-layout`, as the left-side red glow preview. It uses the selected Figma
+Ellipse 589's `#FF9AA4` fill and rotated 246 × 358px proportions, scaled with
+the viewport from the 1441px reference. Native rounded corners and a blur filter
+create the soft edge; there is no embed or runtime CSS. It sits at z-index 0,
+behind the existing layout at 1, with pointer events disabled and `aria-hidden`.
+Its matching `gradient-float-1` attribute is available for later animation.
+
 ```txt
 .section-teams > .teams-layout > .teams-header
   .team-profiles
