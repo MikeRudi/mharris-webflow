@@ -2701,6 +2701,13 @@ function accordionOne() {
     reveal: { start: 0, duration: 0.3, ease: "power1.in" },
   };
   const cleanups = [];
+  const addedHooks = [];
+  // These native content groups sit inside the permanent divider/background shells.
+  ["ac-1-top-flex", "ac-1-btn", "ac-1-card-flex", "ac-1-card-img", "ac-1-img-single"].forEach((name) => {
+    $wraps.find(`.${name}`).each(function () {
+      if (!this.hasAttribute(name)) { this.setAttribute(name, ""); addedHooks.push([this, name]); }
+    });
+  });
   $wraps.each(function (wrapIndex) {
     const wrap = this, $wrap = $(wrap);
     const $items = $wrap.find("[accord-item]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
@@ -2712,6 +2719,13 @@ function accordionOne() {
     const marker = $marker[0], markerParent = marker && marker.parentNode, markerNext = marker && marker.nextSibling;
     const restoreItems = rememberAttributes($items, ["class", "aria-expanded", "aria-controls"]);
     const restorePanels = rememberAttributes($panels, ["id", "class", "style", "aria-hidden", "inert"]);
+    const contentByPanel = new Map($panels.toArray().map((panel) => {
+      const $content = $(panel).find("[ac-1-top-flex], [ac-1-btn], [ac-1-card-flex]")
+        .add($(panel).find("[ac-1-card-img], [ac-1-img-single]").children().not("[h-line], [v-line], script, style"));
+      return [panel, $content.length ? $content : $(panel).children().not("[h-line], [v-line], script, style")];
+    }));
+    const $content = $([...contentByPanel.values()].flatMap(($targets) => $targets.toArray()));
+    const restoreContent = rememberAttributes($content, ["style"]);
     const restoreMarker = rememberAttributes($marker, ["style"]);
     const panelFor = ($item) => $panels.filter((_, element) => element.getAttribute("accord-reveal") === $item.attr("accord-item")).first();
     $panels.each(function (index) {
@@ -2743,11 +2757,13 @@ function accordionOne() {
       });
       if (!$panels.length) return;
       // Kill every old reveal, so interrupted clicks cannot revive hidden panels.
-      gsap.killTweensOf($panels);
+      gsap.killTweensOf($panels.add($content));
       $panels.removeClass("active").attr({ "aria-hidden": "true", inert: "" });
       gsap.set($panels, { autoAlpha: 0, pointerEvents: "none" });
       $panel.addClass("active").attr("aria-hidden", "false").removeAttr("inert");
-      gsap.to($panel, { autoAlpha: 1, pointerEvents: "auto",
+      // Show the panel's lines immediately; animate only the content inside it.
+      gsap.set($panel, { autoAlpha: 1, pointerEvents: "auto" });
+      gsap.fromTo(contentByPanel.get($panel[0]), { autoAlpha: 0 }, { autoAlpha: 1,
         duration: immediate ? 0 : accordionMotion.reveal.duration,
         delay: immediate ? 0 : accordionMotion.reveal.start,
         ease: accordionMotion.reveal.ease, overwrite: true });
@@ -2756,13 +2772,16 @@ function accordionOne() {
     activate($initial.length ? $initial : $items.first(), true);
     const unbind = bindControlActivation($items, "accordionOne", activate);
     cleanups.push(() => {
-      unbind(); gsap.killTweensOf($panels);
+      unbind(); gsap.killTweensOf($panels.add($content));
       if (window.Flip && marker) Flip.killFlipsOf(marker);
       if (markerParent) markerParent.insertBefore(marker, markerNext && markerNext.parentNode === markerParent ? markerNext : null);
-      restoreMarker(); restoreItems(); restorePanels(); restoreLabels();
+      restoreMarker(); restoreItems(); restorePanels(); restoreLabels(); restoreContent();
     });
   });
-  return () => cleanups.forEach((cleanup) => cleanup());
+  return () => {
+    cleanups.forEach((cleanup) => cleanup());
+    addedHooks.forEach(([element, name]) => element.removeAttribute(name));
+  };
 }
 
 function footerEnginePixels() {
