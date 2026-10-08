@@ -184,6 +184,26 @@ the existing `ac-1-top-flex`, `ac-1-btn`, `ac-1-card-flex`, `ac-1-card-img` and
 `ac-1-img-single` classes. Inactive panels remain hidden/inert, and interrupted
 reveals are cancelled. The native divider/background shells are not animated.
 
+## Comparison component conventions (v2)
+
+`Gradient Scroll 01` (`4928117d-677d-0eb1-85b6-d945bf1af05e`) keeps its
+original component identity and all 13 text property IDs, names, groups and
+instance values. Its existing root now has the HTML tag `div`; Webflow's API
+still reports its original internal `Section` type. The `[compare-section]`
+hook and region label remain on that root.
+
+All 13 bound text fields are Text Blocks with only the native `text` class.
+Their custom `class` attributes use the existing typography system:
+- Section heading: `h-6 weight-700 text-center`.
+- Six row titles: `p-2 weight-700`.
+- Six descriptions: `p-3`.
+
+Each replacement text block is bound to the same original component property.
+Heading roles/levels retain the original accessible hierarchy. The logo is
+preserved inside a Div Block, and `.compare-copy` owns the 0.75rem title/copy
+gap. Existing layout classes, SVG artwork and `[compare-glow]` cursor motion
+remain in place. These edits are saved in Designer; publishing is separate.
+
 ## Flex Grow Gallery
 
 Home Staged's process gallery uses the existing `.flex-grow-block` structure:
