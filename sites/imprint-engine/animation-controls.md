@@ -15,7 +15,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `lineHover` | `lineMotion.enter / leave` | Pointer and keyboard underline timing and direction |
 | `filterOne` | `filterMotion` | Hide, container resize and incoming result trains |
 | `catalogueAnimation` | `catalogueControls.hide / reveal` | Image exit/entrance timing, vertical movement and scale; reduced motion switches immediately |
-| `accordionOne` | `accordionMotion.marker / reveal` | Independent marker movement and panel fade |
+| `accordionOne` | `accordionMotion.marker / reveal` | Independent marker movement and content fade; grey divider/background shells stay solid |
 | `footerEnginePixels` | `footerMotion` | Reveal size, pixel pattern, glow, opacity and rendering budget |
 
 ## Timing

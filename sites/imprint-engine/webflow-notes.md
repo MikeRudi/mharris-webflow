@@ -174,6 +174,13 @@ the original purple-to-blue text gradient (`#674dc7` to `#55a6d1`), text clippin
 and transparent color. Inactive labels retain native `#6f6c65`. The first label
 is authored active in Webflow. Keep the hook when duplicating these labels.
 
+Accordion 01's grey dividers come from the reveal/background shells and 1px
+gaps. The selected `[accord-reveal]` now becomes fully visible immediately;
+only its copy, button and image content fades. Runtime attribute hooks mirror
+the existing `ac-1-top-flex`, `ac-1-btn`, `ac-1-card-flex`, `ac-1-card-img` and
+`ac-1-img-single` classes. Inactive panels remain hidden/inert, and interrupted
+reveals are cancelled. The native divider/background shells are not animated.
+
 ## Flex Grow Gallery
 
 Home Staged's process gallery uses the existing `.flex-grow-block` structure:
