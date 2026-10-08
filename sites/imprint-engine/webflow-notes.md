@@ -266,8 +266,9 @@ is active, starting with the authored active item (then an active image, then
 the first item as fallbacks). The same `.active` state is applied to the item,
 its image wrapper, and its copy. Leaving the gallery keeps the last item open.
 
-On desktop/tablet, only the item animates `flexGrow` between `0` and `1` over
-`0.3s` with `power1.in`. Every image pane has `flexGrow: 1` so its width follows
+On desktop/tablet, the item animates `flexGrow` between `0` and `1` over
+`0.3s` with `power1.in`. The native active image gap and content minimum width
+animate on that same timeline. Every image pane has `flexGrow: 1` so its width follows
 the item's available space without multiplying two easing curves.
 Copy fades over `0.15s`. Interrupted transitions restart
 from the current rendered values; initial inline values prevent active-class CSS
@@ -277,22 +278,27 @@ classes, and accessibility attributes.
 
 Sizing is native Webflow CSS, recorded in `flex-grow-webflow.css` for reference;
 do not load that reference file as another runtime stylesheet. Desktop text
-columns retain their original `10em` width, with `1rem` padding and image gaps.
-JS measures the number/title once at initialization, font readiness and resize
-into `--gallery-closed-content-width`. The native item basis uses that measurement
-plus equal left/right padding and borders, reducing only the closed width.
-The open text-column width, image gap and padding stay as originally authored.
+columns use native `width: max-content` and automatic flex basis. Closed items
+have zero image gap, giving the number/title equal left/right padding. The open
+column keeps its original `10em` minimum via the standalone native
+`flex-grow-content-open` class, with the original `1rem` image gap on the item's
+existing active state. The first content block carries this modifier through its
+`class` attribute; JS toggles it and reads both states' native spacing to animate
+alongside growth. No JS-calculated closed widths remain.
 Image wrappers have
 zero basis/width, `min-width: 0`, and no forced aspect ratio. The absolute image
 keeps the fully open size using `--gallery-image-width/height` in `src/styles.css`.
-Its parent clips the reveal. JS measures once per initialization, font readiness
-or width change, never per animation frame. Desktop object-position remains
+Its parent clips the reveal. Each item's fully open image width is measured
+separately before paint at initialization, font readiness or width change, then
+the selected state is restored. Different number widths must not share one
+image-width measurement. No image measurement runs per animation frame.
+Desktop object-position remains
 `right center`; mobile uses the native crop within a full-size 2:1 image.
 Desktop copy is anchored to the bottom of its text column and hidden when
 inactive. Its previous `[text-ch="18"]` limit now lives on the native copy class
 as `max-width: 18ch`, allowing an unrestricted mobile right-hand column.
 
-At tablet widths, text columns remain `7em`, spacing is `0.75rem`, and the
+At tablet widths, open text columns retain a `7em` minimum, spacing is `0.75rem`, and the
 row height increases to `30em`. At `767px` and below, the gallery matches the
 mobile reference: a centered heading/button, number/title on the left, copy
 on the right, and a full-width 2:1 image underneath. Closed rows show only their
