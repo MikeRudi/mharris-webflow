@@ -50,8 +50,9 @@ The controls at the top of `compareGradientAnimation()` use seconds and pixels:
 - `arrive`: movement duration/ease before the hidden gradient is revealed.
 - `reveal`: opacity 1, duration 0.3, ease `power1.in`.
 - `follow.responseSeconds`: cursor response; smaller values follow more closely.
-- `trail`: fixed layer count, per-layer response, opacity, spread and fade response.
-- `leave`: minimum/maximum catch-up time, catch distance and final fade timing/ease.
+- `trail`: layer count per entry, per-layer response, opacity, spread and fade response.
+- `leave`: catch-up time of 0.1–0.35s, catch distance, and a 0.3s final fade with
+  `power1.out`. Re-entry starts independent layers while the previous exit fades.
 - `performance`: settling thresholds and frame-delta cap. The frame loop sleeps
   once the head and trail settle, and stops immediately when hidden/offscreen.
 

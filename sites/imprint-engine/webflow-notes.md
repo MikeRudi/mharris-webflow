@@ -223,17 +223,20 @@ drop static. Component text properties are untouched by this addition.
 The old `.compare-glow` element and its cursor branch in `homeBackgroundMotion()`
 have been removed. The replacement is a native Div Block with class and behavior
 attribute `compare-gradient`, directly inside the comparison component. Native
-styling uses `left: 58%`, `top: 20%`, `width: 22em`, `height: 26em`, cyan
+styling uses `left: 58%`, `top: 20%`, `width: 15em`, `height: 18em`, cyan
 `rgba(1, 163, 183, 0.55)` from the Figma reference, `blur(5.5vw)`, and initial
 opacity 0. Its authored transform is `none`; only runtime cursor movement uses
 translation. `.compare-layout` has z-index 1 to keep content above the artwork.
 
 `compareGradientAnimation()` owns the pointer behavior separately. The gradient
 arrives invisibly in 0.14s, then reveals from 0 to 1 over 0.3s with `power1.in`.
-Four reusable copies of the same native artwork follow at increasing delays;
-their opacity fades as they converge, so they never pile up into a bright blob
+Each entry creates its own head and four reusable trail copies of the native artwork;
+the copies follow at increasing delays, and all are removed after that exit fades.
+Their opacity fades as they converge, so they never pile up into a bright blob
 at rest. On pointer exit, the head parks at the exit point, the trail catches up,
-then everything fades out. It does not return to its original percentage position.
+the catch-up lasts 0.1–0.35s, then everything fades out over 0.3s (`power1.out`).
+Re-entry starts a new gradient while the previous head and trail finish fading
+independently. It does not return to its original percentage position.
 The frame loop stops at rest and when hidden/offscreen. Touch/reduced-motion
 visitors receive no decorative cursor effect; cleanup removes all trail copies.
 
