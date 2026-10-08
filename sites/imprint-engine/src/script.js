@@ -2556,6 +2556,7 @@ function compareDropAnimation() {
   const $sections = $("[compare-section]");
   if (!$sections.length || !window.gsap || !window.ScrollTrigger) return null;
   gsap.registerPlugin(ScrollTrigger);
+  const restoreOriginals = rememberAttributes($sections.find("[compare-drop], [compare-drop-line]"), ["style"]);
 
   const media = gsap.matchMedia();
   media.add("(prefers-reduced-motion: no-preference)", () => {
@@ -2625,7 +2626,7 @@ function compareDropAnimation() {
       cleanups.forEach((cleanup) => cleanup());
     };
   });
-  return () => media.revert();
+  return () => { media.revert(); restoreOriginals(); };
 }
 
 function homeBackgroundMotion() {
