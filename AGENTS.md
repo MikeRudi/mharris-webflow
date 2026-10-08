@@ -93,7 +93,7 @@ Production preference after stable releases:
 
 - Test a new function or animation when first building it.
 - Once the user is refining an existing function or animation, make the requested changes quickly, save locally, and push to GitHub so the user can refresh and judge the result.
-- Aim to complete and apply routine refinements within 1–2 minutes. If the work is likely to take longer than two minutes, tell the user early and briefly explain why; if that becomes clear while working, give the update then rather than continuing silently.
+- Aim to complete and apply routine function or animation refinements in about 30 seconds. If the work is likely to take longer than two minutes, tell the user early and briefly explain why; if that becomes clear while working, give the update then rather than continuing silently.
 - Let the user test refinement changes first. Do not run browser sessions, regression suites, or add new tests for each refinement, including physics/collision adjustments.
 - Resume targeted testing if the user asks for it or reports that a refinement is not working after trying it. Until then, keep verification to a quick syntax check and focused code review.
 
