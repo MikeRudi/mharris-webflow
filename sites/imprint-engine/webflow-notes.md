@@ -288,10 +288,13 @@ only hooks it added. Keep connector endpoints on their circle centers in Designe
 the animation binds the original pairs once and preserves those pairs after resize.
 
 Connected circles use distance constraints with at most 1% elastic extension
-or compression and 2 degrees of rotation either side of each authored line angle.
-Moving one circle carries its connected network with a small elastic lag; drag
-bounds account for the whole group. Release velocity and its cap are 85% of the
-original settings. Connected circles share most of their gentle idle drift.
+or compression. Their joints rotate freely; each grab has a 300px radial drag
+limit from its starting position. Circles collide across all groups, with a 1px
+gap and a soft rebound, while links and header walls remain constrained. Fast
+pointer jumps are swept through small steps to prevent passing through circles.
+Release velocity and its cap remain 85% of the original settings; momentum can
+carry a circle beyond the drag radius after release. Connected circles share
+most of their gentle idle drift.
 JavaScript draws animated line copies in a single `[team-profile-connector-layer]`
 SVG directly inside the header, avoiding the nested group/SVG clipping boxes. It
 keeps native source SVGs intact and restores their visibility on desktop cleanup.

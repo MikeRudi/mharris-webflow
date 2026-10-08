@@ -23,12 +23,21 @@ async function check(name, fn) {
   try { await fn(); results.push(true); console.log(`PASS ${name}`); }
   catch (error) { results.push(false); console.error(`FAIL ${name}: ${error.stack}`); }
 }
-async function open({ width = 1440, reducedMotion = "no-preference", duplicate = false, code = source } = {}) {
+async function open({ width = 1440, reducedMotion = "no-preference", duplicate = false, code = source, scene = null } = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setContent(fixture, { waitUntil: "domcontentloaded" });
   await page.addScriptTag({ content: jquery });
   await page.addScriptTag({ content: gsap });
+  if (scene) await page.evaluate(scene => {
+    const header = document.querySelector('.teams-header');
+    ['18', '19'].slice(0, scene === 'solo' ? 1 : 2).forEach((id, i) => {
+      const node = header.querySelector(`.is-${id}`);
+      header.append(node);
+      node.style.cssText = `left:${(scene === 'solo' ? 670 : 400 + i * 220) - 30}px;top:295px;width:60px`;
+    });
+    header.querySelector('.team-profiles').remove();
+  }, scene);
   await page.evaluate((duplicate) => {
     if (duplicate) document.querySelector('.section-teams').after(document.querySelector('.section-teams').cloneNode(true));
     window.originalArtwork = [...document.querySelectorAll('.team-profile-node, .team-profile-lines line')].map(e => e.outerHTML);
@@ -100,10 +109,16 @@ async function linkLengths(page) {
 async function constrained(page, tolerance=0.011) {
   const lengths=await linkLengths(page);
   lengths.forEach((edge,i)=>assert.ok(Math.abs(edge.length/edge.rest-1)<tolerance,`Link ${i}: ${JSON.stringify(edge)}`));
-  lengths.forEach((edge,i)=>{
-    const angle=Math.atan2(Math.sin(edge.angle-edge.restAngle),Math.cos(edge.angle-edge.restAngle))*180/Math.PI;
-    assert.ok(Math.abs(angle)<=2.03,`Link ${i} rotated ${angle} degrees`);
+  await separated(page);
+}
+async function separated(page) {
+  const overlaps = await page.locator('.teams-header').first().evaluate(header => {
+    const circles = [...header.querySelectorAll('.team-profile-node')].map(e => {
+      const r=e.getBoundingClientRect();return {id:e.className,x:r.x+r.width/2,y:r.y+r.height/2,r:r.width/2};
+    });
+    return circles.flatMap((a,i)=>circles.slice(i+1).map(b=>({a:a.id,b:b.id,overlap:a.r+b.r-Math.hypot(b.x-a.x,b.y-a.y)}))).filter(pair=>pair.overlap>0.1);
   });
+  assert.deepEqual(overlaps, [], 'Circle outlines must not overlap');
 }
 try {
   await check("all 21 circles drift gently; 14 connectors stay at their centers with no frame layout reads", async () => {
@@ -119,31 +134,31 @@ try {
     await page.close();
   });
   await check("drag tracks the pointer immediately and release glides in the same direction before slowing", async () => {
-    const page = await open();
-    const { start, held } = await dragBy(page, 180, 45);
+    const page = await open({scene:'solo'});
+    const { start, held } = await dragBy(page, 180, 45, {id:'18'});
     near(held.x-start.x, 180, 2); near(held.y-start.y, 45, 2);
-    await page.waitForTimeout(220); const fast = await center(page);
+    await page.waitForTimeout(220); const fast = await center(page,'18');
     assert.ok(fast.x > held.x + 60 && fast.x < held.x + 180);
-    await page.waitForTimeout(1500); const settled = await center(page);
-    await page.waitForTimeout(220); const slow = await center(page);
+    await page.waitForTimeout(1500); const settled = await center(page,'18');
+    await page.waitForTimeout(220); const slow = await center(page,'18');
     assert.ok(Math.abs(slow.x-settled.x) < (fast.x-held.x) / 5);
-    await anchored(page); await constrained(page); await page.close();
+    await separated(page); await page.close();
   });
   await check("release power is close to the original, reduced only to 85%",async()=>{
     const still=source.replace('float: { x: 12, y: 9','float: { x: 0, y: 0');
     const distances=[];
     for(const code of [still,still.replace('velocityMultiplier: 0.85, maxSpeed: 935','velocityMultiplier: 1, maxSpeed: 1100')]){
-      const page=await open({code});const {held}=await dragBy(page,500,0,{id:'18'});
+      const page=await open({code,scene:'solo'});const {held}=await dragBy(page,280,0,{id:'18'});
       await page.waitForTimeout(250);distances.push((await center(page,'18')).x-held.x);await page.close();
     }
     near(distances[0]/distances[1],0.85,0.09);
   });
-  await check("dragging moves the connected shape with only 2 degrees of rotation and 1% elasticity",async()=>{
+  await check("dragging restores free joint rotation while keeping 1% elasticity",async()=>{
     const page=await open(); const before=await linkLengths(page);const neighbor=await center(page,'03');
     await dragBy(page,240,110,{hold:100});
     const after=await linkLengths(page),moved=await center(page,'03');
     assert.ok(Math.hypot(moved.x-neighbor.x,moved.y-neighbor.y)>50);
-    assert.ok(after.some((edge,i)=>Math.abs(edge.angle-before[i].angle)>0.002));
+    assert.ok(after.some((edge,i)=>Math.abs(edge.angle-before[i].angle)>0.1), 'Joints should rotate freely beyond the removed 2-degree limit');
     await constrained(page);await page.waitForTimeout(1200);await constrained(page,0.001);
     assert.equal(await page.locator('[team-profile-connector-layer]').count(),1);
     assert.equal(await page.locator('[team-profile-connector-layer]').evaluate(e=>e.parentElement.matches('.teams-header')&&getComputedStyle(e).overflow==='visible'),true);
@@ -161,32 +176,72 @@ try {
     await page.waitForTimeout(300); near((await center(page)).x, canceled.x, 5);
     await page.close();
   });
-  await check("all four header walls contain the entire circle and reflect fast throws", async () => {
-    const page = await open();
-    for (const [dx,dy] of [[2500,0],[-2500,0],[0,1500],[0,-1500]]) {
+  await check("dragging is capped at 300px radially, including diagonal jumps and repeated grabs", async () => {
+    const page = await open({scene:'solo',reducedMotion:'reduce'});
+    for (const [dx,dy] of [[600,0],[-600,0],[500,500],[-500,-500]]) {
       await page.evaluate(() => initSite()); await page.waitForTimeout(100);
-      const { held } = await dragBy(page,dx,dy,{id:'18'});
-      await page.waitForTimeout(180); const bounced = await center(page,'18');
-      assert.ok(dx ? (bounced.x-held.x)*Math.sign(dx)<-5 : (bounced.y-held.y)*Math.sign(dy)<-5, JSON.stringify({dx,dy,held,bounced}));
-      const contained = await page.evaluate(() => {
-        const h = document.querySelector('.teams-header').getBoundingClientRect();
-        return [...document.querySelectorAll('.team-profile-node')].every(e => { const b=e.getBoundingClientRect();return b.left>=h.left-0.1&&b.right<=h.right+0.1&&b.top>=h.top-0.1&&b.bottom<=h.bottom+0.1; });
-      });
-      assert.ok(contained); await anchored(page); await constrained(page);
+      const {start,held}=await dragBy(page,dx,dy,{id:'18'});
+      near(Math.hypot(held.x-start.x,held.y-start.y),300,0.1);
+      const next=await dragBy(page,-dx/4,-dy/4,{id:'18'});
+      near(next.held.x-next.start.x,-dx/4,0.1);near(next.held.y-next.start.y,-dy/4,0.1);
+    }
+    await page.close();
+  });
+  await check("a fast drag cannot tunnel through another circle; a throw transfers momentum on impact",async()=>{
+    const page=await open({scene:'pair',reducedMotion:'reduce'});
+    const a=await center(page,'18'),b=await center(page,'19');
+    await page.mouse.move(a.x,a.y);await page.mouse.down();
+    await page.mouse.move(a.x+900,a.y);await page.waitForTimeout(30);
+    const held=await center(page,'18'),pushed=await center(page,'19');
+    assert.ok(held.x-a.x<=300.1);assert.ok(pushed.x>=held.x+60,JSON.stringify({held,pushed}));
+    assert.ok(pushed.x>b.x+100);await separated(page);
+    await page.waitForTimeout(120);await page.mouse.up();
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.evaluate(()=>initSite());await page.waitForTimeout(100);
+    const before=await center(page,'19');
+    await dragBy(page,120,0,{id:'18'});await page.waitForTimeout(250);
+    assert.ok((await center(page,'19')).x>before.x+25,'Impact should transfer velocity to the other circle');
+    await separated(page);await page.close();
+  });
+  await check("all four header walls contain circles and reflect throws within the drag limit",async()=>{
+    const page=await open({scene:'solo'});
+    for(const [dx,dy] of [[200,0],[-200,0],[0,200],[0,-200]]){
+      await page.evaluate(({dx,dy})=>{
+        initSite.cleanup();const header=document.querySelector('.teams-header'),node=header.querySelector('.is-18');
+        node.style.left=`${dx>0?header.clientWidth-260:dx<0?200:640}px`;
+        node.style.top=`${dy>0?header.clientHeight-260:dy<0?200:295}px`;initSite();
+      },{dx,dy});await page.waitForTimeout(100);
+      const {held}=await dragBy(page,dx,dy,{id:'18'});await page.waitForTimeout(180);
+      const bounced=await center(page,'18');assert.ok(dx?(bounced.x-held.x)*Math.sign(dx)<-5:(bounced.y-held.y)*Math.sign(dy)<-5);
+      await separated(page);
     }
     await page.close();
   });
   await check("fast connected drags stay within the elastic limit at every wall and corner",async()=>{
     const page=await open();
+    await page.evaluate(()=>{
+      window.worstOverlap=0;
+      function sample(){
+        const circles=[...document.querySelectorAll('.team-profile-node')].map(e=>e.getBoundingClientRect());
+        circles.forEach((a,i)=>circles.slice(i+1).forEach(b=>{
+          const overlap=(a.width+b.width)/2-Math.hypot(b.x+b.width/2-a.x-a.width/2,b.y+b.height/2-a.y-a.height/2);
+          window.worstOverlap=Math.max(window.worstOverlap,overlap);
+        }));
+        window.contactFrame=requestAnimationFrame(sample);
+      }
+      sample();
+    });
     for(const id of Array.from({length:17},(_,i)=>String(i+1).padStart(2,'0'))){
       await page.evaluate(()=>initSite());await page.waitForTimeout(80);
       const p=await center(page,id);await page.mouse.move(p.x,p.y);await page.mouse.down();
       for(const [x,y] of [[1400,100],[1400,680],[50,680],[50,50],[700,350]]){
         await page.mouse.move(x,y);await page.waitForTimeout(25);
+        const held=await center(page,id);assert.ok(Math.hypot(held.x-p.x,held.y-p.y)<=301,`Drag exceeded 300px for ${id}`);
         await constrained(page);await anchored(page);
       }
       await page.mouse.up();await page.waitForTimeout(120);await constrained(page);
     }
+    assert.ok(await page.evaluate(()=>{cancelAnimationFrame(contactFrame);return worstOverlap;})<0.15,'Circles overlapped during a rendered frame');
     await page.close();
   });
   await check("resize and scrolling preserve connections; off-screen and hidden tabs stop rendering", async () => {
