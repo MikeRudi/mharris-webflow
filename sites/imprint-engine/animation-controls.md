@@ -64,8 +64,9 @@ and strengths are acceleration in pixels/second². Advanced solver controls are 
   desktop animation. Eight photos remain, with two groups of three connections.
 - Only circles containing a revealed image accept pointer selection/dragging.
   `layout.photoOpacityThreshold` sets the minimum initial opacity (`0.01`).
-- `hover.clipScale / imageScale`: hovered photos and their connected circles scale
-  the clip to `1.15` and the image to `0.95`, over `0.25` seconds with `power1.in`.
+- `hover.scaleAmount: 0.15`: hovered photos and their connected circles scale
+  the clip up 15% (`1.15`) and the image down 15% (`0.85`). Both share one tween,
+  `hover.duration: 0.4` and `hover.ease: "power1.in"`, so their timing stays matched.
   `hover.revealedOpacity: 1`, `hover.fadeDuration: 0.2` and `hover.fadeEase: "power1.in"`
   control the connected image reveal independently of scaling.
   `hover.releaseHoldSeconds: 0.4` keeps the whole hovered group revealed after a
