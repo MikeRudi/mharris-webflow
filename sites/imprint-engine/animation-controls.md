@@ -11,7 +11,7 @@ Keep each feature's movement, timing, opacity and visual values together.
 | `teamProfilesAnimation` | `teamMotion.float / drag / throw / links / collision / repel / walls` | Desktop circle drift, connected dragging, content repulsion, collisions and section-wall bounces |
 | `flexGrowAnimation` | `galleryMotion.grow / copy / mobile` | Item growth revealing full-size images, copy fade, mobile expansion and image ratio |
 | `dropTextAnimation` | `rippleControls.trigger / expand / fade / settle` | Scroll entry, ring size, opacity and purple blur |
-| `testimonialEnvelopeAnimation` | `envelopeMotion.closed / open / close / hover` | Closed flap fade, card peeking, full-content hover lift and envelope toggling |
+| `testimonialEnvelopeAnimation` | `envelopeMotion.closed / open / close / hover` | Closed flap fade, card peeking, full-content hover lift with fixed stacking, and envelope toggling |
 | `compareDropAnimation` | `dropMotion.scroll / draw` | Centre-screen drop hold, trailing line and release at the final comparison row |
 | `compareGradientAnimation` | `gradientMotion.arrive / reveal / follow / trail / leave / performance` | Invisible arrival, cursor reveal, fading paint trail and parked exit |
 | `navTheme` | `navControls.start / heroMode / pageMode` | Section theme trigger, fixed hero theme and starting page theme |

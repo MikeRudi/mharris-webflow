@@ -319,10 +319,12 @@ Native changes need a Webflow publish; the JS uses the existing site loader.
 
 `Testimonials 01` (`75501620-ec18-b292-2f8d-988bcd52a869`) now renders its root
 as a div. It contains a native `.testimonial-layout`, heading text block,
-layered envelope and `.btn-2-black` label. All nine text elements have `.text`
+layered envelope and `.btn-2-black` label. All fourteen text elements have `.text`
 as their only native base, with typography in the custom `class` attribute.
 There were no component props to relink. Existing names/company/quote copy is
-preserved. The Wall of Love label has `[line-hover-item]` and a `[line-hover]`
+preserved. Each card has a name/arrow/company row, divider and paragraph. John
+and Emily use the existing front-card quote as placeholder copy; John also
+reuses its Docusign label, as requested. The Wall of Love label has `[line-hover-item]` and a `[line-hover]`
 underline; it has no destination, as requested.
 
 All four supplied PNGs were resized to 1400px wide and compressed to WebP with
@@ -348,7 +350,10 @@ with generous room above so lifted cards and the back flap stay visible.
 `testimonialEnvelopeAnimation()` runs from `initSite()` on desktop and mobile.
 Native styles start the envelope closed before JS. Opening fades out the closed
 flap while the back and cards reveal. Hover/focus/tap lifts one card enough to
-show all its existing content while retaining paper inside the pocket. Purple
+show all its content while retaining paper inside the pocket. Card stacking stays
+fixed at back/middle/front (1/2/3); rear-card travel clears the cards in front as
+well as the pocket. Rear papers are taller natively (90%, minimum 22rem) to
+support this travel. Purple
 clicks reverse the state; interrupted transitions start from current positions.
 All timings, eases and travel controls are in `envelopeMotion` at the top.
 Resize/content/font changes recalculate card clearance. Cleanup restores native
