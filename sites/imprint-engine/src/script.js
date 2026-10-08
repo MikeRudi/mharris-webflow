@@ -1164,12 +1164,13 @@ function teamProfilesAnimation() {
 
   // TEAM CIRCLES — distances/speeds are px and px/second; times are seconds.
   const teamMotion = {
+    layout: { hiddenCircles: ["02", "06", "07", "08"] }, // Remove one photo and its three white satellites.
     float: { x: 12, y: 9, cycleSeconds: 14, resumeSeconds: 1.2, jointVariation: 1 },
-    drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.48, sampleMs: 90, releasePauseMs: 100 },
+    drag: { velocityMultiplier: 0.68, maxSpeed: 748, holdSeconds: 0.1, followMomentum: 0.8, sampleMs: 90, releasePauseMs: 100 },
     throw: { friction: 2.6, stopSpeed: 3 }, // Higher friction stops a throw sooner.
-    links: { elasticity: 0.01, settleSeconds: 0.18 },
-    collision: { gap: 1, bounce: 0.45 }, // Space between circles; energy retained on impact.
-    repel: { gap: 16, range: 70, strength: 700, bounce: 0.15 }, // Keep the content clear, with a soft push near it.
+    links: { elasticity: 0.06, settleSeconds: 0.65, photoMass: 6 }, // Photos lead; lighter satellites follow.
+    collision: { gap: 1, bounce: 0.45, lineGap: 2 }, // Circles and connectors both take part.
+    repel: { gap: -18, range: 12, strength: 240 }, // Allow some overlap, then ease circles out slowly.
     walls: { inset: 2, bounce: 0.72 }, // 0 = no rebound; 1 = no energy lost.
   };
 
@@ -1203,13 +1204,16 @@ function teamProfilesAnimation() {
     const $lines = $sourceSvgs.find("line");
     const restoreNodes = rememberAttributes($nodes, ["style"]);
     const restoreSvgs = rememberAttributes($sourceSvgs, ["style"]);
-    const nodes = $nodes.toArray().map((element, index) => ({
+    const allNodes = $nodes.toArray().map((element, index) => ({
       element, group: $(element).closest("[team-profile-group]")[0],
+      enabled: !teamMotion.layout.hiddenCircles.some((id) => element.classList.contains(`is-${id}`) || element.classList.contains(`team-profile-position-${id}`)),
+      draggable: [...element.querySelectorAll("img")].some((image) => Number(getComputedStyle(image).opacity) > 0.01 && getComputedStyle(image).visibility !== "hidden"),
       phase: index * 2.39996, speed: 1 + (index % 5) * 0.07,
       baseX: 0, baseY: 0, x: 0, y: 0, vx: 0, vy: 0,
       tx: 0, ty: 0, blend: 0, floatX: 0, floatY: 0, neighbors: [],
       minX: 0, maxX: 0, minY: 0, maxY: 0,
     }));
+    const nodes = allNodes.filter((node) => node.enabled);
     const byElement = new Map(nodes.map((node) => [node.element, node]));
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
@@ -1217,7 +1221,12 @@ function teamProfilesAnimation() {
     let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0, motionStep = 4;
     let visible = !window.IntersectionObserver, active = false, destroyed = false;
     let geometryDirty = true, paintDirty = true, drag = null;
-    $nodes.css({ pointerEvents: "auto", cursor: "grab", touchAction: "none", userSelect: "none" });
+    allNodes.forEach((node) => {
+      const interactive = node.enabled && node.draggable;
+      $(node.element).css({ pointerEvents: interactive ? "auto" : "none", cursor: interactive ? "grab" : "default", touchAction: interactive ? "none" : "auto", userSelect: "none" });
+      // Keep authored geometry available when mapping the original SVG endpoints.
+      if (!node.enabled) node.element.style.visibility = "hidden";
+    });
 
     // GEOMETRY — measure on entry/resize, never all circles inside the frame loop.
     const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -1235,7 +1244,7 @@ function teamProfilesAnimation() {
           right: (box.right - rect.left) / scaleX, top: (box.top - rect.top) / scaleY,
           bottom: (box.bottom - rect.top) / scaleY } : null;
       }).filter(Boolean);
-      nodes.forEach((node) => {
+      allNodes.forEach((node) => {
         const bounds = node.element.getBoundingClientRect();
         const offsetX = oldWidth ? (node.x - node.baseX) * width / oldWidth : 0;
         const offsetY = oldHeight ? (node.y - node.baseY) * height / oldHeight : 0;
@@ -1268,7 +1277,7 @@ function teamProfilesAnimation() {
         edge.matrix = matrices.get(edge.svg);
         if (!edge.matrix) return;
         const group = $(edge.svg).closest("[team-profile-group]")[0];
-        const candidates = nodes.filter((node) => node.group === group);
+        const candidates = allNodes.filter((node) => node.group === group);
         const nearest = (end) => {
           const x = Number(edge.element.getAttribute(`x${end}`));
           const y = Number(edge.element.getAttribute(`y${end}`));
@@ -1282,12 +1291,12 @@ function teamProfilesAnimation() {
         };
         // Bind the authored endpoints once. Never rematch circles during a drag.
         edge.from = nearest(1); edge.to = nearest(2);
-        if (edge.from && edge.to && edge.from !== edge.to) {
+        if (edge.from?.enabled && edge.to?.enabled && edge.from !== edge.to) {
           edge.from.neighbors.push(edge.to); edge.to.neighbors.push(edge.from);
         }
       });
       edges.forEach((edge) => {
-        if (!edge.from || !edge.to || edge.from === edge.to) return;
+        if (!edge.from?.enabled || !edge.to?.enabled || edge.from === edge.to) return;
         // Responsive layout may change the authored length; dragging never does.
         edge.length = Math.hypot(edge.to.baseX - edge.from.baseX, edge.to.baseY - edge.from.baseY);
         edge.targetLength = edge.length * (1 + edge.stretch);
@@ -1345,13 +1354,16 @@ function teamProfilesAnimation() {
 
     // CONNECTED JOINTS + COLLISIONS — free angles, nearly fixed link lengths.
     // Solve both together so a bump also moves the circles attached to that circle.
+    function inverseMass(node) {
+      return (drag?.node === node ? 0.1 : 1) / (node.draggable ? teamMotion.links.photoMass : 1);
+    }
     function solveLinks() {
       for (let pass = 0; pass < 160; pass++) {
         edges.forEach((edge) => {
           if (!edge.length) return;
           const a = edge.from, b = edge.to;
           // Let the grabbed circle yield a little when its network is squeezed.
-          const weightA = drag?.node === a ? 0.1 : 1, weightB = drag?.node === b ? 0.1 : 1;
+          const weightA = inverseMass(a), weightB = inverseMass(b);
           const dx = b.x - a.x, dy = b.y - a.y;
           const distance = Math.hypot(dx, dy) || 0.001;
           const correction = (distance - edge.targetLength) / distance / (weightA + weightB);
@@ -1360,15 +1372,14 @@ function teamProfilesAnimation() {
           b.x -= correctionX * weightB; b.y -= correctionY * weightB;
         });
         resolveCollisions();
-        nodes.forEach(keepContentClear);
+        const lineContact = resolveLineCollisions();
         nodes.forEach((node) => {
           node.x = clamp(node.x, node.minX, node.maxX);
           node.y = clamp(node.y, node.minY, node.maxY);
         });
         const settled = edges.every((edge) => !edge.length ||
           Math.abs(Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) - edge.targetLength) < 0.015) &&
-          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015) &&
-          nodes.every((node) => contentBoxes.every((box) => contentContact(node, box).clearance >= -0.015));
+          pairs.every(({ a, b }) => Math.hypot(b.x - a.x, b.y - a.y) >= a.radius + b.radius + teamMotion.collision.gap - 0.015) && !lineContact;
         if (settled) break;
       }
     }
@@ -1380,7 +1391,7 @@ function teamProfilesAnimation() {
         const distance = Math.hypot(dx, dy);
         const nx = distance > 0.001 ? dx / distance : 1, ny = distance > 0.001 ? dy / distance : 0;
         // The held circle can yield slightly when squeezed against a wall.
-        const weightA = drag?.node === a ? 0.1 : 1, weightB = drag?.node === b ? 0.1 : 1;
+        const weightA = inverseMass(a), weightB = inverseMass(b);
         const correction = Math.max(0, minimum - distance) / (weightA + weightB);
         a.x -= nx * correction * weightA; a.y -= ny * correction * weightA;
         b.x += nx * correction * weightB; b.y += ny * correction * weightB;
@@ -1396,39 +1407,73 @@ function teamProfilesAnimation() {
       members.forEach((item) => item.neighbors.forEach((neighbor) => members.add(neighbor)));
       return members;
     }
-    // CONTENT REPULSION — cached rectangles; circles use their full visible radius.
+    // CONNECTOR COLLISIONS — circles push the closest point on a line; unrelated
+    // lines separate when they cross. Shared photo joints remain free to rotate.
+    function resolveLineCollisions() {
+      let contact = false;
+      const liveEdges = edges.filter((edge) => edge.length);
+      liveEdges.forEach((edge) => {
+        const a = edge.from, b = edge.to;
+        nodes.forEach((node) => {
+          if (node === a || node === b) return;
+          const dx = b.x - a.x, dy = b.y - a.y, square = dx * dx + dy * dy;
+          if (!square) return;
+          const t = clamp(((node.x - a.x) * dx + (node.y - a.y) * dy) / square, 0, 1);
+          const x = node.x - a.x - dx * t, y = node.y - a.y - dy * t;
+          const distance = Math.hypot(x, y), depth = node.radius + teamMotion.collision.lineGap - distance;
+          if (depth <= 0.015) return;
+          contact = true;
+          const nx = distance > 0.001 ? x / distance : -dy / Math.sqrt(square);
+          const ny = distance > 0.001 ? y / distance : dx / Math.sqrt(square);
+          const wa = inverseMass(a), wb = inverseMass(b), wn = inverseMass(node);
+          const weight = wn + wa * (1 - t) ** 2 + wb * t * t;
+          const move = depth / weight;
+          node.x += nx * move * wn; node.y += ny * move * wn;
+          a.x -= nx * move * wa * (1 - t); a.y -= ny * move * wa * (1 - t);
+          b.x -= nx * move * wb * t; b.y -= ny * move * wb * t;
+          const closing = (node.vx - a.vx * (1 - t) - b.vx * t) * nx + (node.vy - a.vy * (1 - t) - b.vy * t) * ny;
+          if (closing >= 0 || reducedMotion.matches) return;
+          const impulse = -(1 + teamMotion.collision.bounce) * closing / weight;
+          node.vx += nx * impulse * wn; node.vy += ny * impulse * wn;
+          a.vx -= nx * impulse * wa * (1 - t); a.vy -= ny * impulse * wa * (1 - t);
+          b.vx -= nx * impulse * wb * t; b.vy -= ny * impulse * wb * t;
+        });
+      });
+      liveEdges.forEach((first, index) => liveEdges.slice(index + 1).forEach((second) => {
+        const a = first.from, b = first.to, c = second.from, d = second.to;
+        if (a === c || a === d || b === c || b === d) return;
+        const cross = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+        if (cross(a, b, c) * cross(a, b, d) >= 0 || cross(c, d, a) * cross(c, d, b) >= 0) return;
+        // Smallest translation along either segment's normal separates the crossing.
+        const options = [];
+        [[a, b], [c, d]].forEach(([p, q]) => {
+          const length = Math.hypot(q.x - p.x, q.y - p.y);
+          if (!length) return;
+          const nx = -(q.y - p.y) / length, ny = (q.x - p.x) / length;
+          const project = (node) => node.x * nx + node.y * ny;
+          const aa = project(a), bb = project(b), cc = project(c), dd = project(d);
+          options.push({ nx, ny, depth: Math.max(aa, bb) - Math.min(cc, dd) + teamMotion.collision.lineGap },
+            { nx: -nx, ny: -ny, depth: Math.max(cc, dd) - Math.min(aa, bb) + teamMotion.collision.lineGap });
+        });
+        if (!options.length) return;
+        const hit = options.reduce((best, next) => next.depth < best.depth ? next : best);
+        const wa = inverseMass(a) + inverseMass(b), wb = inverseMass(c) + inverseMass(d), total = wa + wb;
+        [a, b].forEach((node) => { node.x -= hit.nx * hit.depth * wa / total; node.y -= hit.ny * hit.depth * wa / total; });
+        [c, d].forEach((node) => { node.x += hit.nx * hit.depth * wb / total; node.y += hit.ny * hit.depth * wb / total; });
+        contact = true;
+      }));
+      return contact;
+    }
+    // CONTENT REPULSION — negative gap permits overlap; force eases circles out.
     function contentContact(node, box) {
       const dx = node.x - clamp(node.x, box.left, box.right);
       const dy = node.y - clamp(node.y, box.top, box.bottom);
-      const distance = Math.hypot(dx, dy), radius = node.radius + teamMotion.repel.gap;
+      const distance = Math.hypot(dx, dy), radius = Math.max(0, node.radius + teamMotion.repel.gap);
       if (distance > 0.001) return { nx: dx / distance, ny: dy / distance, clearance: distance - radius };
       const exits = [{ nx: -1, ny: 0, depth: node.x - box.left }, { nx: 1, ny: 0, depth: box.right - node.x },
         { nx: 0, ny: -1, depth: node.y - box.top }, { nx: 0, ny: 1, depth: box.bottom - node.y }];
       const exit = exits.reduce((best, next) => next.depth < best.depth ? next : best);
       return { nx: exit.nx, ny: exit.ny, clearance: -exit.depth - radius };
-    }
-    function keepContentClear(node) {
-      const contacts = contentBoxes.map((box) => contentContact(node, box)).filter((contact) => contact.clearance < 0);
-      if (!contacts.length) return;
-      const radius = node.radius + teamMotion.repel.gap;
-      const exits = contacts.map((contact) => ({ x: node.x - contact.nx * contact.clearance, y: node.y - contact.ny * contact.clearance }));
-      // Treat nearby content as one obstacle: escaping the button must not push
-      // a circle into the heading. Also choose an exit inside the section walls.
-      contentBoxes.forEach((box) => exits.push({ x: box.left - radius, y: node.y }, { x: box.right + radius, y: node.y },
-        { x: node.x, y: box.top - radius }, { x: node.x, y: box.bottom + radius }));
-      const valid = exits.filter((point) => point.x >= node.minX && point.x <= node.maxX && point.y >= node.minY && point.y <= node.maxY &&
-        contentBoxes.every((box) => contentContact({ ...point, radius: node.radius }, box).clearance >= -0.001));
-      if (!valid.length) return;
-      const { x, y } = valid.reduce((best, next) => Math.hypot(next.x - node.x, next.y - node.y) <
-        Math.hypot(best.x - node.x, best.y - node.y) ? next : best);
-      const dx = x - node.x, dy = y - node.y, distance = Math.hypot(dx, dy);
-      if (!distance) return;
-      const nx = dx / distance, ny = dy / distance, incoming = node.vx * nx + node.vy * ny;
-      node.x = x; node.y = y;
-      if (incoming < 0) {
-        node.vx -= nx * incoming * (1 + teamMotion.repel.bounce);
-        node.vy -= ny * incoming * (1 + teamMotion.repel.bounce);
-      }
     }
     function repelContent(node, dt) {
       let repelling = false;
@@ -1521,7 +1566,7 @@ function teamProfilesAnimation() {
       for (let pass = 0; pass < 4; pass++) edges.forEach((edge) => {
         if (!edge.length) return;
         const a = edge.from, b = edge.to, dx = b.x - a.x, dy = b.y - a.y;
-        const weightA = drag?.node === a ? 0 : 1, weightB = drag?.node === b ? 0 : 1;
+        const weightA = drag?.node === a ? 0 : inverseMass(a), weightB = drag?.node === b ? 0 : inverseMass(b);
         const squareLength = dx * dx + dy * dy;
         if (!squareLength) return;
         const impulse = ((b.vx - a.vx) * dx + (b.vy - a.vy) * dy) / squareLength / (weightA + weightB);
@@ -1586,7 +1631,7 @@ function teamProfilesAnimation() {
     }
     $header.on(`pointerdown${namespace}`, "[team-profile-node]", function (event) {
       const original = event.originalEvent || event, node = byElement.get(this);
-      if (!node || drag || original.button !== 0 || original.isPrimary === false || !visible || document.hidden) return;
+      if (!node?.draggable || drag || original.button !== 0 || original.isPrimary === false || !visible || document.hidden) return;
       if (geometryDirty && !measure()) return;
       const rect = header.getBoundingClientRect(), now = performance.now();
       const members = connectedTo(node);
