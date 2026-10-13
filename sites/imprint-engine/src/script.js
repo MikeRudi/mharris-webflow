@@ -46,7 +46,7 @@ function initSite() {
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
-    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation()];
+    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -69,6 +69,177 @@ function initSite() {
 }
 
 $(initSite);
+
+function shopSlider() {
+  if (!window.gsap || !$("[shop-slider]").length) return null;
+
+  // SHOP SLIDER CONTROLS — seconds for timing, pixels for drag distance.
+  const sliderMotion = {
+    arrows: { cardsPerStep: 1, duration: 0.5, ease: "power1.in" },
+    drag: { threshold: 8, edgeResistance: 0.15, momentum: 0.12, maxMomentum: 160 },
+    release: { duration: 0.4, ease: "power1.out" },
+    focus: { duration: 0.3, ease: "power1.in" },
+  };
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const cleanups = [];
+
+  $("[shop-slider]").each(function () {
+    const $slider = $(this), $viewport = $slider.find("[shop-slider-viewport]").first();
+    const $track = $viewport.find("[shop-slider-track]").first();
+    const $cards = $track.children("[shop-slider-card]");
+    const $prev = $slider.find("[shop-slider-prev]"), $next = $slider.find("[shop-slider-next]");
+    if (!$viewport.length || !$track.length || !$cards.length) return;
+    const viewport = $viewport[0], track = $track[0];
+    const restoreTrack = rememberAttributes($track, ["style"]);
+    const restoreButtons = rememberAttributes($prev.add($next), ["aria-disabled"]);
+    let stops = [0], max = 0, target = 0, drag = null, suppressClickUntil = 0;
+    const clamp = (value) => Math.max(0, Math.min(max, value));
+    const current = () => -(parseFloat(gsap.getProperty(track, "x")) || 0);
+
+    function updateButtons() {
+      $prev.attr("aria-disabled", String(target <= 1));
+      $next.attr("aria-disabled", String(target >= max - 1));
+    }
+
+    function moveTo(value, motion) {
+      target = clamp(value);
+      gsap.to(track, { x: -target, duration: reducedMotion.matches ? 0 : motion.duration,
+        ease: motion.ease, overwrite: true });
+      updateButtons();
+    }
+
+    // Measure on resize only; pointer movement never reads layout.
+    function measure() {
+      const style = getComputedStyle(viewport);
+      const width = viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      max = Math.max(0, track.scrollWidth - width);
+      const first = $cards[0].offsetLeft;
+      stops = [...new Set([0, ...$cards.toArray().map(card => clamp(card.offsetLeft - first)), max])];
+      target = clamp(target);
+      drag = null;
+      gsap.killTweensOf(track);
+      gsap.set(track, { x: -target });
+      updateButtons();
+    }
+
+    function step(direction) {
+      const available = stops.filter(value => direction > 0 ? value > target + 1 : value < target - 1);
+      if (direction < 0) available.reverse();
+      const index = Math.min(available.length, Math.max(1, sliderMotion.arrows.cardsPerStep)) - 1;
+      if (index >= 0) moveTo(available[index], sliderMotion.arrows);
+    }
+
+    $prev.add($next).on("click.shopSlider keydown.shopSlider", function (event) {
+      if (event.type === "keydown" && !["Enter", " "].includes(event.key)) return;
+      event.preventDefault();
+      if ($(this).attr("aria-disabled") !== "true") step(this.hasAttribute("shop-slider-next") ? 1 : -1);
+    });
+
+    $viewport.on("keydown.shopSlider", function (event) {
+      if (event.target !== viewport) return;
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === "Home" || event.key === "End") moveTo(event.key === "Home" ? 0 : max, sliderMotion.arrows);
+      else step(event.key === "ArrowRight" ? 1 : -1);
+    }).on("dragstart.shopSlider", event => event.preventDefault());
+
+    // Preserve normal clicks and vertical scrolling until a horizontal drag begins.
+    function pointerDown(event) {
+      if (!event.isPrimary || event.button !== 0 || max <= 0) return;
+      gsap.killTweensOf(track);
+      target = clamp(current());
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: current(),
+        lastX: event.clientX, time: performance.now(), velocity: 0, active: false };
+    }
+
+    function pointerMove(event) {
+      if (!drag || event.pointerId !== drag.id) return;
+      const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+      if (!drag.active) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < sliderMotion.drag.threshold) return;
+        if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; }
+        drag.active = true;
+        viewport.setPointerCapture(event.pointerId);
+      }
+      event.preventDefault();
+      const time = performance.now(), elapsed = Math.max(1, time - drag.time);
+      drag.velocity = (drag.lastX - event.clientX) / elapsed * 1000;
+      drag.lastX = event.clientX;
+      drag.time = time;
+      const raw = drag.start - dx, bounded = clamp(raw);
+      target = bounded;
+      gsap.set(track, { x: -(bounded + (raw - bounded) * sliderMotion.drag.edgeResistance) });
+      updateButtons();
+    }
+
+    function pointerEnd(event) {
+      if (!drag || event.pointerId !== drag.id) return;
+      const released = drag;
+      drag = null;
+      if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+      if (!released.active) return;
+      suppressClickUntil = performance.now() + 250;
+      const velocity = event.type === "pointercancel" || performance.now() - released.time > 100 ? 0 : released.velocity;
+      const momentum = Math.max(-sliderMotion.drag.maxMomentum, Math.min(sliderMotion.drag.maxMomentum,
+        velocity * sliderMotion.drag.momentum));
+      const projected = clamp(current() + momentum);
+      const nearest = stops.reduce((best, value) => Math.abs(value - projected) < Math.abs(best - projected) ? value : best);
+      moveTo(nearest, sliderMotion.release);
+    }
+
+    function suppressDragClick(event) {
+      if (event.detail > 0 && performance.now() < suppressClickUntil) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }
+
+    $viewport.on("focusin.shopSlider", function (event) {
+      const card = $(event.target).closest("[shop-slider-card]")[0];
+      if (!card) return;
+      // Browser focus may scroll an overflow-hidden box; the track owns movement.
+      viewport.scrollLeft = 0;
+      const left = card.offsetLeft - $cards[0].offsetLeft;
+      const width = track.scrollWidth - max;
+      if (left < target) moveTo(left, sliderMotion.focus);
+      else if (left + card.offsetWidth > target + width) moveTo(left + card.offsetWidth - width, sliderMotion.focus);
+    });
+
+    viewport.addEventListener("pointerdown", pointerDown);
+    viewport.addEventListener("pointermove", pointerMove, { passive: false });
+    viewport.addEventListener("pointerup", pointerEnd);
+    viewport.addEventListener("pointercancel", pointerEnd);
+    viewport.addEventListener("lostpointercapture", pointerEnd);
+    viewport.addEventListener("click", suppressDragClick, true);
+    // A pending click can leave the viewport before it becomes a captured drag.
+    viewport.addEventListener("pointerleave", clearPending);
+    function clearPending() { if (drag && !drag.active) drag = null; }
+    const resize = window.ResizeObserver ? new ResizeObserver(measure) : null;
+    if (resize) { resize.observe(viewport); resize.observe(track); }
+    else $(window).on("resize.shopSlider", measure);
+    measure();
+
+    cleanups.push(() => {
+      if (drag && viewport.hasPointerCapture(drag.id)) viewport.releasePointerCapture(drag.id);
+      drag = null;
+      if (resize) resize.disconnect();
+      else $(window).off("resize.shopSlider", measure);
+      $viewport.off(".shopSlider");
+      $prev.add($next).off(".shopSlider");
+      viewport.removeEventListener("pointerdown", pointerDown);
+      viewport.removeEventListener("pointermove", pointerMove);
+      viewport.removeEventListener("pointerup", pointerEnd);
+      viewport.removeEventListener("pointercancel", pointerEnd);
+      viewport.removeEventListener("lostpointercapture", pointerEnd);
+      viewport.removeEventListener("pointerleave", clearPending);
+      viewport.removeEventListener("click", suppressDragClick, true);
+      gsap.killTweensOf(track);
+      restoreTrack();
+      restoreButtons();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
 
 function homeAnimation() {
   if (
