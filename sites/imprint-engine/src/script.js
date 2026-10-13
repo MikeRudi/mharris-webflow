@@ -75,7 +75,7 @@ function shopSlider() {
 
   // SHOP SLIDER CONTROLS — timings in seconds; arrow travel in em.
   const sliderMotion = {
-    arrows: { cardsPerStep: 1, duration: 0.5, ease: "power1.in", mergeLastStepBelow: 0.5 },
+    arrows: { cardsPerStep: 1, duration: 0.3, ease: "power1.out", mergeLastStepBelow: 0.5 },
     arrowHover: { scale: 1.2, duration: 0.3, ease: "power1.in" },
     cardHover: { arrowX: "0.3em", duration: 0.3, ease: "power1.in" },
     cardBackground: { resting: "rgba(255,255,255,1)", hover: "rgba(255,255,255,0)", duration: 0.3, ease: "power1.in" },
