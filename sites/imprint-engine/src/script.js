@@ -79,6 +79,7 @@ function shopSlider() {
     arrowHover: { scale: 1.2, duration: 0.3, ease: "power1.in" },
     cardHover: { arrowX: "0.3em", duration: 0.3, ease: "power1.in" },
     cardBackground: { resting: "rgba(255,255,255,1)", hover: "rgba(255,255,255,0)", duration: 0.3, ease: "power1.in" },
+    imageHover: { scale: 1.1, duration: 0.3, ease: "power1.in" },
   };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const cleanups = [];
@@ -91,9 +92,10 @@ function shopSlider() {
     const $buttons = $prev.add($next);
     const $hoverArrows = $slider.find("[shop-slider-control-arrow], [shop-slider-link-arrow]");
     const $backgrounds = $cards.find("[shop-slider-image]");
+    const $images = $cards.find("[shop-slider-product]");
     if (!$viewport.length || !$track.length || !$cards.length) return;
     const viewport = $viewport[0], track = $track[0];
-    const restoreStyles = rememberAttributes($track.add($hoverArrows).add($backgrounds), ["style"]);
+    const restoreStyles = rememberAttributes($track.add($hoverArrows).add($backgrounds).add($images), ["style"]);
     const restoreButtons = rememberAttributes($buttons, ["aria-disabled"]);
     let stops = [0], max = 0, target = 0;
     const clamp = value => Math.max(0, Math.min(max, value));
@@ -163,6 +165,7 @@ function shopSlider() {
     bindHover($cards, "[shop-slider-link-arrow]", sliderMotion.cardHover, "x", 0, sliderMotion.cardHover.arrowX);
     bindHover($cards, "[shop-slider-image]", sliderMotion.cardBackground, "backgroundColor",
       sliderMotion.cardBackground.resting, sliderMotion.cardBackground.hover);
+    bindHover($cards, "[shop-slider-product]", sliderMotion.imageHover, "scale", 1, sliderMotion.imageHover.scale);
 
     const resize = window.ResizeObserver ? new ResizeObserver(measure) : null;
     if (resize) { resize.observe(viewport); resize.observe(track); }
@@ -172,7 +175,7 @@ function shopSlider() {
       if (resize) resize.disconnect();
       else $(window).off("resize.shopSlider", measure);
       $viewport.add($buttons).add($cards).off(".shopSlider");
-      gsap.killTweensOf($track.add($hoverArrows).add($backgrounds));
+      gsap.killTweensOf($track.add($hoverArrows).add($backgrounds).add($images));
       restoreStyles();
       restoreButtons();
     });
