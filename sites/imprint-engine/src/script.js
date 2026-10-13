@@ -173,6 +173,8 @@ function shopSlider() {
     }
 
     function pointerEnd(event) {
+      // Touch starts captured by the child; transferring capture must not end the drag.
+      if (event.type === "lostpointercapture" && event.target !== viewport) return;
       if (!drag || event.pointerId !== drag.id) return;
       const released = drag;
       drag = null;
