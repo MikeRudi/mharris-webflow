@@ -88,6 +88,10 @@ function shopSlider() {
     const $slider = $(this), $viewport = $slider.find("[shop-slider-viewport]").first();
     const $track = $viewport.find("[shop-slider-track]").first();
     const $cards = $track.children("[shop-slider-card]");
+    // Opaque artwork keeps its image and backing still; only the link animates.
+    const $mediaCards = $cards.filter(function () {
+      return $(this).closest("[shop-slider-hover]").attr("shop-slider-hover") !== "link-only";
+    });
     const $prev = $slider.find("[shop-slider-prev]"), $next = $slider.find("[shop-slider-next]");
     const $buttons = $prev.add($next);
     const $hoverArrows = $slider.find("[shop-slider-control-arrow], [shop-slider-link-arrow]");
@@ -163,9 +167,9 @@ function shopSlider() {
     }
     bindHover($buttons, "[shop-slider-control-arrow]", sliderMotion.arrowHover, "scale", 1, sliderMotion.arrowHover.scale);
     bindHover($cards, "[shop-slider-link-arrow]", sliderMotion.cardHover, "x", 0, sliderMotion.cardHover.arrowX);
-    bindHover($cards, "[shop-slider-image]", sliderMotion.cardBackground, "backgroundColor",
+    bindHover($mediaCards, "[shop-slider-image]", sliderMotion.cardBackground, "backgroundColor",
       sliderMotion.cardBackground.resting, sliderMotion.cardBackground.hover);
-    bindHover($cards, "[shop-slider-product]", sliderMotion.imageHover, "scale", 1, sliderMotion.imageHover.scale);
+    bindHover($mediaCards, "[shop-slider-product]", sliderMotion.imageHover, "scale", 1, sliderMotion.imageHover.scale);
 
     const resize = window.ResizeObserver ? new ResizeObserver(measure) : null;
     if (resize) { resize.observe(viewport); resize.observe(track); }
