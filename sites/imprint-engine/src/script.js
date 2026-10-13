@@ -44,7 +44,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), navTheme(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), navTheme(), navigationDropdowns(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
@@ -2370,6 +2370,118 @@ function rippleAnimation(
   }
 
   return rippleTimeline;
+}
+
+function navigationDropdowns() {
+  const $roots = $("[nav-menu-root]");
+  if (!$roots.length || !window.gsap) return null;
+
+  // NAVIGATION CONTROLS — native Webflow panels, seconds for every timing.
+  const menuMotion = {
+    reveal: { duration: 0.2, ease: "power1.out", y: -6 },
+    hide: { duration: 0.15, ease: "power1.in", y: -4 },
+    leaveDelay: 0.12,
+    open: { backgroundColor: "#ffffff", color: "#111111", radius: "2.5rem" },
+  };
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const cleanups = [];
+
+  $roots.each(function (index) {
+    const root = this, $root = $(root), ns = `.navDropdown${index}`;
+    const $triggers = $root.find("[nav-dropdown-trigger]");
+    const $panels = $root.find("[nav-dropdown]");
+    const restore = rememberAttributes($root.add($panels).add($triggers),
+      ["style", "id", "aria-controls", "aria-expanded", "aria-hidden", "inert"]);
+    let active = null, leaveTimer = null, restingStyle = null;
+    const surfaceProperties = ["background-color", "color", "border-bottom-left-radius", "border-bottom-right-radius"];
+    const cancelLeave = () => { clearTimeout(leaveTimer); leaveTimer = null; };
+
+    $panels.each(function (i) {
+      this.id = `nav-panel-${index}-${i}`;
+      this.inert = true;
+      $(this).attr("aria-hidden", "true");
+      const key = $(this).attr("nav-dropdown");
+      $triggers.filter((_, el) => $(el).attr("nav-dropdown-trigger") === key)
+        .attr({ "aria-controls": this.id, "aria-expanded": "false" });
+    });
+
+    function hidePanel(panel) {
+      panel.inert = true;
+      $(panel).attr("aria-hidden", "true");
+      gsap.to(panel, { autoAlpha: 0, y: menuMotion.hide.y, overwrite: true,
+        duration: reduced.matches ? 0 : menuMotion.hide.duration, ease: menuMotion.hide.ease,
+        onComplete: () => gsap.set(panel, { display: "none" }) });
+    }
+
+    function close(returnFocus = false) {
+      cancelLeave();
+      if (!active) return;
+      const previous = active;
+      active = null;
+      $triggers.attr("aria-expanded", "false");
+      hidePanel(previous.panel);
+      if (restingStyle) surfaceProperties.forEach(property => {
+        if (restingStyle[property]) root.style.setProperty(property, restingStyle[property]);
+        else root.style.removeProperty(property);
+      });
+      restingStyle = null;
+      if (returnFocus) previous.trigger.focus();
+    }
+
+    function open(trigger) {
+      cancelLeave();
+      if (active?.trigger === trigger) return;
+      const key = $(trigger).attr("nav-dropdown-trigger");
+      const panel = $panels.filter((_, el) => $(el).attr("nav-dropdown") === key)[0];
+      if (!panel) return;
+      if (active) hidePanel(active.panel);
+      if (!restingStyle) restingStyle = Object.fromEntries(surfaceProperties.map(property =>
+        [property, root.style.getPropertyValue(property)]));
+      $root.css({ backgroundColor: menuMotion.open.backgroundColor, color: menuMotion.open.color,
+        borderBottomLeftRadius: 0, borderBottomRightRadius: 0 });
+      $triggers.attr("aria-expanded", "false");
+      $(trigger).attr("aria-expanded", "true");
+      panel.inert = false;
+      $(panel).attr("aria-hidden", "false");
+      gsap.killTweensOf(panel);
+      gsap.fromTo(panel, { display: "block", autoAlpha: 0, y: menuMotion.reveal.y },
+        { autoAlpha: 1, y: 0, duration: reduced.matches ? 0 : menuMotion.reveal.duration,
+          ease: menuMotion.reveal.ease, overwrite: true });
+      active = { trigger, panel };
+    }
+
+    $triggers.on(`pointerenter${ns}`, function (event) {
+      if (event.originalEvent.pointerType === "mouse") open(this);
+    }).on(`click${ns}`, function (event) {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      active?.trigger === this ? close() : open(this);
+    }).on(`keydown${ns}`, function (event) {
+      if (event.key !== "ArrowDown" && event.key !== " ") return;
+      event.preventDefault();
+      open(this);
+      if (event.key === "ArrowDown") $(active.panel).find("a[href], button, input").first().trigger("focus");
+    });
+    $root.on(`pointerenter${ns}`, cancelLeave).on(`pointerleave${ns}`, () => {
+      cancelLeave();
+      leaveTimer = setTimeout(() => close(), menuMotion.leaveDelay * 1000);
+    }).on(`keydown${ns}`, event => {
+      if (event.key === "Escape" && active) { event.preventDefault(); close(true); }
+    }).on(`focusout${ns}`, event => {
+      if (!root.contains(event.relatedTarget)) close();
+    });
+    $root.find("[nav-login-placeholder]").on(`click${ns}`, event => event.preventDefault());
+    $(document).on(`pointerdown${ns}`, event => { if (!root.contains(event.target)) close(); });
+    $(window).on(`scroll${ns} resize${ns}`, () => close());
+    cleanups.push(() => {
+      cancelLeave();
+      gsap.killTweensOf($panels);
+      $triggers.add($root).add($root.find("[nav-login-placeholder]")).off(ns);
+      $(document).add(window).off(ns);
+      restore();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
 }
 
 function navTheme() {
