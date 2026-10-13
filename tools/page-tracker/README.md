@@ -1,0 +1,61 @@
+# Michael's Webdev Tracker
+
+Local page checklist for Imprint Engine and future projects.
+
+Run from the repository root:
+
+```powershell
+node tools/page-tracker/server.mjs
+```
+
+Open http://127.0.0.1:4318. Keep the terminal running while using it.
+Changes save automatically to data/<project-id>.json. New project creates a separate list.
+Use the page name to edit details; group names can be changed in the page dialog.
+Use **To-do list** beside **Add page** to check off tasks or add/remove items.
+Use **Typography** beside **Add page** for the project's saved class sizes, line
+heights, letter spacing and font weights. Imprint Engine's values were imported
+from its saved desktop typography text file and live in the project JSON's
+`typography` field. Heading sizes use a 1440px viewport and 16px root reference.
+Each page has a separate **Mobile** checkbox. Both lists save automatically in the project JSON.
+Imprint Engine's eight desktop to-dos were imported on 13 October 2026, initially unchecked,
+along with unchecked Mobile controls for every existing tracker entry.
+The plain-text snapshot is imprint-page-list.txt; it is not automatically regenerated after edits.
+
+The initial Imprint list is a working inventory. Only Homepage is approved complete.
+Resources, Customers and Pages Product names were supplied by Michael on 13 October 2026.
+The reference Webflow API snapshot is preserved in data/reference/.
+This tool does not modify or publish Webflow.
+
+## View-only Vercel site
+
+The `public/` folder is a static snapshot for colleagues. It includes page groups,
+search, progress filtering, status labels, disabled Mobile/Awaiting content checks,
+staging links and full-resolution, lossless design previews. It has no editing API,
+project creation, to-do list, typography editor or Add page controls.
+
+Local editing remains at `http://127.0.0.1:4318`. Completed shows completed/total.
+To update the online snapshot, install this folder's dependencies once, then run
+`npm run export` from this folder and commit/push `public/` together with any UI changes.
+The export reads `data/imprint-engine.json` and the local Figma export folder.
+Set `TRACKER_EXPORTS_ROOT` if that folder moves. `TRACKER_SHARP_PATH` may point to
+an existing Sharp installation instead of installing dependencies locally.
+
+Vercel settings: existing GitHub repository, root directory
+`tools/page-tracker/public`, framework Other, no build command, output directory `.`.
+Do not deploy the local server or the complete `data/` folder. Each deployment is a
+snapshot; local status edits reach colleagues after exporting and pushing again.
+
+Figma's Design > Dev page is the current design inventory. Entries marked Removed
+remain in the list but are excluded from the progress totals. CMS collections are
+listed separately and do not count toward page totals.
+View design opens a locally saved PNG. Files are organised by group and page under:
+
+`C:/Users/miker/OneDrive/Desktop/Imprint Engine/Figma exports/`
+
+Each page folder contains `design.png`, original files in `images/`, SVG files in
+`svg/`, and a `manifest.json` identifying its Figma source and exported files.
+
+All 71 design previews are saved. Michael stopped the bulk asset export after
+1,685 images and 3,412 SVGs had been saved across the page folders; the asset set
+is partial. The stopping point is recorded in `data/reference/export-status.json`
+and `data/reference/pending-exports.json` for a later refinement of the process.

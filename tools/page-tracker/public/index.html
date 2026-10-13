@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en" data-read-only="true">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Imprint Engine — Page Tracker</title><meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="/styles.css"><script defer src="/app.js"></script></head>
+<body>
+<aside class="sidebar">
+
+  <div class="sidebar-label">PAGE GROUPS</div><nav id="groups" aria-label="Page groups"></nav>
+</aside>
+<main>
+  <header><div class="heading-row"><h1 id="project-title">Page tracker</h1></div></header>
+  <section class="metrics" aria-label="Project totals" id="metrics"></section>
+  <div class="save-status-row"><span id="save-status" role="status" aria-live="polite">Loading…</span></div>
+  <section class="toolbar" aria-label="Filter pages"><label class="search"><span>⌕</span><input type="search" id="search" placeholder="Find a page…" aria-label="Search pages"></label><select id="status-filter" aria-label="Filter completion"><option value="all">All progress</option><option value="not-started">Not started</option><option value="in-webflow">In Webflow</option><option value="polishing">Polishing</option><option value="complete">Complete</option></select></section>
+  <div class="list-intro"><span id="result-count"></span></div>
+  <div id="page-list"></div><div id="empty" hidden>No pages match these filters.</div>
+  <footer>Webflow presence is separate from completion. “Complete” means Michael has approved the page.</footer>
+</main>
+
+</body></html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Michael's Webdev Tracker</title><link rel="stylesheet" href="/styles.css"><script defer src="/app.js"></script></head>
+<body>
+<aside class="sidebar">
+  <label class="small-label" for="project">PROJECT</label><select id="project"></select>
+  <button class="text-button" id="new-project">+ New project</button>
+  <div class="sidebar-label">PAGE GROUPS</div><nav id="groups" aria-label="Page groups"></nav>
+</aside>
+<main>
+  <header><div class="heading-row"><h1 id="project-title">Page tracker</h1><div class="header-actions"><button id="open-todos">To-do list</button><button id="open-typography">Typography</button><button id="new-page" class="primary">+ Add page</button></div></div></header>
+  <section class="metrics" aria-label="Project totals" id="metrics"></section>
+  <div class="save-status-row"><span id="save-status" role="status" aria-live="polite">Loading…</span></div>
+  <section class="toolbar" aria-label="Filter pages"><label class="search"><span>⌕</span><input type="search" id="search" placeholder="Find a page, section or content note…" aria-label="Search pages"></label><select id="status-filter" aria-label="Filter completion"><option value="all">All progress</option><option value="not-started">Not started</option><option value="in-webflow">In Webflow</option><option value="polishing">Polishing</option><option value="complete">Complete</option></select></section>
+  <div class="list-intro"><span id="result-count"></span><span>Open a page to see its content notes.</span></div>
+  <div id="page-list"></div><div id="empty" hidden>No pages match these filters.</div>
+  <footer>Webflow presence is separate from completion. “Complete” means Michael has approved the page.</footer>
+</main>
+<dialog id="detail"><form id="detail-form"><div class="dialog-top"><div class="eyebrow">PAGE DETAILS</div><button type="button" class="close" id="close-detail" aria-label="Close page details">×</button></div><h2 id="detail-title"></h2><div id="detail-links" class="detail-links"></div><label>Page name<input name="name" required></label><div class="form-grid"><label>Group<input name="group" list="group-options" required><datalist id="group-options"></datalist></label><label>Type<select name="kind"><option value="page">Page</option><option value="component">Component / shared UI</option><option value="reference">Reference / alternate design</option><option value="template">Template</option><option value="collection">CMS collection</option></select></label></div><div class="form-grid"><label>Exists in Webflow<select name="webflow"><option value="yes">Yes</option><option value="no">No</option><option value="unverified">Needs checking</option><option value="removed">Removed</option></select></label><label>Progress<select name="status"><option value="not-started">Not started</option><option value="in-webflow">In Webflow</option><option value="polishing">Polishing</option><option value="complete">Complete</option></select></label></div><label>Figma frame name<input name="figmaFrame"></label><label>Content / sections<textarea name="content" rows="7" placeholder="One section or observation per line"></textarea></label><label>Next steps / your notes<textarea name="notes" rows="4"></textarea></label><details><summary>Reference details</summary><div id="evidence"></div><label>Figma link<input name="figmaUrl" type="url"></label><label>Webflow staging link<input name="webflowUrl" type="url"></label></details><div class="dialog-actions"><button type="button" id="cancel-detail">Cancel</button><button type="submit" class="primary">Save changes</button></div><p class="form-error" id="form-error" role="alert"></p></form></dialog>
+<dialog id="todo-dialog" aria-labelledby="todo-title">
+  <div class="dialog-top"><h2 id="todo-title">To-do list</h2><button type="button" class="close" id="close-todos" aria-label="Close to-do list">×</button></div>
+  <form id="todo-add-form"><input id="todo-new-title" aria-label="New to-do item" placeholder="Add a to-do item…" required maxlength="500"><button type="submit" class="primary">Add item</button></form>
+  <div id="todo-list"></div><p id="todo-empty" class="muted" hidden>No to-do items yet.</p>
+  <div id="todo-save-status" class="todo-save-status" role="status" aria-live="polite"></div>
+</dialog>
+<dialog id="typography-dialog" aria-labelledby="typography-title">
+  <div class="dialog-top"><h2 id="typography-title">Typography</h2><button type="button" class="close" id="close-typography" aria-label="Close typography">×</button></div>
+  <div id="typography-content"></div>
+</dialog>
+<dialog id="project-dialog"><form id="project-form"><h2>Start another project</h2><p>Each project has its own page list and local data file.</p><label>Project name<input name="name" required maxlength="100"></label><div class="dialog-actions"><button type="button" id="cancel-project">Cancel</button><button class="primary" type="submit">Create project</button></div></form></dialog>
+</body></html>

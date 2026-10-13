@@ -1,0 +1,4 @@
+data/*.backup
+data/*.tmp
+data/reference/*.pdf
+data/reference/previews/

@@ -1,0 +1,12 @@
+{
+  "name": "imprint-page-tracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "export": "node build-public.mjs"
+  },
+  "devDependencies": {
+    "sharp": "0.35.5"
+  }
+}
