@@ -28,6 +28,10 @@ This tool does not modify or publish Webflow.
 
 ## View-only Vercel site
 
+Live URL: https://imprint-engine-tracker.vercel.app/
+Vercel project: `imprint-engine-tracker` (`prj_zPB8ACLEsqDCAW7bn5Z6uB4QTBRy`).
+Connected repository: `MikeRudi/mharris-webflow`, production branch `main`.
+
 The `public/` folder is a static snapshot for colleagues. It includes page groups,
 search, progress filtering, status labels, disabled Mobile/Awaiting content checks,
 staging links and full-resolution, lossless design previews. It has no editing API,
