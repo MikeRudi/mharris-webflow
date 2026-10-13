@@ -682,3 +682,29 @@ wrapper retained its exact top/left/width/height and opacity parent. The scroll
 range remains 0–3500px and the timeline duration remains 1. All 13 cards rotate
 and respond to dragging; forward/reverse scrolling restores their opacity and
 position without JavaScript errors. No animation JS, CSS or controls changed.
+
+## Shop Slider — 2026-10-13
+
+- New component `Shop Slider` (`7ba4733d-0b83-32e9-1a81-77e9da8d5704`) on
+  Solutions by Product uses the unlinked copy beneath the original Shop 8X.
+  Original Shop 8X and Shop 1 Item definitions remain unchanged.
+- Native Webflow layout follows Figma frame `7542:34620` (Frame 2147236493):
+  horizontal glass cards, image background and centred previous/next controls.
+  Text uses base `text`; typography/modifier classes use the custom class attribute.
+- Content props: Header, Description, Background. Groups Item 1–8 each expose
+  Image, Title Text, Button Text and Link; all 35 props are bound.
+- `shopSlider()` is called globally from `initSite()`. Hooks: `[shop-slider]`,
+  `[shop-slider-viewport]`, `[shop-slider-track]`, `[shop-slider-card]`,
+  `[shop-slider-prev]`, `[shop-slider-next]`, `[shop-slider-control-arrow]`,
+  and `[shop-slider-link-arrow]`.
+- Controls live at the top of the function. Navigation is by arrow buttons and
+  keyboard; dragging is intentionally removed. A short final scroll is merged
+  into the previous step so the last click does not make a tiny movement.
+- Button arrows scale to 1.2 over 0.3 seconds with power1.in. Card arrows move
+  right by 0.3em; their shorter width and pointer cursor are native Webflow styles.
+  Card hover increases the native backdrop blur from 1.25em to 2.5em.
+- Figma assets are stored in the page's local Figma exports/shop-slider folder.
+  Background and product images were compressed before staging verification.
+- Initial staging checks covered desktop/mobile layout, end positions, keyboard,
+  reinitialization and reduced motion. Subsequent requested hover/navigation
+  refinements received syntax review and are left for Michael's visual check.
