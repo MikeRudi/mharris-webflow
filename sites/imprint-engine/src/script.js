@@ -2381,7 +2381,7 @@ function navigationDropdowns() {
     reveal: { duration: 0.2, ease: "power1.out", y: -6 },
     hide: { duration: 0.15, ease: "power1.in", y: -4 },
     leaveDelay: 0.12,
-    open: { backgroundColor: "#ffffff", color: "#111111", radius: "2.5rem" },
+    open: { backgroundColor: "#ffffff", color: "#111111", radius: "2rem" },
   };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const cleanups = [];
@@ -2391,9 +2391,9 @@ function navigationDropdowns() {
     const $triggers = $root.find("[nav-dropdown-trigger]");
     const $panels = $root.find("[nav-dropdown]");
     const restore = rememberAttributes($root.add($panels).add($triggers),
-      ["style", "id", "aria-controls", "aria-expanded", "aria-hidden", "inert"]);
+      ["style", "class", "id", "aria-controls", "aria-expanded", "aria-hidden", "inert"]);
     let active = null, leaveTimer = null, restingStyle = null;
-    const surfaceProperties = ["background-color", "color", "border-bottom-left-radius", "border-bottom-right-radius"];
+    const surfaceProperties = ["background-color", "color", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"];
     const cancelLeave = () => { clearTimeout(leaveTimer); leaveTimer = null; };
 
     $panels.each(function (i) {
@@ -2418,7 +2418,8 @@ function navigationDropdowns() {
       if (!active) return;
       const previous = active;
       active = null;
-      $triggers.attr("aria-expanded", "false");
+      $triggers.removeClass("is-active").attr("aria-expanded", "false");
+      $(previous.trigger).triggerHandler("mouseleave.lineHover");
       hidePanel(previous.panel);
       if (restingStyle) surfaceProperties.forEach(property => {
         if (restingStyle[property]) root.style.setProperty(property, restingStyle[property]);
@@ -2438,9 +2439,12 @@ function navigationDropdowns() {
       if (!restingStyle) restingStyle = Object.fromEntries(surfaceProperties.map(property =>
         [property, root.style.getPropertyValue(property)]));
       $root.css({ backgroundColor: menuMotion.open.backgroundColor, color: menuMotion.open.color,
+        borderTopLeftRadius: menuMotion.open.radius, borderTopRightRadius: menuMotion.open.radius,
         borderBottomLeftRadius: 0, borderBottomRightRadius: 0 });
-      $triggers.attr("aria-expanded", "false");
-      $(trigger).attr("aria-expanded", "true");
+      $triggers.removeClass("is-active").attr("aria-expanded", "false");
+      if (active) $(active.trigger).triggerHandler("mouseleave.lineHover");
+      $(trigger).addClass("is-active").attr("aria-expanded", "true");
+      $(trigger).triggerHandler("mouseenter.lineHover");
       panel.inert = false;
       $(panel).attr("aria-hidden", "false");
       gsap.killTweensOf(panel);
@@ -2471,12 +2475,14 @@ function navigationDropdowns() {
       if (!root.contains(event.relatedTarget)) close();
     });
     $root.find("[nav-login-placeholder]").on(`click${ns}`, event => event.preventDefault());
+    const $plainLinks = $root.find("a").not($triggers).filter((_, el) => !$(el).closest("[nav-dropdown]").length);
+    $plainLinks.on(`pointerenter${ns} focusin${ns}`, () => close());
     $(document).on(`pointerdown${ns}`, event => { if (!root.contains(event.target)) close(); });
     $(window).on(`scroll${ns} resize${ns}`, () => close());
     cleanups.push(() => {
       cancelLeave();
       gsap.killTweensOf($panels);
-      $triggers.add($root).add($root.find("[nav-login-placeholder]")).off(ns);
+      $triggers.add($root).add($plainLinks).add($root.find("[nav-login-placeholder]")).off(ns);
       $(document).add(window).off(ns);
       restore();
     });
