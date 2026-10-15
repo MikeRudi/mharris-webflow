@@ -57,6 +57,8 @@ function initSite() {
       return () => [teamCleanup, footerCleanup, homeCleanup, lineCleanup].forEach((cleanup) => cleanup && cleanup());
     });
     cleanups.push(() => desktop.revert());
+    const mobile = onMobile(() => mobileNavigation());
+    cleanups.push(() => mobile.revert());
   }
   let destroyed = false;
   initSite.cleanup = () => {
@@ -2388,6 +2390,7 @@ function navigationDropdowns() {
     open: { backgroundColor: "#ffffff", color: "#111111", radius: "2rem" },
   };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const desktopMenu = window.matchMedia("(min-width: 992px)");
   const cleanups = [];
 
   $roots.each(function (index) {
@@ -2459,7 +2462,7 @@ function navigationDropdowns() {
     }
 
     $triggers.on(`pointerenter${ns}`, function (event) {
-      if (event.originalEvent.pointerType === "mouse") open(this);
+      if (desktopMenu.matches && event.originalEvent.pointerType === "mouse") open(this);
     }).on(`click${ns}`, function (event) {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
@@ -2471,6 +2474,7 @@ function navigationDropdowns() {
       if (event.key === "ArrowDown") $(active.panel).find("a[href], button, input").first().trigger("focus");
     });
     $root.on(`pointerenter${ns}`, cancelLeave).on(`pointerleave${ns}`, () => {
+      if (!desktopMenu.matches) return;
       cancelLeave();
       leaveTimer = setTimeout(() => close(), menuMotion.leaveDelay * 1000);
     }).on(`keydown${ns}`, event => {
@@ -2482,12 +2486,108 @@ function navigationDropdowns() {
     const $plainLinks = $root.find("a").not($triggers).filter((_, el) => !$(el).closest("[nav-dropdown]").length);
     $plainLinks.on(`pointerenter${ns} focusin${ns}`, () => close());
     $(document).on(`pointerdown${ns}`, event => { if (!root.contains(event.target)) close(); });
-    $(window).on(`scroll${ns} resize${ns}`, () => close());
+    $root.on(`nav:close${ns}`, () => close());
+    $(window).on(`scroll${ns}`, () => { if (desktopMenu.matches) close(); })
+      .on(`resize${ns}`, () => { if (desktopMenu.matches) close(); });
     cleanups.push(() => {
       cancelLeave();
       gsap.killTweensOf($panels);
       $triggers.add($root).add($plainLinks).add($root.find("[nav-login-placeholder]")).off(ns);
       $(document).add(window).off(ns);
+      restore();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
+
+function mobileNavigation() {
+  // MOBILE MENU CONTROLS — the layout and open states are native Webflow styles.
+  const menuControls = { openLabel: "Menu", closeLabel: "Close", focusOnOpen: true };
+  const $roots = $("[nav-menu-root]").filter((_, root) => !$(root).closest("[home-start]").length);
+  const cleanups = [];
+  let closeCurrent = null;
+
+  $roots.each(function (index) {
+    const root = this, $root = $(root), ns = `.mobileNavigation${index}`;
+    const $toggle = $root.find("[nav-mobile-toggle]").first();
+    const $panel = $root.find("[nav-mobile-panel]").first();
+    const $label = $toggle.find("[nav-mobile-label]");
+    if (!$toggle.length || !$panel.length) return;
+    const panel = $panel[0], toggle = $toggle[0];
+    const restore = rememberAttributes($root.add($toggle).add($panel),
+      ["class", "id", "aria-controls", "aria-expanded", "aria-hidden", "aria-label", "inert"]);
+    const oldLabel = $label.text();
+    panel.id = uniqueElementId("mobile-navigation");
+    $toggle.attr({ "aria-controls": panel.id, "aria-expanded": "false" });
+    $panel.attr("aria-hidden", "true");
+    panel.inert = true;
+    let open = false, scrollY = 0, bodyStyle = null, wasLenisStopped = false;
+    const bodyProperties = ["position", "top", "left", "right", "width", "overflow"];
+    const focusable = () => $root.find("a[href], button:not([disabled]), input:not([disabled]), [tabindex='0']")
+      .filter((_, element) => element.getClientRects().length && !element.closest("[inert]") &&
+        getComputedStyle(element).visibility !== "hidden").toArray();
+
+    function closeMenu(returnFocus = false) {
+      if (!open) return;
+      open = false;
+      $root.triggerHandler("nav:close");
+      $root.removeClass("is-mobile-open");
+      $panel.removeClass("is-open").attr("aria-hidden", "true");
+      $toggle.attr({ "aria-expanded": "false", "aria-label": "Open navigation" });
+      $label.text(menuControls.openLabel);
+      panel.inert = true;
+      bodyProperties.forEach(property => {
+        if (bodyStyle[property]) document.body.style.setProperty(property, bodyStyle[property]);
+        else document.body.style.removeProperty(property);
+      });
+      window.scrollTo(0, scrollY);
+      if (window.lenis && !wasLenisStopped) window.lenis.start();
+      closeCurrent = null;
+      if (returnFocus) toggle.focus({ preventScroll: true });
+    }
+
+    function openMenu() {
+      if (open) return;
+      if (closeCurrent) closeCurrent();
+      open = true;
+      closeCurrent = closeMenu;
+      scrollY = window.scrollY;
+      bodyStyle = Object.fromEntries(bodyProperties.map(property =>
+        [property, document.body.style.getPropertyValue(property)]));
+      wasLenisStopped = Boolean(window.lenis?.isStopped);
+      if (window.lenis) window.lenis.stop();
+      Object.assign(document.body.style, { position: "fixed", top: `${-scrollY}px`, left: "0", right: "0", width: "100%", overflow: "hidden" });
+      $root.addClass("is-mobile-open");
+      $panel.addClass("is-open").attr("aria-hidden", "false");
+      $toggle.attr({ "aria-expanded": "true", "aria-label": "Close navigation" });
+      $label.text(menuControls.closeLabel);
+      panel.inert = false;
+      panel.scrollTop = 0;
+      if (menuControls.focusOnOpen) $panel.find("[nav-dropdown-trigger]").first()[0]?.focus({ preventScroll: true });
+    }
+
+    $toggle.on(`click${ns}`, () => open ? closeMenu(true) : openMenu());
+    $panel.on(`click${ns}`, "a[href]", function () {
+      if (!this.hasAttribute("nav-dropdown-trigger")) closeMenu();
+    });
+    $(document).on(`pointerdown${ns}`, event => {
+      if (open && !root.contains(event.target)) closeMenu();
+    }).on(`keydown${ns}`, event => {
+      if (!open) return;
+      if (event.key === "Escape") { event.preventDefault(); closeMenu(true); return; }
+      if (event.key !== "Tab") return;
+      const items = focusable(), first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !root.contains(document.activeElement))) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !root.contains(document.activeElement))) {
+        event.preventDefault(); first?.focus();
+      }
+    });
+    cleanups.push(() => {
+      closeMenu();
+      $toggle.add($panel).off(ns);
+      $(document).off(ns);
+      $label.text(oldLabel);
       restore();
     });
   });

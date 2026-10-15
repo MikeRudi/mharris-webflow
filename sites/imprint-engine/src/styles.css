@@ -3,8 +3,17 @@
   transition: transform 0.4s ease;
 }
 
-[home-logo-up] {
-  opacity: 0;
+@media screen and (min-width: 992px) {
+  [home-logo-up] {
+    opacity: 0;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  /* Webflow instances cannot carry a distinct class: keep only the page nav on mobile. */
+  [home-start] > :has(> [nav-block]) {
+    display: none;
+  }
 }
 
 /* Let the hero (21) sit above the page nav (20), with layout-end (1) below it.
