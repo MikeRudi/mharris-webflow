@@ -17,6 +17,9 @@ heights, letter spacing and font weights. Imprint Engine's values were imported
 from its saved desktop typography text file and live in the project JSON's
 `typography` field. Heading sizes use a 1440px viewport and 16px root reference.
 Each page has a separate **Mobile** checkbox. Both lists save automatically in the project JSON.
+Only Michael's explicit final confirmation authorizes marking an item Complete or
+checking Mobile. Implementation, testing and publishing alone do not count as approval.
+Use Polishing for work awaiting review, with Mobile unchecked until approved.
 Imprint Engine's eight desktop to-dos were imported on 13 October 2026, initially unchecked,
 along with unchecked Mobile controls for every existing tracker entry.
 The plain-text snapshot is imprint-page-list.txt; it is not automatically regenerated after edits.

@@ -4,6 +4,8 @@ This repo stores custom code for Webflow sites.
 
 ## Core Principles
 
+- Tracker approval belongs to Michael. Only mark progress Complete or check Mobile after his explicit final confirmation for that item. AI implementation, testing, or publishing does not count as approval; keep work awaiting review in Polishing and leave Mobile unchecked.
+
 - Each site must be self-contained.
 - Do not create shared runtime code that multiple live sites import.
 - The `snippets/` folder is a vault for reference and copy-paste starting points only.
