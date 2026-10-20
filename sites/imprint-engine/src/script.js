@@ -257,6 +257,7 @@ function homeAnimation() {
     sceneBottomGapRem: 2,
     artworkWidth: 720,
     lineCenterRem: 21.875,
+    artworkClearanceRem: 8.625,
     drops: {
       initialBlur: 26,
       starts: ["translate(122 -330) scale(1.5)", "translate(553 -150) scale(1.5)", "translate(984 -330) scale(1.5)"],
@@ -285,16 +286,19 @@ function homeAnimation() {
     const canvas = Math.max(screen, homeMobile.introHeightRem,
       logoTop + (logos?.offsetHeight || 0) / rem);
     homeRoot.style.setProperty("--home-logo-top", `${logoTop}rem`);
+    const sceneTops = {};
     [["second", homeMobile.secondTopRem], ["third", homeMobile.thirdTopRem]].forEach(([name, top]) => {
       const content = homeRoot.querySelector(`[home-${name}-up]`);
       const available = screen - (content?.offsetHeight || 0) / rem - homeMobile.sceneBottomGapRem;
-      homeRoot.style.setProperty(`--home-${name}-top`, `${Math.min(top, Math.max(6, available))}rem`);
+      sceneTops[name] = Math.min(top, Math.max(6, available));
+      homeRoot.style.setProperty(`--home-${name}-top`, `${sceneTops[name]}rem`);
     });
     homeRoot.style.setProperty("--home-screen-height", `${screen}rem`);
     homeRoot.style.setProperty("--home-canvas-height", `${canvas}rem`);
     homeRoot.style.setProperty("--home-intro-overflow", `${canvas - screen}rem`);
     const scale = homeRoot.clientWidth / homeMobile.artworkWidth;
-    const top = 330 - (homeMobile.lineCenterRem + canvas - screen) * rem / scale;
+    const lineCenter = Math.min(homeMobile.lineCenterRem, sceneTops.third - homeMobile.artworkClearanceRem);
+    const top = 330 - (lineCenter + canvas - screen) * rem / scale;
     $homeArtwork.attr({
       viewBox: `${720 - homeMobile.artworkWidth / 2} ${top} ${homeMobile.artworkWidth} ${canvas * rem / scale}`,
       preserveAspectRatio: "none",
