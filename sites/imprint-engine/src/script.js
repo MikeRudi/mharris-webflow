@@ -252,6 +252,11 @@ function homeAnimation() {
     endHeightRem: 35,
     artworkWidth: 720,
     lineCenterRem: 21.875,
+    drops: {
+      initialBlur: 26,
+      starts: ["translate(122 -330) scale(1.5)", "translate(553 -150) scale(1.5)", "translate(984 -330) scale(1.5)"],
+      fill: "#6421b9",
+    },
     cards: { horizontalSpread: 1.05, verticalSpread: 0.55, scale: 0.85, radiusScale: 0.8, offsetYRem: 0, riseYRem: -14 },
     dropWidthRem: 3.25,
   };
@@ -261,6 +266,8 @@ function homeAnimation() {
   const $homeBrackets = $("[home-end-brackets-svg]");
   const restoreHomeArtwork = rememberAttributes($homeArtwork, ["viewBox", "preserveAspectRatio"]);
   const restoreHomeBrackets = rememberAttributes($homeBrackets, ["preserveAspectRatio"]);
+  const $homeDropFills = $("[home-gradient-drop] > use");
+  const restoreHomeDropFills = rememberAttributes($homeDropFills, ["fill"]);
   function measureHomeViewport() {
     if (!homeMobile.enabled) return;
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -278,6 +285,7 @@ function homeAnimation() {
     $homeBrackets.attr("preserveAspectRatio", "none");
   }
   measureHomeViewport();
+  if (homeMobile.enabled) $homeDropFills.attr("fill", homeMobile.drops.fill);
   const $homeTargetPath = $("[home-end-target-path]");
   const restoreHomeTargetPath = rememberAttributes($homeTargetPath, ["d"]);
   // The mobile reference uses the solid version of the same drop.
@@ -839,20 +847,14 @@ function homeAnimation() {
     opacity: 0,
   });
 
-  gsap.set($('[home-gradient-drop="1"]'), {
-    attr: { transform: "translate(167 7) scale(1.1)" },
-  });
-
-  gsap.set($('[home-gradient-drop="2"]'), {
-    attr: { transform: "translate(598 7) scale(1.1)" },
-  });
-
-  gsap.set($('[home-gradient-drop="3"]'), {
-    attr: { transform: "translate(1029 7) scale(1.1)" },
+  const initialDropTransforms = homeMobile.enabled ? homeMobile.drops.starts
+    : ["translate(167 7) scale(1.1)", "translate(598 7) scale(1.1)", "translate(1029 7) scale(1.1)"];
+  gsap.set($("[home-gradient-drop]"), {
+    attr: { transform: index => initialDropTransforms[index] },
   });
 
   gsap.set($("[home-gradient-drop-blur], [home-final-drop-blur]"), {
-    attr: { stdDeviation: 52 },
+    attr: { stdDeviation: homeMobile.enabled ? homeMobile.drops.initialBlur : 52 },
   });
 
   gsap.set($("[home-drop-purple-base], [home-drop-colors]"), {
@@ -1156,10 +1158,11 @@ function homeAnimation() {
         { opacity: 1 }, { opacity: 0 }, { ...motion.merge, start: "appear:end" });
     }
     addHomeStep(group, "merge", $("[home-gradient-drop]"),
-      { attr: { transform: (index) => ["translate(167 7) scale(1.1)", "translate(598 7) scale(1.1)", "translate(1029 7) scale(1.1)"][index] } },
+      { attr: { transform: (index) => initialDropTransforms[index] } },
       { attr: { transform: "translate(640 59) scale(0.72)" } }, motion.merge);
     addHomeStep(group, "soften", $("[home-gradient-drop-blur], [home-final-drop-blur]"),
-      { attr: { stdDeviation: 52 } }, { attr: { stdDeviation: motion.soften.blur } }, motion.soften);
+      { attr: { stdDeviation: homeMobile.enabled ? homeMobile.drops.initialBlur : 52 } },
+      { attr: { stdDeviation: motion.soften.blur } }, motion.soften);
     addHomeStep(group, "land", $("[home-gradient-drops]"), { y: 0 }, { y: motion.land.y }, motion.land);
     homeFinalDropTween = addHomeStep(group, "resize", $drop,
       { attr: { transform: "translate(640 59) scale(0.72)" } },
@@ -1325,6 +1328,7 @@ function homeAnimation() {
     restoreHomeTargetPath();
     restoreHomeArtwork();
     restoreHomeBrackets();
+    restoreHomeDropFills();
     gsap.ticker.remove(rotateHomeRestingSphere);
     homeRestingQuickX.tween.kill();
     homeRestingQuickY.tween.kill();
