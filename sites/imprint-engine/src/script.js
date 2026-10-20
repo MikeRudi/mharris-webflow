@@ -249,7 +249,12 @@ function homeAnimation() {
   const homeMobile = {
     enabled: window.matchMedia("(max-width: 991px)").matches,
     introHeightRem: 62.625,
+    logoTopRem: 40.625,
+    logoGapRem: 5,
     endHeightRem: 35,
+    secondTopRem: 26.375,
+    thirdTopRem: 30.5,
+    sceneBottomGapRem: 2,
     artworkWidth: 720,
     lineCenterRem: 21.875,
     drops: {
@@ -266,13 +271,24 @@ function homeAnimation() {
   const $homeBrackets = $("[home-end-brackets-svg]");
   const restoreHomeArtwork = rememberAttributes($homeArtwork, ["viewBox", "preserveAspectRatio"]);
   const restoreHomeBrackets = rememberAttributes($homeBrackets, ["preserveAspectRatio"]);
-  const $homeDropFills = $("[home-gradient-drop] > use");
+  const $homeDropFills = $("[home-gradient-drop] > use, [home-drop-base] > use").not("[home-drop-purple-base]");
   const restoreHomeDropFills = rememberAttributes($homeDropFills, ["fill"]);
   function measureHomeViewport() {
     if (!homeMobile.enabled) return;
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const screen = document.documentElement.clientHeight / rem;
-    const canvas = Math.max(screen, homeMobile.introHeightRem);
+    const intro = homeRoot.querySelector("[home-start-up]:not([home-resting])");
+    const logos = homeRoot.querySelector("[home-logo-up]");
+    const logoTop = Math.max(homeMobile.logoTopRem,
+      intro ? (intro.offsetTop + intro.offsetHeight) / rem + homeMobile.logoGapRem : 0);
+    const canvas = Math.max(screen, homeMobile.introHeightRem,
+      logoTop + (logos?.offsetHeight || 0) / rem);
+    homeRoot.style.setProperty("--home-logo-top", `${logoTop}rem`);
+    [["second", homeMobile.secondTopRem], ["third", homeMobile.thirdTopRem]].forEach(([name, top]) => {
+      const content = homeRoot.querySelector(`[home-${name}-up]`);
+      const available = screen - (content?.offsetHeight || 0) / rem - homeMobile.sceneBottomGapRem;
+      homeRoot.style.setProperty(`--home-${name}-top`, `${Math.min(top, Math.max(6, available))}rem`);
+    });
     homeRoot.style.setProperty("--home-screen-height", `${screen}rem`);
     homeRoot.style.setProperty("--home-canvas-height", `${canvas}rem`);
     homeRoot.style.setProperty("--home-intro-overflow", `${canvas - screen}rem`);
@@ -1267,7 +1283,7 @@ function homeAnimation() {
       ? `top+=${Math.max(0, $("[home-start]")[0].offsetHeight - document.documentElement.clientHeight)} top`
       : "top top",
     end: () => homeMobile.enabled
-      ? `bottom ${homeMobile.endHeightRem * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`
+      ? `bottom ${$homeEnd[0]?.offsetHeight || homeMobile.endHeightRem * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`
       : "bottom bottom",
     animation: homeScrubClock,
     scrub: true,
@@ -1284,6 +1300,11 @@ function homeAnimation() {
   });
   homeScrubClock.progress(homeScrollTrigger.progress);
   syncHomeRestingActivity();
+  if (homeMobile.enabled && document.fonts) {
+    document.fonts.ready.then(() => {
+      if (!homeRestingIsDestroyed) { measureHomeViewport(); homeScrollTrigger.refresh(); }
+    });
+  }
 
   if (window.IntersectionObserver) {
     homeRestingObserver = new IntersectionObserver(([entry]) => {
