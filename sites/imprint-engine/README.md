@@ -29,6 +29,47 @@ Use pinned jsDelivr releases when switching to stable production code.
   one record; adding a CMS item alone does not add another animated position.
   See `webflow-notes.md` for the list structure and item mapping.
 
+## Homepage mobile — 20 October 2026
+
+The supplied `Website.png` and `Frame 2147236654/6655/6656.png` are the mobile
+references. The original `homeAnimation()` now runs below 992px as well as on
+desktop. It retains its percentage scrub controls, separate entrance and idle
+card rotation; the static mobile card slider has been removed.
+
+`homeMobile` at the top of `homeAnimation()` owns mobile framing in rem:
+opening/scene heights, logo clearance, artwork framing, card placement and final
+drop size. It measures the actual text/logo heights so short screens can scroll
+through the opening content before scrubbing. Touch swipes scroll normally.
+Breakpoint cleanup restores the desktop SVG geometry and attributes.
+
+Layout, spacing, gradients, image positioning and breakpoint visibility are
+native Webflow styles. `home-desktop-content` and `home-mobile-content` preserve
+the desktop accordion and Teams component while mobile uses Accordion 01 -
+Split and Homepage Mobile Team Cards. The latter retains the copied content
+props; no Layout/class props were added. Mobile dimensions use rem.
+
+`mobileHomepageDetails()` handles only the mobile solid drop path, Submit label
+and native team-card scroll indicator, with cleanup. The small `[mobile-type]`
+CSS rules select saved typography sizes where the existing body typography
+embed otherwise overrides native breakpoint sizes. Text wrapping continues to
+use `text-ch`; short drop headings retain their authored character limits.
+
+Webflow's original Gilroy 700 face resolves to ExtraBold. The separate native
+Gilroy Mobile font family uses the actual Regular, SemiBold and Bold files,
+leaving the desktop registration intact.
+
+The existing process photograph and current CMS logo records are retained.
+The exported mobile reference shows a different laptop photograph, which is
+not in the available page assets. Final mobile approval remains with Michael;
+Mobile is unchecked in the tracker.
+
+Published checks: `node sites/imprint-engine/tests/home-mobile-staging.browser.mjs`.
+Set `PLAYWRIGHT_MODULE` if Playwright is outside local node_modules and
+`HOME_TEST_OUTPUT` to choose the screenshot/report folder. The test uses a
+headless Chrome touch context and checks native swipe scrolling, reversible
+scrub, short phones, tablet/desktop transitions, navigation, tabs, cards,
+process accordion, FAQ and envelope. It does not submit forms.
+
 ## Animation regression checks
 
 See [homepage-design.md](homepage-design.md) for native Webflow styling,
