@@ -3,17 +3,8 @@
   transition: transform 0.4s ease;
 }
 
-@media screen and (min-width: 992px) {
-  [home-logo-up] {
-    opacity: 0;
-  }
-}
-
-@media screen and (max-width: 991px) {
-  /* Webflow instances cannot carry a distinct class: keep only the page nav on mobile. */
-  [home-start] > :has(> [nav-block]) {
-    display: none;
-  }
+[home-logo-up] {
+  opacity: 0;
 }
 
 /* Let the hero (21) sit above the page nav (20), with layout-end (1) below it.
@@ -27,6 +18,18 @@
   position: absolute;
 }
 
+@media screen and (max-width: 991px) {
+  /* Instance wrappers cannot receive a separate native class in Webflow. */
+  [home-start] > :has(> [nav-block]) {
+    position: fixed;
+  }
+
+  /* The site's head type scale overrides native class sizes. These opt-in
+     hooks select the saved mobile family without changing desktop typography. */
+  [mobile-type="h-6"] { font-size: var(--h6); line-height: 1.1; }
+  [mobile-type="h-8"] { font-size: var(--h8); line-height: 1.4; }
+  [mobile-type="p-3"] { font-size: 0.875rem; line-height: 1.4; }
+}
 /* The gallery clips a full-size photo instead of resizing it on every frame. */
 [flex-grow-item-img] > [img-abs] {
   width: var(--gallery-image-width, 100%);

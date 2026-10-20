@@ -57,7 +57,11 @@ function initSite() {
       return () => [teamCleanup, footerCleanup, homeCleanup, lineCleanup].forEach((cleanup) => cleanup && cleanup());
     });
     cleanups.push(() => desktop.revert());
-    const mobile = onMobile(() => mobileNavigation());
+    const mobile = onMobile(() => {
+      const navigationCleanup = mobileNavigation();
+      const homeCleanup = homeAnimation();
+      return () => [homeCleanup, navigationCleanup].forEach((cleanup) => cleanup && cleanup());
+    });
     cleanups.push(() => mobile.revert());
   }
   let destroyed = false;
@@ -200,6 +204,27 @@ function homeAnimation() {
   }
 
   gsap.registerPlugin(ScrollTrigger);
+
+  // MOBILE FRAMING — the same scrub sequence, with room for the opening logo grid.
+  // All mobile measurements are rem; native Webflow styles consume these values.
+  const homeMobile = {
+    enabled: window.matchMedia("(max-width: 991px)").matches,
+    introHeightRem: 62.625,
+    cards: { horizontalSpread: 1.05, verticalSpread: 0.55, scale: 0.85, radiusScale: 0.8, offsetYRem: 0, riseYRem: -14 },
+    dropWidthRem: 3.25,
+  };
+  const homeRoot = $("[lander-wrap]").first()[0];
+  const restoreHomeViewport = rememberAttributes($(homeRoot), ["style"]);
+  function measureHomeViewport() {
+    if (!homeMobile.enabled) return;
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const screen = document.documentElement.clientHeight / rem;
+    const canvas = Math.max(screen, homeMobile.introHeightRem);
+    homeRoot.style.setProperty("--home-screen-height", `${screen}rem`);
+    homeRoot.style.setProperty("--home-canvas-height", `${canvas}rem`);
+    homeRoot.style.setProperty("--home-intro-overflow", `${canvas - screen}rem`);
+  }
+  measureHomeViewport();
 
   // HOME SCROLL CONTROLS
   // 1 = the full section scroll. A duration of 0.2 always uses 20% of it.
@@ -367,6 +392,10 @@ function homeAnimation() {
     framing: { scale: 0.78, radiusScale: 0.9, offsetYRem: 2, riseYRem: -18 },
     opacity: { back: 0.08, front: 1, ease: "power1.inOut" },
   };
+  if (homeMobile.enabled) {
+    Object.assign(homeCardMotion.layout, homeMobile.cards);
+    Object.assign(homeCardMotion.framing, homeMobile.cards);
+  }
   const cardOpacityEase = gsap.parseEase(homeCardMotion.opacity.ease);
   const $homeResting = $("[home-resting]");
   const $homeRestingDragSurface = $("[home-start]");
@@ -600,7 +629,10 @@ function homeAnimation() {
     if (!screenScale) return "translate(640 59) scale(0.72)";
 
     const em = parseFloat(getComputedStyle(svg).fontSize);
-    const scale = (homeMotion.drop.resize.widthEm * em) / (223 * screenScale);
+    const width = homeMobile.enabled
+      ? homeMobile.dropWidthRem * parseFloat(getComputedStyle(document.documentElement).fontSize)
+      : homeMotion.drop.resize.widthEm * em;
+    const scale = width / (223 * screenScale);
     // Scale the 223 x 315 artwork around the existing line-contact point.
     const x = 720 - 111.1 * scale;
     const y = 180 - 168.0556 * scale;
@@ -624,7 +656,7 @@ function homeAnimation() {
       centerY: lineRect.top + lineRect.height / 2 - homeRect.top,
     };
     const marker = $homeEnd.find("[home-end-brackets]")[0];
-    if (marker && $homeEnd.length) {
+    if (marker && $homeEnd.length && !homeMobile.enabled) {
       const endRect = $homeEnd[0].getBoundingClientRect(), markerRect = marker.getBoundingClientRect();
       const currentPadding = parseFloat(getComputedStyle($homeEnd[0]).paddingTop) || 0;
       const em = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -904,6 +936,7 @@ function homeAnimation() {
   function startHomeRestingDrag(event) {
     if (
       event.button !== 0 ||
+      event.pointerType === "touch" ||
       $(event.target).closest("a, button, input, textarea, select").length ||
       !canDragHomeResting()
     ) {
@@ -1161,11 +1194,14 @@ function homeAnimation() {
   const homeScrollTrigger = ScrollTrigger.create({
     id: "home-scroll",
     trigger: $("[layout-start]")[0],
-    start: "top top",
+    start: () => homeMobile.enabled
+      ? `top+=${Math.max(0, $("[home-start]")[0].offsetHeight - document.documentElement.clientHeight)} top`
+      : "top top",
     end: "bottom bottom",
     animation: homeScrubClock,
     scrub: true,
     onRefresh: () => {
+      measureHomeViewport();
       buildHomeRestingSphere();
       renderHomeRestingSphere();
       measureHomeClip();
@@ -1217,6 +1253,7 @@ function homeAnimation() {
     homeScrubClock.kill();
     homeTimeline.kill();
     restoreHomeEndLayout();
+    restoreHomeViewport();
     gsap.ticker.remove(rotateHomeRestingSphere);
     homeRestingQuickX.tween.kill();
     homeRestingQuickY.tween.kill();
@@ -1963,9 +2000,9 @@ function flexGrowAnimation() {
     },
     mobile: {
       start: 0,
-      media: "(max-width: 767px)",
+      media: "(max-width: 991px)",
       imageAspectRatio: 2,
-      imageGapEm: 1,
+      imageGapRem: 1,
       duration: 0.3,
       ease: "power1.in",
     },
@@ -2098,7 +2135,7 @@ function flexGrowAnimation() {
         const targetSizes = items.map(({ $image, $title, $copy }, index) => ({
           content: Math.max($title.outerHeight(true) || 0, items[index] === item ? $copy.outerHeight(true) || 0 : 0),
           image: items[index] === item ? $image.outerWidth() / galleryMotion.mobile.imageAspectRatio : 0,
-          gap: items[index] === item ? galleryMotion.mobile.imageGapEm * (parseFloat($image.css("font-size")) || 16) : 0,
+          gap: items[index] === item ? galleryMotion.mobile.imageGapRem * parseFloat(getComputedStyle(document.documentElement).fontSize) : 0,
         }));
 
         items.forEach(({ $content, $image }, index) => {
@@ -2503,7 +2540,7 @@ function navigationDropdowns() {
 function mobileNavigation() {
   // MOBILE MENU CONTROLS — the layout and open states are native Webflow styles.
   const menuControls = { openLabel: "Menu", closeLabel: "Close", focusOnOpen: true };
-  const $roots = $("[nav-menu-root]").filter((_, root) => !$(root).closest("[home-start]").length);
+  const $roots = $("[nav-menu-root]");
   const cleanups = [];
   let closeCurrent = null;
 
@@ -2948,7 +2985,10 @@ function compareDropAnimation() {
       // 01 — Measure from the authored top to the bottom of the final row.
       function measure() {
         halfHeight = drop.offsetHeight / 2;
-        travel = Math.max(0, lastRow.getBoundingClientRect().bottom
+        // Mobile displays each comparison column consecutively; rows have no box.
+        const endRow = getComputedStyle(lastRow).display === "contents"
+          ? lastRow.lastElementChild : lastRow;
+        travel = Math.max(0, endRow.getBoundingClientRect().bottom
           - track.getBoundingClientRect().top - halfHeight * 2
           - dropMotion.scroll.startOffset - dropMotion.scroll.endInset);
         line.style.top = `${dropMotion.scroll.startOffset + halfHeight}px`;
