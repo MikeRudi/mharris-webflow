@@ -60,7 +60,8 @@ function initSite() {
     const mobile = onMobile(() => {
       const navigationCleanup = mobileNavigation();
       const homeCleanup = homeAnimation();
-      return () => [homeCleanup, navigationCleanup].forEach((cleanup) => cleanup && cleanup());
+      const detailsCleanup = mobileHomepageDetails();
+      return () => [detailsCleanup, homeCleanup, navigationCleanup].forEach((cleanup) => cleanup && cleanup());
     });
     cleanups.push(() => mobile.revert());
   }
@@ -75,6 +76,44 @@ function initSite() {
 }
 
 $(initSite);
+
+function mobileHomepageDetails() {
+  if (!$("[lander-wrap]").length) return null;
+  const mobileDetails = { submitLabel: "Submit" };
+  const $drops = $("[mobile-solid-drop]");
+  const $submit = $("[mobile-footer-submit]");
+  const restore = rememberAttributes($drops.add($submit), ["d", "value"]);
+  $drops.each((_, path) => path.setAttribute("d", `${path.getAttribute("d").split("ZM")[0]}Z`));
+  $submit.val(mobileDetails.submitLabel);
+
+  // Native horizontal scrolling, with the visible position indicator in the design.
+  const cleanups = [];
+  $("[mobile-team-list]").each(function () {
+    const list = this;
+    const track = $(list).siblings("[mobile-team-scrollbar]")[0];
+    const thumb = track?.querySelector("[mobile-team-thumb]");
+    if (!track || !thumb) return;
+    const restoreThumb = rememberAttributes($(thumb), ["style"]);
+    function update() {
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const ratio = Math.min(1, list.clientWidth / Math.max(list.scrollWidth, 1));
+      const width = track.clientWidth * ratio;
+      const progress = list.scrollLeft / Math.max(1, list.scrollWidth - list.clientWidth);
+      thumb.style.width = `${width / rem}rem`;
+      thumb.style.transform = `translateX(${(track.clientWidth - width) * progress / rem}rem)`;
+    }
+    list.addEventListener("scroll", update, { passive: true });
+    const resize = new ResizeObserver(update);
+    resize.observe(list);
+    update();
+    cleanups.push(() => {
+      list.removeEventListener("scroll", update);
+      resize.disconnect();
+      restoreThumb();
+    });
+  });
+  return () => { cleanups.forEach(cleanup => cleanup()); restore(); };
+}
 
 function shopSlider() {
   if (!window.gsap || !$("[shop-slider]").length) return null;
@@ -211,11 +250,17 @@ function homeAnimation() {
     enabled: window.matchMedia("(max-width: 991px)").matches,
     introHeightRem: 62.625,
     endHeightRem: 35,
+    artworkWidth: 720,
+    lineCenterRem: 21.875,
     cards: { horizontalSpread: 1.05, verticalSpread: 0.55, scale: 0.85, radiusScale: 0.8, offsetYRem: 0, riseYRem: -14 },
     dropWidthRem: 3.25,
   };
   const homeRoot = $("[lander-wrap]").first()[0];
   const restoreHomeViewport = rememberAttributes($(homeRoot), ["style"]);
+  const $homeArtwork = $("[home-gradient-svg]");
+  const $homeBrackets = $("[home-end-brackets-svg]");
+  const restoreHomeArtwork = rememberAttributes($homeArtwork, ["viewBox", "preserveAspectRatio"]);
+  const restoreHomeBrackets = rememberAttributes($homeBrackets, ["preserveAspectRatio"]);
   function measureHomeViewport() {
     if (!homeMobile.enabled) return;
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -224,6 +269,13 @@ function homeAnimation() {
     homeRoot.style.setProperty("--home-screen-height", `${screen}rem`);
     homeRoot.style.setProperty("--home-canvas-height", `${canvas}rem`);
     homeRoot.style.setProperty("--home-intro-overflow", `${canvas - screen}rem`);
+    const scale = homeRoot.clientWidth / homeMobile.artworkWidth;
+    const top = 330 - (homeMobile.lineCenterRem + canvas - screen) * rem / scale;
+    $homeArtwork.attr({
+      viewBox: `${720 - homeMobile.artworkWidth / 2} ${top} ${homeMobile.artworkWidth} ${canvas * rem / scale}`,
+      preserveAspectRatio: "none",
+    });
+    $homeBrackets.attr("preserveAspectRatio", "none");
   }
   measureHomeViewport();
   const $homeTargetPath = $("[home-end-target-path]");
@@ -1097,7 +1149,12 @@ function homeAnimation() {
   let homeFinalDropTween;
   addHomeGroup("drop", (group, motion) => {
     const $drop = $('[home-gradient-drop="2"]');
-    addHomeStep(group, "appear", $drop, { opacity: 0 }, { opacity: 1 }, motion.appear);
+    addHomeStep(group, "appear", homeMobile.enabled ? $("[home-gradient-drop]") : $drop,
+      { opacity: 0 }, { opacity: 1 }, motion.appear);
+    if (homeMobile.enabled) {
+      addHomeStep(group, "sideDrops", $('[home-gradient-drop="1"], [home-gradient-drop="3"]'),
+        { opacity: 1 }, { opacity: 0 }, { ...motion.merge, start: "appear:end" });
+    }
     addHomeStep(group, "merge", $("[home-gradient-drop]"),
       { attr: { transform: (index) => ["translate(167 7) scale(1.1)", "translate(598 7) scale(1.1)", "translate(1029 7) scale(1.1)"][index] } },
       { attr: { transform: "translate(640 59) scale(0.72)" } }, motion.merge);
@@ -1266,6 +1323,8 @@ function homeAnimation() {
     restoreHomeEndLayout();
     restoreHomeViewport();
     restoreHomeTargetPath();
+    restoreHomeArtwork();
+    restoreHomeBrackets();
     gsap.ticker.remove(rotateHomeRestingSphere);
     homeRestingQuickX.tween.kill();
     homeRestingQuickY.tween.kill();
