@@ -210,6 +210,7 @@ function homeAnimation() {
   const homeMobile = {
     enabled: window.matchMedia("(max-width: 991px)").matches,
     introHeightRem: 62.625,
+    endHeightRem: 35,
     cards: { horizontalSpread: 1.05, verticalSpread: 0.55, scale: 0.85, radiusScale: 0.8, offsetYRem: 0, riseYRem: -14 },
     dropWidthRem: 3.25,
   };
@@ -225,6 +226,14 @@ function homeAnimation() {
     homeRoot.style.setProperty("--home-intro-overflow", `${canvas - screen}rem`);
   }
   measureHomeViewport();
+  const $homeTargetPath = $("[home-end-target-path]");
+  const restoreHomeTargetPath = rememberAttributes($homeTargetPath, ["d"]);
+  // The mobile reference uses the solid version of the same drop.
+  if (homeMobile.enabled) {
+    $homeTargetPath.each((_, path) => {
+      path.setAttribute("d", `${path.getAttribute("d").split("ZM")[0]}Z`);
+    });
+  }
 
   // HOME SCROLL CONTROLS
   // 1 = the full section scroll. A duration of 0.2 always uses 20% of it.
@@ -1190,14 +1199,16 @@ function homeAnimation() {
     },
   });
 
-  // STICKY SCROLL RANGE — no autoplay, scroll locking, pin spacer or end offset.
+  // STICKY SCROLL RANGE — mobile ends with the next section visible below the final scene.
   const homeScrollTrigger = ScrollTrigger.create({
     id: "home-scroll",
     trigger: $("[layout-start]")[0],
     start: () => homeMobile.enabled
       ? `top+=${Math.max(0, $("[home-start]")[0].offsetHeight - document.documentElement.clientHeight)} top`
       : "top top",
-    end: "bottom bottom",
+    end: () => homeMobile.enabled
+      ? `bottom ${homeMobile.endHeightRem * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`
+      : "bottom bottom",
     animation: homeScrubClock,
     scrub: true,
     onRefresh: () => {
@@ -1254,6 +1265,7 @@ function homeAnimation() {
     homeTimeline.kill();
     restoreHomeEndLayout();
     restoreHomeViewport();
+    restoreHomeTargetPath();
     gsap.ticker.remove(rotateHomeRestingSphere);
     homeRestingQuickX.tween.kill();
     homeRestingQuickY.tween.kill();
