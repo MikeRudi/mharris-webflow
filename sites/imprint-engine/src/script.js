@@ -264,6 +264,7 @@ function homeAnimation() {
     },
     cards: { horizontalSpread: 1.05, verticalSpread: 0.55, scale: 0.85, radiusScale: 0.8, offsetYRem: 0, riseYRem: -14 },
     dropWidthRem: 3.25,
+    endDropScale: 1,
   };
   const homeRoot = $("[lander-wrap]").first()[0];
   const restoreHomeViewport = rememberAttributes($(homeRoot), ["style"]);
@@ -416,6 +417,7 @@ function homeAnimation() {
       },
     },
   };
+  if (homeMobile.enabled) homeMotion.finish.drop.scale = homeMobile.endDropScale;
 
   // The embedded nav clips with the hero, but stays crisp during the content blur.
   const $homeStartContent = $("[home-start]").children().not("script, style")
