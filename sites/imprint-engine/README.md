@@ -42,14 +42,18 @@ drop size. It measures the actual text/logo heights so short screens can scroll
 through the opening content before scrubbing. Touch swipes scroll normally.
 Breakpoint cleanup restores the desktop SVG geometry and attributes.
 
-Layout, spacing, gradients, image positioning and breakpoint visibility are
-native Webflow styles. `home-desktop-content` and `home-mobile-content` preserve
-the desktop accordion and Teams component while mobile uses Accordion 01 -
-Split and Homepage Mobile Team Cards. The latter retains the copied content
-props; no Layout/class props were added. Mobile dimensions use rem.
+Layout, spacing, gradients and image positioning are native Webflow styles.
+The homepage uses one original Accordion 01 - Single and one original Teams
+component at every breakpoint, preserving their props and instance overrides.
+The separate mobile copies and their responsive wrappers were removed on
+21 October. Adapt components internally; do not duplicate them for mobile.
+Mobile dimensions use rem, with a 100svh final home scene.
 
-`mobileHomepageDetails()` handles only the mobile solid drop path, Submit label
-and native team-card scroll indicator, with cleanup. The small `[mobile-type]`
+`mobileHomepageDetails()` handles only the separate drop-text section's mobile
+solid drop and footer Submit label, with cleanup. The home animation retains
+the desktop outlined drop and proportionate brackets at a smaller native size.
+Both ripple positions follow their drop; the final scene aligns with the clip
+and completes before Form 1 enters. The small `[mobile-type]`
 CSS rules select saved typography sizes where the existing body typography
 embed otherwise overrides native breakpoint sizes. Text wrapping continues to
 use `text-ch`; short drop headings retain their authored character limits.

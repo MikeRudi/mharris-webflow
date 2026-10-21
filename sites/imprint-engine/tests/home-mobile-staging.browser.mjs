@@ -90,7 +90,8 @@ try {
         assert.equal(state.artwork, "0 0 1440 832");
         assert.ok(await page.locator(".section-teams").isVisible());
         assert.ok(await page.locator(".footer-main-show").isVisible());
-        assert.ok(await page.locator(".home-mobile-content").evaluateAll(es => es.every(e => getComputedStyle(e).display === "none")));
+        assert.equal(await page.locator(".ac-1-wrap").count(), 1);
+        assert.equal(await page.locator(".section-teams").count(), 1);
       }
     }
   });
@@ -112,24 +113,31 @@ try {
     assert.equal(await toggle.getAttribute("aria-expanded"), "false");
     assert.notEqual(await page.evaluate(() => document.body.style.overflow), "hidden");
   });
-  await check("three support tabs switch one panel at a time", async () => {
-    const tabs = page.locator(".home-mobile-content [accord-item]");
-    assert.equal(await tabs.count(), 3);
+  await check("the original four support tabs switch one panel at a time", async () => {
+    const tabs = page.locator(".ac-1-wrap [accord-item]");
+    assert.equal(await tabs.count(), 4);
     for (const i of [1, 2, 0]) {
       await tabs.nth(i).scrollIntoViewIfNeeded(); await tabs.nth(i).tap();
       assert.ok((await tabs.nth(i).getAttribute("class")).includes("active"));
-      assert.equal(await page.evaluate(() => [...document.querySelectorAll(".home-mobile-content [accord-reveal]")].filter(e => getComputedStyle(e).display !== "none").length), 1);
+      assert.equal(await page.evaluate(() => [...document.querySelectorAll(".ac-1-wrap [accord-reveal]")].filter(e => getComputedStyle(e).display !== "none").length), 1);
     }
   });
-  await check("three team cards use native horizontal scrolling", async () => {
-    const list = page.locator("[mobile-team-list]");
-    await list.scrollIntoViewIfNeeded();
-    assert.equal(await list.locator(":scope > .home-mobile-team-card").count(), 3);
-    await list.evaluate(e => { e.scrollLeft = e.scrollWidth; });
-    await page.waitForTimeout(180);
-    assert.ok(await list.evaluate(e => e.scrollLeft > 0));
-    assert.notEqual(await page.locator("[mobile-team-thumb]").evaluate(e => e.style.transform), "translateX(0rem)");
-    await list.evaluate(e => { e.scrollLeft = 0; });
+  await check("one Teams instance serves desktop and mobile with the same five items", async () => {
+    assert.equal(await page.locator(".section-teams").count(), 1);
+    assert.equal(await page.locator(".section-teams .team-block").count(), 5);
+    assert.equal(await page.locator("[mobile-team-list]").count(), 0);
+  });
+  await check("the final home scene fills the screen before Form 1 enters", async () => {
+    await seek(1);
+    const state = await page.evaluate(() => ({
+      height: document.querySelector("[layout-end]").getBoundingClientRect().height,
+      formTop: document.querySelector(".page-content").getBoundingClientRect().top,
+      screen: innerHeight,
+      outline: document.querySelector("[home-end-target-path]").getAttribute("d").includes("ZM"),
+    }));
+    assert.ok(Math.abs(state.height - state.screen) < 1);
+    assert.ok(Math.abs(state.formTop - state.screen) < 1);
+    assert.equal(state.outline, true);
   });
   await check("process accordion expands the selected image on touch", async () => {
     const items = page.locator("[flex-grow-item]");
