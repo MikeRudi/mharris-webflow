@@ -50,7 +50,9 @@ The separate mobile copies and their responsive wrappers were removed on
 Mobile dimensions use rem, with a 100svh final home scene.
 
 Tablet (1199px and below) is the first mobile layer. The lander uses the same
-centred, smaller card arrangement and `text-ch` copy lengths on tablet and phone.
+centred card arrangement on tablet and phone. Tablet uses larger tile images,
+wider `text-ch` copy and eight logos per row at the viewport bottom; phones
+retain four logos per row. `homeMobile.tablet` owns the tablet copy and logo controls.
 The shared nav opens as a full-screen white, single-column menu. Submenus cover
 the main options and have a Back control; all mobile menu changes are instant.
 While open, the original nav temporarily moves outside the hero clip, then
