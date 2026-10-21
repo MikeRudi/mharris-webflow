@@ -1480,10 +1480,18 @@
   .accord-06-list {
     grid-column-gap: 1.5rem;
     grid-row-gap: .5rem;
-    flex-wrap: wrap;
-    align-items: center;
+    background-color: #f6efff;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 0;
     height: auto;
-    padding: 1rem 2.625rem;
+    padding: 0 .875rem;
+    overflow-x: auto;
+  }
+
+  .accord-06-divider {
+    display: none;
   }
 
   .accord-06-reveal {
@@ -1497,6 +1505,10 @@
 
   .accord-06-bottom {
     height: 22rem;
+  }
+
+  .accord-06-underline {
+    display: none;
   }
 
   .header-01-image-wrap {
@@ -1548,9 +1560,16 @@
   }
 
   .accord-06-tab {
+    color: #6f6c65;
+    white-space: nowrap;
     align-items: center;
     height: auto;
-    min-height: 2.75rem;
+    min-height: 0;
+    padding: 1.25rem .5rem;
+  }
+
+  .accord-06-tab.active {
+    color: #5f249f;
   }
 
   .solutions-header {
@@ -2141,6 +2160,14 @@
   .shop-slider-bg-image {
     object-fit: contain;
     object-position: 50% 70%;
+  }
+
+  .accord-06-item {
+    flex-shrink: 0;
+  }
+
+  .accord-06-marker {
+    display: block;
   }
 }
 /* END NATIVE TABLET EXTENSION */
