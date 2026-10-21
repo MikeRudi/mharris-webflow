@@ -245,7 +245,9 @@ function homeAnimation() {
     text: { headingCharacters: 22, paragraphCharacters: 48 },
     tablet: {
       minWidth: 768,
-      text: { headingCharacters: 34, paragraphCharacters: 72 },
+      text: { headingCharacters: null, paragraphCharacters: 72 },
+      cardsTopRem: 2,
+      centerIntro: true,
       logoBottomRem: 0, // Native logo-wrapper padding supplies the bottom inset.
     },
     dropWidthRem: 3.25,
@@ -258,21 +260,31 @@ function homeAnimation() {
   const restoreHomeArtwork = rememberAttributes($homeArtwork, ["viewBox", "preserveAspectRatio"]);
   const $homeDropFills = $("[home-gradient-drop] > use, [home-drop-base] > use").not("[home-drop-purple-base]");
   const restoreHomeDropFills = rememberAttributes($homeDropFills, ["fill"]);
+  let homeIntroOffsetRem = 0;
   function measureHomeViewport() {
     if (!homeMobile.enabled) return;
     const tablet = window.innerWidth >= homeMobile.tablet.minWidth;
     const copy = tablet ? homeMobile.tablet.text : homeMobile.text;
     $homeCopy.each((_, element) => {
-      element.setAttribute("text-ch", element.getAttribute("home-mobile-copy") === "heading"
-        ? copy.headingCharacters : copy.paragraphCharacters);
+      const characters = element.getAttribute("home-mobile-copy") === "heading"
+        ? copy.headingCharacters : copy.paragraphCharacters;
+      if (characters === null) element.removeAttribute("text-ch");
+      else element.setAttribute("text-ch", characters);
     });
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const screen = document.documentElement.clientHeight / rem;
     const intro = homeRoot.querySelector("[home-start-up]:not([home-resting])");
     const logos = homeRoot.querySelector("[home-logo-up]");
     const logoHeight = (logos?.offsetHeight || 0) / rem;
+    homeRoot.style.setProperty("--home-tablet-intro-offset", "0rem");
+    const introBottom = intro ? (intro.offsetTop + intro.offsetHeight) / rem : 0;
+    homeIntroOffsetRem = tablet && homeMobile.tablet.centerIntro
+      ? Math.max(0, Math.min((screen - homeMobile.tablet.cardsTopRem - introBottom) / 2,
+        screen - logoHeight - homeMobile.tablet.logoBottomRem - homeMobile.logoGapRem - introBottom))
+      : 0;
+    homeRoot.style.setProperty("--home-tablet-intro-offset", `${homeIntroOffsetRem}rem`);
     const logoTop = Math.max(tablet ? screen - logoHeight - homeMobile.tablet.logoBottomRem : homeMobile.logoTopRem,
-      intro ? (intro.offsetTop + intro.offsetHeight) / rem + homeMobile.logoGapRem : 0);
+      intro ? introBottom + homeIntroOffsetRem + homeMobile.logoGapRem : 0);
     const canvas = Math.max(screen, tablet ? screen : homeMobile.introHeightRem,
       logoTop + logoHeight);
     homeRoot.style.setProperty("--home-logo-top", `${logoTop}rem`);
@@ -544,7 +556,7 @@ function homeAnimation() {
     if (homeMobile.enabled) {
       const homeBounds = $homeRestingDragSurface[0].getBoundingClientRect();
       homeRestingLayoutOffset.x = homeBounds.left + homeBounds.width / 2 - centerX;
-      homeRestingLayoutOffset.y = homeBounds.top + homeMobile.cards.centerYRem * homeRestingRem - centerY;
+      homeRestingLayoutOffset.y = homeBounds.top + (homeMobile.cards.centerYRem + homeIntroOffsetRem) * homeRestingRem - centerY;
     }
 
     homeRestingSphere = restingItems.map((item) => {
