@@ -480,8 +480,8 @@ function homeAnimation() {
       const isFront = $(element).closest("[perspective-opacity-1]").length;
       const isBack = $(element).closest("[perspective-opacity-3]").length;
 
-      const transformX = Number(gsap.getProperty(element, "x", "px")) || 0;
-      const transformY = Number(gsap.getProperty(element, "y", "px")) || 0;
+      const transformX = parseFloat(gsap.getProperty(element, "x", "px")) || 0;
+      const transformY = parseFloat(gsap.getProperty(element, "y", "px")) || 0;
       const bounds = element.getBoundingClientRect();
 
       gsap.set(card, {
