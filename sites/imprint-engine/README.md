@@ -104,6 +104,22 @@ headless Chrome touch context and checks native swipe scrolling, reversible
 scrub, short phones, tablet/desktop transitions, navigation, tabs, cards,
 process accordion, FAQ and envelope. It does not submit forms.
 
+## Solutions by Product mobile — 21 October 2026
+
+Page Header 01 stacks its artwork above the existing content below 1200px.
+The optional `Mobile Image` and `Use Mobile Image` content props select a square
+asset on the overview instance; other instances retain their original image
+until a mobile asset is supplied. All existing content props remain shared.
+The square asset is saved in the overview's local `webflow-ready` asset folder
+as `product-header-mobile-square.png`; Webflow serves its optimized WebP version.
+
+Native mobile styles give Logo List six columns / three rows, Split 6 a centred
+vertical card list, Shop Slider two visible cards plus part of the third, Hoodie
+a rem-sized contained image, and Tiles 1 square images with matching content
+insets. Sections use 1.25rem side padding. The main 18px paragraphs opt into the
+saved 16px p-2 mobile size. Desktop section geometry was unchanged in staging.
+Phone and tablet staging checks passed; mobile approval remains with Michael.
+
 ## Animation regression checks
 
 See [homepage-design.md](homepage-design.md) for native Webflow styling,
