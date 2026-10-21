@@ -17,6 +17,8 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- Custom Products uses native reusable components and instant category/decoration
+  filters. See `custom-products-notes.txt` for the component IDs, props and checks.
 - Keep this site's custom code inside this site folder.
 - Copy snippets into this site before adapting them.
 - Custom code selects elements by attributes; see `attribute-hooks.md` when

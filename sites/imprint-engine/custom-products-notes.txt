@@ -1,0 +1,80 @@
+CUSTOM PRODUCTS — 21 OCTOBER 2026
+
+Site: Imprint Engine v2 (6abbde0cb7e6f39d52509b6c)
+Page: 6abbde0cb7e6f39d52509b56
+Staging: https://imprint-engine-v2.webflow.io/solutions-by-product/solutions-by-custom-products
+Figma: uyv4zqje8zX2zC72bdHWlp, frame 7634:21897
+
+COMPONENTS
+Page Header Full Background: aea76452-6109-d037-e04e-b991dc54c1d4
+Custom Products 01: afca2c72-da53-011b-33f2-ac897d8190d5
+Custom Products Categories: bcae5fda-e4eb-c361-e6b3-f18075efdb74
+Custom Apparel: 6566cbcd-90b2-9838-442c-6c56418742c1
+Custom Bags: b8d08bc8-ad6a-d768-9203-bc9e733ec62c
+Custom Hats: 5e3540b1-5c5d-da2d-3abd-cdc0d62d70ff
+Custom Socks: d17d842d-48b0-ad52-b4d3-18c6507aba2c
+Custom Decoration Methods: 05d2d646-217d-2943-9fb4-4a95d6fa6598
+
+The header and seven content components adapt internally across breakpoints.
+Props expose content, images and links, with repeated cards grouped as Item 1,
+Item 2, etc. There are no class or layout props. Native base class text carries
+typography and weight utilities through the custom class attribute. Saved
+typography classes and text-ch are used. Mobile/tablet spacing is in rem.
+
+Custom Products 01 has the Subtle, Signature and Showcase cards, with their
+three Figma duffel images, content above and two buttons below. The three
+card images total about 585 KB after compression. The hero uses the Figma
+worktable image and native responsive overlay/positioning.
+
+Apparel: 5 products, 6 custom options, 20 fabric entries.
+Bags: 4 products, 4 custom options, 18 material entries.
+Hats: 7 products, 6 custom options, 16 material entries.
+Socks: 2 products.
+Decoration: 24 methods; All/Apparel/Bags/Hats/Socks filters.
+
+BEHAVIOR
+script.js customProducts() initializes inside [custom-products].
+[custom-category-trigger] identifies each category control.
+[custom-category-panel] identifies its page-level wrapper and matching value.
+Native .custom-category-panel.active shows the selected component only.
+These page wrappers preserve the reusable components and their prop identities.
+[custom-decoration-filter] selects All or a product type.
+[custom-decoration-card] contains the matching space-separated categories.
+Switching is immediate. Keyboard arrows, Home, End, Space and Enter work on
+category controls. Hidden panels are inert. Height changes refresh Lenis and
+ScrollTrigger so the footer stays reachable.
+
+Anchors: custom-products-categories, custom-apparel, custom-bags, custom-hats,
+custom-socks, custom-apparel-options, custom-bags-options, custom-hats-options,
+custom-decoration, custom-products-faq, contact.
+
+The page retains Michael's existing Accordion 04 instance and Footer.
+The obsolete Content Rich Text component was removed as requested.
+
+SOURCE ARTWORK
+Many image frames in the current Figma category/options/decoration designs are
+empty. Their image props remain available. Blank image props are hidden by a
+small scoped CSS rule to avoid broken-image icons while preserving the frames.
+Material colour swatches are native Webflow styles. Adding an image to its prop
+shows it automatically; there is no redundant Show Image toggle.
+
+MCP NOTE
+The API accepted but did not persist component-root attributes and visibility
+bindings. Later attempts to add an initial attribute returned an MPS conflict.
+Working category hooks therefore live on native page wrappers created with
+attributes. Content, image and link bindings persist and have been checked.
+Do not replace these components or recreate their prop IDs to change filters.
+
+VALIDATION
+Published to the Webflow staging subdomain; no custom domain publication.
+Checked widths 1440, 1024, 402 and 320px, all four categories at each width:
+exactly one panel visible, no horizontal document or card overflow.
+All 484 content field defaults match the build source extracted from Figma.
+Decoration visible counts: All 24, Apparel 17, Bags 15, Hats 12, Socks 4.
+Keyboard category switching, mobile menu, CTA/FAQ/product anchors and scrolling
+to the very bottom passed. No page JavaScript errors during these checks.
+Native tablet styles were synchronized through 1199px using
+sync-tablet-styles.mjs after publishing.
+
+Tracker notes and current Figma link updated; existing checkbox values preserved.
+Implementation is ready for Michael's review, not approval on his behalf.
