@@ -1653,6 +1653,16 @@
     margin-top: 0;
   }
 
+  .services-page-header {
+    min-height: 100svh;
+    padding-top: 5.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .services-header-content {
+    padding: 0 1.25rem;
+  }
+
   .header-form-section {
     min-height: 0;
     padding-top: 5.5rem;
@@ -1678,8 +1688,38 @@
     width: 100%;
   }
 
+  .services-accord-benefits {
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1rem;
+    min-height: 0;
+    display: grid;
+  }
+
+  .services-accord-benefit {
+    border-right-width: 0;
+    row-gap: .75rem;
+    width: 100%;
+    padding: 1.25rem;
+  }
+
+  .services-accord-icon {
+    width: 7rem;
+    height: 6.395rem;
+  }
+
   .project-callout-layout {
     grid-template-columns: 1fr;
+  }
+
+  .services-overview-header {
+    min-height: 100svh;
+    padding-top: 5.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .services-accordion-section {
+    padding: 3rem 0;
   }
 
   .contact-cta-content {
@@ -2168,6 +2208,14 @@
 
   .accord-06-marker {
     display: block;
+  }
+
+  .services-accord-tabs {
+    background-color: #f6efff;
+  }
+
+  .services-accord-tab {
+    background-color: #0000;
   }
 }
 /* END NATIVE TABLET EXTENSION */
