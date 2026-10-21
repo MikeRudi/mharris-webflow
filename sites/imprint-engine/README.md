@@ -123,6 +123,11 @@ Phone and tablet staging checks passed; mobile approval remains with Michael.
 Shop Slider's mobile background uses contain sizing inside the section height,
 positioned behind the cards, rather than enlarging the artwork to cover a tall frame.
 
+Accordion 06 uses the Product overview's pale tab background and single horizontally
+scrolling row below 1200px. Its native `accord-06-marker` reuses the existing
+`active-marker` behavior; the desktop underlines remain on desktop. Tab labels
+and content bindings remain on the original component.
+
 ## Animation regression checks
 
 See [homepage-design.md](homepage-design.md) for native Webflow styling,
