@@ -1404,17 +1404,15 @@
     padding: 1.5rem 0 2rem;
   }
 
-  .ac-1-reveal-bot-b {
+  .ac-1-reveal-bot-b, .ac-1-reveal-bot-a {
+    grid-row-gap: 1rem;
     flex-flow: column;
-    align-items: center;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
     row-gap: 1rem;
-  }
-
-  .ac-1-reveal-bot-a {
-    flex-flow: column;
-    align-items: center;
-    row-gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
+    display: grid;
   }
 
   .ac-1-svg {
@@ -2122,6 +2120,13 @@
 
   .hoodie-image {
     object-fit: contain;
+  }
+
+  .ac-1-split-6-grid {
+    grid-column-gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    display: grid;
   }
 }
 /* END NATIVE TABLET EXTENSION */

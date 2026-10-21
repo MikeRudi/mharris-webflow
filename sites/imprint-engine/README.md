@@ -113,8 +113,8 @@ until a mobile asset is supplied. All existing content props remain shared.
 The square asset is saved in the overview's local `webflow-ready` asset folder
 as `product-header-mobile-square.png`; Webflow serves its optimized WebP version.
 
-Native mobile styles give Logo List six columns / three rows, Split 6 a centred
-vertical card list, Shop Slider two visible cards plus part of the third, Hoodie
+Native mobile styles give Logo List six columns / three rows, Split 6 two equal
+columns of three evenly spaced cards, Shop Slider two visible cards plus part of the third, Hoodie
 a rem-sized contained image, and Tiles 1 square images with matching content
 insets. Sections use 1.25rem side padding. The main 18px paragraphs opt into the
 saved 16px p-2 mobile size. Desktop section geometry was unchanged in staging.
