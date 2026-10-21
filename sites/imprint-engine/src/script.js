@@ -247,9 +247,9 @@ function homeAnimation() {
     tablet: {
       minWidth: 768,
       text: { headingCharacters: null, paragraphCharacters: 72 },
-      cardsTopRem: 2,
+      cards: { centerYRem: 1, maxRadiusRem: 18 },
       centerIntro: true,
-      logoBottomRem: 0, // Native logo-wrapper padding supplies the bottom inset.
+      logoBottomRem: 2,
     },
     dropWidthRem: 3.25,
   };
@@ -280,7 +280,7 @@ function homeAnimation() {
     homeRoot.style.setProperty("--home-tablet-intro-offset", "0rem");
     const introBottom = intro ? (intro.offsetTop + intro.offsetHeight) / rem : 0;
     homeIntroOffsetRem = tablet && homeMobile.tablet.centerIntro
-      ? Math.max(0, Math.min((screen - homeMobile.tablet.cardsTopRem - introBottom) / 2,
+      ? Math.max(0, Math.min((screen - (intro?.offsetHeight || 0) / rem) / 2 - (intro?.offsetTop || 0) / rem,
         screen - logoHeight - homeMobile.tablet.logoBottomRem - homeMobile.logoGapRem - introBottom))
       : 0;
     homeRoot.style.setProperty("--home-tablet-intro-offset", `${homeIntroOffsetRem}rem`);
@@ -499,6 +499,8 @@ function homeAnimation() {
 
   function buildHomeRestingSphere() {
     homeRestingRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const mobileCards = homeMobile.enabled && window.innerWidth >= homeMobile.tablet.minWidth
+      ? { ...homeMobile.cards, ...homeMobile.tablet.cards } : homeMobile.cards;
     const restingItems = $homeResting.toArray().map((element, index) => {
       const card = $(element).find("[perspective-card]")[0];
       if (!card) return null;
@@ -513,7 +515,7 @@ function homeAnimation() {
       gsap.set(card, {
         force3D: true,
         transformOrigin: "center center",
-        ...(homeMobile.enabled ? { rotation: homeMobile.cards.rotation, skewX: homeMobile.cards.skewX } : {}),
+        ...(homeMobile.enabled ? { rotation: mobileCards.rotation, skewX: mobileCards.skewX } : {}),
       });
       // Keep overlap order stable: sorting transparent tiles every frame visibly snaps.
       gsap.set(element, { zIndex: 100 + Math.round((isFront ? 1 : isBack ? -1 : 0) * 30) + index });
@@ -557,13 +559,13 @@ function homeAnimation() {
     if (homeMobile.enabled) {
       const homeBounds = $homeRestingDragSurface[0].getBoundingClientRect();
       homeRestingLayoutOffset.x = homeBounds.left + homeBounds.width / 2 - centerX;
-      homeRestingLayoutOffset.y = homeBounds.top + (homeMobile.cards.centerYRem + homeIntroOffsetRem) * homeRestingRem - centerY;
+      homeRestingLayoutOffset.y = homeBounds.top + (mobileCards.centerYRem + homeIntroOffsetRem) * homeRestingRem - centerY;
     }
 
     // Fit the desktop orbit pattern inside the mobile artwork area at every angle.
     const orbitFit = homeMobile.enabled ? Math.min(1,
-      Math.max(homeRestingRem, Math.min(homeMobile.cards.maxRadiusRem * homeRestingRem,
-        homeRoot.clientWidth / 2 - Math.max(...restingItems.map(({ card }) => card.offsetWidth)) * homeMobile.cards.edgeAllowance)) /
+      Math.max(homeRestingRem, Math.min(mobileCards.maxRadiusRem * homeRestingRem,
+        homeRoot.clientWidth / 2 - Math.max(...restingItems.map(({ card }) => card.offsetWidth)) * mobileCards.edgeAllowance)) /
       (radius * homeRestingRadiusScale * homeCardMotion.layout.horizontalSpread)) : 1;
     homeRestingSphere = restingItems.map((item) => {
       const screenX = item.x - centerX;
