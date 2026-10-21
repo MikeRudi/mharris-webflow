@@ -1449,7 +1449,7 @@
 
   .shop-slider-card {
     row-gap: .75rem;
-    width: calc(45.4545vw - 1.81818rem);
+    width: calc(50vw - 1.625rem);
     padding: .5rem .5rem .75rem;
   }
 
