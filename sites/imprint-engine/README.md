@@ -107,11 +107,18 @@ process accordion, FAQ and envelope. It does not submit forms.
 ## Solutions by Product mobile — 21 October 2026
 
 Page Header 01 stacks its artwork above the existing content below 1200px.
-The optional `Mobile Image` and `Use Mobile Image` content props select a square
-asset on the overview instance; other instances retain their original image
-until a mobile asset is supplied. All existing content props remain shared.
+The optional `Mobile Image` and `Use Mobile Image` content props select square
+assets on Product overview, Merchandise, Kits, Events, Print and Packaging.
+Apparel retains its existing artwork; Signage and Custom Products have text-only
+headers. All existing content props remain shared.
 The square asset is saved in the overview's local `webflow-ready` asset folder
 as `product-header-mobile-square.png`; Webflow serves its optimized WebP version.
+The five additional reframes and their image-editing prompts are saved in each
+page's `webflow-ready` folder as `<page>-header-mobile-square.png` and the sibling
+`-prompt.txt`. The parent Solutions by Product export folder also holds
+`mobile-hero-updates-2026-10-21.json`, with asset IDs and the prior instance values.
+These were made with the built-in image editor and compressed to WebP in Webflow.
+Only mobile image props changed; the desktop image props retain their originals.
 
 Native mobile styles give Logo List six columns / three rows, Split 6 two equal
 columns of three evenly spaced cards, Shop Slider two visible cards plus part of the third, Hoodie
