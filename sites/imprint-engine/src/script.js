@@ -239,9 +239,9 @@ function homeAnimation() {
       starts: ["translate(122 -330) scale(1.5)", "translate(553 -150) scale(1.5)", "translate(984 -330) scale(1.5)"],
       fill: "#6421b9",
     },
-    cards: { horizontalSpread: 0.95, verticalSpread: 0.5, scale: 0.85, radiusScale: 0.68, centerYRem: 8, offsetYRem: 0, riseYRem: -14,
-      rotation: 22, skewX: -12 },
-    cardOpacity: { back: 0, front: 1, fadeStart: 0.4, fadeEnd: 0.78 },
+    cards: { horizontalSpread: 1.12, verticalSpread: 0.6, scale: 0.85, radiusScale: 0.9, centerYRem: 8, offsetYRem: 0, riseYRem: -14,
+      rotation: 33, skewX: -22.5, maxRadiusRem: 10.5, edgeAllowance: 0.8 },
+    cardOpacity: { back: 0.18, front: 1, fadeStart: 0, fadeEnd: 1 },
     text: { headingCharacters: 22, paragraphCharacters: 48 },
     tablet: {
       minWidth: 768,
@@ -559,6 +559,11 @@ function homeAnimation() {
       homeRestingLayoutOffset.y = homeBounds.top + (homeMobile.cards.centerYRem + homeIntroOffsetRem) * homeRestingRem - centerY;
     }
 
+    // Fit the desktop orbit pattern inside the mobile artwork area at every angle.
+    const orbitFit = homeMobile.enabled ? Math.min(1,
+      Math.max(homeRestingRem, Math.min(homeMobile.cards.maxRadiusRem * homeRestingRem,
+        homeRoot.clientWidth / 2 - Math.max(...restingItems.map(({ card }) => card.offsetWidth)) * homeMobile.cards.edgeAllowance)) /
+      (radius * homeRestingRadiusScale * homeCardMotion.layout.horizontalSpread)) : 1;
     homeRestingSphere = restingItems.map((item) => {
       const screenX = item.x - centerX;
       const screenY = item.y - centerY;
@@ -573,12 +578,12 @@ function homeAnimation() {
 
       return {
         ...item,
-        x: screenX,
-        y: -screenY,
+        x: screenX * orbitFit,
+        y: -screenY * orbitFit,
         screenX,
         screenY,
-        z,
-        radius,
+        z: z * orbitFit,
+        radius: radius * orbitFit,
       };
     });
   }
@@ -623,12 +628,8 @@ function homeAnimation() {
         homeRestingMatrix[6] * item.x +
         homeRestingMatrix[7] * item.y +
         homeRestingMatrix[8] * item.z;
-      const scale =
-        gsap.utils.clamp(
-          0.82,
-          1.16,
-          1 + ((depth - item.z) / item.radius) * 0.16
-        ) * viewScale;
+      // Depth changes opacity and position, never the tile or label size.
+      const scale = viewScale;
       // Every card uses the same continuous depth curve: no front/middle/back states.
       // Cards crossing at the same depth now have the same opacity.
       const normalizedDepth = (depth / item.radius + 1) / 2;
