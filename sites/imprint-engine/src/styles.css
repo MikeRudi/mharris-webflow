@@ -34,6 +34,12 @@
   [mobile-type][text-ch]:not([text-ch="12"], [text-ch="15"]) { max-width: 100%; }
   [nav-block].nav-light [nav-logo-mark] { color: inherit; }
   [mobile-solid][readable-brand-text] { color: white; }
+
+  /* These rings live inside the existing SVG embed; align them with its drop. */
+  [home-gradient-ripples] {
+    top: var(--home-ripple-y);
+    transform: translate(-50%, -50%);
+  }
 }
 /* The gallery clips a full-size photo instead of resizing it on every frame. */
 [flex-grow-item-img] > [img-abs] {

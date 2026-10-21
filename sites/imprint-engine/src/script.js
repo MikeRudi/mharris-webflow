@@ -244,14 +244,13 @@ function homeAnimation() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // MOBILE FRAMING — the same scrub sequence, with room for the opening logo grid.
+  // MOBILE FRAMING — the same scrub sequence, with room for the opening logos.
   // All mobile measurements are rem; native Webflow styles consume these values.
   const homeMobile = {
     enabled: window.matchMedia("(max-width: 991px)").matches,
     introHeightRem: 62.625,
     logoTopRem: 40.625,
     logoGapRem: 5,
-    endHeightRem: 35,
     secondTopRem: 26.375,
     thirdTopRem: 30.5,
     sceneBottomGapRem: 2,
@@ -265,14 +264,11 @@ function homeAnimation() {
     },
     cards: { horizontalSpread: 1.05, verticalSpread: 0.55, scale: 0.85, radiusScale: 0.8, offsetYRem: 0, riseYRem: -14 },
     dropWidthRem: 3.25,
-    endDropScale: 1,
   };
   const homeRoot = $("[lander-wrap]").first()[0];
   const restoreHomeViewport = rememberAttributes($(homeRoot), ["style"]);
   const $homeArtwork = $("[home-gradient-svg]");
-  const $homeBrackets = $("[home-end-brackets-svg]");
   const restoreHomeArtwork = rememberAttributes($homeArtwork, ["viewBox", "preserveAspectRatio"]);
-  const restoreHomeBrackets = rememberAttributes($homeBrackets, ["preserveAspectRatio"]);
   const $homeDropFills = $("[home-gradient-drop] > use, [home-drop-base] > use").not("[home-drop-purple-base]");
   const restoreHomeDropFills = rememberAttributes($homeDropFills, ["fill"]);
   function measureHomeViewport() {
@@ -303,18 +299,9 @@ function homeAnimation() {
       viewBox: `${720 - homeMobile.artworkWidth / 2} ${top} ${homeMobile.artworkWidth} ${canvas * rem / scale}`,
       preserveAspectRatio: "none",
     });
-    $homeBrackets.attr("preserveAspectRatio", "none");
   }
   measureHomeViewport();
   if (homeMobile.enabled) $homeDropFills.attr("fill", homeMobile.drops.fill);
-  const $homeTargetPath = $("[home-end-target-path]");
-  const restoreHomeTargetPath = rememberAttributes($homeTargetPath, ["d"]);
-  // The mobile reference uses the solid version of the same drop.
-  if (homeMobile.enabled) {
-    $homeTargetPath.each((_, path) => {
-      path.setAttribute("d", `${path.getAttribute("d").split("ZM")[0]}Z`);
-    });
-  }
 
   // HOME SCROLL CONTROLS
   // 1 = the full section scroll. A duration of 0.2 always uses 20% of it.
@@ -421,7 +408,6 @@ function homeAnimation() {
       },
     },
   };
-  if (homeMobile.enabled) homeMotion.finish.drop.scale = homeMobile.endDropScale;
 
   // The embedded nav clips with the hero, but stays crisp during the content blur.
   const $homeStartContent = $("[home-start]").children().not("script, style")
@@ -747,13 +733,25 @@ function homeAnimation() {
       centerY: lineRect.top + lineRect.height / 2 - homeRect.top,
     };
     const marker = $homeEnd.find("[home-end-brackets]")[0];
-    if (marker && $homeEnd.length && !homeMobile.enabled) {
+    if (marker && $homeEnd.length) {
       const endRect = $homeEnd[0].getBoundingClientRect(), markerRect = marker.getBoundingClientRect();
       const currentPadding = parseFloat(getComputedStyle($homeEnd[0]).paddingTop) || 0;
       const em = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const desiredCenter = homeClipBounds.centerY + homeAlignment.endDropOffsetRem * em;
+      const introOverflow = homeMobile.enabled
+        ? home.offsetHeight - document.documentElement.clientHeight : 0;
+      const desiredCenter = homeClipBounds.centerY - introOverflow + homeAlignment.endDropOffsetRem * em;
       const shift = desiredCenter - (markerRect.top + markerRect.height / 2 - endRect.top);
       $homeEnd.css("padding-top", Math.max(0, currentPadding + shift));
+    }
+    if (homeMobile.enabled) {
+      // The landing ring sits under the drop, using the SVG's actual screen scale.
+      const svg = $homeArtwork[0];
+      const point = svg.createSVGPoint();
+      point.x = 720;
+      point.y = 59 + 315 * 0.72 + homeMotion.drop.land.y;
+      const landing = point.matrixTransform(svg.getScreenCTM());
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      homeRoot.style.setProperty("--home-ripple-y", `${(landing.y - homeRect.top) / rem}rem`);
     }
   }
   measureHomeClip();
@@ -1281,16 +1279,14 @@ function homeAnimation() {
     },
   });
 
-  // STICKY SCROLL RANGE — mobile ends with the next section visible below the final scene.
+  // STICKY SCROLL RANGE — the final scene fills the viewport before the next section enters.
   const homeScrollTrigger = ScrollTrigger.create({
     id: "home-scroll",
     trigger: $("[layout-start]")[0],
     start: () => homeMobile.enabled
       ? `top+=${Math.max(0, $("[home-start]")[0].offsetHeight - document.documentElement.clientHeight)} top`
       : "top top",
-    end: () => homeMobile.enabled
-      ? `bottom ${$homeEnd[0]?.offsetHeight || homeMobile.endHeightRem * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`
-      : "bottom bottom",
+    end: "bottom bottom",
     animation: homeScrubClock,
     scrub: true,
     onRefresh: () => {
@@ -1352,9 +1348,7 @@ function homeAnimation() {
     homeTimeline.kill();
     restoreHomeEndLayout();
     restoreHomeViewport();
-    restoreHomeTargetPath();
     restoreHomeArtwork();
-    restoreHomeBrackets();
     restoreHomeDropFills();
     gsap.ticker.remove(rotateHomeRestingSphere);
     homeRestingQuickX.tween.kill();
