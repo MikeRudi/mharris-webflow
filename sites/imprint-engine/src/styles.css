@@ -988,7 +988,7 @@
     width: 100%;
     max-width: none;
     height: auto;
-    margin-top: 2.5rem;
+    margin-top: 0;
     margin-bottom: 3rem;
   }
 
@@ -1079,8 +1079,9 @@
   .team-list {
     grid-column-gap: 2rem;
     grid-row-gap: 2rem;
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
+    text-align: left;
+    grid-template-columns: 1fr;
+    place-items: start stretch;
     width: 100%;
     max-width: none;
     display: grid;
@@ -1097,19 +1098,120 @@
   }
 
   .team-profiles {
-    aspect-ratio: 1441 / 500;
+    aspect-ratio: auto;
     flex-shrink: 0;
     order: -1;
-    height: auto;
+    height: 13rem;
+    margin-top: 0;
+    margin-bottom: 0;
     position: relative;
   }
 
   .team-profile-canvas {
+    aspect-ratio: auto;
     width: 100%;
+    height: 13rem;
     position: relative;
     top: 0;
     left: 0;
     transform: none;
+  }
+
+  .team-profile-group.is-left, .team-profile-group.is-right, .team-profile-group.is-top, .team-profile-group.is-floating {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  .team-profile-node.is-01 {
+    visibility: visible;
+    width: 3rem;
+    top: 3rem;
+    left: 12%;
+  }
+
+  .team-profile-node.is-02 {
+    visibility: hidden;
+  }
+
+  .team-profile-node.is-03 {
+    visibility: visible;
+    width: .875rem;
+    top: 1rem;
+    left: 6%;
+  }
+
+  .team-profile-node.is-04 {
+    visibility: visible;
+    width: .75rem;
+    top: 1.5rem;
+    left: 36%;
+  }
+
+  .team-profile-node.is-05 {
+    visibility: visible;
+    width: 1.5rem;
+    top: 6.25rem;
+    left: 3%;
+  }
+
+  .team-profile-node.is-06, .team-profile-node.is-07, .team-profile-node.is-08, .team-profile-node.is-09, .team-profile-node.is-10, .team-profile-node.is-11, .team-profile-node.is-12, .team-profile-node.is-13, .team-profile-node.is-14, .team-profile-node.is-15 {
+    visibility: hidden;
+  }
+
+  .team-profile-node.is-16 {
+    visibility: visible;
+    width: 1.25rem;
+    top: .5rem;
+    left: 54%;
+  }
+
+  .team-profile-node.is-17 {
+    visibility: visible;
+    width: 3rem;
+    top: 2.5rem;
+    left: 65%;
+  }
+
+  .team-profile-node.is-18 {
+    visibility: hidden;
+  }
+
+  .team-profile-node.is-19 {
+    visibility: visible;
+    width: 2.75rem;
+    top: 8rem;
+    left: 36%;
+  }
+
+  .team-profile-node.is-20 {
+    visibility: hidden;
+  }
+
+  .team-profile-node.is-21 {
+    visibility: visible;
+    width: 2.75rem;
+    top: 9rem;
+    left: 78%;
+  }
+
+  .team-profile-position-22 {
+    visibility: visible;
+    width: 1rem;
+    top: 1.5rem;
+    left: 87%;
+  }
+
+  .team-profile-position-23 {
+    visibility: hidden;
+  }
+
+  .team-profile-position-24 {
+    visibility: visible;
+    width: 1rem;
+    top: 10rem;
+    left: 20%;
   }
 
   .compare-drop-track {
@@ -1139,22 +1241,23 @@
     filter: blur(4rem);
     width: 14rem;
     height: 23rem;
+    display: none;
     top: -2rem;
     left: -13rem;
   }
 
   .faq-gradient-2 {
-    filter: blur(4rem);
-    width: 18rem;
-    height: 27rem;
+    filter: blur(2.5rem);
+    width: 8rem;
+    height: 12rem;
     top: auto;
-    bottom: -3rem;
-    right: -6rem;
+    bottom: 0;
+    right: -3rem;
   }
 
   .testimonial-layout {
     flex-direction: column;
-    gap: 2rem 1.25rem;
+    gap: .75rem 1.25rem;
   }
 
   .testimonial-link-wrap {
@@ -1729,7 +1832,7 @@
   }
 
   .drop-text-mobile-fill {
-    fill: #5f249f;
+    fill: #111;
   }
 
   .home-mobile-form-art {
