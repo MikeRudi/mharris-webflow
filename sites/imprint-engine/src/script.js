@@ -84,10 +84,8 @@ $(initSite);
 function mobileHomepageDetails() {
   if (!$("[lander-wrap]").length) return null;
   const mobileDetails = { submitLabel: "Submit" };
-  const $drops = $("[mobile-solid-drop]");
   const $submit = $("[mobile-footer-submit]");
-  const restore = rememberAttributes($drops.add($submit), ["d", "value"]);
-  $drops.each((_, path) => path.setAttribute("d", `${path.getAttribute("d").split("ZM")[0]}Z`));
+  const restore = rememberAttributes($submit, ["value"]);
   $submit.val(mobileDetails.submitLabel);
 
   return restore;
