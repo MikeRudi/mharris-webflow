@@ -99,11 +99,17 @@ function customProducts() {
     if (!$tabs.length || !$panels.length) return;
     const $filters = $root.find("[custom-decoration-filter]");
     const $cards = $root.find("[custom-decoration-card]");
-    const restoreTabs = rememberAttributes($tabs, ["class", "aria-selected", "tabindex"]);
+    const restoreTabs = rememberAttributes($tabs, ["id", "class", "aria-selected", "tabindex"]);
+    const $tabList = $tabs.first().parent();
+    const restoreTabList = rememberAttributes($tabList, ["role", "aria-label"]);
     const restorePanels = rememberAttributes($panels, ["class", "role", "aria-labelledby", "aria-hidden", "inert"]);
     const restoreFilters = rememberAttributes($filters, ["class", "aria-pressed"]);
     const restoreCards = rememberAttributes($cards, ["style"]);
     let resizeFrame = null;
+    $tabList.attr({ role: "tablist", "aria-label": "Custom product categories" });
+    $tabs.each(function () {
+      if (!this.id) this.id = `custom-category-${this.getAttribute("custom-category-trigger")}`;
+    });
 
     function refreshHeight() {
       if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
@@ -122,7 +128,7 @@ function customProducts() {
       $panels.each(function () {
         const key = this.getAttribute("custom-category-panel"), active = key === value;
         const tab = $tabs.toArray().find(item => item.getAttribute("custom-category-trigger") === key);
-        $(this).toggleClass("active", active).attr({ role: "tabpanel", "aria-labelledby": tab.id, "aria-hidden": String(!active) });
+        $(this).toggleClass("active", active).attr({ role: "tabpanel", "aria-labelledby": tab ? tab.id : "", "aria-hidden": String(!active) });
         if (active) this.removeAttribute("inert");
         else this.setAttribute("inert", "");
       });
@@ -161,7 +167,7 @@ function customProducts() {
     cleanups.push(() => {
       if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
       $tabs.add($filters).off(".customProducts");
-      restoreTabs(); restorePanels(); restoreFilters(); restoreCards();
+      restoreTabs(); restoreTabList(); restorePanels(); restoreFilters(); restoreCards();
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());
