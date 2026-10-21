@@ -2093,7 +2093,7 @@ function flexGrowAnimation() {
     },
     mobile: {
       start: 0,
-      media: "(max-width: 991px)",
+      media: "(max-width: 1199px)",
       imageAspectRatio: 2,
       imageGapRem: 1,
       duration: 0.3,
