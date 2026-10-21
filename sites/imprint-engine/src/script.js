@@ -398,7 +398,7 @@ function homeAnimation() {
       reveal: { start: "base", duration: 0.07, ease: "power1.in", stagger: 0.005 },
       sharpen: { start: "base+=0.01", duration: 0.07, ease: "power1.in", blur: 6 },
     },
-    // 10 — Line contact → clip opens → drop and brackets settle → content.
+    // 10 — Line contact → desktop clip / mobile fade → drop and brackets settle → content.
     finish: {
       start: "line:end",
       clip: { start: 0, duration: 0.18, ease: "power1.in" },
@@ -947,7 +947,7 @@ function homeAnimation() {
 
   gsap.set($("[home-start]"), {
     clipPath: "none",
-    willChange: "clip-path",
+    willChange: homeMobile.enabled ? "opacity" : "clip-path",
   });
 
   gsap.set($("[ripple-ring]"), {
@@ -1246,7 +1246,12 @@ function homeAnimation() {
 
   // 10 — Screen opening, star, brackets, final drop and end content.
   addHomeGroup("finish", (group, motion) => {
-    addHomeStep(group, "clip", homeClip, { progress: 0 }, { progress: 1 }, motion.clip);
+    if (homeMobile.enabled) {
+      // Keep the same scrub timing; opacity avoids repainting the full-screen polygon.
+      addHomeStep(group, "clip", $("[home-start]"), { autoAlpha: 1 }, { autoAlpha: 0 }, motion.clip);
+    } else {
+      addHomeStep(group, "clip", homeClip, { progress: 0 }, { progress: 1 }, motion.clip);
+    }
     addHomeStep(group, "blur", $homeStartContent, { filter: motion.blur.from }, { filter: motion.blur.to }, motion.blur);
     addHomeStep(group, "textLeave", $("[home-third-up]"), { scale: 1 }, { scale: motion.textLeave.scale }, motion.textLeave);
     addHomeStep(group, "starGrow", $("[home-drop-star]"),
@@ -1283,6 +1288,7 @@ function homeAnimation() {
 
   function renderHomeScrollGeometry() {
     if (homeTimeline.time() >= homeTimeline.labels["gradientDots.spin"]) moveGradientDots();
+    if (homeMobile.enabled) return;
     if (homeTimeline.time() > homeTimeline.labels["finish.clip"]) {
       $("[home-start]").css("clip-path", homeClipPath(homeClip.progress));
       homeClipWasActive = true;
@@ -1448,7 +1454,7 @@ function homeAnimation() {
       { clearProps: "transform,opacity,visibility,will-change" }
     );
     gsap.set($("[home-start]"), {
-      clearProps: "clip-path,will-change",
+      clearProps: "clip-path,will-change,opacity,visibility",
     });
     gsap.set($homeStartContent, { clearProps: "filter" });
     gsap.set($homeEndContent, {
