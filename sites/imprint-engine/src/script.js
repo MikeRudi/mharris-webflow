@@ -240,7 +240,7 @@ function homeAnimation() {
       fill: "#6421b9",
     },
     cards: { horizontalSpread: 1.12, verticalSpread: 0.6, scale: 0.85, radiusScale: 0.9, centerYRem: 8, offsetYRem: 0, riseYRem: -14,
-      rotation: 33, skewX: -22.5, maxRadiusRem: 10.5, edgeAllowance: 0.8 },
+      rotation: 33, skewX: -22.5, maxRadiusRem: 14, edgeAllowance: 0.15 },
     cardOpacity: { back: 0.18, front: 1, fadeStart: 0, fadeEnd: 1 },
     text: { headingCharacters: 22, paragraphCharacters: 48 },
     tablet: {
