@@ -1502,7 +1502,7 @@
     flex-shrink: 0;
     order: -1;
     width: 100%;
-    height: min(40svh, 22rem);
+    height: min(40svh, 32rem);
     position: relative;
     overflow: visible;
   }
