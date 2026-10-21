@@ -1094,12 +1094,18 @@
 
   .team-block {
     grid-row-gap: .75rem;
+    border-bottom: .0625rem solid #1111112e;
     width: 100%;
     min-width: 0;
+    padding-bottom: 1.5rem;
   }
 
   .b-4 {
     font-family: Gilroy Mobile, Gilroy, sans-serif;
+  }
+
+  .teams-header {
+    grid-row-gap: 1.75rem;
   }
 
   .team-profiles {
