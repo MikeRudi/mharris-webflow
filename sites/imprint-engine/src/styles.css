@@ -2377,13 +2377,13 @@
   outline-offset: 4px;
 }
 
-/* Readable purple text on light surfaces; keep the original brand artwork. */
 /* Empty optional image props keep their Figma frame without a broken-image icon. */
 [custom-products] img:not([src]),
 [custom-products] img[src=""] {
   visibility: hidden;
 }
 
+/* Readable purple text on light surfaces; keep the original brand artwork. */
 [readable-brand-text] {
   color: #7e40c5;
 }
