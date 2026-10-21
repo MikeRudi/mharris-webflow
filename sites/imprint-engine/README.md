@@ -49,6 +49,13 @@ The separate mobile copies and their responsive wrappers were removed on
 21 October. Adapt components internally; do not duplicate them for mobile.
 Mobile dimensions use rem, with a 100svh final home scene.
 
+Teams uses the same floating-circle physics on mobile, with four photos and six
+white satellites. Native tablet styles size and position the circles; explicit
+`team-profile-from` / `team-profile-to` line hooks preserve their connections.
+Touch holds reveal connected photos until release, retaining the existing short
+drag and release fade. The mobile team list is one full-width column. Accordion
+03 switches instantly on mobile; desktop keeps its existing animation.
+
 Tablet (1199px and below) is the first mobile layer. The lander uses the same
 centred card arrangement on tablet and phone. Tablet uses larger tile images,
 wider `text-ch` copy and eight logos per row at the viewport bottom; phones
