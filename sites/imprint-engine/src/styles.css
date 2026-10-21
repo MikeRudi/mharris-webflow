@@ -1653,6 +1653,19 @@
     margin-top: 0;
   }
 
+  .services-cards-track {
+    grid-column-gap: .625rem;
+    grid-row-gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    display: grid;
+  }
+
+  .services-cards-item {
+    width: 100%;
+    min-width: 0;
+  }
+
   .services-page-header {
     min-height: 100svh;
     padding-top: 5.5rem;
