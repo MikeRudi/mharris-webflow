@@ -120,6 +120,8 @@ insets. Sections use 1.25rem side padding; the Split 6 tab strip stays edge-to-e
 with that padding applied only to its content below. The main 18px paragraphs opt into the
 saved 16px p-2 mobile size. Desktop section geometry was unchanged in staging.
 Phone and tablet staging checks passed; mobile approval remains with Michael.
+Shop Slider's mobile background uses contain sizing inside the section height,
+positioned behind the cards, rather than enlarging the artwork to cover a tall frame.
 
 ## Animation regression checks
 
