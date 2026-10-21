@@ -225,6 +225,7 @@ function homeAnimation() {
   const homeMobile = {
     enabled: window.matchMedia("(max-width: 1199px)").matches,
     scroll: { enabled: true, maxSpeedRemPerSecond: 55, maxAheadRem: 24, settleSeconds: 0.16 },
+    viewport: { refreshDelaySeconds: 0.15 },
     introHeightRem: 62.625,
     logoTopRem: 40.625,
     logoGapRem: 5,
@@ -254,6 +255,11 @@ function homeAnimation() {
     dropWidthRem: 3.25,
   };
   const homeRoot = $("[lander-wrap]").first()[0];
+  const homeScrollElement = $("[layout-start]")[0];
+  const homeScreenElement = $("[layout-end]")[0];
+  // Webflow's 100dvh scene follows browser chrome without shrinking for the keyboard.
+  const homeViewportHeight = () => homeMobile.enabled
+    ? homeScreenElement.offsetHeight : document.documentElement.clientHeight;
   const $homeCopy = $(homeRoot).find("[home-mobile-copy]");
   const restoreHomeCopy = rememberAttributes($homeCopy, ["text-ch"]);
   const restoreHomeViewport = rememberAttributes($(homeRoot), ["style"]);
@@ -273,7 +279,7 @@ function homeAnimation() {
       else element.setAttribute("text-ch", characters);
     });
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const screen = document.documentElement.clientHeight / rem;
+    const screen = homeViewportHeight() / rem;
     const intro = homeRoot.querySelector("[home-start-up]:not([home-resting])");
     const logos = homeRoot.querySelector("[home-logo-up]");
     const logoHeight = (logos?.offsetHeight || 0) / rem;
@@ -759,7 +765,7 @@ function homeAnimation() {
       const currentPadding = parseFloat(getComputedStyle($homeEnd[0]).paddingTop) || 0;
       const em = parseFloat(getComputedStyle(document.documentElement).fontSize);
       const introOverflow = homeMobile.enabled
-        ? home.offsetHeight - document.documentElement.clientHeight : 0;
+        ? home.offsetHeight - homeViewportHeight() : 0;
       const desiredCenter = homeClipBounds.centerY - introOverflow + homeAlignment.endDropOffsetRem * em;
       const shift = desiredCenter - (markerRect.top + markerRect.height / 2 - endRect.top);
       $homeEnd.css("padding-top", Math.max(0, currentPadding + shift));
@@ -1303,13 +1309,16 @@ function homeAnimation() {
   // STICKY SCROLL RANGE — the final scene fills the viewport before the next section enters.
   const homeScrollTrigger = ScrollTrigger.create({
     id: "home-scroll",
-    trigger: $("[layout-start]")[0],
+    trigger: homeScrollElement,
     start: () => homeMobile.enabled
-      ? `top+=${Math.max(0, $("[home-start]")[0].offsetHeight - document.documentElement.clientHeight)} top`
+      ? `top+=${Math.max(0, $("[home-start]")[0].offsetHeight - homeViewportHeight())} top`
       : "top top",
-    end: "bottom bottom",
+    end: () => homeMobile.enabled
+      ? homeScrollElement.getBoundingClientRect().top + window.scrollY + homeScrollElement.offsetHeight - homeViewportHeight()
+      : "bottom bottom",
     animation: homeScrubClock,
     scrub: true,
+    onRefreshInit: measureHomeViewport,
     onRefresh: () => {
       measureHomeViewport();
       buildHomeRestingSphere();
@@ -1325,6 +1334,34 @@ function homeAnimation() {
   const restoreHomeScrollSpeed = homeMobile.enabled && homeMobile.scroll.enabled
     ? limitHomeScrollSpeed(homeScrollTrigger, homeMobile.scroll) : null;
   syncHomeRestingActivity();
+  let homeViewportFrame = null, homeViewportTimer = null;
+  let homeViewportSize = `${homeScreenElement.offsetWidth}:${homeScreenElement.offsetHeight}`;
+  function queueHomeViewportRefresh(force = false) {
+    if (!homeMobile.enabled || homeRestingIsDestroyed || homeViewportFrame !== null) return;
+    if (document.querySelector("[nav-menu-root].is-mobile-open") ||
+      Math.abs((window.visualViewport?.scale || 1) - 1) > 0.01) return;
+    const size = `${homeScreenElement.offsetWidth}:${homeScreenElement.offsetHeight}`;
+    if (!force && size === homeViewportSize) return;
+    homeViewportSize = size;
+    homeViewportFrame = requestAnimationFrame(() => {
+      homeViewportFrame = null;
+      measureHomeViewport();
+      measureHomeClip();
+      renderHomeScrollGeometry();
+      clearTimeout(homeViewportTimer);
+      homeViewportTimer = setTimeout(() => {
+        if (homeRestingIsDestroyed || document.querySelector("[nav-menu-root].is-mobile-open")) return;
+        homeScrollTrigger.refresh();
+        homeScrollTrigger.update();
+      }, homeMobile.viewport.refreshDelaySeconds * 1000);
+    });
+  }
+  // Observe the CSS viewport box: ordinary scrolling and keyboard/pinch changes need no refresh.
+  const homeViewportObserver = homeMobile.enabled && window.ResizeObserver
+    ? new ResizeObserver(() => queueHomeViewportRefresh()) : null;
+  homeViewportObserver?.observe(homeScreenElement, { box: "border-box" });
+  if (homeMobile.enabled) $(window).on("pageshow.homeViewport home:viewportchange.homeViewport",
+    () => queueHomeViewportRefresh(true));
   if (homeMobile.enabled && document.fonts) {
     document.fonts.ready.then(() => {
       if (!homeRestingIsDestroyed) { measureHomeViewport(); homeScrollTrigger.refresh(); }
@@ -1366,6 +1403,10 @@ function homeAnimation() {
     }
 
     if (restoreHomeScrollSpeed) restoreHomeScrollSpeed();
+    homeViewportObserver?.disconnect();
+    if (homeViewportFrame !== null) cancelAnimationFrame(homeViewportFrame);
+    clearTimeout(homeViewportTimer);
+    $(window).off(".homeViewport");
     homeScrollTrigger.kill();
     homeLoadTimeline.kill();
     homeScrubClock.kill();
@@ -2842,6 +2883,7 @@ function mobileNavigation() {
       });
       window.scrollTo(0, scrollY);
       if (window.lenis && !wasLenisStopped) window.lenis.start();
+      $(window).triggerHandler("home:viewportchange");
       closeCurrent = null;
       if (returnFocus) toggle.focus({ preventScroll: true });
     }
