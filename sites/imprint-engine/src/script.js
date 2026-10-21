@@ -1451,7 +1451,8 @@ function limitHomeScrollSpeed(trigger, controls) {
     const position = lenis.actualScroll;
     const delta = touch && event.type === "touchend"
       ? Math.sign(deltaY) * Math.abs(lenis.velocity) ** lenis.options.touchInertiaExponent : deltaY;
-    const requested = lenis.targetScroll + delta;
+    const pending = lenis.targetScroll - position;
+    const requested = (pending * delta < 0 ? position : lenis.targetScroll) + delta;
     const start = Math.max(0, trigger.trigger.getBoundingClientRect().top + position);
     const end = trigger.end;
     // Include gestures approaching the lander from either side, including touch inertia.
