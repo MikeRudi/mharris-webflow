@@ -12,6 +12,8 @@ function initLenis() {
     gestureOrientation: "vertical",
     normalizeWheel: false,
     smoothTouch: false,
+    // The HTML box stays viewport-height; late content can grow without its resize observer firing.
+    naiveDimensions: true,
   };
   const lenis = new Lenis(scrollControls);
   window.lenis = lenis;
