@@ -439,14 +439,14 @@
     aspect-ratio: auto;
     border-radius: .5rem;
     row-gap: .375rem;
-    width: 6.5rem;
+    width: 8rem;
     padding: .375rem;
     transform: none;
   }
 
   .perspective-card-img {
-    width: 3.25rem;
-    height: 3rem;
+    width: 4.5rem;
+    height: 4.25rem;
   }
 
   .perspective-card-tag {
@@ -693,7 +693,7 @@
   }
 
   .ac-1-list {
-    background-color: #0000;
+    background-color: #f6efff;
     flex-direction: row;
     justify-content: space-between;
     align-items: stretch;
@@ -1181,13 +1181,13 @@
   }
 
   .home-card-cms {
-    width: 6.5rem;
+    width: 8rem;
   }
 
   .home-logo-item {
     justify-content: center;
     align-items: center;
-    width: calc(25% - .5625rem);
+    width: calc(12.5% - .65625rem);
     min-width: 0;
     height: 1.25rem;
     display: flex;
