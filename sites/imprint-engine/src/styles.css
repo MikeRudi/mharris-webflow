@@ -2223,12 +2223,47 @@
     display: block;
   }
 
+  .page-header-full-bg {
+    min-height: 40rem;
+    padding: 8rem 1.25rem 3rem;
+  }
+
+  .page-header-full-shade {
+    background-image: linear-gradient(90deg, #000000e6, #0006);
+  }
+
   .services-accord-tabs {
     background-color: #f6efff;
   }
 
   .services-accord-tab {
     background-color: #0000;
+  }
+
+  .custom-products-intro {
+    padding: 3rem 1.25rem;
+  }
+
+  .custom-products-categories, .custom-products-main, .custom-products-main-muted {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .custom-products-options, .custom-products-materials {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .custom-products-material-grid {
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .custom-decoration {
+    padding: 3rem 1.25rem;
+  }
+
+  .custom-products-decoration-grid {
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
 /* END NATIVE TABLET EXTENSION */
