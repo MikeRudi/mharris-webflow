@@ -99,16 +99,26 @@ try {
   for (const [name, p] of [["second-scene", .28], ["third-scene", .52], ["final-scene", 1]]) {
     await seek(p); await page.screenshot({ path: join(output, `${name}.png`) });
   }
-  await check("mobile navigation opens, scrolls and closes", async () => {
+  await check("mobile navigation opens full screen with a single-column submenu and Back", async () => {
     await seek(0);
-    const toggle = page.locator("[home-start] [nav-mobile-toggle]");
+    const toggle = page.locator("[nav-mobile-toggle]").first();
     try {
-      await toggle.tap(); assert.equal(await toggle.getAttribute("aria-expanded"), "true");
+      await page.locator("[home-start] [nav-mobile-toggle]").tap();
+      const menu = page.locator(".is-mobile-open");
+      assert.equal(await menu.locator("[nav-mobile-toggle]").getAttribute("aria-expanded"), "true");
       assert.equal(await page.evaluate(() => document.body.style.overflow), "hidden");
-      await page.locator('[home-start] [nav-dropdown-trigger="solutions"]').tap();
-      await page.locator('[home-start] [nav-dropdown="solutions"]').waitFor({ state: "visible" });
+      const bounds = await menu.boundingBox();
+      assert.equal(bounds.y, 0); assert.ok(bounds.height >= page.viewportSize().height);
+      await menu.locator('[nav-dropdown-trigger="solutions"]').tap();
+      const submenu = menu.locator('[nav-dropdown="solutions"]');
+      await submenu.waitFor({ state: "visible" });
+      assert.equal(await submenu.locator(".nav-menu-columns").evaluate(e => getComputedStyle(e).flexDirection), "column");
+      assert.equal(await menu.locator("[nav-mobile-main]").getAttribute("aria-hidden"), "true");
+      await submenu.locator("[nav-mobile-back]").tap();
+      assert.equal(await menu.locator("[nav-mobile-main]").getAttribute("aria-hidden"), "false");
     } finally {
-      await page.keyboard.press("Escape");
+      const openToggle = page.locator(".is-mobile-open [nav-mobile-toggle]");
+      if (await openToggle.count()) await openToggle.tap();
     }
     assert.equal(await toggle.getAttribute("aria-expanded"), "false");
     assert.notEqual(await page.evaluate(() => document.body.style.overflow), "hidden");

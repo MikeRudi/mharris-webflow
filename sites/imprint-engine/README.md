@@ -49,6 +49,13 @@ The separate mobile copies and their responsive wrappers were removed on
 21 October. Adapt components internally; do not duplicate them for mobile.
 Mobile dimensions use rem, with a 100svh final home scene.
 
+Tablet (991px and below) is the first mobile layer. The lander uses the same
+centred, smaller card arrangement and `text-ch` copy lengths on tablet and phone.
+The shared nav opens as a full-screen white, single-column menu. Submenus cover
+the main options and have a Back control; all mobile menu changes are instant.
+While open, the original nav temporarily moves outside the hero clip, then
+returns to its component position on close. Links and props are never cloned.
+
 `mobileHomepageDetails()` handles only the separate drop-text section's mobile
 solid drop and footer Submit label, with cleanup. The home animation retains
 the desktop outlined drop and proportionate brackets at a smaller native size.
