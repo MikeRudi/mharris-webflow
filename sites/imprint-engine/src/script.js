@@ -224,6 +224,7 @@ function homeAnimation() {
   // All mobile measurements are rem; native Webflow styles consume these values.
   const homeMobile = {
     enabled: window.matchMedia("(max-width: 1199px)").matches,
+    scroll: { enabled: true, maxSpeedRemPerSecond: 55, maxAheadRem: 24, settleSeconds: 0.16 },
     introHeightRem: 62.625,
     logoTopRem: 40.625,
     logoGapRem: 5,
@@ -1319,6 +1320,8 @@ function homeAnimation() {
     },
   });
   homeScrubClock.progress(homeScrollTrigger.progress);
+  const restoreHomeScrollSpeed = homeMobile.enabled && homeMobile.scroll.enabled
+    ? limitHomeScrollSpeed(homeScrollTrigger, homeMobile.scroll) : null;
   syncHomeRestingActivity();
   if (homeMobile.enabled && document.fonts) {
     document.fonts.ready.then(() => {
@@ -1360,6 +1363,7 @@ function homeAnimation() {
       homeLoadScrollLocked = false;
     }
 
+    if (restoreHomeScrollSpeed) restoreHomeScrollSpeed();
     homeScrollTrigger.kill();
     homeLoadTimeline.kill();
     homeScrubClock.kill();
