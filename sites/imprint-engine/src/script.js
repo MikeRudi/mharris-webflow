@@ -1425,6 +1425,66 @@ function homeAnimation() {
   };
 }
 
+function limitHomeScrollSpeed(trigger, controls) {
+  const lenis = window.lenis;
+  if (!lenis) return null;
+  const previousVirtualScroll = lenis.options.virtualScroll;
+  const previousSyncTouch = lenis.options.syncTouch;
+  // Keep touch inertia in the same controller so it cannot bypass the cap after finger-up.
+  lenis.options.syncTouch = true;
+  let cappedScroll = false;
+
+  function virtualScroll(data) {
+    if (previousVirtualScroll?.(data) === false) return false;
+    const { deltaX, deltaY, event } = data;
+    if (event.ctrlKey || event.lenisStopPropagation || lenis.isStopped || lenis.isLocked) return;
+    const touch = event.type.startsWith("touch");
+    if (touch && event.touches?.length > 1) return false;
+    if (touch && Math.abs(deltaX) > Math.abs(deltaY)) return false;
+    if (!deltaY || !event.cancelable) return;
+    const path = event.composedPath();
+    if (path.some(node => node.hasAttribute?.("data-lenis-prevent") ||
+      node.hasAttribute?.("data-lenis-prevent-vertical") ||
+      node.hasAttribute?.(touch ? "data-lenis-prevent-touch" : "data-lenis-prevent-wheel") ||
+      lenis.options.prevent?.(node))) return;
+
+    const position = lenis.actualScroll;
+    const delta = touch && event.type === "touchend"
+      ? Math.sign(deltaY) * Math.abs(lenis.velocity) ** lenis.options.touchInertiaExponent : deltaY;
+    const requested = lenis.targetScroll + delta;
+    const start = Math.max(0, trigger.trigger.getBoundingClientRect().top + position);
+    const end = trigger.end;
+    // Include gestures approaching the lander from either side, including touch inertia.
+    const crossesLander = delta > 0 ? position < end && requested > start
+      : delta < 0 && position > start && requested < end;
+    if (!crossesLander) { cappedScroll = false; return; }
+
+    event.preventDefault();
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const maxAhead = controls.maxAheadRem * rem;
+    const target = Math.max(0, Math.min(lenis.limit,
+      Math.max(position - maxAhead, Math.min(position + maxAhead, requested))));
+    const distance = Math.abs(target - position);
+    cappedScroll = true;
+    lenis.scrollTo(target, {
+      programmatic: false,
+      lerp: 0,
+      // power1.out has a peak slope of 2: account for it to enforce the speed limit.
+      duration: Math.max(controls.settleSeconds, 2 * distance / (controls.maxSpeedRemPerSecond * rem)),
+      easing: t => 1 - (1 - t) ** 2,
+      onComplete: () => { cappedScroll = false; },
+    });
+    return false;
+  }
+
+  lenis.options.virtualScroll = virtualScroll;
+  return () => {
+    if (cappedScroll && !lenis.isStopped) lenis.scrollTo(lenis.actualScroll, { immediate: true });
+    if (lenis.options.virtualScroll === virtualScroll) lenis.options.virtualScroll = previousVirtualScroll;
+    lenis.options.syncTouch = previousSyncTouch;
+  };
+}
+
 function teamProfilesAnimation() {
   if (!window.gsap) return null;
 
