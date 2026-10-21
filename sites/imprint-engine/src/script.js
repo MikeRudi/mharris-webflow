@@ -527,7 +527,7 @@ function homeAnimation() {
     homeRestingLayoutOffset.x = right * (1 - homeCardMotion.layout.horizontalSpread);
     homeRestingLayoutOffset.y = top * (1 - homeCardMotion.layout.verticalSpread);
     if (homeMobile.enabled) {
-      const homeBounds = homeRoot.getBoundingClientRect();
+      const homeBounds = $homeRestingDragSurface[0].getBoundingClientRect();
       homeRestingLayoutOffset.x = homeBounds.left + homeBounds.width / 2 - centerX;
       homeRestingLayoutOffset.y = homeBounds.top + homeMobile.cards.centerYRem * homeRestingRem - centerY;
     }
