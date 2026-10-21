@@ -1531,6 +1531,9 @@ function teamProfilesAnimation() {
     const boundary = $header.closest("[section-teams]")[0] || header;
     const layout = $header.closest("[teams-layout]")[0] || boundary;
     if (!$nodes.length) return;
+    const $listCopy = $(layout).find("[team-list] [text-ch]");
+    const restoreCopy = rememberAttributes($listCopy, ["text-ch"]);
+    if (mobile) $listCopy.removeAttr("text-ch");
     // A list/button already protects its contents; avoid overlapping duplicate zones.
     const $content = $(layout).find("[text], [btn-2-brand], [team-list]").filter(function () {
       return !$(this).closest("[team-profile-node]").length &&
@@ -2050,7 +2053,7 @@ function teamProfilesAnimation() {
       if (active) gsap.ticker.add(tick);
       else gsap.ticker.remove(tick);
     }
-    function invalidateGeometry() { finishDrag(); geometryDirty = paintDirty = true; syncActivity(); }
+    function invalidateGeometry() { touchHold = null; finishDrag(); geometryDirty = paintDirty = true; syncActivity(); }
     function visibilityChanged() {
       if (document.hidden) { touchHold = null; finishDrag(); setHover(null, true); }
       else geometryDirty = true;
@@ -2092,6 +2095,7 @@ function teamProfilesAnimation() {
       gsap.killTweensOf(hoverElements);
       gsap.set(hoverElements, { clearProps: "transform,opacity" });
       restoreHover();
+      restoreCopy();
       restoreNodes(); restoreSvgs();
     });
   });
