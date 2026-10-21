@@ -32,7 +32,7 @@ Use pinned jsDelivr releases when switching to stable production code.
 ## Homepage mobile — 20 October 2026
 
 The supplied `Website.png` and `Frame 2147236654/6655/6656.png` are the mobile
-references. The original `homeAnimation()` now runs below 992px as well as on
+references. The original `homeAnimation()` now runs below 1200px as well as on
 desktop. It retains its percentage scrub controls, separate entrance and idle
 card rotation; the static mobile card slider has been removed.
 
@@ -49,12 +49,20 @@ The separate mobile copies and their responsive wrappers were removed on
 21 October. Adapt components internally; do not duplicate them for mobile.
 Mobile dimensions use rem, with a 100svh final home scene.
 
-Tablet (991px and below) is the first mobile layer. The lander uses the same
+Tablet (1199px and below) is the first mobile layer. The lander uses the same
 centred, smaller card arrangement and `text-ch` copy lengths on tablet and phone.
 The shared nav opens as a full-screen white, single-column menu. Submenus cover
 the main options and have a Back control; all mobile menu changes are instant.
 While open, the original nav temporarily moves outside the hero clip, then
 returns to its component position on close. Links and props are never cloned.
+
+Webflow's native tablet breakpoint stops at 991px. The generated block at the
+top of `src/styles.css` extends those native tablet styles through 1199px.
+After publishing tablet style edits, run `node sites/imprint-engine/sync-tablet-styles.mjs`
+to refresh that block. Keep styling in Webflow; the extension reuses its output.
+The menu header stays white above scrolling items, with inset dividers and
+bottom-aligned actions. Smaller mobile tiles keep readable labels and fade out
+at the back; their stacking order stays fixed on desktop and mobile to avoid snaps.
 
 `mobileHomepageDetails()` handles only the separate drop-text section's mobile
 solid drop and footer Submit label, with cleanup. The home animation retains

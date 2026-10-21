@@ -67,7 +67,7 @@ try {
     }
   });
   await check("mobile to desktop and back keeps one controller and no horizontal overflow", async () => {
-    for (const [width, height] of [[320, 568], [375, 740], [768, 1024], [1440, 900], [402, 874]]) {
+    for (const [width, height] of [[320, 568], [375, 740], [768, 1024], [1024, 1366], [1440, 900], [402, 874]]) {
       await page.setViewportSize({ width, height });
       await page.waitForTimeout(450);
       await page.evaluate(() => { ScrollTrigger.refresh(); lenis.scrollTo(0, { immediate: true, force: true }); });
@@ -80,7 +80,7 @@ try {
         artwork: document.querySelector("[home-gradient-svg]").getAttribute("viewBox"),
       }));
       assert.equal(state.count, 1); assert.ok(state.doc <= state.width + 1);
-      if (width < 992) {
+      if (width < 1200) {
         assert.ok(state.logosTop > state.introBottom, JSON.stringify(state));
         await seek(.52);
         const copy = await page.locator("[home-third-up]").boundingBox();
