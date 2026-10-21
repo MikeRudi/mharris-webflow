@@ -73,8 +73,8 @@ The menu header stays white above scrolling items, with inset dividers and
 bottom-aligned actions. Smaller mobile tiles keep readable labels and fade out
 at the back; their stacking order stays fixed on desktop and mobile to avoid snaps.
 
-`mobileHomepageDetails()` handles only the separate drop-text section's mobile
-solid drop and footer Submit label, with cleanup. The home animation retains
+`mobileHomepageDetails()` handles the mobile footer Submit label, with cleanup.
+The separate drop-text section retains its desktop outlined drop on mobile. The home animation retains
 the desktop outlined drop and proportionate brackets at a smaller native size.
 Both ripple positions follow their drop; the final scene aligns with the clip
 and completes before Form 1 enters. The small `[mobile-type]`
