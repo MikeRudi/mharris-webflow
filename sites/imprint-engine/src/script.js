@@ -2684,7 +2684,7 @@ function navigationDropdowns() {
 
 function mobileNavigation() {
   // TABLET + PHONE MENU — instant page changes; layout lives in Webflow.
-  const menuControls = { openLabel: "Menu", closeLabel: "Close", focusOnOpen: true };
+  const menuControls = { openLabel: "Menu", closeLabel: "Close", focusOnOpen: true, closeIconAngle: 45 };
   const $roots = $("[nav-menu-root]");
   const cleanups = [];
   let closeCurrent = null;
@@ -2694,6 +2694,8 @@ function mobileNavigation() {
     const $toggle = $root.find("[nav-mobile-toggle]").first();
     const $panel = $root.find("[nav-mobile-panel]").first();
     const $label = $toggle.find("[nav-mobile-label]");
+    const $bars = $toggle.children("[aria-hidden='true']");
+    const restoreBars = rememberAttributes($bars, ["style"]);
     const $headerBackdrop = $root.find("[nav-mobile-header-backdrop]");
     const $main = $root.find("[nav-mobile-main]").first();
     const $submenus = $root.find("[nav-dropdown]");
@@ -2713,6 +2715,17 @@ function mobileNavigation() {
     const focusable = () => $root.find("a[href], button:not([disabled]), input:not([disabled]), [tabindex='0']")
       .filter((_, element) => element.getClientRects().length && !element.closest("[inert]") &&
         getComputedStyle(element).visibility !== "hidden").toArray();
+
+    function showCloseIcon() {
+      if ($bars.length !== 3) return;
+      const middle = $bars[1].offsetTop + $bars[1].offsetHeight / 2;
+      $bars.each((index, bar) => {
+        if (index === 1) { bar.style.opacity = "0"; return; }
+        const y = middle - bar.offsetTop - bar.offsetHeight / 2;
+        const angle = index === 0 ? menuControls.closeIconAngle : -menuControls.closeIconAngle;
+        bar.style.transform = `translateY(${y}px) rotate(${angle}deg)`;
+      });
+    }
 
     function showMain(returnFocus = false) {
       gsap.killTweensOf($submenus);
@@ -2752,6 +2765,7 @@ function mobileNavigation() {
       $panel.removeClass("is-open").attr("aria-hidden", "true");
       $toggle.attr({ "aria-expanded": "false", "aria-label": "Open navigation" });
       $label.text(menuControls.openLabel);
+      restoreBars();
       panel.inert = true;
       if (placeholder) { placeholder.replaceWith(root); placeholder = null; }
       $root.removeAttr("role aria-modal aria-label");
@@ -2787,6 +2801,7 @@ function mobileNavigation() {
       $panel.addClass("is-open").attr("aria-hidden", "false");
       $toggle.attr({ "aria-expanded": "true", "aria-label": "Close navigation" });
       $label.text(menuControls.closeLabel);
+      showCloseIcon();
       panel.inert = false;
       showMain();
       panel.scrollTop = 0;
@@ -2825,6 +2840,7 @@ function mobileNavigation() {
       $toggle.add($panel).off(ns);
       $(document).off(ns);
       $label.text(oldLabel);
+      restoreBars();
       restore();
     });
   });
