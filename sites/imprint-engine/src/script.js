@@ -145,6 +145,7 @@ function customProducts() {
       else if (event.key === "End") index = $tabs.length - 1;
       else if (event.key !== " ") index = (index + (event.key === "ArrowRight" ? 1 : -1) + $tabs.length) % $tabs.length;
       $tabs[index].focus({ preventScroll: true });
+      $tabs[index].scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
       selectCategory($tabs[index].getAttribute("custom-category-trigger"));
     });
     function selectDecoration(value, refresh = true) {
