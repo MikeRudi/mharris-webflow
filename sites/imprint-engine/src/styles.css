@@ -1979,6 +1979,11 @@
 }
 
 @media screen and (max-width: 1199px) {
+  /* An optional mobile image uses the same header and content props. */
+  [header-desktop-image]:has(+ [header-mobile-image]:not(.w-condition-invisible)) {
+    display: none;
+  }
+
   /* Instance wrappers cannot receive a separate native class in Webflow. */
   [home-start] > :has(> [nav-block]) {
     position: fixed;
