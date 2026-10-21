@@ -55,6 +55,16 @@ finish: {
 }
 ```
 
+## Mobile scroll speed
+
+`homeMobile.scroll` at the top of `homeAnimation()` controls the mobile/tablet
+scroll cap. `maxSpeedRemPerSecond` defaults to `55` (880px/s at a 16px root).
+`maxAheadRem: 24` limits queued movement from a hard swipe; `settleSeconds: 0.16`
+softens short movements. The controller uses `power1.out`, accounting for its
+peak speed, and includes release inertia. It leaves scrolling outside the
+lander uncapped and restores the original touch settings at the desktop breakpoint.
+Set `enabled: false` to disable it. The scroll timeline remains directly scrubbed.
+
 ## Starting choreography
 
 The opening scene/drop sequence reaches the clip at 52%, leaving 48% for the

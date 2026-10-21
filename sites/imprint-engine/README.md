@@ -39,7 +39,8 @@ card rotation; the static mobile card slider has been removed.
 `homeMobile` at the top of `homeAnimation()` owns mobile framing in rem:
 opening/scene heights, logo clearance, artwork framing, card placement and final
 drop size. It measures the actual text/logo heights so short screens can scroll
-through the opening content before scrubbing. Touch swipes scroll normally.
+through the opening content before scrubbing. `homeMobile.scroll` caps mobile/tablet
+scroll speed through the lander, including swipe inertia. Scrolling beyond it is uncapped.
 Breakpoint cleanup restores the desktop SVG geometry and attributes.
 
 Layout, spacing, gradients and image positioning are native Webflow styles.
