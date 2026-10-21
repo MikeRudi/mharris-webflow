@@ -226,7 +226,7 @@
     align-items: flex-start;
     width: 100%;
     height: 100dvh;
-    min-height: 100vh;
+    min-height: 0;
     margin: 0;
     padding: 1.375rem 1.25rem 0;
     font-size: 1rem;
@@ -359,9 +359,9 @@
   .layout-end {
     grid-row-gap: 1.5rem;
     row-gap: 1.5rem;
-    height: 100svh;
+    height: 100dvh;
     min-height: 0;
-    margin-top: -100svh;
+    margin-top: -100dvh;
     padding: 6.25rem 1.25rem 3.5rem;
     position: sticky;
     top: 0;
@@ -1568,15 +1568,18 @@
 
   .nav-dropdown {
     z-index: 3;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    padding-top: 6.5rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0rem));
     background-color: #fff;
     border-width: 0 0 0;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
-    width: 100%;
-    height: 100%;
-    min-height: 100vh;
-    max-height: none;
-    padding: 6.5rem 1.25rem 3rem;
     position: absolute;
     inset: 0;
     overflow: hidden auto;
@@ -1636,16 +1639,19 @@
 
   .nav-mobile-panel {
     height: 100%;
-    min-height: 100vh;
+    min-height: 0;
     max-height: none;
     box-shadow: none;
     color: #111;
     overscroll-behavior: contain;
+    padding-top: 6.4375rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0rem));
     background-color: #fff;
     border-top: 0 solid #d5d5d5;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
-    padding: 6.4375rem 1.25rem 1.25rem;
     display: none;
     position: absolute;
     inset: 0;
