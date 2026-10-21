@@ -443,6 +443,7 @@
     border-radius: .5rem;
     row-gap: .375rem;
     width: 8rem;
+    height: 7.75rem;
     padding: .375rem;
     transform: none;
   }
@@ -455,8 +456,9 @@
   .perspective-card-tag {
     justify-content: center;
     width: 100%;
-    padding-top: .125rem;
-    padding-bottom: .125rem;
+    height: 2.1rem;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .perspective-card-text {
