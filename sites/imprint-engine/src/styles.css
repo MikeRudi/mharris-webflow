@@ -36,7 +36,7 @@
   [mobile-solid][readable-brand-text] { color: white; }
 
   /* These rings live inside the existing SVG embed; align them with its drop. */
-  [home-gradient-ripples] {
+  [lander-wrap] [home-gradient-ripples] {
     top: var(--home-ripple-y);
     transform: translate(-50%, -50%);
   }

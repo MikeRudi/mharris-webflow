@@ -86,33 +86,7 @@ function mobileHomepageDetails() {
   $drops.each((_, path) => path.setAttribute("d", `${path.getAttribute("d").split("ZM")[0]}Z`));
   $submit.val(mobileDetails.submitLabel);
 
-  // Native horizontal scrolling, with the visible position indicator in the design.
-  const cleanups = [];
-  $("[mobile-team-list]").each(function () {
-    const list = this;
-    const track = $(list).siblings("[mobile-team-scrollbar]")[0];
-    const thumb = track?.querySelector("[mobile-team-thumb]");
-    if (!track || !thumb) return;
-    const restoreThumb = rememberAttributes($(thumb), ["style"]);
-    function update() {
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const ratio = Math.min(1, list.clientWidth / Math.max(list.scrollWidth, 1));
-      const width = track.clientWidth * ratio;
-      const progress = list.scrollLeft / Math.max(1, list.scrollWidth - list.clientWidth);
-      thumb.style.width = `${width / rem}rem`;
-      thumb.style.transform = `translateX(${(track.clientWidth - width) * progress / rem}rem)`;
-    }
-    list.addEventListener("scroll", update, { passive: true });
-    const resize = new ResizeObserver(update);
-    resize.observe(list);
-    update();
-    cleanups.push(() => {
-      list.removeEventListener("scroll", update);
-      resize.disconnect();
-      restoreThumb();
-    });
-  });
-  return () => { cleanups.forEach(cleanup => cleanup()); restore(); };
+  return restore;
 }
 
 function shopSlider() {
