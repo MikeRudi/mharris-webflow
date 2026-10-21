@@ -62,7 +62,8 @@ function initSite() {
       const navigationCleanup = mobileNavigation();
       const homeCleanup = homeAnimation();
       const detailsCleanup = mobileHomepageDetails();
-      return () => [detailsCleanup, homeCleanup, navigationCleanup].forEach((cleanup) => cleanup && cleanup());
+      const teamCleanup = teamProfilesAnimation();
+      return () => [teamCleanup, detailsCleanup, homeCleanup, navigationCleanup].forEach((cleanup) => cleanup && cleanup());
     });
     cleanups.push(() => mobile.revert());
   }
@@ -1417,6 +1418,10 @@ function teamProfilesAnimation() {
       hiddenCircles: ["02", "06", "07", "08"],
       photoOpacityThreshold: 0.01,
     },
+    mobile: {
+      media: "(max-width: 1199px)",
+      visibleCircles: ["01", "03", "04", "05", "16", "17", "19", "21", "22", "24"],
+    },
 
     // HOVER + RELEASE — scale, image reveal, then the delayed fade after a drag.
     hover: {
@@ -1518,6 +1523,9 @@ function teamProfilesAnimation() {
   const cleanups = [];
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+  const mobile = window.matchMedia(teamMotion.mobile.media).matches;
+  const circleId = (element) => [...element.classList].map((name) => name.match(/^(?:is-|team-profile-position-)(\d+)$/)?.[1]).find(Boolean);
+
   $("[teams-header]").each(function (sectionIndex) {
     const header = this, $header = $(header), $nodes = $header.find("[team-profile-node]");
     const boundary = $header.closest("[section-teams]")[0] || header;
@@ -1537,7 +1545,8 @@ function teamProfilesAnimation() {
       element, group: $(element).closest("[team-profile-group]")[0],
       clip: element.querySelector("[team-profile-clip]"),
       image: element.querySelector("[team-profile-image]") || element.querySelector("img"),
-      enabled: !teamMotion.layout.hiddenCircles.some((id) => element.classList.contains(`is-${id}`) || element.classList.contains(`team-profile-position-${id}`)),
+      enabled: mobile ? teamMotion.mobile.visibleCircles.includes(circleId(element))
+        : !teamMotion.layout.hiddenCircles.includes(circleId(element)),
       draggable: [...element.querySelectorAll("img")].some((image) => Number(getComputedStyle(image).opacity) > teamMotion.layout.photoOpacityThreshold && getComputedStyle(image).visibility !== "hidden"),
       phase: index * teamMotion.float.phaseStep, speed: 1 + (index % teamMotion.float.speedVariants) * teamMotion.float.speedVariation,
       baseX: 0, baseY: 0, x: 0, y: 0, vx: 0, vy: 0,
@@ -1553,7 +1562,7 @@ function teamProfilesAnimation() {
       node.imageScale = node.image ? Number(gsap.getProperty(node.image, "scaleX")) : 1;
       node.imageOpacity = node.image ? Number(getComputedStyle(node.image).opacity) : 0;
     });
-    let hovered = null, hoverReleaseTimer = null, releasedHover = null;
+    let hovered = null, hoverReleaseTimer = null, releasedHover = null, touchHold = null;
     const byElement = new Map(nodes.map((node) => [node.element, node]));
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b, nearSeconds: 0 })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
@@ -1633,7 +1642,8 @@ function teamProfilesAnimation() {
           return match;
         };
         // Bind the authored endpoints once. Never rematch circles during a drag.
-        edge.from = nearest(1); edge.to = nearest(2);
+        edge.from = allNodes.find((node) => circleId(node.element) === edge.element.getAttribute("team-profile-from")) || nearest(1);
+        edge.to = allNodes.find((node) => circleId(node.element) === edge.element.getAttribute("team-profile-to")) || nearest(2);
         if (edge.from?.enabled && edge.to?.enabled && edge.from !== edge.to) {
           edge.from.neighbors.push(edge.to); edge.to.neighbors.push(edge.from);
         }
@@ -1927,13 +1937,23 @@ function teamProfilesAnimation() {
       if (geometryDirty && !measure()) return;
       setHover(node);
     }).on(`pointerleave${namespace}`, "[team-profile-node]", function () {
-      if (!drag && !hoverReleaseTimer && hovered === byElement.get(this)) {
+      if (!drag && !touchHold && !hoverReleaseTimer && hovered === byElement.get(this)) {
         if (releasedHover === hovered) setHover(null, false, teamMotion.hover.releaseFadeDuration, teamMotion.hover.releaseFadeEase);
         else setHover(null);
       }
     });
 
     // POINTER DRAG — direct movement; only the last short motion sets the throw.
+    function releaseReveal(node, touch = false) {
+      releasedHover = node;
+      clearTimeout(hoverReleaseTimer);
+      hoverReleaseTimer = setTimeout(() => {
+        hoverReleaseTimer = null;
+        if (!destroyed && !drag && !touchHold && hovered === node && (touch || !node.element.matches(":hover"))) {
+          setHover(null, false, teamMotion.hover.releaseFadeDuration, teamMotion.hover.releaseFadeEase);
+        }
+      }, teamMotion.hover.releaseHoldSeconds * 1000);
+    }
     function moveDrag(event) {
       if (!drag || event.pointerId !== drag.pointerId) return;
       if (performance.now() >= drag.releaseAt) { finishDrag(true); return; }
@@ -1976,14 +1996,7 @@ function teamProfilesAnimation() {
       node.element.style.cursor = "grab";
       if (!destroyed && throwIt) {
         setHover(node);
-        releasedHover = node;
-        hoverReleaseTimer = setTimeout(() => {
-          hoverReleaseTimer = null;
-          // Pointer capture has ended: keep the reveal while the circle is still hovered.
-          if (!destroyed && !drag && hovered === node && !node.element.matches(":hover")) {
-            setHover(null, false, teamMotion.hover.releaseFadeDuration, teamMotion.hover.releaseFadeEase);
-          }
-        }, teamMotion.hover.releaseHoldSeconds * 1000);
+        if (!touchHold) releaseReveal(node, current.pointerType === "touch");
       } else if (!destroyed) setHover(null);
       if (node.element.hasPointerCapture?.(current.pointerId)) node.element.releasePointerCapture(current.pointerId);
       paintDirty = true; syncActivity();
@@ -1996,7 +2009,9 @@ function teamProfilesAnimation() {
       const members = connectedTo(node);
       node.vx = node.vy = 0;
       setHover(node);
+      if (original.pointerType === "touch") touchHold = { node, pointerId: original.pointerId };
       drag = { node, members, x: node.x, y: node.y, pending: false, appliedAt: now, pointerId: original.pointerId,
+        pointerType: original.pointerType,
         releaseAt: now + teamMotion.drag.holdSeconds * 1000,
         offsetX: (original.clientX - rect.left) / scaleX - node.x,
         offsetY: (original.clientY - rect.top) / scaleY - node.y,
@@ -2013,11 +2028,18 @@ function teamProfilesAnimation() {
     $(document).on(`pointermove${namespace}`, (event) => moveDrag(event.originalEvent || event))
       .on(`pointerup${namespace} pointercancel${namespace}`, (event) => {
         const original = event.originalEvent || event;
-        if (original.pointerId !== drag?.pointerId) return;
-        if (event.type === "pointerup") moveDrag(original);
-        finishDrag(event.type === "pointerup");
+        const held = original.pointerId === touchHold?.pointerId ? touchHold : null;
+        if (held) touchHold = null;
+        if (original.pointerId === drag?.pointerId) {
+          if (event.type === "pointerup") moveDrag(original);
+          finishDrag(event.type === "pointerup");
+        }
+        if (held) {
+          if (event.type === "pointerup") releaseReveal(held.node, true);
+          else setHover(null);
+        }
       });
-    $(window).on(`blur${namespace}`, () => { finishDrag(); setHover(null, true); });
+    $(window).on(`blur${namespace}`, () => { touchHold = null; finishDrag(); setHover(null, true); });
 
     // LIFECYCLE — no off-screen frames; desktop cleanup restores native artwork.
     function syncActivity() {
@@ -2030,7 +2052,7 @@ function teamProfilesAnimation() {
     }
     function invalidateGeometry() { finishDrag(); geometryDirty = paintDirty = true; syncActivity(); }
     function visibilityChanged() {
-      if (document.hidden) { finishDrag(); setHover(null, true); }
+      if (document.hidden) { touchHold = null; finishDrag(); setHover(null, true); }
       else geometryDirty = true;
       syncActivity();
     }
@@ -2040,7 +2062,7 @@ function teamProfilesAnimation() {
     }
     const observer = window.IntersectionObserver && new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (!visible) { finishDrag(); setHover(null, true); }
+      if (!visible) { touchHold = null; finishDrag(); setHover(null, true); }
       else geometryDirty = true;
       syncActivity();
     });
@@ -2102,6 +2124,7 @@ function flexGrowAnimation() {
     mobile: {
       start: 0,
       media: "(max-width: 1199px)",
+      instant: true,
       imageAspectRatio: 2,
       imageGapRem: 1,
       duration: 0.3,
@@ -2195,6 +2218,7 @@ function flexGrowAnimation() {
 
     function activateItem(item, immediate = false) {
       if (activeItem === item && !immediate) return;
+      immediate = immediate || (mobile && galleryMotion.mobile.instant);
       activeItem = item;
       if (timeline) timeline.kill();
 
