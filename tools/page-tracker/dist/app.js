@@ -95,7 +95,7 @@ function render() {
   $('#metrics').innerHTML = workflowFields.map(([field, label]) => `<div class="metric"><span>${escape(label)}</span><strong>${activeItems.filter(p => p[field]).length}</strong></div>`).join('');
   const groupButton = g => `<button type="button" data-group="${escape(g.id)}" class="${g.id === activeGroup ? 'selected' : ''}" aria-current="${g.id === activeGroup ? 'true' : 'false'}"><span>${escape(g.name)}</span><span>${pages.filter(p => g.id === 'all' ? isPageGroupItem(p) : p.groupId === g.id).length}</span></button>`;
   $('#groups').innerHTML = [{ id: 'all', name: 'All groups' }, ...project.groups.filter(g => !otherGroupIds.has(g.id))].map(groupButton).join('') +
-    (otherGroups.length ? '<div class="sidebar-label other-groups-label">OTHER GROUPS</div>' + otherGroups.map(groupButton).join('') : '');
+    (otherGroups.length ? '<h2 class="sidebar-label other-groups-label">OTHER GROUPS</h2>' + otherGroups.map(groupButton).join('') : '');
   const q = $('#search').value.trim().toLowerCase();
   const checkedFilters = [...document.querySelectorAll('[data-filter]:checked')].map(input => input.dataset.filter);
   const filtered = pages.filter(p => (activeGroup === 'all' ? isPageGroupItem(p) : p.groupId === activeGroup) && checkedFilters.every(field => p[field]) && [p.name, p.figmaFrame, p.content, p.notes].join(' ').toLowerCase().includes(q));
@@ -149,7 +149,6 @@ $('#page-list').addEventListener('change', async event => {
   page[input.dataset.field] = input.checked;
   render(); await save().catch(() => {});
 });
-$('#project').addEventListener('change', event => loadProject(event.target.value).catch(showError));
 $('#new-page').addEventListener('click', () => openDetail(null));
 $('#open-typography').addEventListener('click', () => { renderTypography(); $('#typography-dialog').showModal(); });
 $('#close-typography').addEventListener('click', () => $('#typography-dialog').close());
@@ -195,15 +194,6 @@ $('#detail-form').addEventListener('submit', async event => {
   const button = form.querySelector('[type=submit]'); button.disabled = true;
   try { await save(); $('#detail').close(); render(); } catch (error) { $('#form-error').textContent = error.message; } finally { button.disabled = false; }
 });
-$('#new-project').addEventListener('click', () => { $('#project-form').reset(); $('#project-dialog').showModal(); });
-$('#cancel-project').addEventListener('click', () => $('#project-dialog').close());
-$('#project-form').addEventListener('submit', async event => {
-  event.preventDefault(); const button = event.currentTarget.querySelector('[type=submit]'); button.disabled = true;
-  try {
-    const p = await request('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: event.currentTarget.elements.name.value }) });
-    $('#project-dialog').close(); await loadProjectList(p.id);
-  } catch (error) { showError(error); } finally { button.disabled = false; }
-});
 }
 
 function renderTypography() {
@@ -229,14 +219,5 @@ function flushTodoSave() {
 }
 
 function showError(error) { setSaveStatus(error.message, true); }
-async function loadProjectList(preferred) {
-  const projects = await request('/api/projects');
-  $('#project').innerHTML = projects.map(p => `<option value="${escape(p.id)}">${escape(p.name)}</option>`).join('');
-  const id = projects.some(p => p.id === preferred) ? preferred : projects[0]?.id;
-  if (id) { $('#project').value = id; await loadProject(id); }
-  else { setSaveStatus('Create your first project to begin.'); $('#new-page').disabled = true; $('#open-todos').disabled = true; }
-  if (id) { $('#new-page').disabled = false; $('#open-todos').disabled = false; }
-}
 window.addEventListener('beforeunload', event => { if (pending || todoSaveTimer) { flushTodoSave(); event.preventDefault(); event.returnValue = ''; } });
-if (readOnly) loadProject('imprint-engine').catch(showError);
-else loadProjectList(localStorage.getItem('michael-webdev-project') || 'imprint-engine').catch(showError);
+loadProject('imprint-engine').catch(showError);

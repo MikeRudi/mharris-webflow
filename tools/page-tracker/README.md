@@ -9,7 +9,8 @@ node tools/page-tracker/server.mjs
 ```
 
 Open http://127.0.0.1:4318. Keep the terminal running while using it.
-Changes save automatically to data/<project-id>.json. New project creates a separate list.
+The local tracker opens Imprint Engine directly; project switching and creation
+controls are temporarily removed. Changes save automatically to data/imprint-engine.json.
 Use the page name to edit details; group names can be changed in the page dialog.
 Use **To-do list** beside **Add page** to check off tasks or add/remove items.
 Use **Typography** beside **Add page** for the project's saved class sizes, line

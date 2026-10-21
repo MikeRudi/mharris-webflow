@@ -2,12 +2,11 @@
 <html lang="en" data-read-only="true">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Imprint Engine — Page Tracker</title><meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="/styles.css"><script type="module" src="/app.js"></script></head>
 <body>
-<aside class="sidebar">
-
-  <div class="sidebar-label">PAGE GROUPS</div><nav id="groups" aria-label="Page groups"></nav>
+<aside class="sidebar" id="page-index" aria-label="Page index">
+  <h2 class="sidebar-label">PAGE GROUPS</h2><nav id="groups" aria-label="Page groups"></nav>
 </aside>
 <main>
-  <header><div class="heading-row"><h1 id="project-title">Page tracker</h1></div></header>
+  <header><div class="heading-row"><div class="heading-title"><h1 id="project-title">Page tracker</h1></div></div></header>
   <section class="metrics checklist-totals" aria-label="Page checklist totals" id="metrics"></section>
   <div class="save-status-row"><span id="save-status" role="status" aria-live="polite">Loading…</span></div>
   <section class="toolbar" aria-label="Filter pages"><label class="search"><span>⌕</span><input type="search" id="search" placeholder="Find a page…" aria-label="Search pages"></label><fieldset id="workflow-filters" class="workflow-filters"></fieldset></section>
