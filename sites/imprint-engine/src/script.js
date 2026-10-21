@@ -38,8 +38,9 @@ function initLenis() {
   };
 }
 
-const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 992px)", fn);
-const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
+// Include wider tablets in the mobile layout; native tablet styles are extended in styles.css.
+const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 1200px)", fn);
+const onMobile = (fn) => gsap.matchMedia().add("(max-width: 1199px)", fn);
 
 function initSite() {
   if (isWebflowEditor()) return null;
@@ -221,7 +222,7 @@ function homeAnimation() {
   // MOBILE FRAMING — the same scrub sequence, with room for the opening logos.
   // All mobile measurements are rem; native Webflow styles consume these values.
   const homeMobile = {
-    enabled: window.matchMedia("(max-width: 991px)").matches,
+    enabled: window.matchMedia("(max-width: 1199px)").matches,
     introHeightRem: 62.625,
     logoTopRem: 40.625,
     logoGapRem: 5,
@@ -237,7 +238,9 @@ function homeAnimation() {
       starts: ["translate(122 -330) scale(1.5)", "translate(553 -150) scale(1.5)", "translate(984 -330) scale(1.5)"],
       fill: "#6421b9",
     },
-    cards: { horizontalSpread: 0.95, verticalSpread: 0.5, scale: 0.85, radiusScale: 0.68, centerYRem: 8, offsetYRem: 0, riseYRem: -14 },
+    cards: { horizontalSpread: 0.95, verticalSpread: 0.5, scale: 0.85, radiusScale: 0.68, centerYRem: 8, offsetYRem: 0, riseYRem: -14,
+      rotation: 22, skewX: -12 },
+    cardOpacity: { back: 0, front: 1, fadeStart: 0.4, fadeEnd: 0.78 },
     text: { headingCharacters: 22, paragraphCharacters: 48 },
     dropWidthRem: 3.25,
   };
@@ -450,11 +453,12 @@ function homeAnimation() {
     drag: { duration: 0.6, ease: "power2.out", degreesPerPixel: 0.25 },
     layout: { horizontalSpread: 1.12, verticalSpread: 0.6 },
     framing: { scale: 0.78, radiusScale: 0.9, offsetYRem: 2, riseYRem: -18 },
-    opacity: { back: 0.08, front: 1, ease: "power1.inOut" },
+    opacity: { back: 0.08, front: 1, ease: "power1.inOut", fadeStart: 0, fadeEnd: 1 },
   };
   if (homeMobile.enabled) {
     Object.assign(homeCardMotion.layout, homeMobile.cards);
     Object.assign(homeCardMotion.framing, homeMobile.cards);
+    Object.assign(homeCardMotion.opacity, homeMobile.cardOpacity);
   }
   const cardOpacityEase = gsap.parseEase(homeCardMotion.opacity.ease);
   const $homeResting = $("[home-resting]");
@@ -487,7 +491,10 @@ function homeAnimation() {
       gsap.set(card, {
         force3D: true,
         transformOrigin: "center center",
+        ...(homeMobile.enabled ? { rotation: homeMobile.cards.rotation, skewX: homeMobile.cards.skewX } : {}),
       });
+      // Keep overlap order stable: sorting transparent tiles every frame visibly snaps.
+      gsap.set(element, { zIndex: 100 + Math.round((isFront ? 1 : isBack ? -1 : 0) * 30) + index });
 
       return {
         element,
@@ -498,7 +505,6 @@ function homeAnimation() {
         setScaleX: gsap.quickSetter(card, "scaleX"),
         setScaleY: gsap.quickSetter(card, "scaleY"),
         setOpacity: gsap.quickSetter(card, "opacity"),
-        setZIndex: gsap.quickSetter(element, "zIndex"),
         x: bounds.left - transformX + bounds.width / 2,
         y: bounds.top - transformY + bounds.height / 2,
         depth: isFront ? 1 : isBack ? -1 : index % 2 === 0 ? 0.35 : -0.35,
@@ -604,12 +610,14 @@ function homeAnimation() {
         ) * viewScale;
       // Every card uses the same continuous depth curve: no front/middle/back states.
       // Cards crossing at the same depth now have the same opacity.
-      const depthProgress = gsap.utils.clamp(0, 1, (depth / item.radius + 1) / 2);
+      const normalizedDepth = (depth / item.radius + 1) / 2;
+      const depthProgress = gsap.utils.clamp(0, 1,
+        (normalizedDepth - homeCardMotion.opacity.fadeStart) /
+        (homeCardMotion.opacity.fadeEnd - homeCardMotion.opacity.fadeStart));
       const opacity = gsap.utils.interpolate(homeCardMotion.opacity.back,
         homeCardMotion.opacity.front, cardOpacityEase(depthProgress));
 
       // Reuse setters: per-frame gsap.set() tweens accumulate in matchMedia.
-      item.setZIndex(Math.round(depth + item.radius));
       item.setX(
         x * homeRestingRadiusScale * homeCardMotion.layout.horizontalSpread +
           homeRestingLayoutOffset.x - item.screenX
@@ -2512,7 +2520,7 @@ function navigationDropdowns() {
     open: { backgroundColor: "#ffffff", color: "#111111", radius: "2rem" },
   };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const desktopMenu = window.matchMedia("(min-width: 992px)");
+  const desktopMenu = window.matchMedia("(min-width: 1200px)");
   const cleanups = [];
 
   $roots.each(function (index) {
@@ -2637,12 +2645,13 @@ function mobileNavigation() {
     const $toggle = $root.find("[nav-mobile-toggle]").first();
     const $panel = $root.find("[nav-mobile-panel]").first();
     const $label = $toggle.find("[nav-mobile-label]");
+    const $headerBackdrop = $root.find("[nav-mobile-header-backdrop]");
     const $main = $root.find("[nav-mobile-main]").first();
     const $submenus = $root.find("[nav-dropdown]");
     const $triggers = $root.find("[nav-dropdown-trigger]");
     if (!$toggle.length || !$panel.length) return;
     const panel = $panel[0], toggle = $toggle[0];
-    const restore = rememberAttributes($root.add($toggle).add($panel).add($main).add($submenus).add($triggers),
+    const restore = rememberAttributes($root.add($toggle).add($panel).add($main).add($submenus).add($triggers).add($headerBackdrop),
       ["style", "class", "id", "role", "aria-modal", "aria-controls", "aria-expanded", "aria-hidden", "aria-label", "inert"]);
     const oldLabel = $label.text();
     panel.id = uniqueElementId("mobile-navigation");
@@ -2690,6 +2699,7 @@ function mobileNavigation() {
       showMain();
       $root.triggerHandler("nav:close");
       $root.removeClass("is-mobile-open");
+      gsap.set($headerBackdrop, { autoAlpha: 0 });
       $panel.removeClass("is-open").attr("aria-hidden", "true");
       $toggle.attr({ "aria-expanded": "false", "aria-label": "Open navigation" });
       $label.text(menuControls.openLabel);
@@ -2723,6 +2733,7 @@ function mobileNavigation() {
       document.body.append(root);
       Object.assign(document.body.style, { position: "fixed", top: `${-scrollY}px`, left: "0", right: "0", width: "100%", overflow: "hidden" });
       $root.addClass("is-mobile-open");
+      gsap.set($headerBackdrop, { autoAlpha: 1 });
       $root.attr({ role: "dialog", "aria-modal": "true", "aria-label": "Navigation" });
       $panel.addClass("is-open").attr("aria-hidden", "false");
       $toggle.attr({ "aria-expanded": "true", "aria-label": "Close navigation" });
