@@ -3,6 +3,7 @@ import { readFile, writeFile, readdir, mkdir, copyFile, rename } from 'node:fs/p
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { workflowFields, normalizeProject } from './workflow.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(root, 'data');
@@ -22,7 +23,7 @@ function validate(project) {
   const pageIds = new Set();
   for (const page of project.pages) {
     if (!validId(page.id) || pageIds.has(page.id) || !groupIds.has(page.groupId) || typeof page.name !== 'string') throw Error('Invalid page or group.');
-    if (!['yes', 'no', 'unverified', 'removed'].includes(page.webflow) || !['not-started', 'in-webflow', 'polishing', 'complete'].includes(page.status)) throw Error('Invalid status.');
+    if (workflowFields.some(([field]) => typeof page[field] !== 'boolean')) throw Error('Invalid checklist value.');
     pageIds.add(page.id);
   }
 }
@@ -62,16 +63,18 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'POST' && url.pathname === '/api/projects') {
       const input = await body(req);
-      const p = { schemaVersion: 1, id: randomUUID(), name: String(input.name || '').trim(), revision: 1, updatedAt: new Date().toISOString(), groups: [{ id: 'general', name: 'General' }], pages: [], notes: '' };
+      const p = { schemaVersion: 2, id: randomUUID(), name: String(input.name || '').trim(), revision: 1, updatedAt: new Date().toISOString(), groups: [{ id: 'general', name: 'General' }], pages: [], notes: '' };
       validate(p); await writeFile(projectPath(p.id), JSON.stringify(p, null, 2), { flag: 'wx' });
       return json(res, 201, p);
     }
     const match = url.pathname.match(/^\/api\/projects\/([a-z0-9-]+)$/);
     if (match && validId(match[1])) {
       const file = projectPath(match[1]);
-      if (req.method === 'GET') return json(res, 200, JSON.parse(await readFile(file, 'utf8')));
+      if (req.method === 'GET') return json(res, 200, normalizeProject(JSON.parse(await readFile(file, 'utf8'))));
       if (req.method === 'PUT') {
-        const p = await body(req); validate(p);
+        const input = await body(req);
+        if (input.schemaVersion !== 2) throw Error('The tracker has been updated. Refresh this page before editing.');
+        const p = normalizeProject(input); validate(p);
         if (p.id !== match[1]) throw Error('Project ID mismatch.');
         const job = writes.then(async () => {
           const current = JSON.parse(await readFile(file, 'utf8'));
@@ -87,6 +90,10 @@ const server = http.createServer(async (req, res) => {
       }
     }
     const files = { '/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/styles.css': ['styles.css', 'text/css'] };
+    if (req.method === 'GET' && url.pathname === '/workflow.mjs') {
+      res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' });
+      return res.end(await readFile(path.join(root, 'workflow.mjs')));
+    }
     if (req.method === 'GET' && files[url.pathname]) {
       const [file, type] = files[url.pathname];
       res.writeHead(200, { 'Content-Type': `${type}; charset=utf-8`, 'Cache-Control': 'no-store' });

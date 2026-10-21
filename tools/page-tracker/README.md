@@ -16,10 +16,22 @@ Use **Typography** beside **Add page** for the project's saved class sizes, line
 heights, letter spacing and font weights. Imprint Engine's values were imported
 from its saved desktop typography text file and live in the project JSON's
 `typography` field. Heading sizes use a 1440px viewport and 16px root reference.
-Each page has a separate **Mobile** checkbox. Both lists save automatically in the project JSON.
-Only Michael's explicit final confirmation authorizes marking an item Complete or
-checking Mobile. Implementation, testing and publishing alone do not count as approval.
-Use Polishing for work awaiting review, with Mobile unchecked until approved.
+Each page has seven independent checkboxes: **Design ready**, **Developing in Webflow**,
+**Desktop**, **Mobile**, **Awaiting content**, **Client’s hands**, and **Complete**. They appear
+in the table and page dialog and save automatically in the project JSON. The filter
+checkboxes show pages matching every selected checkbox. Seven compact totals at
+the top count checked items in the page groups, excluding Removed entries.
+Navigation, CMS collections and References sit under **Other groups** in the
+sidebar. They remain editable there but are excluded from All groups and its totals.
+Only Michael's explicit final confirmation authorizes checking Complete, Desktop or Mobile.
+Implementation, testing and publishing alone do not count as approval.
+The checkbox fields are `designReady`, `workingInWebflow`, `desktop`, `mobile`,
+`awaitingContent`, `clientsHands`, and `complete`. These are the current workflow values;
+the old `status` and `webflow` fields remain as historical metadata, including
+Removed entries. Do not use the old status fields for new updates.
+`workflow.mjs` carries existing saved designs, Webflow presence and approvals into
+the checkboxes on load without overwriting explicit checkbox values. Desktop and
+Client’s hands start unchecked. The new values persist with the next local save.
 Imprint Engine's eight desktop to-dos were imported on 13 October 2026, initially unchecked,
 along with unchecked Mobile controls for every existing tracker entry.
 The plain-text snapshot is imprint-page-list.txt; it is not automatically regenerated after edits.
@@ -36,11 +48,11 @@ Vercel project: `imprint-engine-tracker` (`prj_zPB8ACLEsqDCAW7bn5Z6uB4QTBRy`).
 Connected repository: `MikeRudi/mharris-webflow`, production branch `main`.
 
 The `public/` folder is a static snapshot for colleagues. It includes page groups,
-search, progress filtering, status labels, disabled Mobile/Awaiting content checks,
+search, checklist filtering, seven disabled status checkboxes,
 staging links and full-resolution, lossless design previews. It has no editing API,
 project creation, to-do list, typography editor or Add page controls.
 
-Local editing remains at `http://127.0.0.1:4318`. Completed shows completed/total.
+Local editing remains at `http://127.0.0.1:4318`.
 To update the online snapshot, install this folder's dependencies once, then run
 `npm run export` from this folder and commit/push `public/` together with any UI changes.
 The export reads `data/imprint-engine.json` and the local Figma export folder.
