@@ -230,6 +230,7 @@ function homeAnimation() {
     sceneBottomGapRem: 2,
     artworkWidth: 720,
     lineCenterRem: 21.875,
+    minimumLineCenterRem: 8.25,
     artworkClearanceRem: 8.625,
     drops: {
       initialBlur: 26,
@@ -267,7 +268,8 @@ function homeAnimation() {
     homeRoot.style.setProperty("--home-canvas-height", `${canvas}rem`);
     homeRoot.style.setProperty("--home-intro-overflow", `${canvas - screen}rem`);
     const scale = homeRoot.clientWidth / homeMobile.artworkWidth;
-    const lineCenter = Math.min(homeMobile.lineCenterRem, sceneTops.third - homeMobile.artworkClearanceRem);
+    const lineCenter = Math.max(homeMobile.minimumLineCenterRem,
+      Math.min(homeMobile.lineCenterRem, sceneTops.third - homeMobile.artworkClearanceRem));
     const top = 330 - (lineCenter + canvas - screen) * rem / scale;
     $homeArtwork.attr({
       viewBox: `${720 - homeMobile.artworkWidth / 2} ${top} ${homeMobile.artworkWidth} ${canvas * rem / scale}`,
