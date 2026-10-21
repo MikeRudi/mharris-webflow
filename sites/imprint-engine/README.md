@@ -116,7 +116,8 @@ as `product-header-mobile-square.png`; Webflow serves its optimized WebP version
 Native mobile styles give Logo List six columns / three rows, Split 6 two equal
 columns of three evenly spaced cards, Shop Slider two visible cards plus part of the third, Hoodie
 a rem-sized contained image, and Tiles 1 landscape 3:2 images with matching content
-insets. Sections use 1.25rem side padding. The main 18px paragraphs opt into the
+insets. Sections use 1.25rem side padding; the Split 6 tab strip stays edge-to-edge,
+with that padding applied only to its content below. The main 18px paragraphs opt into the
 saved 16px p-2 mobile size. Desktop section geometry was unchanged in staging.
 Phone and tablet staging checks passed; mobile approval remains with Michael.
 
