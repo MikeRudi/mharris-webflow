@@ -109,7 +109,7 @@ process accordion, FAQ and envelope. It does not submit forms.
 Page Header 01 stacks its artwork above the existing content below 1200px.
 The optional `Mobile Image` and `Use Mobile Image` content props select square
 assets on Product overview, Merchandise, Kits, Events, Print and Packaging.
-Apparel retains its existing artwork; Signage and Custom Products have text-only
+Apparel also uses a square mobile reframe. Signage and Custom Products have text-only
 headers. All existing content props remain shared.
 The square asset is saved in the overview's local `webflow-ready` asset folder
 as `product-header-mobile-square.png`; Webflow serves its optimized WebP version.
@@ -134,6 +134,22 @@ Accordion 06 uses the Product overview's pale tab background and single horizont
 scrolling row below 1200px. Its native `accord-06-marker` reuses the existing
 `active-marker` behavior; the desktop underlines remain on desktop. Tab labels
 and content bindings remain on the original component.
+
+## Services and Apparel mobile — 21 October 2026
+
+Apparel, the Services overview and all five Service detail pages now select their
+own square artwork through Page Header 01's existing Mobile Image and Use Mobile
+Image props. Desktop image props are unchanged. The built-in image editor reframed
+the existing artwork; originals, square PNGs and prompts are saved in each page's
+`webflow-ready` folder. Webflow serves optimized WebP files. The Services export
+folder contains `mobile-updates-2026-10-21.json` with asset IDs and prior prop values.
+
+Accordion 01 - Services reuses the Split 6 mobile content padding and typography.
+Its horizontal tab strip has the pale background and no outer page inset. Its
+three-item panels stack evenly, including the separate Photography benefits panel.
+Native responsive overrides keep Service headers consistent with Page Header 01
+on phones and tablets. The detail-page Accordion 06 instances retain their shared
+horizontal mobile tabs. Mobile approval remains unchecked for Michael's review.
 
 ## Animation regression checks
 
