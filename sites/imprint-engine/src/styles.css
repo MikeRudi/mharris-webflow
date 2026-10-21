@@ -1098,6 +1098,7 @@
   }
 
   .team-profiles {
+    z-index: 1;
     aspect-ratio: auto;
     flex-shrink: 0;
     order: -1;
