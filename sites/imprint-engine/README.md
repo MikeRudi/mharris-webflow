@@ -48,7 +48,12 @@ The homepage uses one original Accordion 01 - Single and one original Teams
 component at every breakpoint, preserving their props and instance overrides.
 The separate mobile copies and their responsive wrappers were removed on
 21 October. Adapt components internally; do not duplicate them for mobile.
-Mobile dimensions use rem, with a 100svh final home scene.
+Mobile dimensions use rem, with a 100dvh final home scene. The menu and lander
+follow the visible browser height, without a larger 100vh minimum. The lander
+observes that dynamic height, updates its framing and refreshes the scrub range
+after browser-bar resizing settles. Menu close also resynchronizes the lander.
+On mobile/tablet, the final transition fades the hero instead of animating its
+clip path; desktop keeps the wipe. Timing remains in `homeMotion.finish.clip`.
 
 Teams uses the same floating-circle physics on mobile, with four photos and six
 white satellites. Native tablet styles size and position the circles; explicit
