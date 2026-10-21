@@ -242,15 +242,16 @@ function homeAnimation() {
       rotation: 22, skewX: -12 },
     cardOpacity: { back: 0, front: 1, fadeStart: 0.4, fadeEnd: 0.78 },
     text: { headingCharacters: 22, paragraphCharacters: 48 },
+    tablet: {
+      minWidth: 768,
+      text: { headingCharacters: 34, paragraphCharacters: 72 },
+      logoBottomRem: 0, // Native logo-wrapper padding supplies the bottom inset.
+    },
     dropWidthRem: 3.25,
   };
   const homeRoot = $("[lander-wrap]").first()[0];
   const $homeCopy = $(homeRoot).find("[home-mobile-copy]");
   const restoreHomeCopy = rememberAttributes($homeCopy, ["text-ch"]);
-  if (homeMobile.enabled) $homeCopy.each((_, element) => {
-    element.setAttribute("text-ch", element.getAttribute("home-mobile-copy") === "heading"
-      ? homeMobile.text.headingCharacters : homeMobile.text.paragraphCharacters);
-  });
   const restoreHomeViewport = rememberAttributes($(homeRoot), ["style"]);
   const $homeArtwork = $("[home-gradient-svg]");
   const restoreHomeArtwork = rememberAttributes($homeArtwork, ["viewBox", "preserveAspectRatio"]);
@@ -258,14 +259,21 @@ function homeAnimation() {
   const restoreHomeDropFills = rememberAttributes($homeDropFills, ["fill"]);
   function measureHomeViewport() {
     if (!homeMobile.enabled) return;
+    const tablet = window.innerWidth >= homeMobile.tablet.minWidth;
+    const copy = tablet ? homeMobile.tablet.text : homeMobile.text;
+    $homeCopy.each((_, element) => {
+      element.setAttribute("text-ch", element.getAttribute("home-mobile-copy") === "heading"
+        ? copy.headingCharacters : copy.paragraphCharacters);
+    });
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const screen = document.documentElement.clientHeight / rem;
     const intro = homeRoot.querySelector("[home-start-up]:not([home-resting])");
     const logos = homeRoot.querySelector("[home-logo-up]");
-    const logoTop = Math.max(homeMobile.logoTopRem,
+    const logoHeight = (logos?.offsetHeight || 0) / rem;
+    const logoTop = Math.max(tablet ? screen - logoHeight - homeMobile.tablet.logoBottomRem : homeMobile.logoTopRem,
       intro ? (intro.offsetTop + intro.offsetHeight) / rem + homeMobile.logoGapRem : 0);
-    const canvas = Math.max(screen, homeMobile.introHeightRem,
-      logoTop + (logos?.offsetHeight || 0) / rem);
+    const canvas = Math.max(screen, tablet ? screen : homeMobile.introHeightRem,
+      logoTop + logoHeight);
     homeRoot.style.setProperty("--home-logo-top", `${logoTop}rem`);
     const sceneTops = {};
     [["second", homeMobile.secondTopRem], ["third", homeMobile.thirdTopRem]].forEach(([name, top]) => {
