@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 1199px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), navTheme(), navigationDropdowns(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), customProducts(), navTheme(), navigationDropdowns(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
@@ -89,6 +89,82 @@ function mobileHomepageDetails() {
   $submit.val(mobileDetails.submitLabel);
 
   return restore;
+}
+
+function customProducts() {
+  const cleanups = [];
+  $("[custom-products]").each(function () {
+    const $root = $(this), $tabs = $root.find("[custom-category-trigger]");
+    const $panels = $root.find("[custom-category-panel]");
+    if (!$tabs.length || !$panels.length) return;
+    const $filters = $root.find("[custom-decoration-filter]");
+    const $cards = $root.find("[custom-decoration-card]");
+    const restoreTabs = rememberAttributes($tabs, ["class", "aria-selected", "tabindex"]);
+    const restorePanels = rememberAttributes($panels, ["class", "role", "aria-labelledby", "aria-hidden", "inert"]);
+    const restoreFilters = rememberAttributes($filters, ["class", "aria-pressed"]);
+    const restoreCards = rememberAttributes($cards, ["style"]);
+    let resizeFrame = null;
+
+    function refreshHeight() {
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = null;
+        if (window.lenis) window.lenis.resize();
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      });
+    }
+    function selectCategory(value, refresh = true) {
+      if (!$panels.filter((_, panel) => panel.getAttribute("custom-category-panel") === value).length) return;
+      $tabs.each(function () {
+        const active = this.getAttribute("custom-category-trigger") === value;
+        $(this).toggleClass("active", active).attr({ "aria-selected": String(active), tabindex: active ? "0" : "-1" });
+      });
+      $panels.each(function () {
+        const key = this.getAttribute("custom-category-panel"), active = key === value;
+        const tab = $tabs.toArray().find(item => item.getAttribute("custom-category-trigger") === key);
+        $(this).toggleClass("active", active).attr({ role: "tabpanel", "aria-labelledby": tab.id, "aria-hidden": String(!active) });
+        if (active) this.removeAttribute("inert");
+        else this.setAttribute("inert", "");
+      });
+      if (refresh) refreshHeight();
+    }
+    $tabs.on("click.customProducts", function (event) {
+      event.preventDefault(); selectCategory(this.getAttribute("custom-category-trigger"));
+    }).on("keydown.customProducts", function (event) {
+      const keys = ["ArrowLeft", "ArrowRight", "Home", "End", " "];
+      if (!keys.includes(event.key)) return;
+      event.preventDefault();
+      let index = $tabs.index(this);
+      if (event.key === "Home") index = 0;
+      else if (event.key === "End") index = $tabs.length - 1;
+      else if (event.key !== " ") index = (index + (event.key === "ArrowRight" ? 1 : -1) + $tabs.length) % $tabs.length;
+      $tabs[index].focus({ preventScroll: true });
+      selectCategory($tabs[index].getAttribute("custom-category-trigger"));
+    });
+    function selectDecoration(value, refresh = true) {
+      $filters.each(function () {
+        const active = this.getAttribute("custom-decoration-filter") === value;
+        $(this).toggleClass("active", active).attr("aria-pressed", String(active));
+      });
+      $cards.each(function () {
+        const show = value === "all" || this.getAttribute("custom-decoration-card").split(" ").includes(value);
+        this.style.display = show ? "" : "none";
+      });
+      if (refresh) refreshHeight();
+    }
+    $filters.on("click.customProducts keydown.customProducts", function (event) {
+      if (event.type === "keydown" && event.key !== " ") return;
+      event.preventDefault(); selectDecoration(this.getAttribute("custom-decoration-filter"));
+    });
+    const initial = $panels.filter(".active").first().attr("custom-category-panel") || $tabs.first().attr("custom-category-trigger");
+    selectCategory(initial, false); selectDecoration("all", false);
+    cleanups.push(() => {
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+      $tabs.add($filters).off(".customProducts");
+      restoreTabs(); restorePanels(); restoreFilters(); restoreCards();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
 }
 
 function shopSlider() {
