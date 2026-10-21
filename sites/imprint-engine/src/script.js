@@ -237,10 +237,17 @@ function homeAnimation() {
       starts: ["translate(122 -330) scale(1.5)", "translate(553 -150) scale(1.5)", "translate(984 -330) scale(1.5)"],
       fill: "#6421b9",
     },
-    cards: { horizontalSpread: 1.05, verticalSpread: 0.55, scale: 0.85, radiusScale: 0.8, offsetYRem: 0, riseYRem: -14 },
+    cards: { horizontalSpread: 0.95, verticalSpread: 0.5, scale: 0.85, radiusScale: 0.68, centerYRem: 8, offsetYRem: 0, riseYRem: -14 },
+    text: { headingCharacters: 22, paragraphCharacters: 48 },
     dropWidthRem: 3.25,
   };
   const homeRoot = $("[lander-wrap]").first()[0];
+  const $homeCopy = $(homeRoot).find("[home-mobile-copy]");
+  const restoreHomeCopy = rememberAttributes($homeCopy, ["text-ch"]);
+  if (homeMobile.enabled) $homeCopy.each((_, element) => {
+    element.setAttribute("text-ch", element.getAttribute("home-mobile-copy") === "heading"
+      ? homeMobile.text.headingCharacters : homeMobile.text.paragraphCharacters);
+  });
   const restoreHomeViewport = rememberAttributes($(homeRoot), ["style"]);
   const $homeArtwork = $("[home-gradient-svg]");
   const restoreHomeArtwork = rememberAttributes($homeArtwork, ["viewBox", "preserveAspectRatio"]);
@@ -519,6 +526,11 @@ function homeAnimation() {
     const top = Math.min(...restingItems.map((item) => item.y - centerY)) * homeRestingRadiusScale;
     homeRestingLayoutOffset.x = right * (1 - homeCardMotion.layout.horizontalSpread);
     homeRestingLayoutOffset.y = top * (1 - homeCardMotion.layout.verticalSpread);
+    if (homeMobile.enabled) {
+      const homeBounds = homeRoot.getBoundingClientRect();
+      homeRestingLayoutOffset.x = homeBounds.left + homeBounds.width / 2 - centerX;
+      homeRestingLayoutOffset.y = homeBounds.top + homeMobile.cards.centerYRem * homeRestingRem - centerY;
+    }
 
     homeRestingSphere = restingItems.map((item) => {
       const screenX = item.x - centerX;
@@ -1324,6 +1336,7 @@ function homeAnimation() {
     homeTimeline.kill();
     restoreHomeEndLayout();
     restoreHomeViewport();
+    restoreHomeCopy();
     restoreHomeArtwork();
     restoreHomeDropFills();
     gsap.ticker.remove(rotateHomeRestingSphere);
@@ -2546,6 +2559,7 @@ function navigationDropdowns() {
     }
 
     function open(trigger) {
+      if (!desktopMenu.matches) return;
       cancelLeave();
       if (active?.trigger === trigger) return;
       const key = $(trigger).attr("nav-dropdown-trigger");
@@ -2573,10 +2587,12 @@ function navigationDropdowns() {
     $triggers.on(`pointerenter${ns}`, function (event) {
       if (desktopMenu.matches && event.originalEvent.pointerType === "mouse") open(this);
     }).on(`click${ns}`, function (event) {
+      if (!desktopMenu.matches) return;
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       active?.trigger === this ? close() : open(this);
     }).on(`keydown${ns}`, function (event) {
+      if (!desktopMenu.matches) return;
       if (event.key !== "ArrowDown" && event.key !== " ") return;
       event.preventDefault();
       open(this);
@@ -2610,7 +2626,7 @@ function navigationDropdowns() {
 }
 
 function mobileNavigation() {
-  // MOBILE MENU CONTROLS — the layout and open states are native Webflow styles.
+  // TABLET + PHONE MENU — instant page changes; layout lives in Webflow.
   const menuControls = { openLabel: "Menu", closeLabel: "Close", focusOnOpen: true };
   const $roots = $("[nav-menu-root]");
   const cleanups = [];
@@ -2621,30 +2637,65 @@ function mobileNavigation() {
     const $toggle = $root.find("[nav-mobile-toggle]").first();
     const $panel = $root.find("[nav-mobile-panel]").first();
     const $label = $toggle.find("[nav-mobile-label]");
+    const $main = $root.find("[nav-mobile-main]").first();
+    const $submenus = $root.find("[nav-dropdown]");
+    const $triggers = $root.find("[nav-dropdown-trigger]");
     if (!$toggle.length || !$panel.length) return;
     const panel = $panel[0], toggle = $toggle[0];
-    const restore = rememberAttributes($root.add($toggle).add($panel),
-      ["class", "id", "aria-controls", "aria-expanded", "aria-hidden", "aria-label", "inert"]);
+    const restore = rememberAttributes($root.add($toggle).add($panel).add($main).add($submenus).add($triggers),
+      ["style", "class", "id", "role", "aria-modal", "aria-controls", "aria-expanded", "aria-hidden", "aria-label", "inert"]);
     const oldLabel = $label.text();
     panel.id = uniqueElementId("mobile-navigation");
     $toggle.attr({ "aria-controls": panel.id, "aria-expanded": "false" });
     $panel.attr("aria-hidden", "true");
     panel.inert = true;
     let open = false, scrollY = 0, bodyStyle = null, wasLenisStopped = false;
+    let activeSubmenu = null, returnTrigger = null, placeholder = null;
     const bodyProperties = ["position", "top", "left", "right", "width", "overflow"];
     const focusable = () => $root.find("a[href], button:not([disabled]), input:not([disabled]), [tabindex='0']")
       .filter((_, element) => element.getClientRects().length && !element.closest("[inert]") &&
         getComputedStyle(element).visibility !== "hidden").toArray();
 
+    function showMain(returnFocus = false) {
+      gsap.killTweensOf($submenus);
+      gsap.set($submenus, { display: "none", autoAlpha: 0, y: 0 });
+      $submenus.attr("aria-hidden", "true").each((_, element) => { element.inert = true; });
+      $triggers.removeClass("is-active").attr("aria-expanded", "false");
+      $main.css("visibility", "").attr("aria-hidden", "false").prop("inert", false);
+      activeSubmenu = null;
+      panel.scrollTop = 0;
+      if (returnFocus) returnTrigger?.focus({ preventScroll: true });
+    }
+
+    function showSubmenu(trigger) {
+      if (!open) return;
+      const key = trigger.getAttribute("nav-dropdown-trigger");
+      const submenu = $submenus.filter((_, element) => element.getAttribute("nav-dropdown") === key)[0];
+      if (!submenu) return;
+      showMain();
+      returnTrigger = trigger;
+      activeSubmenu = submenu;
+      $main.css("visibility", "hidden").attr("aria-hidden", "true").prop("inert", true);
+      $(trigger).attr("aria-expanded", "true");
+      submenu.inert = false;
+      $(submenu).attr("aria-hidden", "false");
+      gsap.set(submenu, { display: "block", autoAlpha: 1, y: 0 });
+      submenu.scrollTop = 0;
+      submenu.querySelector("[nav-mobile-back]")?.focus({ preventScroll: true });
+    }
+
     function closeMenu(returnFocus = false) {
       if (!open) return;
       open = false;
+      showMain();
       $root.triggerHandler("nav:close");
       $root.removeClass("is-mobile-open");
       $panel.removeClass("is-open").attr("aria-hidden", "true");
       $toggle.attr({ "aria-expanded": "false", "aria-label": "Open navigation" });
       $label.text(menuControls.openLabel);
       panel.inert = true;
+      if (placeholder) { placeholder.replaceWith(root); placeholder = null; }
+      $root.removeAttr("role aria-modal aria-label");
       bodyProperties.forEach(property => {
         if (bodyStyle[property]) document.body.style.setProperty(property, bodyStyle[property]);
         else document.body.style.removeProperty(property);
@@ -2658,6 +2709,7 @@ function mobileNavigation() {
     function openMenu() {
       if (open) return;
       if (closeCurrent) closeCurrent();
+      $root.triggerHandler("nav:close");
       open = true;
       closeCurrent = closeMenu;
       scrollY = window.scrollY;
@@ -2665,25 +2717,41 @@ function mobileNavigation() {
         [property, document.body.style.getPropertyValue(property)]));
       wasLenisStopped = Boolean(window.lenis?.isStopped);
       if (window.lenis) window.lenis.stop();
+      // Move this same nav out of the hero clip while open; never clone its links.
+      placeholder = document.createComment("mobile navigation position");
+      root.before(placeholder);
+      document.body.append(root);
       Object.assign(document.body.style, { position: "fixed", top: `${-scrollY}px`, left: "0", right: "0", width: "100%", overflow: "hidden" });
       $root.addClass("is-mobile-open");
+      $root.attr({ role: "dialog", "aria-modal": "true", "aria-label": "Navigation" });
       $panel.addClass("is-open").attr("aria-hidden", "false");
       $toggle.attr({ "aria-expanded": "true", "aria-label": "Close navigation" });
       $label.text(menuControls.closeLabel);
       panel.inert = false;
+      showMain();
       panel.scrollTop = 0;
       if (menuControls.focusOnOpen) $panel.find("[nav-dropdown-trigger]").first()[0]?.focus({ preventScroll: true });
     }
 
     $toggle.on(`click${ns}`, () => open ? closeMenu(true) : openMenu());
+    $panel.on(`click${ns}`, "[nav-dropdown-trigger]", function (event) {
+      event.preventDefault(); showSubmenu(this);
+    }).on(`click${ns}`, "[nav-mobile-back]", () => showMain(true))
+      .on(`keydown${ns}`, "[nav-mobile-back], [nav-dropdown-trigger]", function (event) {
+        if (event.key !== " " && !(event.key === "Enter" && this.tagName !== "A")) return;
+        event.preventDefault();
+        this.hasAttribute("nav-mobile-back") ? showMain(true) : showSubmenu(this);
+      });
     $panel.on(`click${ns}`, "a[href]", function () {
-      if (!this.hasAttribute("nav-dropdown-trigger")) closeMenu();
+      if (!this.hasAttribute("nav-dropdown-trigger") && !this.hasAttribute("nav-login-placeholder")) closeMenu();
     });
     $(document).on(`pointerdown${ns}`, event => {
       if (open && !root.contains(event.target)) closeMenu();
     }).on(`keydown${ns}`, event => {
       if (!open) return;
-      if (event.key === "Escape") { event.preventDefault(); closeMenu(true); return; }
+      if (event.key === "Escape") {
+        event.preventDefault(); activeSubmenu ? showMain(true) : closeMenu(true); return;
+      }
       if (event.key !== "Tab") return;
       const items = focusable(), first = items[0], last = items[items.length - 1];
       if (event.shiftKey && (document.activeElement === first || !root.contains(document.activeElement))) {

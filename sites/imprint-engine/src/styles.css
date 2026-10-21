@@ -31,7 +31,7 @@
   [mobile-type][mobile-type="p-2"] { font-size: 1rem; line-height: 1.4; }
   [mobile-type][mobile-type="p-3"] { font-size: 0.875rem; letter-spacing: -0.0175rem; }
   [mobile-type][mobile-type="b-2"] { font-size: 0.875rem; line-height: 1.4; }
-  [mobile-type][text-ch]:not([text-ch="12"], [text-ch="15"]) { max-width: 100%; }
+  [mobile-type][text-ch]:not([text-ch="12"], [text-ch="15"], [home-mobile-copy]) { max-width: 100%; }
   [nav-block].nav-light [nav-logo-mark] { color: inherit; }
   [mobile-solid][readable-brand-text] { color: white; }
 
