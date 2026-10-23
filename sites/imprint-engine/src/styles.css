@@ -167,6 +167,10 @@
     row-gap: 0;
   }
 
+  .text.author-details {
+    margin-bottom: 0;
+  }
+
   .footer-gradient-wrap {
     width: 100%;
     height: 24rem;
@@ -1067,7 +1071,7 @@
     margin-bottom: 3rem;
   }
 
-  .home-faq-section {
+  .faq-section {
     padding: 3rem 1.5rem 6.5rem;
   }
 
@@ -1116,7 +1120,7 @@
     left: -16rem;
   }
 
-  .home-faq-layout {
+  .faq-layout {
     row-gap: 2rem;
   }
 
@@ -1388,6 +1392,11 @@
     display: flex;
   }
 
+  .page-header-section-01.faqs {
+    min-height: auto;
+    padding-top: 2.5rem;
+  }
+
   .ac-1-split-6 {
     flex: none;
     row-gap: .75rem;
@@ -1575,32 +1584,54 @@
   .solutions-header {
     min-height: 0;
     padding-top: 5.5rem;
+    padding-bottom: 0;
   }
 
   .solutions-header-content {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
   }
 
   .benefits-section {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
+    padding: 3rem 1.25rem;
+  }
+
+  .benefits-background {
+    object-fit: contain;
+    width: 100%;
+    height: calc(100% - 4rem);
+    top: 2rem;
+    left: 0;
   }
 
   .benefits-content {
-    grid-row-gap: 2.5rem;
+    grid-row-gap: 2rem;
   }
 
   .benefits-grid {
     grid-column-gap: 1rem;
-    grid-row-gap: 1rem;
+    grid-row-gap: .875rem;
     flex-wrap: wrap;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     display: grid;
   }
 
   .benefits-card {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .image-copy-section {
+    padding: 2rem 1.25rem 3.5rem;
+  }
+
+  .image-copy-inner {
+    grid-row-gap: 1.75rem;
+  }
+
+  .image-copy-media {
+    aspect-ratio: 16 / 10;
+    border-radius: .75rem;
+    height: auto;
   }
 
   .image-copy-content {
@@ -1676,23 +1707,43 @@
     padding: 0 1.25rem;
   }
 
+  .header-form-panel {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .header-form-name-row {
+    grid-row-gap: 1.125rem;
+    flex-direction: column;
+  }
+
+  .header-form-input {
+    height: 3rem;
+    font-size: 1rem;
+  }
+
   .header-form-section {
     min-height: 0;
     padding-top: 5.5rem;
+    padding-bottom: 3rem;
+    display: block;
+    overflow: hidden;
   }
 
   .header-form-content {
     grid-column-gap: 2rem;
     grid-row-gap: 2rem;
     grid-template-columns: 1fr;
-    padding: 2rem 2.625rem 3rem;
+    padding: 1.5rem 1.25rem 0;
+    position: relative;
   }
 
   .header-form-background {
+    object-fit: cover;
     width: 100%;
-    height: 36rem;
-    top: 4rem;
-    left: 0%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   .client-logos-grid {
@@ -1999,6 +2050,14 @@
     margin-top: -6em;
   }
 
+  .post-media.faqs {
+    margin-top: -12em;
+  }
+
+  .post-body {
+    padding-bottom: 3.5em;
+  }
+
   .home-mobile-scene-copy {
     text-align: center;
     font-size: .875rem;
@@ -2264,6 +2323,50 @@
   .custom-products-decoration-grid {
     grid-template-rows: auto;
     grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .blog-cta-section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .solutions-accord-section {
+    padding: 3rem 0;
+  }
+
+  .solutions-accord-tabs {
+    grid-column-gap: 1rem;
+    justify-content: flex-start;
+    width: 100%;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .solutions-accord-content {
+    width: 100%;
+  }
+
+  .solutions-accord-label {
+    white-space: nowrap;
+    font-size: 1rem;
+  }
+
+  .solutions-accord-top {
+    min-height: 0;
+    padding: 2rem 1.25rem;
+  }
+
+  .solutions-accord-art {
+    aspect-ratio: 16 / 7;
+  }
+
+  .header-form-art-wrap {
+    z-index: 0;
+    order: 0;
+    width: 100%;
+    height: auto;
+    position: absolute;
+    inset: 22rem 0 0;
   }
 }
 /* END NATIVE TABLET EXTENSION */
