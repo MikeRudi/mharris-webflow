@@ -1064,7 +1064,7 @@
   }
 
   .testimonial-envelope {
-    width: 100%;
+    width: min(100%, 31rem);
     max-width: none;
     height: auto;
     margin-top: 0;
@@ -1597,7 +1597,7 @@
   }
 
   .benefits-background {
-    object-fit: contain;
+    object-fit: cover;
     width: 100%;
     height: calc(100% - 4rem);
     top: 2rem;
