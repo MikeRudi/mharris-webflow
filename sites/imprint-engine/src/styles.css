@@ -2397,6 +2397,24 @@
     display: none;
   }
 
+  /* This desktop asset has a transparent text area on its left. The shared
+     header needs source-specific mobile framing without another layout prop. */
+  .header-01-image-wrap:has([header-desktop-image][src*="team-people-header"]) {
+    overflow: hidden;
+    height: min(32svh, 24rem);
+  }
+
+  [header-desktop-image][src*="team-people-header"] {
+    transform: translateX(-20%) scale(1.55);
+    transform-origin: center;
+  }
+
+  @media screen and (min-width: 768px) {
+    [header-desktop-image][src*="team-people-header"] {
+      transform: translateX(-15%) scale(1.15);
+    }
+  }
+
   /* Instance wrappers cannot receive a separate native class in Webflow. */
   [home-start] > :has(> [nav-block]) {
     position: fixed;
