@@ -335,6 +335,10 @@
     row-gap: 1.25rem;
   }
 
+  .tiles-item.is-2:where(.w-variant-2642f8ec-f6ce-432d-0450-fbcb87e77e4d), .tiles-item.is-3:where(.w-variant-2642f8ec-f6ce-432d-0450-fbcb87e77e4d) {
+    margin-top: 0;
+  }
+
   .tiles-img {
     aspect-ratio: 3 / 2;
   }
@@ -1626,16 +1630,36 @@
 
   .image-copy-inner {
     grid-row-gap: 1.75rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .image-copy-inner:where(.w-variant-3d1bd3a8-41c9-99c9-52e3-98f67763e25c) {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .image-copy-media {
     aspect-ratio: 16 / 10;
     border-radius: .75rem;
+    flex: none;
+    width: 100%;
+    height: auto;
+  }
+
+  .image-copy-media:where(.w-variant-3d1bd3a8-41c9-99c9-52e3-98f67763e25c) {
+    aspect-ratio: 16 / 10;
+    width: 100%;
     height: auto;
   }
 
   .image-copy-content {
     grid-template-columns: 1fr;
+  }
+
+  .image-copy-split-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
 
   .image-copy-split {
@@ -1649,14 +1673,22 @@
   }
 
   .image-copy-split-media {
+    aspect-ratio: 16 / 10;
     flex: none;
     width: 100%;
-    height: 26rem;
+    height: auto;
   }
 
   .image-copy-split-content {
+    grid-row-gap: 1.25rem;
+    flex-direction: column;
     flex: none;
+    align-items: flex-start;
     width: 100%;
+  }
+
+  .image-cards-section {
+    padding: 3rem 1.25rem;
   }
 
   .image-cards-intro {
@@ -1665,15 +1697,36 @@
   }
 
   .image-cards-grid {
-    grid-row-gap: 1.5rem;
+    grid-column-gap: .75rem;
+    grid-row-gap: 1.25rem;
     grid-template-columns: 1fr 1fr;
+    align-items: start;
+    padding-top: 2rem;
     padding-left: 0;
     padding-right: 0;
     display: grid;
   }
 
+  .image-cards-item.is-4:where(.w-variant-2642f8ec-f6ce-432d-0450-fbcb87e77e4d) {
+    margin-top: 0;
+  }
+
+  .image-cards-clip {
+    aspect-ratio: 4 / 3;
+    height: auto;
+  }
+
   .image-card-offset-2, .image-card-offset-3, .image-card-offset-4 {
     margin-top: 0;
+  }
+
+  .callout-text-section {
+    padding: 2rem 1.25rem;
+  }
+
+  .callout-text-panel {
+    grid-row-gap: 1.25rem;
+    padding: 2rem 1.25rem;
   }
 
   .solutions-header-compact {
@@ -1772,8 +1825,14 @@
     height: 6.395rem;
   }
 
+  .project-callout-section {
+    padding: 2rem 1.25rem;
+  }
+
   .project-callout-layout {
+    grid-row-gap: 1.5rem;
     grid-template-columns: 1fr;
+    padding: 2rem 1.25rem;
   }
 
   .services-overview-header {
@@ -1786,9 +1845,24 @@
     padding: 3rem 0;
   }
 
+  .usecase-card-clip {
+    aspect-ratio: 4 / 3;
+    height: auto;
+  }
+
+  .usecase-card-label {
+    min-height: 0;
+    padding: .875rem .375rem;
+  }
+
+  .contact-cta-section {
+    min-height: 0;
+  }
+
   .contact-cta-content {
     grid-row-gap: 2rem;
     grid-template-columns: 1fr;
+    padding: 2rem 1.25rem 3rem;
   }
 
   .contact-cta-background {
@@ -1830,6 +1904,7 @@
     grid-column-gap: 2rem;
     grid-row-gap: 2rem;
     grid-template-columns: 1fr;
+    padding: 2rem 1.25rem 3rem;
   }
 
   .store-cards-grid {
