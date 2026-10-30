@@ -2543,6 +2543,10 @@
   }
 
   /* A centered header uses its artwork as a background, not a separate mobile row. */
+  .solutions-header .promo-header-content {
+    min-height: 0;
+  }
+
   .page-header-section-01:has(> .usecase-header-centered) > .header-01-image-wrap {
     position: absolute;
     inset: 0;
