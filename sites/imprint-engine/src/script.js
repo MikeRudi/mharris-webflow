@@ -64,8 +64,9 @@ function initSite() {
       const navigationCleanup = mobileNavigation();
       const homeCleanup = homeAnimation();
       const detailsCleanup = mobileHomepageDetails();
+      const headerCleanup = mobileSolutionHeaderArt();
       const teamCleanup = teamProfilesAnimation();
-      return () => [teamCleanup, detailsCleanup, homeCleanup, navigationCleanup].forEach((cleanup) => cleanup && cleanup());
+      return () => [teamCleanup, headerCleanup, detailsCleanup, homeCleanup, navigationCleanup].forEach((cleanup) => cleanup && cleanup());
     });
     cleanups.push(() => mobile.revert());
   }
@@ -80,6 +81,27 @@ function initSite() {
 }
 
 $(initSite);
+
+function mobileSolutionHeaderArt() {
+  const pageId = document.documentElement.getAttribute("data-wf-page");
+  const pages = new Set([
+    "6abbde0cb7e6f39d52509b87", "6abbde0cb7e6f39d52509b99", "6abbde0cb7e6f39d52509b9a",
+    "6abbde0cb7e6f39d52509b9b", "6abbde0cb7e6f39d52509b9c", "6abbde0cb7e6f39d52509b9d",
+    "6abbde0cb7e6f39d52509b9e", "6abbde0cb7e6f39d52509ba2", "6abbde0cb7e6f39d52509ba3",
+    "6abbde0cb7e6f39d52509ba4", "6abbde0cb7e6f39d52509ba5", "6abbde0cb7e6f39d52509ba6",
+    "6abbde0cb7e6f39d52509ba7", "6abbde0cb7e6f39d52509ba9", "6abbde0cb7e6f39d52509baa",
+    "6abbde0cb7e6f39d52509bab", "6abbde0cb7e6f39d52509bac", "6abbde0cb7e6f39d52509bad",
+  ]);
+  if (!pages.has(pageId)) return null;
+  const $images = $("[header-desktop-image]").filter(function () {
+    return !$(this).siblings("[header-mobile-image]:not(.w-condition-invisible)").length;
+  });
+  if (!$images.length) return null;
+  const restore = rememberAttributes($images, ["solution-header-art", "sizes"]);
+  // The desktop exports include empty space for copy. Request enough pixels for the mobile crop.
+  $images.attr({ "solution-header-art": "", sizes: "1000px" });
+  return restore;
+}
 
 function mobileHomepageDetails() {
   if (!$("[lander-wrap]").length) return null;

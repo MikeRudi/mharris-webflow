@@ -2479,6 +2479,22 @@
     height: min(32svh, 24rem);
   }
 
+  /* Frame the existing wide Industry/Use Case exports around their artwork.
+     The hook is scoped to these pages; optional mobile-image props still take priority. */
+  .header-01-image-wrap:has([solution-header-art]) {
+    height: min(35svh, 28rem);
+    overflow: hidden;
+  }
+
+  [header-desktop-image][solution-header-art] {
+    width: calc(min(35svh, 28rem) * 1.25);
+    height: 100%;
+    left: 50%;
+    object-fit: cover;
+    object-position: 70% 50%;
+    transform: translateX(-50%);
+  }
+
   [header-desktop-image][src*="team-people-header"] {
     transform: translateX(-20%) scale(1.55);
     transform-origin: center;
