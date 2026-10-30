@@ -1835,6 +1835,15 @@
     padding: 2rem 1.25rem;
   }
 
+  .project-callout-background {
+    object-fit: cover;
+    object-position: 50% 50%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
   .services-overview-header {
     min-height: 100svh;
     padding-top: 5.5rem;
