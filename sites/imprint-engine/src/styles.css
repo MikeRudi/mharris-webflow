@@ -2504,6 +2504,19 @@
     transform: translateX(-50%);
   }
 
+  /* A centered header uses its artwork as a background, not a separate mobile row. */
+  .page-header-section-01:has(> .usecase-header-centered) > .header-01-image-wrap {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .page-header-section-01:has(> .usecase-header-centered) [header-desktop-image] {
+    object-fit: cover;
+    object-position: 50% 100%;
+  }
+
   [header-desktop-image][src*="team-people-header"] {
     transform: translateX(-20%) scale(1.55);
     transform-origin: center;
