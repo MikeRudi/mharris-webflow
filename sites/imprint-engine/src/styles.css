@@ -1130,6 +1130,7 @@
 
   .faq-section:where(.w-variant-4aab047b-de58-3075-070f-4598b4eeb7db) {
     background-color: #101010;
+    padding-top: 2rem;
   }
 
   .home-faq-heading {

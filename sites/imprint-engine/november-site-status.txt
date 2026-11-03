@@ -1,0 +1,45 @@
+IMPRINT ENGINE — HOMEPAGE CORRECTIONS AND NOVEMBER PASS STATUS
+Date: 3 November 2026
+Staging: https://imprint-engine-v2.webflow.io/
+Status: Homepage corrections awaiting Michael's review. The wider November site pass is not finished.
+
+LATEST HOMEPAGE CORRECTIONS
+- Teams: original circle groups and interaction restored, persona images only. Six centered content blocks with side padding; Item 6 is Lorem ipsum. Desktop three columns, mobile one.
+- Accordion 02: CUSTOM now sits underneath revealed images, like the other choices.
+- Testimonials: original red, grey and white notes begin inside the open envelope. Corrected pocket geometry and layering. Fifteen editable notes spread into the horizontal swiper, with the envelope remaining in the track. No progress bar; thin arrow artwork and purple CTA treatment restored. Responsive note headers prevent logos crowding names.
+- Homepage Drop with Text: copy moved left; gradient drop fades in with the lander's star reflection. Shorter sticky sequence, FAQ entering during line retraction. Outro and FAQ backgrounds match the footer at each breakpoint.
+- Native changes published to Webflow staging; runtime CSS/JS pushed to GitHub main. Custom production domains were not published.
+- Checked 1440, 1024 and 390 CSS pixels: no page-width overflow, broken persona images or page JavaScript errors. Fifteen notes and Next scrolling verified.
+
+WHERE THE WIDER SITE PASS HAD REACHED
+
+Company
+- About Us updated with latest copy and ten original PNG photos.
+- Global Infrastructure, How We Work and Impact copy audited and updated; final image/responsive review remains.
+- Careers openings, benefits and application layout built and checked at four widths. Resume upload remains deferred until last as requested; final form controls still need checking.
+- Team and Culture built and checked at four widths, retaining Lorem ipsum and empty media where supplied by the design.
+- Blog listing built with original featured images, CMS filtering and pagination; article template remains.
+- Product Updates built with seven editable release rows and original ribbon; responsive checks complete. Source release content still includes placeholders.
+
+Solutions
+- Latest content/design inventory collected for 44 matched pages.
+- Team overview and six detail pages updated, including fourteen Image + Copy Split sections and Marketing's production photo/section. Twenty-one responsive checks performed.
+- Four Service opening accordion panels updated with latest copy and original 2112px images.
+- Eight Industry pages copy-audited with twelve punctuation updates; remaining Finance/Construction heading updates and final checks still pending.
+- Use Case overview updated with thirteen real linked categories and responsive checks.
+- Remaining Solutions content/image/responsive checks are unfinished. Some supplied images remain explicit Figma placeholders.
+
+Product
+- Gifting and Stores assembled with latest source content and original assets; four-width checks completed. Final visual polish remains.
+- Portal: twenty-four assets exported/uploaded and reusable components prepared. The Portal page itself has NOT been assembled.
+- Product overview, Portal, Rebate, Security, Pricing, Integrations and Academy remain.
+
+Still outstanding
+- Remaining Product pages, Resources and Customers content/component passes.
+- Blog article template.
+- Remaining Solutions/Company source-content and responsive checks.
+- Latest navigation/footer alignment and full-site final link/image/mobile review.
+- Careers resume upload last.
+
+No tracker Complete/Desktop/Mobile approvals were added. Final approval belongs to Michael.
+Backups, original asset exports and QA screenshots remain in the local Figma exports folders.

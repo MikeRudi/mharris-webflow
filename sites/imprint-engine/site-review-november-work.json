@@ -1,0 +1,365 @@
+{
+  "started": "2026-11-03",
+  "status": "in progress",
+  "scope": "Company, Product, Resources, Customers, Solutions content/assets, compact spacing, responsive QA",
+  "approval": "Michael only; no Complete or Mobile checks",
+  "completed": [
+    "Full site/page/component backups",
+    "New Figma page inventory",
+    "About Us content and original PNG photo updates",
+    "Global Infrastructure, How We Work and Impact copy audit",
+    "Company spacing and responsive image wrappers",
+    "Industry 8 pages copy audit and 12 punctuation updates",
+    "Careers native openings, benefits, values and application layout",
+    "Careers filtering QA: 1440, 1024, 768, 390; no overflow or broken images",
+    "Image Cards 4 optional descriptions and CTA props added",
+    "Compact native spacing across shared solution and company sections",
+    "Team and Culture page with optional FAQ categories; 1440/1024/768/390 QA passed",
+    "Product Updates page, reusable ribbon header and seven prop-based release rows; responsive QA passed",
+    "Blog featured story, original PNG assets, full CMS pagination and filtering; responsive QA passed",
+    "Use Case overview updated to latest copy, banner and 13 real category links; responsive QA passed",
+    "Gifting curve replaced with original SVG and ratio wrapper; overlap fixed; platform image fixed-height removed",
+    "Latest Figma and Webflow content inventories collected for all 44 matched solution pages",
+    "Marketing production section added with original source photo and text",
+    "Four Service accordion opening panels updated to latest content and original 2112px images",
+    "Team text-only hero gaps corrected natively; desktop minimum height reduced from 777px to content height",
+    "Six Team solution detail pages and overview updated; 21 responsive checks completed, final sitewide review remains",
+    "Product Gifting and Stores assembled with latest source copy and original assets; checked at four widths, final visual polish remains",
+    "Portal original assets exported and uploaded; reusable component preparation only, page not assembled",
+    "Homepage review corrections: persona-only original circles, sixth content item, CUSTOM image stacking, envelope retained in 15-note swiper, left outro copy, star reflection and earlier FAQ entry"
+  ],
+  "solutions": [
+    {
+      "group": "Solutions By Industry",
+      "name": "Solutions by Industry",
+      "figmaId": "7704:35011",
+      "pageId": "6abbde0cb7e6f39d52509b87",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "Technology",
+      "figmaId": "7704:35292",
+      "pageId": "6abbde0cb7e6f39d52509b99",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "Finance & Fintech",
+      "figmaId": "7704:35736",
+      "pageId": "6abbde0cb7e6f39d52509b9a",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "Healthcare & Life sciences",
+      "figmaId": "7704:36046",
+      "pageId": "6abbde0cb7e6f39d52509b9b",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "Hospitality",
+      "figmaId": "7704:36329",
+      "pageId": "6abbde0cb7e6f39d52509b9c",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "events & entertainment",
+      "figmaId": "7704:36633",
+      "pageId": "6abbde0cb7e6f39d52509b9d",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "construction & engineering",
+      "figmaId": "7704:36943",
+      "pageId": "6abbde0cb7e6f39d52509b9e",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "professional services",
+      "figmaId": "7704:37119",
+      "pageId": "6abbde0cb7e6f39d52509b9f",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Industry",
+      "name": "professional services",
+      "figmaId": "7704:37293",
+      "pageId": null,
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "Frame 2147236818",
+      "figmaId": "7704:37886",
+      "pageId": "6abbde0cb7e6f39d52509ba0",
+      "status": "implemented; awaiting final review"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "Corporate Gifting",
+      "figmaId": "7704:38144",
+      "pageId": "6abbde0cb7e6f39d52509ba1",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "Corporate Events",
+      "figmaId": "7704:38457",
+      "pageId": "6abbde0cb7e6f39d52509ba3",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "Online Company Store",
+      "figmaId": "7704:38720",
+      "pageId": "6abbde0cb7e6f39d52509ba4",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "Promo Products",
+      "figmaId": "7704:39126",
+      "pageId": "6abbde0cb7e6f39d52509ba2",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "sales prospecting",
+      "figmaId": "7704:39659",
+      "pageId": "6abbde0cb7e6f39d52509ba9",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "direct mail",
+      "figmaId": "7704:39847",
+      "pageId": "6abbde0cb7e6f39d52509baa",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "employee recognition",
+      "figmaId": "7704:40047",
+      "pageId": "6abbde0cb7e6f39d52509bab",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "activation & events",
+      "figmaId": "7704:40148",
+      "pageId": "6abbde0cb7e6f39d52509bac",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "managed inventory",
+      "figmaId": "7704:40337",
+      "pageId": "6abbde0cb7e6f39d52509bad",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "New Hire Kits",
+      "figmaId": "7704:40516",
+      "pageId": "6abbde0cb7e6f39d52509ba5",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "holiday Giftings",
+      "figmaId": "7704:40741",
+      "pageId": "6abbde0cb7e6f39d52509ba6",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "customer appreciation",
+      "figmaId": "7704:41021",
+      "pageId": "6abbde0cb7e6f39d52509ba7",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Use Case",
+      "name": "retail merchandising",
+      "figmaId": "7704:41276",
+      "pageId": "6abbde0cb7e6f39d52509ba8",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product",
+      "figmaId": "7704:42006",
+      "pageId": "6abbde0cb7e6f39d52509b4e",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product / Apparel",
+      "figmaId": "7704:42485",
+      "pageId": "6abbde0cb7e6f39d52509b53",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product / Merchandise",
+      "figmaId": "7704:42647",
+      "pageId": "6abbde0cb7e6f39d52509b54",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product / Signage",
+      "figmaId": "7704:42801",
+      "pageId": "6abbde0cb7e6f39d52509b58",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product / Packaging",
+      "figmaId": "7704:42902",
+      "pageId": "6abbde0cb7e6f39d52509b5a",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product / Events",
+      "figmaId": "7704:42946",
+      "pageId": "6abbde0cb7e6f39d52509b57",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product / Print",
+      "figmaId": "7704:43074",
+      "pageId": "6abbde0cb7e6f39d52509b59",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Shop By Product / Kits",
+      "figmaId": "7704:43238",
+      "pageId": "6abbde0cb7e6f39d52509b55",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Product",
+      "name": "Custom Products Page",
+      "figmaId": "7704:43315",
+      "pageId": "6abbde0cb7e6f39d52509b56",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Service",
+      "name": "Solutions by Service",
+      "figmaId": "7704:45130",
+      "pageId": "6acdfe80e72e20aaa58605cb",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Service",
+      "name": "Shop By Product / Brand Design",
+      "figmaId": "7704:45424",
+      "pageId": "6abbde0cb7e6f39d52509b5d",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Service",
+      "name": "Shop By Product / Custom product design",
+      "figmaId": "7704:45657",
+      "pageId": "6abbde0cb7e6f39d52509b5e",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Service",
+      "name": "Shop By Product / Photographyn",
+      "figmaId": "7704:45852",
+      "pageId": "6abbde0cb7e6f39d52509b5f",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Service",
+      "name": "Shop By Product / Videography",
+      "figmaId": "7704:46065",
+      "pageId": "6abbde0cb7e6f39d52509b60",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Service",
+      "name": "Shop By Product / Strategy & Consulting",
+      "figmaId": "7704:46281",
+      "pageId": "6abbde0cb7e6f39d52509bc2",
+      "status": "pending"
+    },
+    {
+      "group": "Solutions By Team",
+      "name": "Shop by Team",
+      "figmaId": "7704:46584",
+      "pageId": "6abbde0cb7e6f39d52509b61",
+      "status": "implemented; awaiting final review"
+    },
+    {
+      "group": "Solutions By Team",
+      "name": "People Manager",
+      "figmaId": "7704:46967",
+      "pageId": "6abbde0cb7e6f39d52509b65",
+      "status": "implemented; awaiting final review"
+    },
+    {
+      "group": "Solutions By Team",
+      "name": "Marketing",
+      "figmaId": "7704:47155",
+      "pageId": "6abbde0cb7e6f39d52509b66",
+      "status": "implemented; awaiting final review"
+    },
+    {
+      "group": "Solutions By Team",
+      "name": "Events",
+      "figmaId": "7704:47461",
+      "pageId": "6abbde0cb7e6f39d52509b67",
+      "status": "implemented; awaiting final review"
+    },
+    {
+      "group": "Solutions By Team",
+      "name": "Sales",
+      "figmaId": "7704:47766",
+      "pageId": "6abbde0cb7e6f39d52509b68",
+      "status": "implemented; awaiting final review"
+    },
+    {
+      "group": "Solutions By Team",
+      "name": "Procurement",
+      "figmaId": "7704:48072",
+      "pageId": "6abbde0cb7e6f39d52509b86",
+      "status": "implemented; awaiting final review"
+    },
+    {
+      "group": "Solutions By Team",
+      "name": "Retail",
+      "figmaId": "7704:48377",
+      "pageId": "6abbde0cb7e6f39d52509bc4",
+      "status": "implemented; awaiting final review"
+    }
+  ],
+  "deferredLast": "Careers native resume upload remains deferred until last, per Michael; no current foreground-control permission.",
+  "reviewGaps": [
+    "Career upload not working yet; Submit label still inherited Get Started; support-tail text needs recheck and prop rebind",
+    "Careers departments not supplied; category props are blank; job links use application anchor",
+    "About culture poster has no supplied video URL",
+    "Values images 3-5 only 300x240 in Figma original source",
+    "Team and Culture source remains lorem ipsum and blank media. Product Updates source remains placeholder release descriptions and dates; release links not supplied.",
+    "Most new Team solution images are still explicit 360px missing-image placeholders in Figma.",
+    "Remaining content, image and responsive work is ongoing; do not treat current implementation as approved.",
+    "Blog listing finished; static/CMS article template remains",
+    "Product: Gifting and Stores built; Portal prepared but not assembled; remaining product pages pending",
+    "Resources and Customers main content pass pending",
+    "Remaining Solutions content/image/mobile validation, navigation and footer alignment, final full-site QA pending"
+  ],
+  "latestCommit": "5077b97",
+  "updatedAt": "2026-11-03T10:53:20.910Z",
+  "currentFocus": "Homepage review corrections; wider November site pass remains in progress"
+}

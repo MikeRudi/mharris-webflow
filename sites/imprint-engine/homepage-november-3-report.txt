@@ -1,4 +1,12 @@
 IMPRINT ENGINE — HOMEPAGE NOVEMBER 3
+UPDATED REVIEW NOTE: The implementation record below predates Michael's latest
+corrections. See november-site-status.txt for the current state. Teams now uses
+only persona photos in the original circle layout and has six content items.
+Testimonials retains the envelope in the swiper with corrected pocket layering.
+The outro copy is on the left, includes the star reflection, and releases sooner.
+Outro/FAQ blacks match the footer at each breakpoint. Correction commits include
+9857965 and 5077b97. No tracker approval was recorded.
+
 Status: Ready for Michael to review
 Date: 3 November 2026
 Staging: https://imprint-engine-v2.webflow.io/
