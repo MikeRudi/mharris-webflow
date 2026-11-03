@@ -2816,12 +2816,12 @@ function homeOutroAnimation() {
   if (!window.gsap || !window.ScrollTrigger) return null;
   // Fractions of the sticky section's scroll; mobile keeps the lighter opacity transition.
   const motion = {
-    brackets: { start: 0.04, duration: 0.2, distance: 1.2, ease: "power1.in" },
-    drop: { start: 0.08, duration: 0.2, ease: "power1.in" },
-    clip: { start: 0.22, duration: 0.5, ease: "none", mobileTextSwitch: 0.55 },
-    lineReveal: { start: 0.55, duration: 0.12, ease: "power1.in" },
-    lineRetract: { start: 0.72, duration: 0.28, ease: "power1.in" },
-    dropLeave: { start: 0.86, duration: 0.14, ease: "power1.in" },
+    brackets: { start: 0.02, duration: 0.16, distance: 1.2, ease: "power1.in" },
+    drop: { start: 0.06, duration: 0.18, ease: "power1.in" },
+    clip: { start: 0.18, duration: 0.4, ease: "none", mobileTextSwitch: 0.55 },
+    lineReveal: { start: 0.48, duration: 0.1, ease: "power1.in" },
+    lineRetract: { start: 0.64, duration: 0.26, ease: "power1.in" },
+    dropLeave: { start: 0.78, duration: 0.12, ease: "power1.in" },
   };
   const cleanups = [], media = gsap.matchMedia();
   media.add({ mobile: "(max-width: 1199px)", desktop: "(min-width: 1200px)",
@@ -2883,7 +2883,8 @@ function homeOutroAnimation() {
       if (reduced) {
         section.style.height = "100dvh"; layout.style.position = "relative";
         timeline.progress(1); draw();
-      } else trigger = ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom bottom",
+      // The sticky frame releases before the line retracts, bringing the FAQ in beneath it.
+      } else trigger = ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom 50%",
         animation: timeline, scrub: true, invalidateOnRefresh: true, onRefresh: draw });
       cleanups.push(() => { trigger?.kill(); timeline.kill(); restore(); });
     });
@@ -4067,9 +4068,9 @@ function testimonialEnvelopeAnimation() {
     scroll: { start: "top 50%", end: "top top", scrub: true },
     lift: { start: 0, duration: 0.32, distance: 4, ease: "power1.in" },
     spread: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
-    envelope: { start: 0.5, duration: 0.5, ease: "power1.in" },
+    envelope: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
     controls: { start: 0.88, duration: 0.12, ease: "power1.in" },
-    stack: { scale: 0.72, rotation: [-7, 1, 7], offset: 1.4 },
+    stack: { width: 0.76, top: [0.12, 0.18, 0.26], left: [0.13, 0.1, 0.12], rotation: [2, 0, 4] },
   };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const cleanups = [];
@@ -4103,7 +4104,7 @@ function testimonialEnvelopeAnimation() {
       $ui.each((_, node) => { node.inert = !ready; });
       cards.forEach((card, i) => {
         card.inert = !ready;
-        card.setAttribute("aria-hidden", String(!ready && i > 2));
+        card.setAttribute("aria-hidden", String(!ready && Number(card.getAttribute("testimonial-slide")) > 3));
       });
       if (!ready) carousel.scrollLeft = 0;
       updateButtons();
@@ -4112,22 +4113,41 @@ function testimonialEnvelopeAnimation() {
       if (disposed) return;
       trigger?.kill(); timeline?.kill();
       carousel.scrollLeft = 0;
-      gsap.set(cards, { clearProps: "transform,opacity,visibility" });
+      gsap.set(cards, { clearProps: "transform,opacity,visibility,clipPath" });
       const unit = rem(), centre = carousel.clientWidth / 2;
-      const positions = cards.map((card, i) => centre - card.offsetLeft - card.offsetWidth / 2
-        + ((i % 3) - 1) * motion.stack.offset * unit);
-      const lift = motion.lift.distance * unit;
-      gsap.set(envelope, { autoAlpha: 1 });
-      gsap.set(cards, { x: i => positions[i], y: 2.8 * unit, scale: motion.stack.scale,
-        rotation: i => motion.stack.rotation[i % 3], autoAlpha: i => i < 3 ? 1 : 0,
-        zIndex: i => i < 3 ? i + 1 : 0, transformOrigin: "50% 50%" });
+      gsap.set(envelope, { clearProps: "transform,opacity,visibility,left" });
+      const envelopeLeft = centre - envelope.offsetWidth / 2;
+      const envelopeTravel = envelopeLeft - envelope.offsetLeft;
+      const starts = cards.map(card => {
+        const number = Number(card.getAttribute("testimonial-slide")), index = (number - 1) % 3;
+        const scale = envelope.offsetWidth * motion.stack.width / card.offsetWidth;
+        return {
+          x: envelopeLeft + envelope.offsetWidth * (motion.stack.left[index] + motion.stack.width / 2)
+            - card.offsetLeft - card.offsetWidth / 2,
+          y: envelope.offsetTop + envelope.offsetHeight * motion.stack.top[index] - card.offsetTop
+            - card.offsetHeight * (1 - scale) / 2,
+          scale, rotation: motion.stack.rotation[index], visible: number <= 3, number,
+          clippedBottom: Math.max(0, card.offsetHeight - envelope.offsetHeight * (0.92 - motion.stack.top[index]) / scale),
+        };
+      });
+      // Relative left does not create a stacking context: the pocket stays above the notes,
+      // while the envelope back stays underneath them throughout the scroll.
+      gsap.set(envelope, { left: envelopeTravel, autoAlpha: 1 });
+      gsap.set(cards, { x: i => starts[i].x, y: i => starts[i].y, scale: i => starts[i].scale,
+        rotation: i => starts[i].rotation, autoAlpha: i => starts[i].visible ? 1 : 0,
+        zIndex: i => 10 + (starts[i].number % 3 || 3), transformOrigin: "50% 50%",
+        clipPath: i => `inset(0px 0px ${starts[i].clippedBottom}px 0px)` });
       gsap.set($ui, { autoAlpha: 0 });
       ready = true; interactive(false);
       timeline = gsap.timeline({ paused: true });
-      timeline.to(cards, { y: -lift, duration: motion.lift.duration, ease: motion.lift.ease }, motion.lift.start);
-      timeline.to(cards, { x: 0, y: 0, scale: 1, rotation: 0, autoAlpha: 1,
+      timeline.to(cards, { y: i => starts[i].y - motion.lift.distance * unit,
+        duration: motion.lift.duration, ease: motion.lift.ease }, motion.lift.start);
+      timeline.to(cards, { x: 0, y: unit, scale: 1,
+        rotation: i => starts[i].number === 3 ? 3 : starts[i].number % 3 === 0 ? 1.35 : 0, autoAlpha: 1,
         duration: motion.spread.duration, ease: motion.spread.ease }, motion.spread.start);
-      timeline.to(envelope, { autoAlpha: 0, duration: motion.envelope.duration, ease: motion.envelope.ease }, motion.envelope.start);
+      timeline.to(cards, { clipPath: "inset(0px 0px 0px 0px)", duration: motion.spread.duration,
+        ease: motion.spread.ease }, motion.spread.start);
+      timeline.to(envelope, { left: 0, duration: motion.envelope.duration, ease: motion.envelope.ease }, motion.envelope.start);
       timeline.to($ui, { autoAlpha: 1, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
       if (reduced.matches) { timeline.progress(1); interactive(true); }
       else trigger = ScrollTrigger.create({ trigger: section, animation: timeline, ...motion.scroll,
