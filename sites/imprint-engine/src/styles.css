@@ -1654,7 +1654,7 @@
   }
 
   .image-copy-section {
-    padding: 2rem 1.25rem 3.5rem;
+    padding: 2rem 1.25rem;
   }
 
   .image-copy-inner {
@@ -2089,18 +2089,22 @@
   }
 
   .header-photo-content {
-    grid-template-columns: 1fr .3fr;
-    padding: 2rem 2.625rem;
+    grid-template-columns: 1fr;
+    padding: 2rem 1.25rem;
   }
 
   .header-photo-copy {
     width: 100%;
   }
 
+  .company-copy-section {
+    padding: 2rem 1.25rem;
+  }
+
   .company-copy-inner {
     direction: ltr;
     grid-template-columns: 1fr;
-    row-gap: 2rem;
+    row-gap: 1.5rem;
   }
 
   .company-copy-reverse {
@@ -2108,12 +2112,16 @@
   }
 
   .company-copy-media {
-    height: 26rem;
+    aspect-ratio: 4 / 3;
   }
 
   .company-statement-inner {
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .company-values-section {
+    padding: 2rem 1.25rem;
   }
 
   .company-values-grid {
@@ -2801,8 +2809,56 @@
     width: 100%;
     min-width: 0;
   }
+
+  .career-openings {
+    padding: 2rem 1.25rem;
+  }
+
+  .career-openings-layout {
+    grid-template-columns: 1fr;
+    row-gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .career-openings-filters {
+    flex-flow: wrap;
+    gap: .75rem 1rem;
+  }
+
+  .career-job {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .career-benefits {
+    padding: 2rem 1.25rem;
+  }
+
+  .career-benefit-card {
+    width: 16rem;
+    padding: 1rem;
+  }
+
+  .career-application {
+    padding: 2rem 1.25rem;
+  }
+
+  .career-application-layout {
+    grid-template-columns: 1fr;
+    row-gap: 1.5rem;
+  }
 }
 /* END NATIVE TABLET EXTENSION */
+
+/* Content filtering must override native flex/grid display rules. */
+[career-job][hidden],
+[career-empty][hidden] {
+  display: none !important;
+}
+
+[career-job-filter].is-active {
+  color: #6425ab;
+}
 
 [git-test] {
   background-color: green;

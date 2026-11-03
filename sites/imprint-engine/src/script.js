@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 1199px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), customProducts(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), customProducts(), careerOpenings(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
@@ -81,6 +81,48 @@ function initSite() {
 }
 
 $(initSite);
+
+function careerOpenings() {
+  const cleanups = [];
+  $("[career-openings]").each(function () {
+    const $root = $(this), $jobs = $root.find("[career-job]");
+    const $search = $root.find("[career-job-search]"), $filters = $root.find("[career-job-filter]");
+    const $empty = $root.find("[career-empty]"), $form = $root.find("[career-search-form]");
+    if (!$jobs.length || !$search.length) return;
+    const restoreJobs = rememberAttributes($jobs, ["hidden"]);
+    const restoreFilters = rememberAttributes($filters, ["class", "aria-pressed"]);
+    const restoreEmpty = rememberAttributes($empty, ["hidden", "class", "role", "aria-live"]);
+    let department = "";
+    $empty.removeClass("is-hidden").attr({ role: "status", "aria-live": "polite", hidden: true });
+    function filter() {
+      const query = String($search.val() || "").trim().toLowerCase();
+      let visible = 0;
+      $jobs.each(function () {
+        const $job = $(this), category = $job.find("[career-job-department]").text().trim().toLowerCase();
+        const matches = $job.text().toLowerCase().includes(query) && (!department || !category || category === department);
+        this.hidden = !matches;
+        if (matches) visible++;
+      });
+      $empty.prop("hidden", visible !== 0);
+      $filters.each(function () {
+        const active = $(this).text().trim().toLowerCase() === department;
+        $(this).toggleClass("is-active", active).attr("aria-pressed", String(active));
+      });
+      if (window.lenis) window.lenis.resize();
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    }
+    const unbind = bindControlActivation($filters, "careerOpenings", ($filter) => {
+      const value = $filter.text().trim().toLowerCase();
+      department = department === value ? "" : value;
+      filter();
+    });
+    $search.on("input.careerOpenings", filter);
+    $form.on("submit.careerOpenings", (event) => { event.preventDefault(); event.stopImmediatePropagation(); });
+    filter();
+    cleanups.push(() => { unbind(); $search.off(".careerOpenings"); $form.off(".careerOpenings"); restoreJobs(); restoreFilters(); restoreEmpty(); });
+  });
+  return () => cleanups.forEach((cleanup) => cleanup());
+}
 
 function mobileSolutionHeaderArt() {
   const pageId = document.documentElement.getAttribute("data-wf-page");
