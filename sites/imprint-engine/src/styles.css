@@ -1984,13 +1984,25 @@
     height: 22rem;
   }
 
+  .platform-image-section {
+    padding: 0 0 2rem;
+  }
+
+  .platform-image-media {
+    aspect-ratio: 1440 / 435;
+    height: auto;
+    min-height: 0;
+  }
+
   .platform-image-content {
+    grid-row-gap: 1.25rem;
     grid-template-columns: 1fr;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
   }
 
   .gifting-logo-section {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding: 0;
   }
 
   .event-cards-intro {
@@ -3009,6 +3021,10 @@
     grid-column-gap: .75rem;
     grid-row-gap: .75rem;
     justify-self: start;
+  }
+
+  .gifting-logo-content {
+    padding: 2rem 1.25rem;
   }
 }
 /* END NATIVE TABLET EXTENSION */
