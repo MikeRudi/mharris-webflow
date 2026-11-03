@@ -3145,14 +3145,18 @@ function navigationSearch() {
       "solutions-by-use-case": "Solutions by Use Case",
     };
     $root.find("[nav-dropdown] a[href], [nav-mobile-main] a[href]").each(function () {
-      if (this.hasAttribute("nav-dropdown-trigger") || this.hasAttribute("nav-login-placeholder") || this.matches(".nav-menu-feature")) return;
+      if (this.hasAttribute("nav-dropdown-trigger") || this.hasAttribute("nav-login-placeholder") ||
+        this.matches(".nav-menu-feature") || this.closest(".nav-btns")) return;
       const href = this.getAttribute("href"), label = this.textContent.trim().replace(/\s+/g, " ");
       if (!label || !href || href === "#" || /^javascript:/i.test(href)) return;
       const key = href;
       if (seen.has(key)) return;
       seen.add(key);
       const path = new URL(href, location.href).pathname.split("/").filter(Boolean)[0];
-      const category = categories[path] || "Explore";
+      const menu = this.closest("[nav-dropdown]")?.getAttribute("nav-dropdown");
+      const column = this.closest(".nav-menu-column")?.querySelector(".nav-menu-group-title")?.textContent.trim();
+      const category = categories[path] || (column === "Customer" ? "Customers" : column) ||
+        ({ platform: "Platform", company: "Company", support: "Resources" })[menu] || "Explore";
       if (!groups.has(category)) {
         const group = document.createElement("div"), heading = document.createElement("div");
         group.className = "nav-search-group"; heading.className = "text nav-search-heading";
