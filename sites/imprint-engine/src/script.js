@@ -2824,6 +2824,7 @@ function homeOutroAnimation() {
   if (!window.gsap || !window.ScrollTrigger) return null;
   // Fractions of the sticky section's scroll; mobile keeps the lighter opacity transition.
   const motion = {
+    scroll: { viewportDistance: 0.5 },
     brackets: { start: 0.02, duration: 0.16, distance: 1.2, ease: "power1.in" },
     drop: { start: 0.06, duration: 0.18, ease: "power1.in" },
     clip: { start: 0.18, duration: 0.4, ease: "none", mobileTextSwitch: 0.55 },
@@ -2901,7 +2902,7 @@ function homeOutroAnimation() {
         // Prepare only the approaching section, without retaining an offscreen render layer.
         prepare = ScrollTrigger.create({ trigger: section, start: "top 150%", end: "bottom top",
           onToggle: self => { dark.style.willChange = self.isActive ? (mobile ? "opacity" : "clip-path") : "auto"; } });
-        trigger = ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom 50%",
+        trigger = ScrollTrigger.create({ trigger: section, start: "top top", end: () => `+=${layout.clientHeight * motion.scroll.viewportDistance}`,
           animation: timeline, scrub: true, invalidateOnRefresh: true, onRefresh: measureClip });
       }
       cleanups.push(() => { prepare?.kill(); trigger?.kill(); timeline.kill(); restore(); });
@@ -3043,6 +3044,7 @@ function navigationDropdowns() {
 
     function open(trigger) {
       if (!desktopMenu.matches) return;
+      $root.triggerHandler("nav:searchclose");
       cancelLeave();
       if (active?.trigger === trigger) return;
       const key = $(trigger).attr("nav-dropdown-trigger");
@@ -3133,21 +3135,36 @@ function navigationSearch() {
       ["style", "class", "id", "aria-expanded", "aria-controls", "aria-hidden", "tabindex", "inert"]);
     const originalPosition = document.createComment("navigation search position");
     control.before(originalPosition);
-    const surface = ["background-color", "color", "border-bottom-left-radius", "border-bottom-right-radius"];
-    let opened = false, restingStyle = null;
-    const entries = [], seen = new Set();
+    const surface = ["background-color", "color", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"];
+    let opened = false, restingStyle = null, scrollLock = null;
+    const entries = [], seen = new Set(), groups = new Map();
+    const categories = {
+      "product": "Platform", "company": "Company", "resources": "Resources", "customers": "Customers",
+      "solutions-by-product": "Solutions by Product", "solutions-by-service": "Solutions by Service",
+      "solutions-by-team": "Solutions by Team", "solutions-by-industry": "Solutions by Industry",
+      "solutions-by-use-case": "Solutions by Use Case",
+    };
     $root.find("[nav-dropdown] a[href], [nav-mobile-main] a[href]").each(function () {
-      if (this.hasAttribute("nav-dropdown-trigger") || this.hasAttribute("nav-login-placeholder")) return;
+      if (this.hasAttribute("nav-dropdown-trigger") || this.hasAttribute("nav-login-placeholder") || this.matches(".nav-menu-feature")) return;
       const href = this.getAttribute("href"), label = this.textContent.trim().replace(/\s+/g, " ");
       if (!label || !href || href === "#" || /^javascript:/i.test(href)) return;
-      const key = `${href}|${label.toLowerCase()}`;
+      const key = href;
       if (seen.has(key)) return;
       seen.add(key);
+      const path = new URL(href, location.href).pathname.split("/").filter(Boolean)[0];
+      const category = categories[path] || "Explore";
+      if (!groups.has(category)) {
+        const group = document.createElement("div"), heading = document.createElement("div");
+        group.className = "nav-search-group"; heading.className = "text nav-search-heading";
+        heading.textContent = category; group.append(heading); results.append(group);
+        groups.set(category, group);
+      }
       const anchor = document.createElement("a");
       anchor.className = "nav-search-result"; anchor.setAttribute("href", href);
       anchor.textContent = label;
       for (const name of ["target", "rel"]) if (this.hasAttribute(name)) anchor.setAttribute(name, this.getAttribute(name));
-      results.append(anchor); entries.push({ anchor, label: label.toLowerCase() });
+      groups.get(category).append(anchor);
+      entries.push({ anchor, label: `${category} ${label}`.toLowerCase(), category });
     });
     panel.id = uniqueElementId("navigation-search-results");
     toggle.setAttribute("aria-controls", panel.id);
@@ -3162,7 +3179,29 @@ function navigationSearch() {
         anchor.hidden = !match; anchor.style.display = match ? "" : "none";
         if (match) count++;
       });
+      groups.forEach((group, category) => {
+        group.hidden = !entries.some(entry => entry.category === category && !entry.anchor.hidden);
+        group.style.display = group.hidden ? "none" : "";
+      });
       if (empty) empty.style.display = count ? "none" : "block";
+    }
+    function lockScroll() {
+      // Mobile navigation already owns its body lock; desktop search owns only this one.
+      if ($root.hasClass("is-mobile-open") || scrollLock) return;
+      const html = document.documentElement, body = document.body;
+      scrollLock = { html: html.style.overflow, body: body.style.overflow,
+        gutter: html.style.scrollbarGutter, stopped: Boolean(window.lenis?.isStopped) };
+      html.style.scrollbarGutter = "stable";
+      html.style.overflow = "hidden"; body.style.overflow = "hidden";
+      window.lenis?.stop();
+    }
+    function unlockScroll() {
+      if (!scrollLock) return;
+      document.documentElement.style.overflow = scrollLock.html;
+      document.documentElement.style.scrollbarGutter = scrollLock.gutter;
+      document.body.style.overflow = scrollLock.body;
+      if (!scrollLock.stopped) window.lenis?.start();
+      scrollLock = null;
     }
     function placeControl() {
       if (mobile.matches) main.prepend(control);
@@ -3173,6 +3212,7 @@ function navigationSearch() {
     function close(focus = false) {
       if (!opened) return;
       opened = false;
+      unlockScroll();
       $root.removeClass("is-search-open");
       toggle.setAttribute("aria-expanded", "false");
       panel.inert = true; panel.setAttribute("aria-hidden", "true");
@@ -3199,11 +3239,13 @@ function navigationSearch() {
         if (back) back.after(control); else panel.prepend(control);
         gsap.set(field, { width: "100%" });
       } else {
-        $root.css({ backgroundColor: "#ffffff", color: "#111111", borderBottomLeftRadius: 0, borderBottomRightRadius: 0 });
+        $root.css({ backgroundColor: "#ffffff", color: "#111111", borderTopLeftRadius: "2rem", borderTopRightRadius: "2rem",
+          borderBottomLeftRadius: 0, borderBottomRightRadius: 0 });
         gsap.to(field, { width: motion.field.width, duration: reduced.matches ? 0 : motion.field.duration,
           ease: motion.field.ease, overwrite: true });
       }
       input.tabIndex = 0; panel.inert = false; panel.setAttribute("aria-hidden", "false");
+      panel.scrollTop = 0; lockScroll();
       gsap.fromTo(panel, { display: "block", autoAlpha: 0, y: mobile.matches ? 0 : motion.panel.y },
         { autoAlpha: 1, y: 0, duration: reduced.matches || mobile.matches ? 0 : motion.panel.duration, ease: motion.panel.ease, overwrite: true });
       filter(); input.focus({ preventScroll: true });
@@ -3221,14 +3263,13 @@ function navigationSearch() {
     $root.on(`nav:close${ns} nav:searchclose${ns}`, () => close())
       .on(`keydown${ns}`, event => { if (event.key === "Escape" && opened) { event.preventDefault(); close(true); } });
     $(document).on(`pointerdown${ns}`, event => { if (opened && !root.contains(event.target)) close(); });
-    $(window).on(`scroll${ns}`, () => { if (!mobile.matches) close(); });
     const resize = () => { close(); placeControl(); };
     mobile.addEventListener("change", resize);
     placeControl(); filter();
     cleanups.push(() => {
       close(); unbind(); unbindBack(); mobile.removeEventListener("change", resize);
       $(input).add($root).add(document).add(window).off(ns); $(input).closest("form").off(ns);
-      entries.forEach(entry => entry.anchor.remove()); originalPosition.replaceWith(control);
+      groups.forEach(group => group.remove()); originalPosition.replaceWith(control);
       gsap.killTweensOf([field, panel]); restore();
     });
   });
@@ -4086,7 +4127,6 @@ function testimonialEnvelopeAnimation() {
     scroll: { start: "top 70%", end: "center center", scrub: true },
     lift: { start: 0, duration: 0.32, distance: 4, ease: "power1.in" },
     spread: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
-    envelope: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
     controls: { start: 0.88, duration: 0.12, ease: "power1.in" },
     stack: { width: 0.76, top: [0.07, 0.21, 0.36], left: [0.13, 0.08, 0.14], rotation: [2, -2, 4] },
   };
@@ -4098,10 +4138,11 @@ function testimonialEnvelopeAnimation() {
     const track = section.querySelector("[testimonial-track]");
     const cards = Array.from(section.querySelectorAll("[testimonial-slide]"));
     const envelope = section.querySelector("[testimonial-envelope]");
+    const pocket = envelope?.querySelector("[testimonial-envelope-front]");
     const $ui = $section.find("[testimonial-controls], [testimonial-complete-ui]");
     const $buttons = $section.find("[testimonial-previous], [testimonial-next]");
     if (!carousel || !track || !cards.length || !envelope) return;
-    const restore = rememberAttributes($(cards).add(envelope).add(carousel).add($ui).add($buttons),
+    const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add($ui).add($buttons),
       ["style", "class", "aria-hidden", "inert", "tabindex", "role", "aria-disabled"]);
     let timeline, trigger, ready = false, drag = null, resizeFrame, disposed = false;
     const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -4132,25 +4173,24 @@ function testimonialEnvelopeAnimation() {
       trigger?.kill(); timeline?.kill();
       carousel.scrollLeft = 0;
       gsap.set(cards, { clearProps: "transform,opacity,visibility,clipPath" });
-      const unit = rem(), centre = carousel.clientWidth / 2;
+      const unit = rem();
       gsap.set(envelope, { clearProps: "transform,opacity,visibility,left" });
-      const envelopeLeft = centre - envelope.offsetWidth / 2;
-      const envelopeTravel = envelopeLeft - envelope.offsetLeft;
+      const envelopeRect = envelope.getBoundingClientRect();
       const starts = cards.map(card => {
         const number = Number(card.getAttribute("testimonial-slide")), index = (number - 1) % 3;
         const scale = envelope.offsetWidth * motion.stack.width / card.offsetWidth;
+        const cardRect = card.getBoundingClientRect();
         return {
-          x: envelopeLeft + envelope.offsetWidth * (motion.stack.left[index] + motion.stack.width / 2)
-            - card.offsetLeft - card.offsetWidth / 2,
-          y: envelope.offsetTop + envelope.offsetHeight * motion.stack.top[index] - card.offsetTop
+          x: envelopeRect.left + envelope.offsetWidth * (motion.stack.left[index] + motion.stack.width / 2)
+            - cardRect.left - card.offsetWidth / 2,
+          y: envelopeRect.top + envelope.offsetHeight * motion.stack.top[index] - cardRect.top
             - card.offsetHeight * (1 - scale) / 2,
           scale, rotation: motion.stack.rotation[index], visible: number <= 3, number,
           clippedBottom: Math.max(0, card.offsetHeight - envelope.offsetHeight * (0.92 - motion.stack.top[index]) / scale),
         };
       });
-      // Relative left does not create a stacking context: the pocket stays above the notes,
-      // while the envelope back stays underneath them throughout the scroll.
-      gsap.set(envelope, { left: envelopeTravel, autoAlpha: 1 });
+      gsap.set(envelope, { autoAlpha: 1 });
+      if (pocket) gsap.set(pocket, { zIndex: 30 });
       gsap.set(cards, { x: i => starts[i].x, y: i => starts[i].y, scale: i => starts[i].scale,
         rotation: i => starts[i].rotation, autoAlpha: i => starts[i].visible ? 1 : 0,
         zIndex: i => 10 + (starts[i].number % 3 || 3), transformOrigin: "50% 50%",
@@ -4165,7 +4205,7 @@ function testimonialEnvelopeAnimation() {
         duration: motion.spread.duration, ease: motion.spread.ease }, motion.spread.start);
       timeline.to(cards, { clipPath: "inset(0px 0px 0px 0px)", duration: motion.spread.duration,
         ease: motion.spread.ease }, motion.spread.start);
-      timeline.to(envelope, { left: 0, duration: motion.envelope.duration, ease: motion.envelope.ease }, motion.envelope.start);
+      if (pocket) timeline.set(pocket, { zIndex: 1 }, motion.spread.start + motion.lift.duration);
       timeline.to($ui, { autoAlpha: 1, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
       if (reduced.matches) { timeline.progress(1); interactive(true); }
       else trigger = ScrollTrigger.create({ trigger: section, endTrigger: carousel, animation: timeline, ...motion.scroll,

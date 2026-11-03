@@ -1122,6 +1122,7 @@
     height: auto;
     margin-top: 0;
     margin-bottom: 0;
+    margin-left: -11rem;
   }
 
   .faq-section {
@@ -1130,7 +1131,8 @@
 
   .faq-section:where(.w-variant-4aab047b-de58-3075-070f-4598b4eeb7db) {
     background-color: #101010;
-    padding-top: 1rem;
+    margin-top: -15dvh;
+    padding-top: 0;
   }
 
   .home-faq-heading {
@@ -2975,6 +2977,7 @@
 
   .testimonial-carousel {
     height: auto;
+    min-height: 28rem;
   }
 
   .testimonial-slide {
