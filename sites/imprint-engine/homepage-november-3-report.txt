@@ -1,0 +1,75 @@
+IMPRINT ENGINE — HOMEPAGE NOVEMBER 3
+Status: Ready for Michael to review
+Date: 3 November 2026
+Staging: https://imprint-engine-v2.webflow.io/
+
+TEAMS
+- Uploaded all 17 original Leadership PNGs and all 20 original Persona PNGs.
+- Created 37 native circles, preserving the existing drag, float and hold/hover behaviour.
+- Leadership portraits are cropped within circular relative image wrappers. Images remain img-abs.
+- Added editable image props for every portrait/persona. Persona assignments are initial pairings for the client to rearrange.
+- Five content items: Marketing, Sales, People, Events, Procurement.
+- Three desktop columns across two rows; one content column on tablet and phones.
+- Applied updated content, heading typography and purple content links.
+
+GRADIENT SCROLL 01
+- Original turquoise stays on the right half of the screen.
+- Left half changes to red rgba(255, 66, 92, 0.55), duration 0.1 seconds, power1.in.
+
+TESTIMONIALS 01
+- Starts with the envelope open.
+- Scrubs while the section top travels from the viewport midpoint to its top.
+- Cards lift and spread into a horizontal carousel with 15 native editable cards.
+- Each card has Name, Company Logo and Quote props, grouped Item 1–15.
+- Heading, arrows and Wall of Love CTA reveal together at completion.
+- Supports native touch swipe, mouse drag, previous/next arrows and keyboard activation.
+- The extra slots repeat the three supplied named examples and supplied quote as editable defaults. No additional customer statements were invented.
+
+HOMEPAGE DROP WITH TEXT / ACCORDION 04
+- Preserved the exact supplied logo geometry and existing time-based ripple.
+- Native sticky layout reverses the gradient drop, black reveal and line retraction before releasing the page.
+- Copy is positioned top right on desktop as requested. Both desktop colour layers share the original copy props.
+- Desktop uses the reverse clip. Tablet/phone retains the lighter opacity transition and uses one readable text layer.
+- Accordion 04 now has a native Black Background variant, applied to the homepage only.
+
+NAVIGATION
+- Search icon hover uses #5f249f.
+- Desktop input expands from 0 to 8rem over 0.25 seconds with power1.inOut.
+- Search dropdown filters existing navigation links; destinations remain intact.
+- Mobile includes its own search view with Back, no-results feedback and keyboard support.
+- Opening/closing the mobile menu restores page scrolling correctly.
+
+COUNTRY TILES
+- New native Country Tiles component immediately after the lander.
+- United States, India, Ireland, United Kingdom, Australia and China.
+- Original SVG map assets uploaded to Webflow.
+- Heading plus six Image, Header and rich-text Description prop groups.
+- Responsive six / three / two / one-column grid.
+
+CHECKS
+- Published and tested the Webflow staging site; custom production domains were not published.
+- Checked homepage sections at desktop, tablet and phone sizes.
+- Widths checked: 1440, 1024, 768, 390 and 320 CSS pixels.
+- No page-width overflow or broken new images; all 17 leadership / 20 persona / 15 testimonial / 6 country items present.
+- Tested gradient left/right colour, search hover, search filtering/no-results/Back, portrait hover/drag/touch-hold, carousel arrows/drag, FAQ expansion and reduced motion.
+- Verified sticky outro reaches black, retracts the line, hides the gradient drop and releases scrolling.
+- Verified dynamic viewport height and access to the page bottom.
+- Browser checks used headless Chrome and touch emulation; no foreground computer control was used.
+- JavaScript syntax check passed. No page JavaScript errors recorded in the checks.
+
+COMPONENT IDS
+Teams: 34b4e05c-0d23-2864-1743-abb4f15eebac
+Testimonials 01: 75501620-ec18-b292-2f8d-988bcd52a869
+Homepage Drop with Text: d65c02be-c173-4ce4-57c4-7e2a391ca275
+Gradient Scroll 01: 4928117d-677d-0eb1-85b6-d945bf1af05e
+Accordion 04: 33a56323-afed-17a4-1c08-8ef33668b85d
+Black Background variant: 4aab047b-de58-3075-070f-4598b4eeb7db
+Navigation: 139054b1-b3f4-73e3-7e34-a2bae84738ab
+Country Tiles: 0952295c-fdd1-18ac-0b5c-eb3b897ed732
+
+BACKUPS AND EVIDENCE
+Local original files, component snapshots, asset manifests and QA screenshots:
+C:/Users/miker/OneDrive/Desktop/Imprint Engine/Figma exports/Homepage November 3/
+
+Code commits: 702e812, add2c9f, f7b749a (main, pushed to GitHub).
+Tracker Complete/Mobile approval was not changed. Final approval belongs to Michael.

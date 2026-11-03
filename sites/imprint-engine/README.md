@@ -57,12 +57,37 @@ after browser-bar resizing settles. Menu close also resynchronizes the lander.
 On mobile/tablet, the final transition fades the hero instead of animating its
 clip path; desktop keeps the wipe. Timing remains in `homeMotion.finish.clip`.
 
-Teams uses the same floating-circle physics on mobile, with four photos and six
-white satellites. Native tablet styles size and position the circles; explicit
-`team-profile-from` / `team-profile-to` line hooks preserve their connections.
+Teams uses the same floating-circle physics on mobile. The November update now
+includes all 17 leadership portraits and 20 persona satellites at every width.
+Native tablet styles size and position the circles; `team-profile-parent` hooks
+connect each persona to a leadership portrait in the new `team-network` layout.
 Touch holds reveal connected photos until release, retaining the existing short
 drag and release fade. The mobile team list is one full-width column. Accordion
 03 switches instantly on mobile; desktop keeps its existing animation.
+
+## Homepage — 3 November 2026
+
+The November 3 Figma homepage is implemented for review on Webflow staging.
+See `homepage-november-3-report.txt` for component IDs, editable content and QA.
+
+- Teams preserves its component and content props, adds all portrait/persona
+  image props, and uses five content items in a three-column desktop grid.
+- Country Tiles is a native component with six image, heading and rich-text
+  prop groups. It follows the lander and adapts to three, two and one columns.
+- `compareGradientAnimation()` changes the cursor gradient between the original
+  turquoise on the right and red on the left in 0.1 seconds.
+- `testimonialEnvelopeAnimation()` opens from an unsealed envelope into 15
+  editable cards. Its scrub runs from section top at 50% to section top at 0%.
+  Native horizontal scrolling, arrow controls and dragging are enabled at the end.
+- `homeOutroAnimation()` reverses the lander's drop/clip/line sequence within a
+  native sticky layout. Mobile uses opacity and one readable copy layer; desktop
+  clips a white copy layer over the original black copy. Both copies share props.
+- Accordion 04 has a Black Background variant, applied to the homepage instance.
+- `navigationSearch()` expands the desktop input to 8rem, derives results from
+  existing navigation links, and supports the mobile menu and its Back control.
+
+The additional testimonial slots repeat the supplied examples as editable
+defaults. This implementation does not record Michael's final tracker approval.
 
 Tablet (1199px and below) is the first mobile layer. The lander uses the same
 centred card arrangement on tablet and phone. Tablet uses larger tile images,

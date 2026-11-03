@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-03",
+  "status": "ready for Michael review",
+  "scope": [
+    "Teams: 17 leadership images, 20 personas, five content items",
+    "Gradient cursor colour at centre line",
+    "Testimonials: scroll reveal to 15-card swiper",
+    "Drop outro: sticky reverse lander and dark FAQ variant",
+    "Navigation search",
+    "Six country tiles",
+    "Homepage tablet/mobile QA"
+  ],
+  "components": {
+    "teams": "34b4e05c-0d23-2864-1743-abb4f15eebac",
+    "testimonials": "75501620-ec18-b292-2f8d-988bcd52a869",
+    "drop": "d65c02be-c173-4ce4-57c4-7e2a391ca275",
+    "gradient": "4928117d-677d-0eb1-85b6-d945bf1af05e",
+    "faq": "33a56323-afed-17a4-1c08-8ef33668b85d",
+    "nav": "139054b1-b3f4-73e3-7e34-a2bae84738ab",
+    "countries": "0952295c-fdd1-18ac-0b5c-eb3b897ed732"
+  },
+  "updatedAt": "2026-11-03T08:49:31+02:00",
+  "staging": "https://imprint-engine-v2.webflow.io/",
+  "checkedWidths": [
+    320,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "trackerApproval": "Unchanged; awaiting Michael final confirmation"
+}
