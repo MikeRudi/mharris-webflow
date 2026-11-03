@@ -920,9 +920,10 @@ function homeAnimation() {
     [720, -104, 160], [1088, 48, 145], [1240, 416, 155], [1088, 784, 140],
     [720, 936, 165], [352, 784, 145], [200, 416, 155], [352, 48, 140],
   ];
-  let homeClipBounds;
+  let homeClipBounds, lastHomeClipProgress = -1;
 
   function measureHomeClip() {
+    lastHomeClipProgress = -1;
     const home = $("[home-start]")[0];
     const line = $("[home-gradient-line]")[0];
     const homeRect = home.getBoundingClientRect();
@@ -1023,7 +1024,11 @@ function homeAnimation() {
     return `polygon(${path.join(", ")})`;
   }
 
+  let lastGradientAngle, lastGradientMerge;
   function moveGradientDots() {
+    if (lastGradientAngle === gradientOrbit.angle && lastGradientMerge === gradientOrbit.merge) return;
+    lastGradientAngle = gradientOrbit.angle;
+    lastGradientMerge = gradientOrbit.merge;
     const cos = Math.cos(gradientOrbit.angle);
     const sin = Math.sin(gradientOrbit.angle);
     $gradientPieces.each(function (index) {
@@ -1471,12 +1476,16 @@ function homeAnimation() {
     if (homeTimeline.time() >= homeTimeline.labels["gradientDots.spin"]) moveGradientDots();
     if (homeMobile.enabled) return;
     if (homeTimeline.time() > homeTimeline.labels["finish.clip"]) {
-      $("[home-start]").css("clip-path", homeClipPath(homeClip.progress));
+      if (lastHomeClipProgress !== homeClip.progress) {
+        $("[home-start]").css("clip-path", homeClipPath(homeClip.progress));
+        lastHomeClipProgress = homeClip.progress;
+      }
       homeClipWasActive = true;
     } else if (homeClipWasActive) {
       $("[home-start]").css("clip-path", "none");
       $homeStartContent.css("filter", "");
       homeClipWasActive = false;
+      lastHomeClipProgress = -1;
     }
   }
   homeTimeline.eventCallback("onUpdate", renderHomeScrollGeometry);
@@ -1860,7 +1869,6 @@ function teamProfilesAnimation() {
     if (!$nodes.length) return;
     const $listCopy = $(layout).find("[team-list] [text-ch]");
     const restoreCopy = rememberAttributes($listCopy, ["text-ch"]);
-    if (mobile) $listCopy.removeAttr("text-ch");
     // A list/button already protects its contents; avoid overlapping duplicate zones.
     const $content = $(layout).find("[text], [btn-2-brand], [team-list]").filter(function () {
       return !$(this).closest("[team-profile-node]").length &&
@@ -2819,7 +2827,6 @@ function homeOutroAnimation() {
     brackets: { start: 0.02, duration: 0.16, distance: 1.2, ease: "power1.in" },
     drop: { start: 0.06, duration: 0.18, ease: "power1.in" },
     clip: { start: 0.18, duration: 0.4, ease: "none", mobileTextSwitch: 0.55 },
-    lineReveal: { start: 0.48, duration: 0.1, ease: "power1.in" },
     lineRetract: { start: 0.64, duration: 0.26, ease: "power1.in" },
     dropLeave: { start: 0.78, duration: 0.12, ease: "power1.in" },
   };
@@ -2842,10 +2849,11 @@ function homeOutroAnimation() {
       const restore = rememberAttributes($(section).add(layout).add(dark).add(gradient).add(line)
         .add(left).add(right).add(droplet).add(rings).add(copy), ["style"]);
       const clip = { progress: 0 };
+      let clipWidth = layout.clientWidth, clipHeight = layout.clientHeight, renderedProgress = -1;
       function clipPath(progress) {
         if (progress <= 0) return "inset(0 100% 0 0)";
         if (progress >= 1) return "inset(0)";
-        const p = 1 - progress, width = layout.clientWidth, height = layout.clientHeight;
+        const p = 1 - progress, width = clipWidth, height = clipHeight;
         const x = width / 2, y = height / 2, half = Math.max(width, height);
         const point = (a, b) => `${a}px ${b}px`, centre = point(x, y);
         const ray = angle => {
@@ -2860,11 +2868,17 @@ function homeOutroAnimation() {
         return `polygon(${[centre, upper, ...corners, lower, centre].join(",")})`;
       }
       const draw = () => {
+        if (renderedProgress === clip.progress) return;
+        renderedProgress = clip.progress;
         dark.style.opacity = mobile ? String(clip.progress) : "1";
         dark.style.clipPath = mobile ? "none" : clipPath(clip.progress);
         if (mobile && copy) copy.style.color = clip.progress < motion.clip.mobileTextSwitch ? "#111111" : "#ffffff";
       };
-      gsap.set(gradient, { autoAlpha: 0 }); gsap.set(line, { autoAlpha: 0, scaleX: 1 });
+      const measureClip = () => {
+        clipWidth = layout.clientWidth; clipHeight = layout.clientHeight;
+        renderedProgress = -1; draw();
+      };
+      gsap.set(gradient, { autoAlpha: 0 }); gsap.set(line, { autoAlpha: 1, scaleX: 1 });
       draw();
       const timeline = gsap.timeline({ paused: true });
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -2876,17 +2890,21 @@ function homeOutroAnimation() {
       timeline.to(gradient, { autoAlpha: 1, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
       timeline.to(rings, { opacity: 0, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
       timeline.to(clip, { progress: 1, duration: motion.clip.duration, ease: motion.clip.ease, onUpdate: draw }, motion.clip.start);
-      timeline.to(line, { autoAlpha: 1, duration: motion.lineReveal.duration, ease: motion.lineReveal.ease }, motion.lineReveal.start);
       timeline.to(line, { scaleX: 0, duration: motion.lineRetract.duration, ease: motion.lineRetract.ease }, motion.lineRetract.start);
       timeline.to(gradient, { autoAlpha: 0, duration: motion.dropLeave.duration, ease: motion.dropLeave.ease }, motion.dropLeave.start);
-      let trigger;
+      let trigger, prepare;
       if (reduced) {
         section.style.height = "100dvh"; layout.style.position = "relative";
         timeline.progress(1); draw();
       // The sticky frame releases before the line retracts, bringing the FAQ in beneath it.
-      } else trigger = ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom 50%",
-        animation: timeline, scrub: true, invalidateOnRefresh: true, onRefresh: draw });
-      cleanups.push(() => { trigger?.kill(); timeline.kill(); restore(); });
+      } else {
+        // Prepare only the approaching section, without retaining an offscreen render layer.
+        prepare = ScrollTrigger.create({ trigger: section, start: "top 150%", end: "bottom top",
+          onToggle: self => { dark.style.willChange = self.isActive ? (mobile ? "opacity" : "clip-path") : "auto"; } });
+        trigger = ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom 50%",
+          animation: timeline, scrub: true, invalidateOnRefresh: true, onRefresh: measureClip });
+      }
+      cleanups.push(() => { prepare?.kill(); trigger?.kill(); timeline.kill(); restore(); });
     });
     return () => { cleanups.splice(0).forEach(cleanup => cleanup()); };
   });
@@ -4063,14 +4081,14 @@ function compareGradientAnimation() {
 
 function testimonialEnvelopeAnimation() {
   if (!window.gsap || !window.ScrollTrigger) return null;
-  // Scroll timings are fractions of the section's top travelling from mid-screen to the top.
+  // Begin before the envelope reaches mid-screen; finish with the cards centered.
   const motion = {
-    scroll: { start: "top 50%", end: "top top", scrub: true },
+    scroll: { start: "top 70%", end: "center center", scrub: true },
     lift: { start: 0, duration: 0.32, distance: 4, ease: "power1.in" },
     spread: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
     envelope: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
     controls: { start: 0.88, duration: 0.12, ease: "power1.in" },
-    stack: { width: 0.76, top: [0.12, 0.18, 0.26], left: [0.13, 0.1, 0.12], rotation: [2, 0, 4] },
+    stack: { width: 0.76, top: [0.07, 0.21, 0.36], left: [0.13, 0.08, 0.14], rotation: [2, -2, 4] },
   };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const cleanups = [];
@@ -4150,7 +4168,7 @@ function testimonialEnvelopeAnimation() {
       timeline.to(envelope, { left: 0, duration: motion.envelope.duration, ease: motion.envelope.ease }, motion.envelope.start);
       timeline.to($ui, { autoAlpha: 1, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
       if (reduced.matches) { timeline.progress(1); interactive(true); }
-      else trigger = ScrollTrigger.create({ trigger: section, animation: timeline, ...motion.scroll,
+      else trigger = ScrollTrigger.create({ trigger: section, endTrigger: carousel, animation: timeline, ...motion.scroll,
         onUpdate: self => interactive(self.progress >= 0.999),
         onRefresh: self => interactive(self.progress >= 0.999) });
     }

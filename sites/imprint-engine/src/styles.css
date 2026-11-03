@@ -939,7 +939,7 @@
   .drop-text-section {
     background-color: #101010;
     width: 100%;
-    height: 180dvh;
+    height: 145dvh;
     min-height: 0;
     padding: 0;
     display: block;
@@ -1130,7 +1130,7 @@
 
   .faq-section:where(.w-variant-4aab047b-de58-3075-070f-4598b4eeb7db) {
     background-color: #101010;
-    padding-top: 2rem;
+    padding-top: 1rem;
   }
 
   .home-faq-heading {
@@ -1201,11 +1201,16 @@
     height: 100%;
   }
 
+  .section-teams {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
   .teams-layout {
     grid-row-gap: 3rem;
     height: auto;
     min-height: 0;
-    padding-top: 4rem;
+    padding-top: 0;
     padding-bottom: 4rem;
   }
 
