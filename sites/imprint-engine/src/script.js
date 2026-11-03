@@ -362,6 +362,9 @@ function homeAnimation() {
   const homeRoot = $("[lander-wrap]").first()[0];
   const homeScrollElement = $("[layout-start]")[0];
   const homeScreenElement = $("[layout-end]")[0];
+  const homeAuthoredHeight = homeScrollElement.style.getPropertyValue("height");
+  const homeAuthoredHeightPriority = homeScrollElement.style.getPropertyPriority("height");
+  const restoreHomeScrollLayout = rememberAttributes($(homeScrollElement), ["style"]);
   // Webflow's 100dvh scene follows browser chrome without shrinking for the keyboard.
   const homeViewportHeight = () => homeMobile.enabled
     ? homeScreenElement.offsetHeight : document.documentElement.clientHeight;
@@ -423,7 +426,8 @@ function homeAnimation() {
   if (homeMobile.enabled) $homeDropFills.attr("fill", homeMobile.drops.fill);
 
   // HOME SCROLL CONTROLS
-  // 1 = the full section scroll. A duration of 0.2 always uses 20% of it.
+  // 1 = the native section's authored scroll range; unused time at the end is removed.
+  // A duration of 0.2 keeps 20% of that original distance as the finish gets shorter.
   // Each group has a start on the main timeline; its steps use local positions.
   // start: 0          starts at the beginning of the group.
   // start: "move"     starts with the step named move.
@@ -510,21 +514,21 @@ function homeAnimation() {
       blur: { start: "clip", duration: 0.18, ease: "power1.in", from: "blur(0rem)", to: "blur(1.5rem)" },
       textLeave: { start: "clip", duration: 0.18, ease: "power1.in", scale: 0.9 },
       starGrow: { start: "clip", duration: 0.04, ease: "power1.in", scale: 2.5 },
-      starRotate: { start: "starGrow", duration: 0.43, ease: "none", rotation: 360 },
+      starRotate: { start: "starGrow", duration: 0.18, ease: "none", rotation: 130.35 },
       starSettle: { start: "starGrow:end+=0.07", duration: 0.04, ease: "power1.in", scale: 2.15 },
-      drop: { start: "clip+=0.04", duration: 0.18, ease: "power1.in", scale: 0.5 },
-      leftBracket: { start: "drop+=0.035", duration: 0.18, ease: "power1.in" },
-      rightBracket: { start: "leftBracket", duration: 0.18, ease: "power1.in" },
-      content: { start: "clip:end+=0.035", duration: 0.1, ease: "power1.in" },
+      drop: { start: "clip+=0.04", duration: 0.15, ease: "power1.in", scale: 0.5 },
+      leftBracket: { start: "clip", clipProgress: 0.8, duration: 0.045, ease: "power1.in" },
+      rightBracket: { start: "leftBracket", duration: 0.045, ease: "power1.in" },
+      content: { start: "leftBracket", duration: 0.04, ease: "power1.in" },
     },
-    // 11 — Perspective water rings; final size, colour and blur are native Webflow styles.
-    endRipple: {
-      start: "finish.clip+=0.12",
-      expand: { start: 0, duration: 0.29, ease: "power1.in", stagger: 0.02, fromScale: 0.08, scale: 1 },
-      reveal: {
-        start: "expand", duration: 0.2, ease: "power1.in", stagger: 0.02,
-        opacity: { outer: 0.4, middle: 0.4, inner: 0.6 },
-      },
+  };
+  // FINAL RIPPLE — triggered by scroll, but durations/staggers here are seconds.
+  const homeEndRipple = {
+    start: "finish.clip",
+    expand: { start: 0, duration: 1.2, ease: "power1.in", stagger: 0.08, fromScale: 0.08, scale: 1 },
+    reveal: {
+      start: "expand", duration: 0.35, ease: "power1.in", stagger: 0.08,
+      opacity: { outer: 0.4, middle: 0.4, inner: 0.6 },
     },
   };
 
@@ -1086,7 +1090,7 @@ function homeAnimation() {
   });
 
   gsap.set($("[home-end-ripple]"), {
-    scale: homeMotion.endRipple.expand.fromScale,
+    scale: homeEndRipple.expand.fromScale,
     autoAlpha: 0,
     transformOrigin: "center",
   });
@@ -1361,37 +1365,48 @@ function homeAnimation() {
     addHomeStep(group, "textLeave", $("[home-third-up]"), { scale: 1 }, { scale: motion.textLeave.scale }, motion.textLeave);
     addHomeStep(group, "starGrow", $("[home-drop-star]"),
       { opacity: 0, scale: 0.15 }, { opacity: 1, scale: motion.starGrow.scale }, motion.starGrow);
+    // Preserve its visible rotation speed, ending when the clip hides the star.
     addHomeStep(group, "starRotate", $("[home-drop-star]"),
       { rotation: -35 }, { rotation: motion.starRotate.rotation }, motion.starRotate);
     addHomeStep(group, "starSettle", $("[home-drop-star]"),
       { scale: motion.starGrow.scale }, { scale: motion.starSettle.scale }, motion.starSettle);
     addHomeStep(group, "drop", $("[home-end-target-svg]"),
       { scale: 1 }, { scale: motion.drop.scale }, motion.drop);
-    addHomeStep(group, "leftBracket", $("[home-end-bracket-left]"), { x: -72 }, { x: 0 }, motion.leftBracket);
+    addHomeStep(group, "leftBracket", $("[home-end-bracket-left]"), { x: -72 }, { x: 0 }, {
+      ...motion.leftBracket,
+      start: `${motion.leftBracket.start}+=${motion.clip.duration * motion.leftBracket.clipProgress}`,
+    });
     addHomeStep(group, "rightBracket", $("[home-end-bracket-right]"), { x: 72 }, { x: 0 }, motion.rightBracket);
     addHomeStep(group, "content", $homeEndContent, { opacity: 0 }, { opacity: 1 }, motion.content);
   });
 
-  // 11 — Webflow owns the flattened ellipses; the scrub preserves their final geometry.
-  addHomeGroup("endRipple", (group, motion) => {
-    const $rings = $("[home-end-ripple]");
-    addHomeStep(group, "expand", $rings,
-      { scale: motion.expand.fromScale }, { scale: motion.expand.scale }, motion.expand);
-    addHomeStep(group, "reveal", $rings, { autoAlpha: 0 }, {
-      autoAlpha: (index, ring) => motion.reveal.opacity[ring.getAttribute("home-end-ripple")]
-        ?? motion.reveal.opacity[["outer", "middle", "inner"][index]],
-    }, motion.reveal);
-  });
+  // 11 — Play independently once the clip starts; reset only when scrolling back before it.
+  const homeRippleTimeline = gsap.timeline({ paused: true, id: "home-end-ripple" });
+  const $endRings = $("[home-end-ripple]");
+  addHomeStep(homeRippleTimeline, "expand", $endRings,
+    { scale: homeEndRipple.expand.fromScale }, { scale: homeEndRipple.expand.scale }, homeEndRipple.expand);
+  addHomeStep(homeRippleTimeline, "reveal", $endRings, { autoAlpha: 0 }, {
+    autoAlpha: (index, ring) => homeEndRipple.reveal.opacity[ring.getAttribute("home-end-ripple")]
+      ?? homeEndRipple.reveal.opacity[["outer", "middle", "inner"][index]],
+  }, homeEndRipple.reveal);
+  let homeRippleStarted = false;
 
-  // A fixed 0–1 clock keeps percentages literal even if edited steps exceed 1.
-  // Such steps stop at the section end; they never stretch all the other timings.
+  // Keep the original scroll distance per timing unit, cutting off the unused tail.
   if (homeTimeline.duration() > 1.00001) {
     console.warn("Home animation extends beyond 100% scroll. Move or shorten its last steps in homeMotion.");
   }
-  homeTimeline.to({}, { duration: Math.max(0, 1 - homeTimeline.duration()) });
+  const homeScrubEnd = Math.min(1, homeTimeline.duration());
   let homeClipWasActive = false;
 
   function renderHomeScrollGeometry() {
+    const rippleReady = homeTimeline.time() >= homeTimeline.labels[homeEndRipple.start];
+    if (rippleReady && !homeRippleStarted) {
+      homeRippleStarted = true;
+      homeRippleTimeline.restart();
+    } else if (!rippleReady && homeRippleStarted) {
+      homeRippleStarted = false;
+      homeRippleTimeline.pause(0);
+    }
     if (homeTimeline.time() >= homeTimeline.labels["gradientDots.spin"]) moveGradientDots();
     if (homeMobile.enabled) return;
     if (homeTimeline.time() > homeTimeline.labels["finish.clip"]) {
@@ -1407,7 +1422,7 @@ function homeAnimation() {
 
   const homeScrollPosition = { value: 0 };
   const homeScrubClock = gsap.fromTo(homeScrollPosition, { value: 0 }, {
-    value: 1, duration: 1, ease: "none", paused: true, id: "home-scrub-clock",
+    value: homeScrubEnd, duration: 1, ease: "none", paused: true, id: "home-scrub-clock",
     onUpdate: () => {
       // Native scrollbar/PageDown input can arrive before the load entrance ends.
       if (homeScrollPosition.value > 0 && homeLoadTimeline.progress() < 1) homeLoadTimeline.progress(1);
@@ -1416,6 +1431,21 @@ function homeAnimation() {
       syncHomeRestingActivity();
     },
   });
+
+  function measureHomeScrollRange() {
+    measureHomeViewport();
+    // Remeasure native breakpoint sizing, never compound the previous reduction.
+    if (homeAuthoredHeight) homeScrollElement.style.setProperty("height", homeAuthoredHeight, homeAuthoredHeightPriority);
+    else homeScrollElement.style.removeProperty("height");
+    const screenHeight = homeViewportHeight();
+    const introOverflow = homeMobile.enabled
+      ? Math.max(0, $("[home-start]")[0].offsetHeight - screenHeight) : 0;
+    const authoredScroll = Math.max(0, homeScrollElement.offsetHeight - screenHeight - introOverflow);
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    homeScrollElement.style.setProperty("height",
+      `${(screenHeight + introOverflow + authoredScroll * homeScrubEnd) / rem}rem`);
+  }
+  measureHomeScrollRange();
 
   // STICKY SCROLL RANGE — the final scene fills the viewport before the next section enters.
   const homeScrollTrigger = ScrollTrigger.create({
@@ -1429,7 +1459,7 @@ function homeAnimation() {
       : "bottom bottom",
     animation: homeScrubClock,
     scrub: true,
-    onRefreshInit: measureHomeViewport,
+    onRefreshInit: measureHomeScrollRange,
     onRefresh: () => {
       measureHomeViewport();
       buildHomeRestingSphere();
@@ -1522,6 +1552,8 @@ function homeAnimation() {
     homeLoadTimeline.kill();
     homeScrubClock.kill();
     homeTimeline.kill();
+    homeRippleTimeline.kill();
+    restoreHomeScrollLayout();
     restoreHomeEndLayout();
     restoreHomeViewport();
     restoreHomeCopy();

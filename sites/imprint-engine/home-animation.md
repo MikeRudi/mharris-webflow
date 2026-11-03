@@ -8,15 +8,18 @@ the final water rings. Each step has its own `start`, `duration`, and `ease`.
 
 The animation starts when `[layout-start]` reaches the top of the viewport and
 finishes when its bottom reaches the bottom of the viewport. Webflow owns the
-section height and the two overlapping sticky layers.
+authored section height and the two overlapping sticky layers. JavaScript trims
+the unused tail from that height so the next section follows the completed finish.
 
-`1` means the full scroll distance. `duration: 0.2` means 20% of that distance,
+`1` means the original authored scroll distance. `duration: 0.2` means 20% of that distance,
 even inside a group. For a `450vh` section and a `100vh` viewport, the available
 scroll distance is `350vh`.
 
-The scroll clock always spans exactly `0–1`. It does not rescale the other
-animations when a duration changes. Keep the final endpoints at or before `1`;
-an overrun produces a console warning and is cut off at the section boundary.
+The scroll clock ends with the last scrubbed step, currently `0.71`. The section
+keeps 71% of its original scrub distance, preserving the earlier scenes' pace.
+The viewport and any mobile introduction overflow remain full-size. Refreshes
+remeasure native sizing before trimming, and breakpoint cleanup restores it.
+Keep endpoints at or before `1`; overruns warn and are cut off at that limit.
 
 ## Start positions and animation trains
 
@@ -43,15 +46,16 @@ To link groups, prefix the step with its group name. The finish group starts at
 `"line:end"`; the line starts at `"drop.land:end"`. Changing the landing duration
 moves the line and its following finish sequence together.
 
-Example: make the clip take 20% of the scroll. Its content reveal follows the
-new endpoint automatically:
+Example: make the clip take 20% of the authored scroll. The brackets start at
+80% of the clip's duration and the content follows that start automatically:
 
 ```js
 finish: {
   start: "line:end",
   clip: { start: 0, duration: 0.2, ease: "power1.in" },
+  leftBracket: { start: "clip", clipProgress: 0.8, duration: 0.045, ease: "power1.in" },
   // Other finish steps remain here.
-  content: { start: "clip:end+=0.035", duration: 0.1, ease: "power1.in" },
+  content: { start: "leftBracket", duration: 0.04, ease: "power1.in" },
 }
 ```
 
@@ -67,8 +71,8 @@ Set `enabled: false` to disable it. The scroll timeline remains directly scrubbe
 
 ## Starting choreography
 
-The opening scene/drop sequence reaches the clip at 52%, leaving 48% for the
-finish. The opening cards, copy and logos rise together over the first 9% and
+The opening scene/drop sequence reaches the clip at 52% of the authored range;
+the finish completes at 71%. The opening cards, copy and logos rise together over the first 9% and
 fade out together by 7%, when the second scene begins. There is no scroll-exit
 stagger. Most movements and the opening fades use `power1.in`; the gradient
 orbit and star rotation use `none` for a constant rate.
@@ -83,12 +87,14 @@ orbit and star rotation use `none` for a constant rate.
 | `drop` | When dots start fading | Form, land, then resize the drop |
 | `landingRipple`, `line` | After landing, currently 35% | Water ripple and line drawing |
 | `dropColours` | After resizing, currently 40.5% | Fill the drop and sharpen it |
-| `finish` | After the line, currently 52% | Clip through 70%; drop, brackets and content settle after it |
-| `endRipple` | Clip start + 12%, currently 64% | Expand and settle through 97% |
+| `finish` | After the line, currently 52% | Clip through 70%; brackets start at 66.4%, everything settles by 71% |
+| `homeEndRipple` | At clip start, currently 52% | Play independently in seconds, adding no scroll distance |
 
-`endRipple.expand` controls growth from `fromScale: 0.08` to the native size
-(`scale: 1`), over `0.29` of the scroll with `0.02` stagger. Its `reveal.opacity`
-controls outer/middle/inner strength independently (0.4/0.4/0.6). The flattened
+`homeEndRipple.expand` controls growth from `fromScale: 0.08` to the native size
+(`scale: 1`), over 1.2 seconds with 0.08-second stagger. Its reveal takes 0.35
+seconds, with outer/middle/inner opacity 0.4/0.4/0.6. It keeps playing when the
+user stops scrolling. Scrolling back before the clip resets it for the next entry;
+it is killed on breakpoint cleanup. The earlier landing ripple remains scrubbed. The flattened
 ellipse dimensions, vertical offsets, thick borders and blur are authored in
 Webflow, matching the selected Figma ellipses; JS does not replace that artwork
 with shadows.
@@ -107,8 +113,8 @@ the top anchored, clearing space above the logos. These change card positions,
 not the shape of the cards. The layout is remeasured on ScrollTrigger refresh.
 `framing.riseYRem: -18` adds a straight upward movement over the same 9%; there
 is no scroll-driven move toward the viewport centre. `framing.scale` retains
-the gradual reduction to 0.78. All home scroll
-sequences, including both ripples, follow scroll in both directions.
+the gradual reduction to 0.78. The scene transitions and landing ripple follow
+scroll in both directions; only the final ripple plays independently.
 
 `homeAlignment.endDropOffsetRem` positions the end mark relative to the gradient
 line; `-0.75` raises its centre slightly above the line. The surrounding content
