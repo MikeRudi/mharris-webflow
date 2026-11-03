@@ -1436,6 +1436,13 @@
     padding: 7.5rem 1.25rem 2rem;
   }
 
+  .page-header-section-01:where(.w-variant-93e07eb7-708e-cea9-e91f-b09885906b76) {
+    height: auto;
+    min-height: 0;
+    padding-top: 7.5rem;
+    padding-bottom: 2rem;
+  }
+
   .page-header-section-01.faqs {
     min-height: auto;
     padding-top: 2.5rem;
@@ -1609,13 +1616,24 @@
     transform: none;
   }
 
+  .header-01-content:where(.w-variant-93e07eb7-708e-cea9-e91f-b09885906b76) {
+    text-align: left;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    position: relative;
+    transform: none;
+  }
+
   .header-01-copy {
     text-align: center;
     align-items: center;
     width: 100%;
   }
 
-  .header-01-copy:where(.w-variant-47379e56-8269-11dd-099f-e6e6c1c54b30) {
+  .header-01-copy:where(.w-variant-47379e56-8269-11dd-099f-e6e6c1c54b30), .header-01-copy:where(.w-variant-93e07eb7-708e-cea9-e91f-b09885906b76) {
     text-align: left;
     align-items: flex-start;
     width: 100%;
@@ -3025,6 +3043,11 @@
 
   .gifting-logo-content {
     padding: 2rem 1.25rem;
+  }
+
+  .header-form-actions {
+    grid-column-gap: .75rem;
+    grid-row-gap: .75rem;
   }
 }
 /* END NATIVE TABLET EXTENSION */
