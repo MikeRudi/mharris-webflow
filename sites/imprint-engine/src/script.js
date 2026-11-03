@@ -3313,54 +3313,103 @@ function filterOne() {
 }
 
 function catalogueAnimation() {
-  const $selects = $("[cat-select]"), $reveals = $("[cat-reveal]");
-  if (!$selects.length || !$reveals.length) return null;
-  // CATALOGUE CONTROLS — seconds; the new image follows the outgoing image.
+  const $wraps = $("[cat-catalogue]");
+  if (!$wraps.length) return null;
+  // CATALOGUE CONTROLS — seconds; incoming artwork overlaps the outgoing fade.
   const catalogueControls = {
     activeClass: "active", initialValue: null,
-    hide: { start: 0, duration: 0.2, ease: "power1.in", y: "-2rem", scale: 0.9 },
-    reveal: { start: ">", duration: 0.3, ease: "power1.in", fromY: "2rem", fromScale: 0.9, y: 0, scale: 1 },
+    hide: { start: 0, duration: 0.2, ease: "power1.in", y: "-2rem", opacity: 0 },
+    reveal: { start: 0.1, duration: 0.3, ease: "power1.in", fromY: "2rem", fromScale: 0.9, fromOpacity: 0, y: 0, scale: 1, opacity: 1 },
+    layers: { outgoing: 1, incoming: 2 },
   };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let transition = null;
-  const restoreSelects = rememberAttributes($selects, ["class", "aria-pressed"]);
-  const restoreReveals = rememberAttributes($reveals, ["class", "style", "aria-hidden", "inert"]);
-  function activate($select, immediate = false) {
-    const value = $select.attr("cat-select");
-    const $matches = $reveals.filter((_, element) => element.getAttribute("cat-reveal") === value);
-    if (!$matches.length || (!immediate && $select.hasClass(catalogueControls.activeClass))) return;
-    if (transition) transition.kill();
-    const $outgoing = $reveals.filter(`.${catalogueControls.activeClass}`).not($matches);
-    $selects.removeClass(catalogueControls.activeClass).attr("aria-pressed", "false");
-    $select.addClass(catalogueControls.activeClass).attr("aria-pressed", "true");
-    $reveals.attr({ "aria-hidden": "true", inert: "" });
-    function showSelected() {
-      $reveals.removeClass(catalogueControls.activeClass);
-      $matches.addClass(catalogueControls.activeClass).attr("aria-hidden", "false").removeAttr("inert");
+  const cleanups = [];
+  $wraps.each(function () {
+    const wrap = this, $wrap = $(wrap);
+    const $selects = $wrap.find("[cat-select]");
+    const $reveals = $wrap.find("[cat-reveal]");
+    if (!$selects.length || !$reveals.length) return;
+    const positions = new Map();
+    const imagesFor = value => $reveals.filter((_, element) => element.getAttribute("cat-reveal") === value);
+    const restoreSelects = rememberAttributes($selects, ["class", "aria-pressed"]);
+    const restoreReveals = rememberAttributes($reveals, ["class", "style", "aria-hidden", "inert"]);
+    const restoreImages = rememberAttributes($reveals.find("img"), ["loading"]);
+    let transition = null, current = null, requestId = 0, readyToPrefetch = false;
+
+    function loadImage($panel) {
+      const image = $panel.find("img")[0];
+      if (!image) return Promise.resolve();
+      image.loading = "eager";
+      return image.decode ? image.decode().catch(() => {}) : Promise.resolve();
     }
-    if (immediate || !window.gsap || reducedMotion.matches) {
-      showSelected();
-      if (window.gsap) gsap.set($reveals, { clearProps: "transform,opacity" });
-      return;
+    function preloadNext(value) {
+      if (!readyToPrefetch) return;
+      const $images = imagesFor(value);
+      if ($images.length > 1) loadImage($images.eq(((positions.get(value) ?? 0) + 1) % $images.length));
     }
-    const { hide, reveal } = catalogueControls;
-    transition = gsap.timeline({ onComplete: () => {
-      gsap.set($reveals, { clearProps: "transform,opacity" });
-      transition = null;
-    } });
-    if ($outgoing.length) {
-      transition.to($outgoing, { y: hide.y, scale: hide.scale, opacity: 0, duration: hide.duration, ease: hide.ease }, hide.start);
+    function settle($incoming) {
+      $reveals.removeClass(catalogueControls.activeClass).attr({ "aria-hidden": "true", inert: "" });
+      if (window.gsap) gsap.set($reveals, { clearProps: "transform,opacity,zIndex" });
+      $incoming.addClass(catalogueControls.activeClass).attr("aria-hidden", "false").removeAttr("inert");
+      current = $incoming[0];
     }
-    // Keep Webflow's display state until the outgoing image has finished.
-    transition.call(showSelected);
-    transition.fromTo($matches, { y: reveal.fromY, scale: reveal.fromScale, opacity: 0 },
-      { y: reveal.y, scale: reveal.scale, opacity: 1, duration: reveal.duration, ease: reveal.ease, immediateRender: false }, reveal.start);
-  }
-  const $initial = catalogueControls.initialValue === null ? $selects.filter(".active").first()
-    : $selects.filter((_, element) => element.getAttribute("cat-select") === catalogueControls.initialValue).first();
-  activate($initial.length ? $initial : $selects.first(), true);
-  const unbind = bindControlActivation($selects, "catalogueAnimation", activate);
-  return () => { if (transition) transition.kill(); unbind(); restoreSelects(); restoreReveals(); };
+    function activate($select, immediate = false) {
+      const value = $select.attr("cat-select"), $images = imagesFor(value);
+      if (!$images.length) return;
+      const index = immediate ? 0 : ((positions.get(value) ?? -1) + 1) % $images.length;
+      positions.set(value, index);
+      const $incoming = $images.eq(index), request = ++requestId;
+      $selects.removeClass(catalogueControls.activeClass).attr("aria-pressed", "false");
+      $select.addClass(catalogueControls.activeClass).attr("aria-pressed", "true");
+      if (transition) transition.progress(1);
+      if (immediate) { settle($incoming); return; }
+      // Keep the current image visible while the next PNG decodes. Latest click wins.
+      loadImage($incoming).then(() => {
+        if (request !== requestId) return;
+        if (!window.gsap || reducedMotion.matches || current === $incoming[0]) {
+          settle($incoming); preloadNext(value); return;
+        }
+        const $outgoing = $(current), { hide, reveal, layers } = catalogueControls;
+        $reveals.attr({ "aria-hidden": "true", inert: "" });
+        $incoming.addClass(catalogueControls.activeClass).attr("aria-hidden", "false").removeAttr("inert");
+        gsap.set($outgoing, { zIndex: layers.outgoing });
+        gsap.set($incoming, { y: reveal.fromY, scale: reveal.fromScale, opacity: reveal.fromOpacity, zIndex: layers.incoming });
+        current = $incoming[0];
+        transition = gsap.timeline({ onComplete: () => {
+          settle($incoming); transition = null; preloadNext(value);
+        } });
+        if ($outgoing.length) {
+          transition.to($outgoing, { y: hide.y, opacity: hide.opacity, duration: hide.duration, ease: hide.ease }, hide.start)
+            .call(() => $outgoing.removeClass(catalogueControls.activeClass), [], hide.start + hide.duration);
+        }
+        transition.to($incoming, { y: reveal.y, scale: reveal.scale, opacity: reveal.opacity,
+          duration: reveal.duration, ease: reveal.ease }, reveal.start);
+      });
+    }
+    const $initial = catalogueControls.initialValue === null ? $selects.filter(".active").first()
+      : $selects.filter((_, element) => element.getAttribute("cat-select") === catalogueControls.initialValue).first();
+    activate($initial.length ? $initial : $selects.first(), true);
+    // Warm only the first choice in each category and the next active image near the section.
+    let observer = null;
+    if (window.IntersectionObserver) {
+      observer = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        readyToPrefetch = true;
+        $selects.each(function () { loadImage(imagesFor(this.getAttribute("cat-select")).first()); });
+        if (current) preloadNext(current.getAttribute("cat-reveal"));
+        observer.disconnect();
+      }, { rootMargin: "400px" });
+      observer.observe(wrap);
+    } else readyToPrefetch = true;
+    const unbind = bindControlActivation($selects, "catalogueAnimation", activate);
+    cleanups.push(() => {
+      requestId++;
+      if (transition) transition.kill();
+      if (observer) observer.disconnect();
+      unbind(); restoreSelects(); restoreReveals(); restoreImages();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
 }
 
 function gradientBreathOne() {

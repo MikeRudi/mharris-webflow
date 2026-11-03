@@ -876,6 +876,7 @@
   }
 
   .cat-block-flex {
+    grid-column-gap: .5rem;
     align-items: center;
     row-gap: .75rem;
     width: 100%;
@@ -2486,6 +2487,26 @@
 
   .solutions-accord-image-frame {
     aspect-ratio: 16 / 7;
+  }
+
+  .cat-image-frame {
+    flex-shrink: 0;
+    width: 14rem;
+  }
+
+  .cat-top-choice {
+    padding-left: .75rem;
+    padding-right: .75rem;
+  }
+
+  .cat-top-label {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  .cat-image-merch {
+    flex-shrink: 0;
+    width: 14rem;
   }
 }
 /* END NATIVE TABLET EXTENSION */
