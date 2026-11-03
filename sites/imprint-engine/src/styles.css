@@ -3422,6 +3422,12 @@
   position: absolute;
 }
 
+/* Keep the desktop wipe independent of the hero nav's expensive backdrop capture. */
+[home-start].is-home-clipping [nav-block] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 @media screen and (max-width: 1199px) {
   /* An optional mobile image uses the same header and content props. */
   [header-desktop-image]:has(+ [header-mobile-image]:not(.w-condition-invisible)) {

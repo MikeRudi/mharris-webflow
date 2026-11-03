@@ -574,6 +574,7 @@ function homeAnimation() {
     finish: {
       start: "line:end",
       clip: { start: 0, duration: 0.171, ease: "power1.in" },
+      navBackdrop: { prepareBefore: 0.015 },
       blur: { start: "clip", duration: 0.171, ease: "power1.in", from: "blur(0rem)", to: "blur(1.5rem)" },
       textLeave: { start: "clip", duration: 0.171, ease: "power1.in", scale: 0.9 },
       starGrow: { start: "clip", duration: 0.038, ease: "power1.in", scale: 2.5 },
@@ -1462,7 +1463,7 @@ function homeAnimation() {
     console.warn("Home animation extends beyond 100% scroll. Move or shorten its last steps in homeMotion.");
   }
   const homeScrubEnd = Math.min(1, homeTimeline.duration());
-  let homeClipWasActive = false;
+  let homeClipWasActive = false, homeClipNavIsPrepared = false;
 
   function renderHomeScrollGeometry() {
     const rippleReady = homeTimeline.time() >= homeTimeline.labels[homeEndRipple.start];
@@ -1475,6 +1476,14 @@ function homeAnimation() {
     }
     if (homeTimeline.time() >= homeTimeline.labels["gradientDots.spin"]) moveGradientDots();
     if (homeMobile.enabled) return;
+    // A backdrop blur inside the changing clip forces costly backdrop recaptures.
+    // Switch it off just before the wipe; retain the nav's authored colour and border.
+    const prepareClipNav = homeTimeline.time() >= homeTimeline.labels["finish.clip"] - homeMotion.finish.navBackdrop.prepareBefore
+      && homeTimeline.time() < homeTimeline.labels["finish.layerFade:end"];
+    if (prepareClipNav !== homeClipNavIsPrepared) {
+      homeClipNavIsPrepared = prepareClipNav;
+      $homeRestingDragSurface.toggleClass("is-home-clipping", prepareClipNav);
+    }
     if (homeTimeline.time() > homeTimeline.labels["finish.clip"]) {
       if (lastHomeClipProgress !== homeClip.progress) {
         $("[home-start]").css("clip-path", homeClipPath(homeClip.progress));
@@ -1633,6 +1642,7 @@ function homeAnimation() {
     homeRestingQuickX.tween.kill();
     homeRestingQuickY.tween.kill();
     $homeRestingDragSurface.css("cursor", "");
+    $homeRestingDragSurface.removeClass("is-home-clipping");
     $homeRestingDragSurface.off(".homeRestingDrag");
     $(document).off(".homeRestingDrag");
     document.body.style.userSelect = homeRestingUserSelect;
