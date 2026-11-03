@@ -1149,10 +1149,6 @@
     height: 100%;
   }
 
-  .ac-1-img-single {
-    aspect-ratio: 16 / 9;
-  }
-
   .teams-layout {
     grid-row-gap: 3rem;
     height: auto;
@@ -2466,10 +2462,6 @@
     padding: 2rem 1.25rem;
   }
 
-  .solutions-accord-art {
-    aspect-ratio: 16 / 7;
-  }
-
   .header-form-art-wrap {
     z-index: 0;
     order: 0;
@@ -2486,6 +2478,14 @@
     top: auto;
     bottom: 0;
     left: 0;
+  }
+
+  .ac-1-image-frame {
+    aspect-ratio: 16 / 9;
+  }
+
+  .solutions-accord-image-frame {
+    aspect-ratio: 16 / 7;
   }
 }
 /* END NATIVE TABLET EXTENSION */
