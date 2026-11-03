@@ -1745,6 +1745,11 @@
     height: auto;
   }
 
+  .image-copy-media:where(.w-variant-b3be3031-e227-bb64-482e-8cae2c15ded8) {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+  }
+
   .image-copy-content {
     grid-template-columns: 1fr;
   }
@@ -1799,12 +1804,21 @@
     display: grid;
   }
 
+  .image-cards-grid:where(.w-variant-8ade6db7-8a48-70cb-4ea6-781bdef04c0b), .image-cards-grid:where(.w-variant-e45c8f6f-1c0e-8d37-0a3c-9dde775cb7a1), .image-cards-grid:where(.w-variant-48168ebd-c725-3297-15ea-dcc619e9b543) {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .image-cards-item.is-4:where(.w-variant-2642f8ec-f6ce-432d-0450-fbcb87e77e4d) {
     margin-top: 0;
   }
 
   .image-cards-clip {
     aspect-ratio: 4 / 3;
+    height: auto;
+  }
+
+  .image-cards-clip:where(.w-variant-8ade6db7-8a48-70cb-4ea6-781bdef04c0b), .image-cards-clip:where(.w-variant-e45c8f6f-1c0e-8d37-0a3c-9dde775cb7a1), .image-cards-clip:where(.w-variant-48168ebd-c725-3297-15ea-dcc619e9b543) {
+    aspect-ratio: 16 / 10;
     height: auto;
   }
 
@@ -2233,8 +2247,20 @@
     padding-top: 7rem;
   }
 
+  .header-split-section:where(.w-variant-e036b828-6c95-65af-ea02-60736dd684e5) {
+    padding: 6rem 1.25rem 2rem;
+  }
+
   .header-split-visual {
-    height: 25rem;
+    height: auto;
+  }
+
+  .header-split-visual:where(.w-variant-e036b828-6c95-65af-ea02-60736dd684e5) {
+    order: 0;
+  }
+
+  .header-split-content:where(.w-variant-e036b828-6c95-65af-ea02-60736dd684e5) {
+    order: 1;
   }
 
   .global-locations-grid {
@@ -3062,6 +3088,127 @@
   .header-form-actions {
     grid-column-gap: .75rem;
     grid-row-gap: .75rem;
+  }
+
+  .product-audience-section {
+    padding: 2rem 1.25rem;
+  }
+
+  .product-audience-scene {
+    grid-column-gap: 2rem;
+    grid-row-gap: 2rem;
+    aspect-ratio: auto;
+    flex-direction: column;
+    display: flex;
+  }
+
+  .product-audience-art {
+    grid-column-gap: .75rem;
+    grid-row-gap: .75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    display: flex;
+    position: relative;
+    inset: auto;
+  }
+
+  .product-audience-heading {
+    width: 100%;
+    position: relative;
+    inset: auto;
+  }
+
+  .product-audience-list {
+    grid-column-gap: 1.5rem;
+    grid-row-gap: 1.5rem;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr;
+    padding-top: 2rem;
+  }
+
+  .product-audience-item {
+    border-bottom: 1px solid #11111126;
+    padding-bottom: 1.5rem;
+  }
+
+  .product-audience-decoration-1, .product-audience-decoration-2 {
+    display: none;
+  }
+
+  .product-audience-portrait-1 {
+    aspect-ratio: 1;
+    width: 3.5rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+  }
+
+  .product-audience-decoration-3, .product-audience-decoration-4, .product-audience-decoration-5, .product-audience-decoration-6, .product-audience-decoration-7, .product-audience-decoration-8, .product-audience-decoration-9 {
+    display: none;
+  }
+
+  .product-audience-portrait-2, .product-audience-portrait-3, .product-audience-portrait-4 {
+    aspect-ratio: 1;
+    width: 3.5rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+  }
+
+  .product-audience-decoration-10, .product-audience-decoration-11, .product-audience-decoration-12 {
+    display: none;
+  }
+
+  .product-audience-portrait-5 {
+    aspect-ratio: 1;
+    width: 3.5rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+  }
+
+  .product-audience-decoration-13, .product-audience-decoration-14, .product-audience-decoration-15, .product-audience-decoration-16, .product-audience-decoration-17, .product-audience-decoration-18, .product-audience-decoration-19 {
+    display: none;
+  }
+
+  .product-audience-portrait-6, .product-audience-portrait-7 {
+    aspect-ratio: 1;
+    width: 3.5rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+  }
+
+  .product-audience-decoration-20, .product-audience-decoration-21, .product-audience-decoration-22, .product-audience-decoration-23, .product-audience-decoration-24, .product-audience-decoration-25 {
+    display: none;
+  }
+
+  .product-audience-portrait-8 {
+    aspect-ratio: 1;
+    width: 3.5rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+  }
+
+  .product-audience-decoration-26 {
+    display: none;
+  }
+
+  .product-audience-portrait-9, .product-audience-portrait-10 {
+    aspect-ratio: 1;
+    width: 3.5rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
   }
 }
 /* END NATIVE TABLET EXTENSION */
