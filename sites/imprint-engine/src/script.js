@@ -2755,7 +2755,7 @@ function homeOutroAnimation() {
   const motion = {
     brackets: { start: 0.04, duration: 0.2, distance: 1.2, ease: "power1.in" },
     drop: { start: 0.08, duration: 0.2, ease: "power1.in" },
-    clip: { start: 0.22, duration: 0.5, ease: "none" },
+    clip: { start: 0.22, duration: 0.5, ease: "none", mobileTextSwitch: 0.55 },
     lineReveal: { start: 0.55, duration: 0.12, ease: "power1.in" },
     lineRetract: { start: 0.72, duration: 0.28, ease: "power1.in" },
     dropLeave: { start: 0.86, duration: 0.14, ease: "power1.in" },
@@ -2799,6 +2799,7 @@ function homeOutroAnimation() {
       const draw = () => {
         dark.style.opacity = mobile ? String(clip.progress) : "1";
         dark.style.clipPath = mobile ? "none" : clipPath(clip.progress);
+        if (mobile && copy) copy.style.color = clip.progress < motion.clip.mobileTextSwitch ? "#111111" : "#ffffff";
       };
       gsap.set(gradient, { autoAlpha: 0 }); gsap.set(line, { autoAlpha: 0, scaleX: 1 });
       draw();
@@ -2812,8 +2813,6 @@ function homeOutroAnimation() {
       timeline.to(gradient, { autoAlpha: 1, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
       timeline.to(rings, { opacity: 0, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
       timeline.to(clip, { progress: 1, duration: motion.clip.duration, ease: motion.clip.ease, onUpdate: draw }, motion.clip.start);
-      if (mobile && copy) timeline.fromTo(copy, { color: "#111111" }, { color: "#ffffff",
-        duration: motion.clip.duration, ease: motion.clip.ease }, motion.clip.start);
       timeline.to(line, { autoAlpha: 1, duration: motion.lineReveal.duration, ease: motion.lineReveal.ease }, motion.lineReveal.start);
       timeline.to(line, { scaleX: 0, duration: motion.lineRetract.duration, ease: motion.lineRetract.ease }, motion.lineRetract.start);
       timeline.to(gradient, { autoAlpha: 0, duration: motion.dropLeave.duration, ease: motion.dropLeave.ease }, motion.dropLeave.start);
