@@ -2901,10 +2901,75 @@
     grid-template-columns: 1fr;
     row-gap: 1.5rem;
   }
+
+  .ribbon-header {
+    flex-direction: column;
+    padding-top: 7rem;
+    display: flex;
+  }
+
+  .ribbon-header-art {
+    margin-top: 1rem;
+  }
+
+  .ribbon-header-copy {
+    grid-column-gap: 1rem;
+    grid-row-gap: 1rem;
+    order: -1;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    position: relative;
+    top: auto;
+    left: auto;
+  }
+
+  .updates-section {
+    padding: 2rem 1.25rem;
+  }
+
+  .updates-list {
+    grid-column-gap: 2rem;
+    grid-row-gap: 2rem;
+  }
+
+  .updates-item {
+    grid-template-rows: auto;
+    grid-template-columns: 1fr;
+    row-gap: 1rem;
+  }
+
+  .updates-date {
+    grid-column-gap: .625rem;
+    grid-row-gap: .625rem;
+    padding-top: 0;
+  }
+
+  .updates-content {
+    grid-template-rows: auto;
+    grid-template-columns: 1fr;
+    row-gap: 1rem;
+    padding-top: 1.5rem;
+  }
+
+  .updates-description {
+    grid-column-gap: 1rem;
+    grid-row-gap: 1rem;
+  }
+
+  .updates-more {
+    margin-top: 2rem;
+  }
+
+  .faq-categories {
+    grid-column-gap: 1.25rem;
+    justify-content: flex-start;
+  }
 }
 /* END NATIVE TABLET EXTENSION */
 
 /* Content filtering must override native flex/grid display rules. */
+[home-faq-item][hidden],
+[updates-item][hidden],
 [career-job][hidden],
 [career-empty][hidden] {
   display: none !important;

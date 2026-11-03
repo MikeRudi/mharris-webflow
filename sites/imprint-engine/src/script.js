@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 1199px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), customProducts(), careerOpenings(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), customProducts(), careerOpenings(), productUpdates(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
@@ -81,6 +81,27 @@ function initSite() {
 }
 
 $(initSite);
+
+function productUpdates() {
+  const cleanups = [];
+  $("[product-updates]").each(function () {
+    const $items = $(this).find("[updates-item]"), $more = $(this).find("[updates-more]");
+    const restoreItems = rememberAttributes($items, ["hidden"]);
+    const restoreMore = rememberAttributes($more, ["aria-disabled"]);
+    let shown = 7;
+    function render() {
+      $items.each((i, item) => { item.hidden = i >= shown; });
+      $more.attr("aria-disabled", String(shown >= $items.length));
+    }
+    const unbind = bindControlActivation($more, "productUpdates", () => {
+      shown += 7; render();
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    });
+    render();
+    cleanups.push(() => { unbind(); restoreItems(); restoreMore(); });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
 
 function careerOpenings() {
   const cleanups = [];
@@ -4204,6 +4225,36 @@ function homeFaqAnimation() {
   const cleanups = [];
   $sections.each(function () {
     const $items = $(this).find("[home-faq-item]");
+    const $categories = $(this).find("[faq-category]");
+    const $more = $(this).find("[faq-more]");
+    const hasMore = $more.length && !$more.closest(".w-condition-invisible").length;
+    let shown = hasMore ? 4 : Infinity;
+    let category = "";
+    const restoreCategories = rememberAttributes($categories, ["class", "aria-pressed"]);
+    const restoreItemVisibility = rememberAttributes($items, ["hidden"]);
+    const restoreMore = rememberAttributes($more, ["aria-disabled"]);
+    function filterQuestions() {
+      let matched = 0;
+      $items.each(function () {
+        if ($(this).hasClass("w-condition-invisible")) return;
+        const assigned = ($(this).attr("faq-item-category") || "").trim().toLowerCase();
+        const matches = !category || !assigned || assigned.split(",").map(v => v.trim()).includes(category);
+        if (matches) matched++;
+        this.hidden = !matches || matched > shown;
+      });
+      $more.attr("aria-disabled", String(matched <= shown));
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    }
+    const unbindCategories = bindControlActivation($categories, "faqCategories", ($category) => {
+      category = $category.attr("faq-category") === "0" ? "" : $category.text().trim().toLowerCase();
+      shown = hasMore ? 4 : Infinity;
+      $categories.removeClass("is-active").attr("aria-pressed", "false");
+      $category.addClass("is-active").attr("aria-pressed", "true");
+      filterQuestions();
+    });
+    const unbindMore = bindControlActivation($more, "faqMore", () => { shown += 4; filterQuestions(); });
+    $categories.attr("aria-pressed", "false").filter(".is-active").attr("aria-pressed", "true");
+    if (hasMore) filterQuestions();
     const $buttons = $items.find("[home-faq-button]");
     const $panels = $items.find("[home-faq-panel]");
     const restoreButtons = rememberAttributes($buttons, ["aria-expanded", "aria-controls"]);
@@ -4241,6 +4292,7 @@ function homeFaqAnimation() {
     });
     cleanups.push(() => {
       unbind();
+      unbindCategories(); unbindMore(); restoreCategories(); restoreItemVisibility(); restoreMore();
       if (transition) transition.kill();
       if (window.gsap) gsap.killTweensOf($panels);
       restoreButtons(); restorePanels();
