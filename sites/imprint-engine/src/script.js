@@ -432,35 +432,35 @@ function homeAnimation() {
   // "<", ">", and ">+=0.02" also work relative to the previous step.
   // Across groups, use "group.step:end" or "group:end".
   const homeMotion = {
-    // 01 — Copy leaves early; the card sphere drifts behind the opening scenes.
+    // 01 — Cards, copy and logos rise together and clear as the second scene enters.
     firstScene: {
       start: 0,
-      sphere: { start: 0, duration: 0.3, ease: "none" },
-      move: { start: 0, duration: 0.11, ease: "power1.in", y: "-20rem", scale: 0.9, stagger: { amount: 0.02, from: "end" } },
-      fade: { start: "move", duration: 0.07, ease: "power1.in", stagger: { amount: 0.02, from: "end" } },
+      sphere: { start: 0, duration: 0.09, ease: "power1.in" },
+      move: { start: 0, duration: 0.09, ease: "power1.in", y: "-20rem", scale: 0.9, stagger: 0 },
+      fade: { start: "move", duration: 0.07, ease: "power1.in", stagger: 0 },
     },
-    // 02 — Cards fade gently; the logos follow the first scene's exit.
+    // 02 — Match the first scene's exit timing; no delayed cards or logos.
     cards: {
-      start: 0.24,
+      start: "firstScene.move",
       move: { start: 0, duration: 0.09, ease: "power1.in", y: "-6rem" },
-      fade: { start: "move", duration: 0.09, ease: "power1.inOut" },
+      fade: { start: "move", duration: 0.07, ease: "power1.in" },
     },
     logos: {
-      start: "firstScene.move:end",
-      move: { start: 0, duration: 0.06, ease: "power1.in", y: "-10rem" },
-      fade: { start: "move", duration: 0.06, ease: "power1.in" },
+      start: "firstScene.move",
+      move: { start: 0, duration: 0.09, ease: "power1.in", y: "-10rem" },
+      fade: { start: "move", duration: 0.07, ease: "power1.in" },
     },
     // 03 — Second scene: enter → hold → leave.
     secondScene: {
-      start: "logos:end+=0.02",
+      start: "firstScene.fade:end",
       enter: { start: 0, duration: 0.065, ease: "power1.in", fromY: "10rem", fromScale: 0.9, scale: 1 },
       reveal: { start: "enter", duration: 0.05, ease: "power1.in" },
-      leave: { start: "enter:end+=0.045", duration: 0.065, ease: "power1.in", y: "-20rem", scale: 0.9 },
+      leave: { start: "enter:end+=0.02", duration: 0.065, ease: "power1.in", y: "-20rem", scale: 0.9 },
       hide: { start: "leave", duration: 0.05, ease: "power1.in" },
     },
     // 04 — Third scene enters and holds naturally until the screen opens.
     thirdScene: {
-      start: "secondScene.leave:end",
+      start: "secondScene.hide:end",
       enter: { start: 0, duration: 0.065, ease: "power1.in", fromY: "10rem", fromScale: 0.9, scale: 1 },
       reveal: { start: "enter", duration: 0.05, ease: "power1.in" },
     },

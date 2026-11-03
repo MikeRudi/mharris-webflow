@@ -68,17 +68,17 @@ Set `enabled: false` to disable it. The scroll timeline remains directly scrubbe
 ## Starting choreography
 
 The opening scene/drop sequence reaches the clip at 52%, leaving 48% for the
-finish. Copy transitions overlap the slow background card framing rather than
-waiting for it to finish. Most movements use `power1.in`. Card framing, the
-gradient orbit and star rotation use `none` for a constant rate. Card fades use
-`power1.inOut` to ease smoothly into and out of transparency.
+finish. The opening cards, copy and logos rise together over the first 9% and
+fade out together by 7%, when the second scene begins. There is no scroll-exit
+stagger. Most movements and the opening fades use `power1.in`; the gradient
+orbit and star rotation use `none` for a constant rate.
 
 | Group | Initial start | Main behavior |
 | --- | --- | --- |
-| `firstScene` | 0% | Exit text; cards rise from their existing positions until 30% |
-| `cards`, `logos` | 24%; after first exit | Cards fade through 33%; logos leave with the next scene |
-| `secondScene` | After first text exit, currently 11% | Enter, hold, then leave |
-| `thirdScene` | After second exit, currently 28.5% | Enter and remain until the clip |
+| `firstScene` | 0% | Text and card framing rise through 9%; text clears by 7% |
+| `cards`, `logos` | With the first scene, 0% | Rise through 9%; both clear by 7% |
+| `secondScene` | After the opening fade, 7% | Enter through 13.5%, hold for 2%, then leave |
+| `thirdScene` | After the second scene fades, 20.5% | Enter through 27% and remain until the clip |
 | `gradientDots` | 2% | Form the ring, rotate, rise, merge |
 | `drop` | When dots start fading | Form, land, then resize the drop |
 | `landingRipple`, `line` | After landing, currently 35% | Water ripple and line drawing |
@@ -96,7 +96,7 @@ with shadows.
 The page entrance uses the separate `homeEntrance` controls in seconds. Idle
 card rotation and pointer dragging use `homeCardMotion`: the idle rate is 360
 degrees per 48 seconds, with a 45-degree axis. `idle.scrollSpeedMultiplier: 3`
-gradually triples rotation speed across the opening 30%, including while scrolling
+gradually triples rotation speed across the opening 9%, including while scrolling
 or holding that scroll position. Idle advances directly; drag smoothing only
 affects pointer input. Rotation stops after the existing card fade finishes.
 `opacity.back/front/ease` defines
@@ -105,7 +105,7 @@ one continuous depth curve for every card, replacing fixed opacity tiers.
 edge anchored. `layout.verticalSpread: 0.6` raises the lower rows while keeping
 the top anchored, clearing space above the logos. These change card positions,
 not the shape of the cards. The layout is remeasured on ScrollTrigger refresh.
-`framing.riseYRem: -6` adds a straight upward movement over the same 30%; there
+`framing.riseYRem: -18` adds a straight upward movement over the same 9%; there
 is no scroll-driven move toward the viewport centre. `framing.scale` retains
 the gradual reduction to 0.78. All home scroll
 sequences, including both ripples, follow scroll in both directions.
@@ -157,9 +157,11 @@ and full-size gallery artwork during desktop and mobile expansion.
 The card suite compares top/right anchors and logo clearance, checks resize
 stability, measures rotation speed, and tests wheel scrolling and fade/reverse.
 
-The second scene starts at `logos:end+=0.02`, leaving a 2% scroll gap after
-the logos finish. Its entry and the third scene's entry expose `fromY`,
+The second scene starts at `firstScene.fade:end`, immediately after all three
+opening groups fade. Its entry and the third scene's entry expose `fromY`,
 `fromScale` and `scale`; text enters from 0.9 and leaves toward 0.9. The final
 scene's exit scale is `finish.textLeave`. Card upward travel is
-`homeCardMotion.framing.riseYRem` (currently -18rem), spread linearly over
-`firstScene.sphere` while rotation continues and accelerates.
+`homeCardMotion.framing.riseYRem` (currently -18rem), eased over
+`firstScene.sphere` while rotation continues and accelerates. The second scene
+holds for 2% after entering; the third starts at `secondScene.hide:end`, without
+waiting for the last invisible part of its upward movement.
