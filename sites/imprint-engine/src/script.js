@@ -3817,8 +3817,6 @@ function compareDropAnimation() {
   // COMPARISON DROP — native Webflow classes control size, colour and glow.
   const dropMotion = {
     scroll: { screenPosition: 0.5, startOffset: 0, endInset: 0, scrub: true },
-    // Linear movement and direct scrub keep the drop exactly at screenPosition.
-    draw: { duration: 1, ease: "none" },
   };
   const $sections = $("[compare-section]");
   if (!$sections.length || !window.gsap || !window.ScrollTrigger) return null;
@@ -3845,18 +3843,23 @@ function compareDropAnimation() {
       const lastRow = $section.find("[compare-row]").last()[0];
       if (!track || !drop || !line || !lastRow) return;
       const restore = rememberAttributes($([drop, line]), ["style"]);
-      let halfHeight = 0, travel = 0;
+      let travel = 0;
+      const moveDrop = gsap.quickSetter(drop, "y", "px");
+      const drawLine = gsap.quickSetter(line, "scaleY");
+      function draw(progress) {
+        moveDrop(dropMotion.scroll.startOffset + travel * progress);
+        drawLine(progress);
+      }
 
       // 01 — Measure from the authored top to the bottom of the final row.
       function measure() {
-        halfHeight = drop.offsetHeight / 2;
         // Mobile displays each comparison column consecutively; rows have no box.
         const endRow = getComputedStyle(lastRow).display === "contents"
           ? lastRow.lastElementChild : lastRow;
         travel = Math.max(0, endRow.getBoundingClientRect().bottom
-          - track.getBoundingClientRect().top - halfHeight * 2
+          - track.getBoundingClientRect().top - drop.offsetHeight
           - dropMotion.scroll.startOffset - dropMotion.scroll.endInset);
-        line.style.top = `${dropMotion.scroll.startOffset + halfHeight}px`;
+        line.style.top = `${dropMotion.scroll.startOffset}px`;
         line.style.height = `${travel}px`;
       }
       measure();
@@ -3865,28 +3868,23 @@ function compareDropAnimation() {
 
       // 02 — Match scroll pixel for pixel, holding the drop at mid-screen.
       // Both ends stay inside the section; no pin spacer changes its layout.
-      const timeline = gsap.timeline({ paused: true })
-        .fromTo(drop, { y: () => dropMotion.scroll.startOffset }, {
-          y: () => dropMotion.scroll.startOffset + travel, ...dropMotion.draw,
-        }, 0)
-        .fromTo(line, { scaleY: 0 }, { scaleY: 1, ...dropMotion.draw }, 0);
       const trigger = ScrollTrigger.create({
         id: `compare-drop-${index + 1}`,
         trigger: track,
-        start: () => `${dropMotion.scroll.startOffset + halfHeight}px ${dropMotion.scroll.screenPosition * 100}%`,
+        start: () => `${dropMotion.scroll.startOffset}px ${dropMotion.scroll.screenPosition * 100}%`,
         end: (self) => self.start + Math.max(1, travel),
-        animation: timeline,
-        scrub: dropMotion.scroll.scrub,
-        invalidateOnRefresh: true,
+        onUpdate: self => draw(self.progress),
         onRefreshInit: measure,
+        onRefresh: self => draw(self.progress),
       });
+      draw(trigger.progress);
 
       // 03 — Remeasure when copy, fonts or responsive layout changes height.
       const observer = window.ResizeObserver && new ResizeObserver(scheduleRefresh);
       if (observer) { observer.observe(this); observer.observe(lastRow); }
       cleanups.push(() => {
         if (observer) observer.disconnect();
-        trigger.kill(); timeline.kill(); restore();
+        trigger.kill(); restore();
       });
     });
     if (document.fonts) document.fonts.ready.then(scheduleRefresh);
@@ -4132,6 +4130,7 @@ function testimonialEnvelopeAnimation() {
     lift: { start: 0, duration: 0.32, distance: 4, ease: "power1.in" },
     spread: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
     controls: { start: 0.88, duration: 0.12, ease: "power1.in" },
+    swipe: { duration: 0.45, ease: "power1.inOut", edgeCards: 2 },
     stack: { width: 0.76, top: [0.07, 0.21, 0.36], left: [0.13, 0.08, 0.14], rotation: [2, -2, 4] },
   };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -4146,15 +4145,46 @@ function testimonialEnvelopeAnimation() {
     const $ui = $section.find("[testimonial-controls], [testimonial-complete-ui]");
     const $buttons = $section.find("[testimonial-previous], [testimonial-next]");
     if (!carousel || !track || !cards.length || !envelope) return;
-    const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add($ui).add($buttons),
+    const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add(track).add($ui).add($buttons),
       ["style", "class", "aria-hidden", "inert", "tabindex", "role", "aria-disabled"]);
     let timeline, trigger, ready = false, drag = null, resizeFrame, disposed = false;
+    let arrowTween = null, loopStep = 0, movingCards = false;
     const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
 
     function updateButtons() {
+      $buttons.attr("aria-disabled", String(!ready));
+    }
+    function stopArrow() {
+      arrowTween?.kill(); arrowTween = null;
+    }
+    function restoreOrder() {
+      stopArrow();
+      const fragment = document.createDocumentFragment();
+      cards.forEach(card => fragment.append(card)); track.append(fragment);
+      carousel.scrollLeft = 0;
+    }
+    function rotateCards(prepend) {
+      const count = Math.max(1, Math.floor(cards.length / 3));
+      const anchor = prepend ? track.firstElementChild : track.children[count];
+      const before = anchor.offsetLeft, scroll = carousel.scrollLeft;
+      movingCards = true;
+      if (prepend) {
+        for (let i = 0; i < count; i++) track.prepend(track.lastElementChild);
+      } else {
+        for (let i = 0; i < count; i++) track.append(track.firstElementChild);
+      }
+      const shift = anchor.offsetLeft - before;
+      carousel.scrollLeft = scroll + shift;
+      if (drag) drag.scroll += shift;
+      movingCards = false;
+    }
+    function keepLoopCentered() {
+      if (!ready || movingCards || arrowTween || !loopStep) return;
+      const edge = loopStep * motion.swipe.edgeCards;
       const maximum = carousel.scrollWidth - carousel.clientWidth;
-      $buttons.filter("[testimonial-previous]").attr("aria-disabled", String(carousel.scrollLeft <= 1));
-      $buttons.filter("[testimonial-next]").attr("aria-disabled", String(carousel.scrollLeft >= maximum - 1));
+      if (maximum <= edge * 2) return;
+      if (carousel.scrollLeft < edge) rotateCards(true);
+      else if (carousel.scrollLeft > maximum - edge) rotateCards(false);
     }
     function interactive(next) {
       if (ready === next) return;
@@ -4162,20 +4192,26 @@ function testimonialEnvelopeAnimation() {
       carousel.classList.toggle("is-ready", ready);
       carousel.style.overflowX = ready ? "auto" : "hidden";
       carousel.style.overflowY = "hidden";
-      carousel.style.scrollSnapType = ready ? "x proximity" : "none";
+      carousel.style.scrollSnapType = "none";
+      carousel.style.overflowAnchor = "none"; track.style.overflowAnchor = "none";
       carousel.style.cursor = ready ? "grab" : "default";
       $ui.each((_, node) => { node.inert = !ready; });
       cards.forEach((card, i) => {
         card.inert = !ready;
         card.setAttribute("aria-hidden", String(!ready && Number(card.getAttribute("testimonial-slide")) > 3));
       });
-      if (!ready) carousel.scrollLeft = 0;
+      if (ready) {
+        loopStep = cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 0;
+        keepLoopCentered();
+      } else {
+        up(); restoreOrder();
+      }
       updateButtons();
     }
     function build() {
       if (disposed) return;
       trigger?.kill(); timeline?.kill();
-      carousel.scrollLeft = 0;
+      restoreOrder();
       gsap.set(cards, { clearProps: "transform,opacity,visibility,clipPath" });
       const unit = rem();
       gsap.set(envelope, { clearProps: "transform,opacity,visibility,left" });
@@ -4218,22 +4254,30 @@ function testimonialEnvelopeAnimation() {
     }
     const unbind = bindControlActivation($buttons, "testimonialSwiper", $button => {
       if (!ready) return;
+      stopArrow(); keepLoopCentered();
       const direction = $button.is("[testimonial-next]") ? 1 : -1;
-      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      carousel.scrollBy({ left: direction * (cards[0].offsetWidth + gap), behavior: reduced.matches ? "instant" : "smooth" });
+      const position = { value: carousel.scrollLeft };
+      if (reduced.matches) {
+        carousel.scrollLeft += direction * loopStep; keepLoopCentered(); return;
+      }
+      arrowTween = gsap.to(position, { value: position.value + direction * loopStep,
+        duration: motion.swipe.duration, ease: motion.swipe.ease,
+        onUpdate: () => { carousel.scrollLeft = position.value; },
+        onComplete: () => { arrowTween = null; keepLoopCentered(); } });
     });
     function down(event) {
+      stopArrow(); keepLoopCentered();
       if (!ready || event.pointerType !== "mouse" || event.button !== 0 || event.target.closest("a,button,input")) return;
       drag = { id: event.pointerId, x: event.clientX, scroll: carousel.scrollLeft };
       carousel.setPointerCapture(event.pointerId);
-      carousel.style.cursor = "grabbing"; carousel.style.scrollSnapType = "none";
+      carousel.style.cursor = "grabbing";
       event.preventDefault();
     }
     function move(event) { if (drag) carousel.scrollLeft = drag.scroll + drag.x - event.clientX; }
     function up() {
       if (!drag) return;
       if (carousel.hasPointerCapture(drag.id)) carousel.releasePointerCapture(drag.id);
-      drag = null; carousel.style.cursor = "grab"; carousel.style.scrollSnapType = "x proximity";
+      drag = null; carousel.style.cursor = "grab";
     }
     let width = carousel.clientWidth;
     const observer = new ResizeObserver(() => {
@@ -4242,7 +4286,8 @@ function testimonialEnvelopeAnimation() {
       cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(build);
     });
     observer.observe(carousel);
-    carousel.addEventListener("scroll", updateButtons, { passive: true });
+    carousel.addEventListener("scroll", keepLoopCentered, { passive: true });
+    carousel.addEventListener("wheel", stopArrow, { passive: true });
     carousel.addEventListener("pointerdown", down); carousel.addEventListener("pointermove", move);
     carousel.addEventListener("pointerup", up); carousel.addEventListener("pointercancel", up);
     reduced.addEventListener("change", build);
@@ -4251,7 +4296,9 @@ function testimonialEnvelopeAnimation() {
     cleanups.push(() => {
       disposed = true; up(); trigger?.kill(); timeline?.kill(); unbind(); observer.disconnect();
       cancelAnimationFrame(resizeFrame); reduced.removeEventListener("change", build);
-      carousel.removeEventListener("scroll", updateButtons); carousel.removeEventListener("pointerdown", down);
+      restoreOrder();
+      carousel.removeEventListener("scroll", keepLoopCentered); carousel.removeEventListener("wheel", stopArrow);
+      carousel.removeEventListener("pointerdown", down);
       carousel.removeEventListener("pointermove", move); carousel.removeEventListener("pointerup", up);
       carousel.removeEventListener("pointercancel", up); restore();
     });
