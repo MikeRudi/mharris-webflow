@@ -15,8 +15,8 @@ the unused tail from that height so the next section follows the completed finis
 even inside a group. For a `450vh` section and a `100vh` viewport, the available
 scroll distance is `350vh`.
 
-The scroll clock ends with the last scrubbed step, currently `0.71`. The section
-keeps 71% of its original scrub distance, preserving the earlier scenes' pace.
+The scroll clock ends with the last scrubbed step, currently `0.6085`. The section
+keeps 60.85% of its original scrub distance, preserving the opening scene's pace.
 The viewport and any mobile introduction overflow remain full-size. Refreshes
 remeasure native sizing before trimming, and breakpoint cleanup restores it.
 Keep endpoints at or before `1`; overruns warn and are cut off at that limit.
@@ -71,8 +71,8 @@ Set `enabled: false` to disable it. The scroll timeline remains directly scrubbe
 
 ## Starting choreography
 
-The opening scene/drop sequence reaches the clip at 52% of the authored range;
-the finish completes at 71%. The opening cards, copy and logos rise together over the first 9% and
+The opening scene/drop sequence reaches the clip at 42.8% of the authored range;
+the finish completes at 60.85%. The opening cards, copy and logos rise together over the first 9% and
 fade out together by 7%, when the second scene begins. There is no scroll-exit
 stagger. Most movements and the opening fades use `power1.in`; the gradient
 orbit and star rotation use `none` for a constant rate.
@@ -81,21 +81,21 @@ orbit and star rotation use `none` for a constant rate.
 | --- | --- | --- |
 | `firstScene` | 0% | Text and card framing rise through 9%; text clears by 7% |
 | `cards`, `logos` | With the first scene, 0% | Rise through 9%; both clear by 7% |
-| `secondScene` | After the opening fade, 7% | Enter through 13.5%, hold for 2%, then leave |
-| `thirdScene` | After the second scene fades, 20.5% | Enter through 27% and remain until the clip |
+| `secondScene` | After the opening fade, 7% | Enter through 13.5%, hold for 1.5%, then leave |
+| `thirdScene` | After the second scene fades, 19% | Enter through 24% and remain until the clip |
 | `gradientDots` | 2% | Form the ring, rotate, rise, merge |
 | `drop` | When dots start fading | Form, land, then resize the drop |
-| `landingRipple`, `line` | After landing, currently 35% | Water ripple and line drawing |
-| `dropColours` | After resizing, currently 40.5% | Fill the drop and sharpen it |
-| `finish` | After the line, currently 52% | Clip through 70%; brackets start at 66.4%, everything settles by 71% |
-| `homeEndRipple` | When the clipped layer finishes fading, currently 69.4% | Play independently in seconds, adding no scroll distance |
+| `landingRipple`, `line` | After landing, currently 30.8% | Water ripple and line drawing |
+| `dropColours` | After resizing, currently 34.95% | Fill the drop and sharpen it |
+| `finish` | After the line, currently 42.8% | Clip through 59.9%; brackets start at 56.48%, everything settles by 60.85% |
+| `homeEndRipple` | When the clipped layer finishes fading, currently 59.33% | Play independently in seconds, adding no scroll distance |
 
 `homeEndRipple.expand` controls growth from `fromScale: 0.08` to the native size
 (`scale: 1`), over 1.2 seconds with 0.08-second stagger. Its reveal takes 0.35
 seconds, with outer/middle/inner opacity 0.4/0.4/0.6. It keeps playing when the
 user stops scrolling. Scrolling back before the layer fade completes resets it for the next entry;
 it is killed on breakpoint cleanup. `finish.layerFade` starts with the brackets
-and lasts 3% of the authored range, finishing before their 4.5% closing movement.
+and lasts 2.85% of the authored range, finishing before their 4.275% closing movement.
 Desktop keeps the clip while this layer fades; mobile uses only the opacity transition.
 The earlier landing ripple remains scrubbed. The flattened
 ellipse dimensions, vertical offsets, thick borders and blur are authored in
@@ -177,5 +177,5 @@ opening groups fade. Its entry and the third scene's entry expose `fromY`,
 scene's exit scale is `finish.textLeave`. Card upward travel is
 `homeCardMotion.framing.riseYRem` (currently -18rem), eased over
 `firstScene.sphere` while rotation continues and accelerates. The second scene
-holds for 2% after entering; the third starts at `secondScene.hide:end`, without
+holds for 1.5% after entering; the third starts at `secondScene.hide:end`, without
 waiting for the last invisible part of its upward movement.
