@@ -1669,9 +1669,23 @@
     padding-bottom: 0;
   }
 
+  .solutions-header:where(.w-variant-93e07eb7-708e-cea9-e91f-b09885906b76) {
+    height: auto;
+    min-height: 0;
+    padding-top: 7.5rem;
+    padding-bottom: 2rem;
+  }
+
   .solutions-header-content {
     padding-top: 1.5rem;
     padding-bottom: 2rem;
+  }
+
+  .solutions-header-content:where(.w-variant-93e07eb7-708e-cea9-e91f-b09885906b76) {
+    height: auto;
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .benefits-section {
