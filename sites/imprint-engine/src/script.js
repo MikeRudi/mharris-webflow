@@ -516,15 +516,16 @@ function homeAnimation() {
       starGrow: { start: "clip", duration: 0.04, ease: "power1.in", scale: 2.5 },
       starRotate: { start: "starGrow", duration: 0.18, ease: "none", rotation: 130.35 },
       starSettle: { start: "starGrow:end+=0.07", duration: 0.04, ease: "power1.in", scale: 2.15 },
-      drop: { start: "clip+=0.04", duration: 0.15, ease: "power1.in", scale: 0.5 },
+      drop: { start: "clip+=0.04", duration: 0.15, ease: "power1.in", fromScale: 2, scale: 1 },
       leftBracket: { start: "clip", clipProgress: 0.8, duration: 0.045, ease: "power1.in" },
       rightBracket: { start: "leftBracket", duration: 0.045, ease: "power1.in" },
+      layerFade: { start: "leftBracket", duration: 0.03, ease: "power1.in" },
       content: { start: "leftBracket", duration: 0.04, ease: "power1.in" },
     },
   };
   // FINAL RIPPLE — triggered by scroll, but durations/staggers here are seconds.
   const homeEndRipple = {
-    start: "finish.rightBracket:end",
+    start: "finish.layerFade:end",
     expand: { start: 0, duration: 1.2, ease: "power1.in", stagger: 0.08, fromScale: 0.08, scale: 1 },
     reveal: {
       start: "expand", duration: 0.35, ease: "power1.in", stagger: 0.08,
@@ -1066,7 +1067,7 @@ function homeAnimation() {
   });
 
   gsap.set($("[home-end-target-svg]"), {
-    scale: 1,
+    scale: homeMotion.finish.drop.fromScale,
     opacity: 1,
     transformOrigin: "center center",
   });
@@ -1355,12 +1356,8 @@ function homeAnimation() {
 
   // 10 — Screen opening, star, brackets, final drop and end content.
   addHomeGroup("finish", (group, motion) => {
-    if (homeMobile.enabled) {
-      // Keep the same scrub timing; opacity avoids repainting the full-screen polygon.
-      addHomeStep(group, "clip", $("[home-start]"), { autoAlpha: 1 }, { autoAlpha: 0 }, motion.clip);
-    } else {
-      addHomeStep(group, "clip", homeClip, { progress: 0 }, { progress: 1 }, motion.clip);
-    }
+    // Mobile keeps the timing clock without painting the desktop polygon.
+    addHomeStep(group, "clip", homeClip, { progress: 0 }, { progress: 1 }, motion.clip);
     addHomeStep(group, "blur", $homeStartContent, { filter: motion.blur.from }, { filter: motion.blur.to }, motion.blur);
     addHomeStep(group, "textLeave", $("[home-third-up]"), { scale: 1 }, { scale: motion.textLeave.scale }, motion.textLeave);
     addHomeStep(group, "starGrow", $("[home-drop-star]"),
@@ -1371,16 +1368,17 @@ function homeAnimation() {
     addHomeStep(group, "starSettle", $("[home-drop-star]"),
       { scale: motion.starGrow.scale }, { scale: motion.starSettle.scale }, motion.starSettle);
     addHomeStep(group, "drop", $("[home-end-target-svg]"),
-      { scale: 1 }, { scale: motion.drop.scale }, motion.drop);
+      { scale: motion.drop.fromScale }, { scale: motion.drop.scale }, motion.drop);
     addHomeStep(group, "leftBracket", $("[home-end-bracket-left]"), { x: -72 }, { x: 0 }, {
       ...motion.leftBracket,
       start: `${motion.leftBracket.start}+=${motion.clip.duration * motion.leftBracket.clipProgress}`,
     });
     addHomeStep(group, "rightBracket", $("[home-end-bracket-right]"), { x: 72 }, { x: 0 }, motion.rightBracket);
+    addHomeStep(group, "layerFade", $("[home-start]"), { autoAlpha: 1 }, { autoAlpha: 0 }, motion.layerFade);
     addHomeStep(group, "content", $homeEndContent, { opacity: 0 }, { opacity: 1 }, motion.content);
   });
 
-  // 11 — Play independently once the brackets close; reset when scrolling back before closure.
+  // 11 — Play independently after the clipped layer fades; reset before that threshold.
   const homeRippleTimeline = gsap.timeline({ paused: true, id: "home-end-ripple" });
   const $endRings = $("[home-end-ripple]");
   addHomeStep(homeRippleTimeline, "expand", $endRings,

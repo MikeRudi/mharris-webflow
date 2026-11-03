@@ -665,7 +665,7 @@
   }
 
   .home-end-drop-stage {
-    width: 4.375rem;
+    width: 100%;
   }
 
   .home-end-target-svg {
@@ -953,15 +953,11 @@
 
   .drop-text-mark {
     width: 5.75rem;
-    height: 5.75rem;
+    height: auto;
   }
 
-  .drop-text-droplet {
-    width: 2.25rem;
-  }
-
-  .drop-text-bracket-left, .drop-text-bracket-right {
-    width: 1rem;
+  .drop-text-droplet, .drop-text-bracket-left, .drop-text-bracket-right {
+    width: 100%;
   }
 
   .flex-grow-section {
@@ -1315,8 +1311,9 @@
   }
 
   .compare-drop {
+    aspect-ratio: 120.363 / 180.288;
     width: .375rem;
-    height: .575rem;
+    height: auto;
     left: -.1875rem;
   }
 

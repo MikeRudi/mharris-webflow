@@ -88,13 +88,16 @@ orbit and star rotation use `none` for a constant rate.
 | `landingRipple`, `line` | After landing, currently 35% | Water ripple and line drawing |
 | `dropColours` | After resizing, currently 40.5% | Fill the drop and sharpen it |
 | `finish` | After the line, currently 52% | Clip through 70%; brackets start at 66.4%, everything settles by 71% |
-| `homeEndRipple` | When the brackets close, currently 70.9% | Play independently in seconds, adding no scroll distance |
+| `homeEndRipple` | When the clipped layer finishes fading, currently 69.4% | Play independently in seconds, adding no scroll distance |
 
 `homeEndRipple.expand` controls growth from `fromScale: 0.08` to the native size
 (`scale: 1`), over 1.2 seconds with 0.08-second stagger. Its reveal takes 0.35
 seconds, with outer/middle/inner opacity 0.4/0.4/0.6. It keeps playing when the
-user stops scrolling. Scrolling back before bracket closure resets it for the next entry;
-it is killed on breakpoint cleanup. The earlier landing ripple remains scrubbed. The flattened
+user stops scrolling. Scrolling back before the layer fade completes resets it for the next entry;
+it is killed on breakpoint cleanup. `finish.layerFade` starts with the brackets
+and lasts 3% of the authored range, finishing before their 4.5% closing movement.
+Desktop keeps the clip while this layer fades; mobile uses only the opacity transition.
+The earlier landing ripple remains scrubbed. The flattened
 ellipse dimensions, vertical offsets, thick borders and blur are authored in
 Webflow, matching the selected Figma ellipses; JS does not replace that artwork
 with shadows.
@@ -124,6 +127,11 @@ wrapper or changing the section height.
 Home Staged has a white-text nav inside the dark hero and a dark-text page nav.
 The hero clip reveals the page nav naturally. `navTheme()` keeps the hero's theme
 fixed and applies section themes (including the footer) to the page nav.
+
+The final mark uses the exact paths from `logo-mark-source.svg` in matched
+`0 0 304 271` SVG viewBoxes. The drop and brackets share one coordinate frame;
+the drop settles from scale 2 to 1 so its final proportions match the supplied
+logo. Native Webflow sizing scales the complete mark uniformly at each breakpoint.
 
 ## Preview and regression checks
 
