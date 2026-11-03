@@ -76,18 +76,21 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
 - `compareGradientAnimation()` changes the cursor gradient between the original
   turquoise on the right and red on the left in 0.1 seconds.
 - `testimonialEnvelopeAnimation()` starts with the red, grey and white notes
-  inside the open envelope, then spreads into 15 editable cards. The envelope
-  remains in the horizontal track. Its scrub runs from section top at 50% to
-  section top at 0%. Swipe, arrows and dragging are enabled at the end; there is
-  no progress bar.
+  inside the open envelope, then spreads into 15 editable cards. The envelope is
+  absolute behind the carousel and stays fixed while cards scroll over it. The
+  scrub starts at section top at 70% and ends with the carousel centered in the
+  viewport. Swipe, arrows and dragging are enabled at the end; no progress bar.
 - `homeOutroAnimation()` reverses the lander's drop/clip/line sequence within a
   native sticky layout. Mobile uses opacity and one readable copy layer; desktop
   clips a white copy layer over the original black copy. Both copies share props
   and sit on the left. The gradient drop includes the lander's star reflection.
-  The FAQ enters during line retraction, before the timeline finishes.
+  The line lives inside the black clip, so it is hidden on the white background.
+  The FAQ overlaps the section tail and enters near the end of the clip reveal.
 - Accordion 04 has a Black Background variant, applied to the homepage instance.
-- `navigationSearch()` expands the desktop input to 8rem, derives results from
-  existing navigation links, and supports the mobile menu and its Back control.
+- `navigationSearch()` expands the desktop input to 8rem and groups existing
+  navigation links by page category. Close clears the query and collapses search.
+  Desktop search locks page scrolling; mobile reuses the menu's existing lock.
+  Only the results panel scrolls while search is open.
 
 The additional testimonial slots repeat the supplied examples as editable
 defaults. This implementation does not record Michael's final tracker approval.
