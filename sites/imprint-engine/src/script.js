@@ -4261,6 +4261,8 @@ function testimonialEnvelopeAnimation() {
       else trigger = ScrollTrigger.create({ trigger: section, endTrigger: carousel, animation: timeline, ...motion.scroll,
         onUpdate: self => { if (self.progress >= 0.999) finishOpening(); },
         onRefresh: self => { if (self.progress >= 0.999) finishOpening(); } });
+      // Creation can refresh synchronously before the trigger assignment completes.
+      if (openedOnce && trigger) finishOpening();
     }
     const unbind = bindControlActivation($buttons, "testimonialSwiper", $button => {
       if (!ready) finishOpening();
