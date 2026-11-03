@@ -79,7 +79,9 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
   inside the open envelope, then spreads into 15 editable cards. The envelope is
   absolute behind the carousel and stays fixed while cards scroll over it. The
   scrub starts at section top at 70% and ends with the carousel centered in the
-  viewport. Swipe, arrows and dragging are enabled at the end; no progress bar.
+  viewport. Swipe, arrows and dragging loop in both directions by recycling the
+  original 15 cards. The original order returns when reversing into the envelope
+  animation. No duplicate props or progress bar are added.
 - `homeOutroAnimation()` reverses the lander's drop/clip/line sequence within a
   native sticky layout. Mobile uses opacity and one readable copy layer; desktop
   clips a white copy layer over the original black copy. Both copies share props

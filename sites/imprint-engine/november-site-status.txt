@@ -6,8 +6,10 @@ Status: Homepage corrections awaiting Michael's review. The wider November site 
 LATEST HOMEPAGE CORRECTIONS
 - Teams: original circle groups and interaction restored, persona images only. Six centered content blocks with side padding; Item 6 is Lorem ipsum. Desktop three columns, mobile one.
 - Accordion 02: CUSTOM now sits underneath revealed images, like the other choices.
-- Testimonials: original red, grey and white notes begin inside the open envelope. Corrected pocket geometry and layering. Fifteen editable notes spread into the horizontal swiper, with the envelope remaining in the track. No progress bar; thin arrow artwork and purple CTA treatment restored. Responsive note headers prevent logos crowding names.
-- Homepage Drop with Text: copy moved left; gradient drop fades in with the lander's star reflection. Shorter sticky sequence, FAQ entering during line retraction. Outro and FAQ backgrounds match the footer at each breakpoint.
+- Testimonials: original red, grey and white notes begin inside the open envelope. The envelope is absolute behind the swiper, stays stationary, and item 2 overlaps it. The existing fifteen cards loop left/right without duplicate props. No progress bar; thin arrows and purple CTA restored. Animation starts earlier and finishes with the carousel centered.
+- Comparison section: scroll marker now updates directly from scroll progress and refresh measurements; the vertical line ends at the drop's tip.
+- Homepage Drop with Text: copy moved left; gradient drop fades in with the lander's star reflection. The white line lives inside the black clip. FAQ enters toward the clip's end, overlapping the section tail. Outro and FAQ backgrounds match the footer at each breakpoint.
+- Navigation search: category groups, matching dropdown corners, aligned input, Close control and independent menu scrolling while the page is locked.
 - Native changes published to Webflow staging; runtime CSS/JS pushed to GitHub main. Custom production domains were not published.
 - Checked 1440, 1024 and 390 CSS pixels: no page-width overflow, broken persona images or page JavaScript errors. Fifteen notes and Next scrolling verified.
 
