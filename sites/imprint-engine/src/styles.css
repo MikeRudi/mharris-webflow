@@ -2975,6 +2975,9 @@
   display: none !important;
 }
 
+[faq-category] { border-bottom: 1px solid transparent; }
+[faq-category].is-active { border-bottom-color: currentColor; }
+
 [career-job-filter].is-active {
   color: #6425ab;
 }

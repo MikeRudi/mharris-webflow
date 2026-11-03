@@ -4225,6 +4225,13 @@ function homeFaqAnimation() {
   const cleanups = [];
   $sections.each(function () {
     const $items = $(this).find("[home-faq-item]");
+    const addedCategoryHooks = [];
+    $(this).find(".faq-categories > .filter1-tabs-item").each(function (index) {
+      if (!this.hasAttribute("faq-category")) {
+        this.setAttribute("faq-category", String(index));
+        addedCategoryHooks.push(this);
+      }
+    });
     const $categories = $(this).find("[faq-category]");
     const $more = $(this).find("[faq-more]");
     const hasMore = $more.length && !$more.closest(".w-condition-invisible").length;
@@ -4293,6 +4300,7 @@ function homeFaqAnimation() {
     cleanups.push(() => {
       unbind();
       unbindCategories(); unbindMore(); restoreCategories(); restoreItemVisibility(); restoreMore();
+      addedCategoryHooks.forEach(item => item.removeAttribute("faq-category"));
       if (transition) transition.kill();
       if (window.gsap) gsap.killTweensOf($panels);
       restoreButtons(); restorePanels();
