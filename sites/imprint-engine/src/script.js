@@ -4142,17 +4142,19 @@ function testimonialEnvelopeAnimation() {
     const cards = Array.from(section.querySelectorAll("[testimonial-slide]"));
     const envelope = section.querySelector("[testimonial-envelope]");
     const pocket = envelope?.querySelector("[testimonial-envelope-front]");
-    const $ui = $section.find("[testimonial-controls], [testimonial-complete-ui]");
     const $buttons = $section.find("[testimonial-previous], [testimonial-next]");
+    const $controls = $section.find("[testimonial-controls]");
+    const $arrows = $buttons.closest(".testimonial-arrows");
+    const $ui = $section.find("[testimonial-complete-ui]").add($controls.children().not($arrows));
     if (!carousel || !track || !cards.length || !envelope) return;
-    const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add(track).add($ui).add($buttons),
+    const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add(track).add($ui).add($controls).add($buttons),
       ["style", "class", "aria-hidden", "inert", "tabindex", "role", "aria-disabled"]);
     let timeline, trigger, ready = false, drag = null, resizeFrame, disposed = false;
-    let arrowTween = null, loopStep = 0, movingCards = false;
+    let arrowTween = null, loopStep = 0, movingCards = false, openedOnce = false;
     const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
 
     function updateButtons() {
-      $buttons.attr("aria-disabled", String(!ready));
+      $buttons.attr("aria-disabled", "false").prop("inert", false);
     }
     function stopArrow() {
       arrowTween?.kill(); arrowTween = null;
@@ -4208,6 +4210,12 @@ function testimonialEnvelopeAnimation() {
       }
       updateButtons();
     }
+    function finishOpening() {
+      openedOnce = true;
+      trigger?.kill(false, true); trigger = null;
+      timeline.progress(1).pause();
+      interactive(true);
+    }
     function build() {
       if (disposed) return;
       trigger?.kill(); timeline?.kill();
@@ -4236,6 +4244,8 @@ function testimonialEnvelopeAnimation() {
         zIndex: i => 10 + (starts[i].number % 3 || 3), transformOrigin: "50% 50%",
         clipPath: i => `inset(0px 0px ${starts[i].clippedBottom}px 0px)` });
       gsap.set($ui, { autoAlpha: 0 });
+      gsap.set($controls, { autoAlpha: 1 });
+      $controls.prop("inert", false);
       ready = true; interactive(false);
       timeline = gsap.timeline({ paused: true });
       timeline.to(cards, { y: i => starts[i].y - motion.lift.distance * unit,
@@ -4247,13 +4257,13 @@ function testimonialEnvelopeAnimation() {
         ease: motion.spread.ease }, motion.spread.start);
       if (pocket) timeline.set(pocket, { zIndex: 1 }, motion.spread.start + motion.lift.duration);
       timeline.to($ui, { autoAlpha: 1, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
-      if (reduced.matches) { timeline.progress(1); interactive(true); }
+      if (reduced.matches || openedOnce) finishOpening();
       else trigger = ScrollTrigger.create({ trigger: section, endTrigger: carousel, animation: timeline, ...motion.scroll,
-        onUpdate: self => interactive(self.progress >= 0.999),
-        onRefresh: self => interactive(self.progress >= 0.999) });
+        onUpdate: self => { if (self.progress >= 0.999) finishOpening(); },
+        onRefresh: self => { if (self.progress >= 0.999) finishOpening(); } });
     }
     const unbind = bindControlActivation($buttons, "testimonialSwiper", $button => {
-      if (!ready) return;
+      if (!ready) finishOpening();
       stopArrow(); keepLoopCentered();
       const direction = $button.is("[testimonial-next]") ? 1 : -1;
       const position = { value: carousel.scrollLeft };
