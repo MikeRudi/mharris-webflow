@@ -937,7 +937,7 @@
   }
 
   .drop-text-section {
-    background-color: #000;
+    background-color: #101010;
     width: 100%;
     height: 180dvh;
     min-height: 0;
@@ -1126,6 +1126,10 @@
 
   .faq-section {
     padding: 3rem 1.5rem 6.5rem;
+  }
+
+  .faq-section:where(.w-variant-4aab047b-de58-3075-070f-4598b4eeb7db) {
+    background-color: #101010;
   }
 
   .home-faq-heading {
@@ -2979,6 +2983,10 @@
     position: relative;
     top: auto;
     left: auto;
+  }
+
+  .drop-outro-dark {
+    background-color: #101010;
   }
 
   .drop-outro-copy {
