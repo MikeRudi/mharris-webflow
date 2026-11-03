@@ -1755,6 +1755,14 @@
     width: 100%;
   }
 
+  .image-copy-media:where(.w-variant-dc221c5e-4eb7-b6f8-fd45-37bb66e27900) {
+    aspect-ratio: 16 / 10;
+    order: 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+
   .image-copy-content {
     grid-template-columns: 1fr;
   }
@@ -3236,6 +3244,12 @@
     transform: none;
   }
 
+  .product-inline-link {
+    flex-direction: row;
+    align-items: center;
+    column-gap: .25rem;
+  }
+
   .product-section-heading, .product-security {
     padding: 2rem 1.25rem;
   }
@@ -3412,6 +3426,30 @@
 }
 
 /* A row's hover/focus reveals its child arrow; active arrows stay visible. */
+/* The shared typography embed overrides native variant font sizes. Keep the
+   Product variants on the saved type scale without exposing layout props. */
+@media screen and (min-width: 1200px) {
+  .image-cards-section:is(.w-variant-8ade6db7-8a48-70cb-4ea6-781bdef04c0b, .w-variant-48168ebd-c725-3297-15ea-dcc619e9b543) .image-cards-intro > .h-6,
+  .product-section-heading.w-variant-0bc57465-4db5-398e-f52e-c2abcbdaa50b > .text {
+    font-size: var(--h4);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    font-weight: 700;
+  }
+
+  .image-cards-section.w-variant-8ade6db7-8a48-70cb-4ea6-781bdef04c0b .image-cards-item > .h-8 {
+    font-size: var(--h7);
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  .image-cards-section:is(.w-variant-8ade6db7-8a48-70cb-4ea6-781bdef04c0b, .w-variant-e45c8f6f-1c0e-8d37-0a3c-9dde775cb7a1, .w-variant-48168ebd-c725-3297-15ea-dcc619e9b543) .p-3 {
+    font-size: .875rem;
+    line-height: 1.4;
+    letter-spacing: -.02em;
+  }
+}
+
 [accord-item]:hover [accord-1-arrow],
 [accord-item]:focus-visible [accord-1-arrow],
 [accord-item].active [accord-1-arrow] {
