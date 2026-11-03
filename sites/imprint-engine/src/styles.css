@@ -1430,6 +1430,12 @@
     display: flex;
   }
 
+  .page-header-section-01:where(.w-variant-47379e56-8269-11dd-099f-e6e6c1c54b30) {
+    height: auto;
+    min-height: 0;
+    padding: 7.5rem 1.25rem 2rem;
+  }
+
   .page-header-section-01.faqs {
     min-height: auto;
     padding-top: 2.5rem;
@@ -1590,10 +1596,30 @@
     padding: 0 1.25rem;
   }
 
+  .header-01-content:where(.w-variant-47379e56-8269-11dd-099f-e6e6c1c54b30) {
+    text-align: left;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    display: flex;
+    position: relative;
+    transform: none;
+  }
+
   .header-01-copy {
     text-align: center;
     align-items: center;
     width: 100%;
+  }
+
+  .header-01-copy:where(.w-variant-47379e56-8269-11dd-099f-e6e6c1c54b30) {
+    text-align: left;
+    align-items: flex-start;
+    width: 100%;
+    max-width: none;
   }
 
   .header-01-copy-gap {
@@ -2963,6 +2989,26 @@
   .faq-categories {
     grid-column-gap: 1.25rem;
     justify-content: flex-start;
+  }
+
+  .usecase-directory {
+    grid-column-gap: 2rem;
+    grid-row-gap: 2rem;
+    padding: 2rem 1.25rem;
+  }
+
+  .usecase-directory-image {
+    aspect-ratio: 4 / 3;
+  }
+
+  .usecase-directory-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .usecase-directory-column {
+    grid-column-gap: .75rem;
+    grid-row-gap: .75rem;
+    justify-self: start;
   }
 }
 /* END NATIVE TABLET EXTENSION */
