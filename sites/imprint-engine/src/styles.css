@@ -438,6 +438,11 @@
     height: 20rem;
   }
 
+  .section-tile-4 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
   .layout-end {
     grid-row-gap: 1.5rem;
     row-gap: 1.5rem;
@@ -1462,8 +1467,8 @@
   }
 
   .shop-slider {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
     font-size: 16px;
   }
 
@@ -1516,7 +1521,7 @@
   }
 
   .accord-06-wrap {
-    padding-bottom: 4rem;
+    padding-bottom: 2rem;
   }
 
   .accord-06-list {
@@ -1626,7 +1631,7 @@
   }
 
   .benefits-section {
-    padding: 3rem 1.25rem;
+    padding: 2rem 1.25rem;
   }
 
   .benefits-background {
@@ -1687,8 +1692,8 @@
   }
 
   .image-copy-split-section {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   .image-copy-split {
@@ -1717,7 +1722,7 @@
   }
 
   .image-cards-section {
-    padding: 3rem 1.25rem;
+    padding: 2rem 1.25rem;
   }
 
   .image-cards-intro {
@@ -1764,6 +1769,12 @@
 
   .image-cards-offset-2, .image-cards-offset-3, .image-cards-offset-4 {
     margin-top: 0;
+  }
+
+  .services-cards-section {
+    min-height: 0;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   .services-cards-track {
@@ -1883,6 +1894,10 @@
     padding: 3rem 0;
   }
 
+  .usecase-cards-section {
+    padding: 2rem 1.25rem;
+  }
+
   .usecase-card-clip {
     aspect-ratio: 4 / 3;
     height: auto;
@@ -1891,6 +1906,10 @@
   .usecase-card-label {
     min-height: 0;
     padding: .875rem .375rem;
+  }
+
+  .usecase-faq-section {
+    padding: 2rem 1.25rem;
   }
 
   .contact-cta-section {
@@ -1943,6 +1962,11 @@
     grid-template-columns: 1fr;
   }
 
+  .gifting-logo-section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
   .event-cards-intro {
     padding-left: 0;
     padding-right: 0;
@@ -1966,6 +1990,11 @@
 
   .promo-header-content {
     min-height: 0;
+  }
+
+  .store-cards-section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   .store-cards-grid {
@@ -2152,6 +2181,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .file-guide-section {
+    padding: 2rem 1.25rem;
+  }
+
   .file-guide-grid {
     grid-row-gap: 2rem;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2159,7 +2192,7 @@
 
   .support-section {
     padding-top: 8rem;
-    padding-bottom: 8rem;
+    padding-bottom: 2rem;
   }
 
   .support-layout {
@@ -2167,11 +2200,18 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .blog-list-section {
+    padding: 2rem 1.25rem;
+  }
+
   .blog-list-layout {
+    grid-column-gap: 1.25rem;
+    grid-row-gap: 1.5rem;
     grid-template-columns: 1fr;
   }
 
   .blog-filter {
+    grid-row-gap: 1rem;
     position: relative;
     top: auto;
   }
@@ -2183,6 +2223,20 @@
 
   .blog-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .blog-card {
+    grid-row-gap: .75rem;
+    padding: 1rem 1rem 1.25rem;
+  }
+
+  .blog-card-tags {
+    grid-column-gap: .25rem;
+    grid-row-gap: .25rem;
+  }
+
+  .blog-load-more {
+    margin-top: 2rem;
   }
 
   .post-header {
