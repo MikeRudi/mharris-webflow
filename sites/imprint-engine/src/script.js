@@ -47,9 +47,9 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 1199px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), customProducts(), navTheme(), navigationDropdowns(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), customProducts(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
-    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
+    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -1786,11 +1786,13 @@ function teamProfilesAnimation() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const mobile = window.matchMedia(teamMotion.mobile.media).matches;
-  const circleId = (element) => [...element.classList].map((name) => name.match(/^(?:is-|team-profile-position-)(\d+)$/)?.[1]).find(Boolean);
+  const circleId = (element) => element.getAttribute("team-profile-id") ||
+    [...element.classList].map((name) => name.match(/^(?:is-|team-profile-position-)(\d+)$/)?.[1]).find(Boolean);
 
   $("[teams-header]").each(function (sectionIndex) {
     const header = this, $header = $(header), $nodes = $header.find("[team-profile-node]");
-    const boundary = $header.closest("[section-teams]")[0] || header;
+    const network = header.querySelector("[team-network]");
+    const boundary = network || $header.closest("[section-teams]")[0] || header;
     const layout = $header.closest("[teams-layout]")[0] || boundary;
     if (!$nodes.length) return;
     const $listCopy = $(layout).find("[team-list] [text-ch]");
@@ -1810,7 +1812,7 @@ function teamProfilesAnimation() {
       element, group: $(element).closest("[team-profile-group]")[0],
       clip: element.querySelector("[team-profile-clip]"),
       image: element.querySelector("[team-profile-image]") || element.querySelector("img"),
-      enabled: mobile ? teamMotion.mobile.visibleCircles.includes(circleId(element))
+      enabled: network ? true : mobile ? teamMotion.mobile.visibleCircles.includes(circleId(element))
         : !teamMotion.layout.hiddenCircles.includes(circleId(element)),
       draggable: [...element.querySelectorAll("img")].some((image) => Number(getComputedStyle(image).opacity) > teamMotion.layout.photoOpacityThreshold && getComputedStyle(image).visibility !== "hidden"),
       phase: index * teamMotion.float.phaseStep, speed: 1 + (index % teamMotion.float.speedVariants) * teamMotion.float.speedVariation,
@@ -1831,6 +1833,18 @@ function teamProfilesAnimation() {
     const byElement = new Map(nodes.map((node) => [node.element, node]));
     const pairs = nodes.flatMap((a, index) => nodes.slice(index + 1).map((b) => ({ a, b, nearSeconds: 0 })));
     const edges = $lines.toArray().map((element) => ({ element, svg: element.ownerSVGElement, stretch: 0 }));
+    // New portrait groups keep their editable images in Webflow; parent hooks define the connections.
+    if (network) nodes.forEach((node) => {
+      const parentId = node.element.getAttribute("team-profile-parent");
+      const parent = nodes.find(candidate => circleId(candidate.element) === parentId);
+      if (!parent) return;
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("stroke", "#E0E0E0");
+      line.setAttribute("stroke-width", "1");
+      line.setAttribute("vector-effect", "non-scaling-stroke");
+      parent.neighbors.push(node); node.neighbors.push(parent);
+      edges.push({ element: line, from: parent, to: node, stretch: 0 });
+    });
     let layer = null, contentBoxes = [];
     let width = 0, height = 0, scaleX = 1, scaleY = 1, clock = 0, motionStep = teamMotion.physics.maxStepPx;
     let visible = !window.IntersectionObserver, active = false, destroyed = false;
@@ -2735,6 +2749,85 @@ function dropTextAnimation() {
   };
 }
 
+function homeOutroAnimation() {
+  if (!window.gsap || !window.ScrollTrigger) return null;
+  // Fractions of the sticky section's scroll; mobile keeps the lighter opacity transition.
+  const motion = {
+    brackets: { start: 0.04, duration: 0.2, distance: 1.2, ease: "power1.in" },
+    drop: { start: 0.08, duration: 0.2, ease: "power1.in" },
+    clip: { start: 0.22, duration: 0.5, ease: "none" },
+    lineReveal: { start: 0.55, duration: 0.12, ease: "power1.in" },
+    lineRetract: { start: 0.72, duration: 0.28, ease: "power1.in" },
+    dropLeave: { start: 0.86, duration: 0.14, ease: "power1.in" },
+  };
+  const cleanups = [], media = gsap.matchMedia();
+  media.add({ mobile: "(max-width: 1199px)", desktop: "(min-width: 1200px)",
+    reduced: "(prefers-reduced-motion: reduce)" }, context => {
+    const mobile = context.conditions.mobile, reduced = context.conditions.reduced;
+    $("[drop-outro]").each(function () {
+      const section = this, layout = section.querySelector("[drop-text-layout]");
+      const dark = section.querySelector("[drop-outro-dark]");
+      const gradient = section.querySelector("[drop-outro-gradient]");
+      const line = section.querySelector("[drop-outro-line]");
+      const mark = section.querySelector(".drop-text-mark");
+      const left = mark?.querySelector(".drop-text-bracket-left");
+      const right = mark?.querySelector(".drop-text-bracket-right");
+      const droplet = mark?.querySelector(".drop-text-droplet");
+      const rings = section.querySelector(".drop-text-ripples");
+      if (!layout || !dark || !gradient || !line || !mark) return;
+      const restore = rememberAttributes($(section).add(layout).add(dark).add(gradient).add(line)
+        .add(left).add(right).add(droplet).add(rings), ["style"]);
+      const clip = { progress: 0 };
+      function clipPath(progress) {
+        if (progress <= 0) return "inset(0 100% 0 0)";
+        if (progress >= 1) return "inset(0)";
+        const p = 1 - progress, width = layout.clientWidth, height = layout.clientHeight;
+        const x = width / 2, y = height / 2, half = Math.max(width, height);
+        const point = (a, b) => `${a}px ${b}px`, centre = point(x, y);
+        const ray = angle => {
+          const dx = Math.cos(angle), dy = Math.sin(angle), distance = half / Math.max(Math.abs(dx), Math.abs(dy));
+          return point(x + dx * distance, y + dy * distance);
+        };
+        const upper = ray(-Math.PI * p), lower = ray(Math.PI * p);
+        const corners = p <= 0.25
+          ? [point(x + half, y - half), point(x - half, y - half), point(x - half, y + half), point(x + half, y + half)]
+          : p <= 0.75 ? [upper, point(x - half, y - half), point(x - half, y + half), lower]
+          : [upper, upper, lower, lower];
+        return `polygon(${[centre, upper, ...corners, lower, centre].join(",")})`;
+      }
+      const draw = () => {
+        dark.style.opacity = mobile ? String(clip.progress) : "1";
+        dark.style.clipPath = mobile ? "none" : clipPath(clip.progress);
+      };
+      gsap.set(gradient, { autoAlpha: 0 }); gsap.set(line, { autoAlpha: 0, scaleX: 1 });
+      draw();
+      const timeline = gsap.timeline({ paused: true });
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      timeline.to(left, { x: -motion.brackets.distance * rem, autoAlpha: 0,
+        duration: motion.brackets.duration, ease: motion.brackets.ease }, motion.brackets.start);
+      timeline.to(right, { x: motion.brackets.distance * rem, autoAlpha: 0,
+        duration: motion.brackets.duration, ease: motion.brackets.ease }, motion.brackets.start);
+      timeline.to(droplet, { autoAlpha: 0, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
+      timeline.to(gradient, { autoAlpha: 1, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
+      timeline.to(rings, { opacity: 0, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
+      timeline.to(clip, { progress: 1, duration: motion.clip.duration, ease: motion.clip.ease, onUpdate: draw }, motion.clip.start);
+      timeline.to(line, { autoAlpha: 1, duration: motion.lineReveal.duration, ease: motion.lineReveal.ease }, motion.lineReveal.start);
+      timeline.to(line, { scaleX: 0, duration: motion.lineRetract.duration, ease: motion.lineRetract.ease }, motion.lineRetract.start);
+      timeline.to(gradient, { autoAlpha: 0, duration: motion.dropLeave.duration, ease: motion.dropLeave.ease }, motion.dropLeave.start);
+      let trigger;
+      if (reduced) {
+        section.style.height = "100dvh"; layout.style.position = "relative";
+        timeline.progress(1); draw();
+      } else trigger = ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom bottom",
+        animation: timeline, scrub: true, invalidateOnRefresh: true, onRefresh: draw });
+      cleanups.push(() => { trigger?.kill(); timeline.kill(); restore(); });
+    });
+    return () => { cleanups.splice(0).forEach(cleanup => cleanup()); };
+  });
+  return () => media.revert();
+}
+
+
 function rippleAnimation(
   $rings = $("[ripple-ring]"),
   {
@@ -2930,6 +3023,134 @@ function navigationDropdowns() {
   });
   return () => cleanups.forEach(cleanup => cleanup());
 }
+
+function navigationSearch() {
+  if (!window.gsap) return null;
+  const motion = {
+    field: { width: "8rem", duration: 0.25, ease: "power1.inOut" },
+    panel: { duration: 0.2, ease: "power1.in", y: -6 },
+  };
+  const mobile = window.matchMedia("(max-width: 1199px)");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const cleanups = [];
+  $("[nav-menu-root]").each(function (index) {
+    const root = this, $root = $(root), ns = `.navSearch${index}`;
+    const toggle = root.querySelector("[nav-search-toggle]");
+    const input = root.querySelector("[nav-search-input]");
+    const field = root.querySelector("[nav-search-field]");
+    const control = root.querySelector("[nav-search-control]");
+    const panel = root.querySelector("[nav-search-panel]");
+    const results = root.querySelector("[nav-search-results]");
+    const empty = root.querySelector("[nav-search-empty]");
+    const main = root.querySelector("[nav-mobile-main]");
+    const back = root.querySelector("[nav-search-back]");
+    if (!toggle || !input || !field || !control || !panel || !results || !main) return;
+    const restore = rememberAttributes($(root).add(input).add(field).add(toggle).add(panel).add(control),
+      ["style", "class", "id", "aria-expanded", "aria-controls", "aria-hidden", "tabindex", "inert"]);
+    const originalPosition = document.createComment("navigation search position");
+    control.before(originalPosition);
+    const surface = ["background-color", "color", "border-bottom-left-radius", "border-bottom-right-radius"];
+    let opened = false, restingStyle = null;
+    const entries = [], seen = new Set();
+    $root.find("[nav-dropdown] a[href], [nav-mobile-main] a[href]").each(function () {
+      if (this.hasAttribute("nav-dropdown-trigger") || this.hasAttribute("nav-login-placeholder")) return;
+      const href = this.getAttribute("href"), label = this.textContent.trim().replace(/\s+/g, " ");
+      if (!label || !href || href === "#" || /^javascript:/i.test(href)) return;
+      const key = `${href}|${label.toLowerCase()}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      const anchor = document.createElement("a");
+      anchor.className = "nav-search-result"; anchor.setAttribute("href", href);
+      anchor.textContent = label;
+      for (const name of ["target", "rel"]) if (this.hasAttribute(name)) anchor.setAttribute(name, this.getAttribute(name));
+      results.append(anchor); entries.push({ anchor, label: label.toLowerCase() });
+    });
+    panel.id = uniqueElementId("navigation-search-results");
+    toggle.setAttribute("aria-controls", panel.id);
+    input.setAttribute("aria-controls", panel.id);
+    input.id = uniqueElementId("navigation-search-input");
+    panel.inert = true; panel.setAttribute("aria-hidden", "true");
+    function filter() {
+      const words = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let count = 0;
+      entries.forEach(({anchor, label}) => {
+        const match = words.every(word => label.includes(word));
+        anchor.hidden = !match; anchor.style.display = match ? "" : "none";
+        if (match) count++;
+      });
+      if (empty) empty.style.display = count ? "none" : "block";
+    }
+    function placeControl() {
+      if (mobile.matches) main.prepend(control);
+      else originalPosition.after(control);
+      gsap.set(field, { width: mobile.matches ? "100%" : opened ? motion.field.width : "0rem" });
+      input.tabIndex = mobile.matches || opened ? 0 : -1;
+    }
+    function close(focus = false) {
+      if (!opened) return;
+      opened = false;
+      $root.removeClass("is-search-open");
+      toggle.setAttribute("aria-expanded", "false");
+      panel.inert = true; panel.setAttribute("aria-hidden", "true");
+      gsap.killTweensOf(panel); gsap.set(panel, { display: "none", autoAlpha: 0, y: 0 });
+      if (restingStyle) surface.forEach(property => restingStyle[property]
+        ? root.style.setProperty(property, restingStyle[property]) : root.style.removeProperty(property));
+      restingStyle = null;
+      main.inert = false; main.removeAttribute("aria-hidden");
+      placeControl();
+      if (!mobile.matches) gsap.fromTo(field, { width: motion.field.width },
+        { width: "0rem", duration: reduced.matches ? 0 : motion.field.duration, ease: motion.field.ease, overwrite: true });
+      input.value = ""; filter();
+      if (focus) toggle.focus({ preventScroll: true });
+    }
+    function open() {
+      if (opened) return;
+      $root.triggerHandler("nav:close");
+      opened = true;
+      $root.addClass("is-search-open");
+      toggle.setAttribute("aria-expanded", "true");
+      restingStyle = Object.fromEntries(surface.map(property => [property, root.style.getPropertyValue(property)]));
+      if (mobile.matches) {
+        main.inert = true; main.setAttribute("aria-hidden", "true");
+        if (back) back.after(control); else panel.prepend(control);
+        gsap.set(field, { width: "100%" });
+      } else {
+        $root.css({ backgroundColor: "#ffffff", color: "#111111", borderBottomLeftRadius: 0, borderBottomRightRadius: 0 });
+        gsap.to(field, { width: motion.field.width, duration: reduced.matches ? 0 : motion.field.duration,
+          ease: motion.field.ease, overwrite: true });
+      }
+      input.tabIndex = 0; panel.inert = false; panel.setAttribute("aria-hidden", "false");
+      gsap.fromTo(panel, { display: "block", autoAlpha: 0, y: mobile.matches ? 0 : motion.panel.y },
+        { autoAlpha: 1, y: 0, duration: reduced.matches || mobile.matches ? 0 : motion.panel.duration, ease: motion.panel.ease, overwrite: true });
+      filter(); input.focus({ preventScroll: true });
+    }
+    const unbind = bindControlActivation($(toggle), `navSearchToggle${index}`, () => opened ? close(true) : open());
+    const unbindBack = bindControlActivation($(back), `navSearchBack${index}`, () => close(true));
+    $(input).on(`focus${ns}`, () => { if (mobile.matches) open(); })
+      .on(`input${ns}`, () => { if (!opened) open(); filter(); })
+      .on(`keydown${ns}`, event => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault(); entries.find(entry => !entry.anchor.hidden)?.anchor.focus();
+        }
+      });
+    $(input).closest("form").on(`submit${ns}`, event => { event.preventDefault(); event.stopImmediatePropagation(); });
+    $root.on(`nav:close${ns} nav:searchclose${ns}`, () => close())
+      .on(`keydown${ns}`, event => { if (event.key === "Escape" && opened) { event.preventDefault(); close(true); } });
+    $(document).on(`pointerdown${ns}`, event => { if (opened && !root.contains(event.target)) close(); });
+    $(window).on(`scroll${ns}`, () => { if (!mobile.matches) close(); });
+    const resize = () => { close(); placeControl(); };
+    mobile.addEventListener("change", resize);
+    placeControl(); filter();
+    cleanups.push(() => {
+      close(); unbind(); unbindBack(); mobile.removeEventListener("change", resize);
+      $(input).add($root).add(document).add(window).off(ns); $(input).closest("form").off(ns);
+      entries.forEach(entry => entry.anchor.remove()); originalPosition.replaceWith(control);
+      gsap.killTweensOf([field, panel]); restore();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
+
 
 function mobileNavigation() {
   // TABLET + PHONE MENU — instant page changes; layout lives in Webflow.
@@ -3555,6 +3776,7 @@ function compareGradientAnimation() {
     arrive: { duration: 0.14, ease: "power1.out" },
     reveal: { opacity: 1, duration: 0.3, ease: "power1.in" },
     follow: { responseSeconds: 0.07 },
+    colour: { left: "rgba(255, 66, 92, 0.55)", duration: 0.1, ease: "power1.in" },
     trail: { count: 4, responseSeconds: 0.1, responseStep: 0.025,
       opacity: 0.26, spread: 90, fadeResponseSeconds: 0.12 },
     leave: { minCatchUp: 0.1, maxCatchUp: 0.35, catchDistance: 4,
@@ -3571,6 +3793,7 @@ function compareGradientAnimation() {
       const section = this, gradient = $(this).find("[compare-gradient]")[0];
       if (!gradient) return;
       const restore = rememberAttributes($(gradient), ["style"]);
+      const rightColour = getComputedStyle(gradient).backgroundColor;
       const strokes = new Set();
       let active = null;
 
@@ -3579,7 +3802,7 @@ function compareGradientAnimation() {
         const opacity = { value: 0 }, head = { x: 0, y: 0 };
         const target = { x: 0, y: 0 }, start = { x: 0, y: 0 };
         let rect, origin, pointer, frame = 0, lastTime = 0, elapsed = 0;
-        let inside = false, phase = "hidden";
+        let inside = false, phase = "hidden", leftSide = null;
         const arrivalEase = gsap.parseEase(gradientMotion.arrive.ease);
 
         // 01 — Allocate once per entry; reuse the layers for every pointer move.
@@ -3610,6 +3833,15 @@ function compareGradientAnimation() {
         }
         function aim(event) {
           pointer = { x: event.clientX, y: event.clientY };
+          const nextSide = pointer.x < window.innerWidth / 2;
+          if (nextSide !== leftSide) {
+            leftSide = nextSide;
+            gsap.to(layers.map(layer => layer.element), {
+              backgroundColor: leftSide ? gradientMotion.colour.left : rightColour,
+              duration: gradientMotion.colour.duration, ease: gradientMotion.colour.ease,
+              overwrite: "auto",
+            });
+          }
           rect = section.getBoundingClientRect();
           target.x = Math.max(0, Math.min(rect.width, pointer.x - rect.left)) - origin.x;
           target.y = Math.max(0, Math.min(rect.height, pointer.y - rect.top)) - origin.y;
@@ -3705,6 +3937,7 @@ function compareGradientAnimation() {
         function hide() {
           inside = false; phase = "hidden"; opacity.value = 0;
           gsap.killTweensOf(opacity); stop();
+          gsap.killTweensOf(layers.map(layer => layer.element));
           layers.forEach(layer => layer.element.remove());
           strokes.delete(stroke);
         }
@@ -3763,152 +3996,117 @@ function compareGradientAnimation() {
 }
 
 function testimonialEnvelopeAnimation() {
-  // ENVELOPE CONTROLS — seconds; card travel is measured so all its text clears the pocket.
-  const envelopeMotion = {
-    closed: { cardYPercent: 60, backYPercent: 8 },
-    open: {
-      flap: { start: 0, duration: 0.3, ease: "power1.in" },
-      back: { start: 0, duration: 0.5, ease: "power1.in" },
-      cards: { start: 0.12, duration: 0.6, ease: "power1.in", stagger: 0.06 },
-    },
-    close: {
-      cards: { start: 0, duration: 0.3, ease: "power1.in", stagger: 0.03 },
-      back: { start: 0.15, duration: 0.3, ease: "power1.in" },
-      flap: { start: 0.18, duration: 0.3, ease: "power1.in" },
-    },
-    hover: {
-      reveal: { duration: 0.4, ease: "power1.in" },
-      return: { duration: 0.4, ease: "power1.out" },
-      // Fractions of envelope height; 0.12 means 12%.
-      minimumLift: 0.12, contentGap: 0.025, minimumInserted: 0.08,
-    },
+  if (!window.gsap || !window.ScrollTrigger) return null;
+  // Scroll timings are fractions of the section's top travelling from mid-screen to the top.
+  const motion = {
+    scroll: { start: "top 50%", end: "top top", scrub: true },
+    lift: { start: 0, duration: 0.32, distance: 4, ease: "power1.in" },
+    spread: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
+    envelope: { start: 0.5, duration: 0.5, ease: "power1.in" },
+    controls: { start: 0.88, duration: 0.12, ease: "power1.in" },
+    stack: { scale: 0.72, rotation: [-7, 1, 7], offset: 1.4 },
   };
-  const $envelopes = $("[testimonial-envelope]");
-  if (!window.gsap || !$envelopes.length) return null;
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const canHover = window.matchMedia("(hover: hover) and (pointer: fine)");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const cleanups = [];
+  $("[testimonial-section]").each(function () {
+    const section = this, $section = $(section);
+    const carousel = section.querySelector("[testimonial-carousel]");
+    const track = section.querySelector("[testimonial-track]");
+    const cards = Array.from(section.querySelectorAll("[testimonial-slide]"));
+    const envelope = section.querySelector("[testimonial-envelope]");
+    const $ui = $section.find("[testimonial-controls], [testimonial-complete-ui]");
+    const $buttons = $section.find("[testimonial-previous], [testimonial-next]");
+    if (!carousel || !track || !cards.length || !envelope) return;
+    const restore = rememberAttributes($(cards).add(envelope).add(carousel).add($ui).add($buttons),
+      ["style", "class", "aria-hidden", "inert", "tabindex", "role", "aria-disabled"]);
+    let timeline, trigger, ready = false, drag = null, resizeFrame, disposed = false;
+    const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-  $envelopes.each(function () {
-    const envelope = this, $envelope = $(this);
-    const $cards = $envelope.find("[testimonial-card]");
-    const $back = $envelope.find("[testimonial-envelope-open]");
-    const $flap = $envelope.find("[testimonial-envelope-closed]");
-    const $openHit = $envelope.find("[testimonial-envelope-open-hit]");
-    const $toggles = $envelope.find("[testimonial-envelope-toggle]");
-    const $button = $toggles.filter('[role="button"]').first();
-    const $pocket = $button;
-    if (!$cards.length || !$back.length || !$flap.length || !$button.length) return;
-    const $moving = $cards.add($back).add($flap).add($openHit);
-    const restore = rememberAttributes($moving.add($button), ["style", "tabindex", "aria-expanded", "aria-label", "aria-hidden"]);
-    let open = false, ready = false, active = null, transition = null, disposed = false;
-    let hovered = null, focused = null;
-    const lifts = new Map();
-    const seconds = value => reducedMotion.matches ? 0 : value;
-
-    function measure() {
-      const height = envelope.clientHeight, mouth = $pocket[0].offsetTop;
-      const cards = $cards.toArray();
-      const restingTops = cards.map(card => {
-        const angle = Number(gsap.getProperty(card, "rotation")) * Math.PI / 180;
-        return card.offsetTop + card.offsetHeight / 2 * (1 - Math.cos(angle))
-          - card.offsetWidth / 2 * Math.abs(Math.sin(angle));
-      });
-      $cards.each(function (index) {
-        const content = this.querySelector("[testimonial-card-content]");
-        if (!content) return;
-        const angle = Number(gsap.getProperty(this, "rotation")) * Math.PI / 180;
-        const cx = this.offsetWidth / 2, cy = this.offsetHeight / 2;
-        const contentBottom = cy + (content.offsetTop + content.offsetHeight - cy) * Math.cos(angle)
-          + Math.max((content.offsetLeft - cx) * Math.sin(angle),
-            (content.offsetLeft + content.offsetWidth - cx) * Math.sin(angle));
-        // Rear cards rise above the cards in front; their stacking order never changes.
-        const revealEdge = Math.min(mouth, ...restingTops.slice(index + 1));
-        const reveal = this.offsetTop + contentBottom - revealEdge + height * envelopeMotion.hover.contentGap;
-        const tuckedBottom = this.offsetTop + cy + cy * Math.cos(angle) - cx * Math.abs(Math.sin(angle));
-        const maximum = tuckedBottom - mouth - height * envelopeMotion.hover.minimumInserted;
-        lifts.set(this, Math.max(0, Math.min(maximum, Math.max(height * envelopeMotion.hover.minimumLift, reveal))));
-      });
-      if (open && ready && active) gsap.set(active, { y: -lifts.get(active), yPercent: 0 });
+    function updateButtons() {
+      const maximum = carousel.scrollWidth - carousel.clientWidth;
+      $buttons.filter("[testimonial-previous]").attr("aria-disabled", String(carousel.scrollLeft <= 1));
+      $buttons.filter("[testimonial-next]").attr("aria-disabled", String(carousel.scrollLeft >= maximum - 1));
     }
-
-    function revealCard(card) {
-      if (!open || !ready) return;
-      active = card;
-      $cards.each(function () {
-        const selected = this === card;
-        const motion = envelopeMotion.hover[selected ? "reveal" : "return"];
-        gsap.to(this, {
-          y: selected ? -lifts.get(this) : 0, yPercent: 0,
-          duration: seconds(motion.duration), ease: motion.ease, overwrite: true,
-        });
+    function interactive(next) {
+      if (ready === next) return;
+      ready = next;
+      carousel.classList.toggle("is-ready", ready);
+      carousel.style.overflowX = ready ? "auto" : "hidden";
+      carousel.style.overflowY = "hidden";
+      carousel.style.scrollSnapType = ready ? "x proximity" : "none";
+      carousel.style.cursor = ready ? "grab" : "default";
+      $ui.each((_, node) => { node.inert = !ready; });
+      cards.forEach((card, i) => {
+        card.inert = !ready;
+        card.setAttribute("aria-hidden", String(!ready && i > 2));
       });
+      if (!ready) carousel.scrollLeft = 0;
+      updateButtons();
     }
-
-    function setOpen(next, immediate = false) {
-      open = next; ready = false; active = null; hovered = null; focused = null;
-      if (!open && $cards.toArray().some(card => card.contains(document.activeElement))) {
-        $button[0].focus({ preventScroll: true });
-      }
-      if (transition) transition.kill();
-      gsap.killTweensOf($moving);
-      $button.attr({ "aria-expanded": String(open), "aria-label": open ? "Close testimonials" : "Open testimonials" });
-      $cards.attr({ tabindex: open ? "0" : "-1", "aria-hidden": String(!open) });
-      gsap.set($cards, { pointerEvents: "none" });
-      gsap.set($openHit, { visibility: open ? "visible" : "hidden" });
-      gsap.set($flap, { pointerEvents: open ? "none" : "auto" });
-      const motion = envelopeMotion[open ? "open" : "close"];
-      const time = value => immediate ? 0 : seconds(value);
-      transition = gsap.timeline({ onComplete: () => {
-        ready = open;
-        if (!open) return;
-        gsap.set($cards, { pointerEvents: "auto" });
-        const underPointer = canHover.matches ? $cards.toArray().find(card => card.matches(":hover")) : null;
-        if (underPointer) { hovered = underPointer; revealCard(underPointer); }
-      } });
-      transition.to($flap, { autoAlpha: open ? 0 : 1, duration: time(motion.flap.duration), ease: motion.flap.ease }, time(motion.flap.start));
-      transition.to($back, { autoAlpha: open ? 1 : 0, yPercent: open ? 0 : envelopeMotion.closed.backYPercent,
-        duration: time(motion.back.duration), ease: motion.back.ease }, time(motion.back.start));
-      transition.to($cards, { autoAlpha: open ? 1 : 0, y: 0, yPercent: open ? 0 : envelopeMotion.closed.cardYPercent,
-        duration: time(motion.cards.duration), stagger: time(motion.cards.stagger), ease: motion.cards.ease }, time(motion.cards.start));
+    function build() {
+      if (disposed) return;
+      trigger?.kill(); timeline?.kill();
+      carousel.scrollLeft = 0;
+      gsap.set(cards, { clearProps: "transform,opacity,visibility" });
+      const unit = rem(), centre = carousel.clientWidth / 2;
+      const positions = cards.map((card, i) => centre - card.offsetLeft - card.offsetWidth / 2
+        + ((i % 3) - 1) * motion.stack.offset * unit);
+      const lift = motion.lift.distance * unit;
+      gsap.set(envelope, { autoAlpha: 1 });
+      gsap.set(cards, { x: i => positions[i], y: 2.8 * unit, scale: motion.stack.scale,
+        rotation: i => motion.stack.rotation[i % 3], autoAlpha: i => i < 3 ? 1 : 0,
+        zIndex: i => i < 3 ? i + 1 : 0, transformOrigin: "50% 50%" });
+      gsap.set($ui, { autoAlpha: 0 });
+      ready = true; interactive(false);
+      timeline = gsap.timeline({ paused: true });
+      timeline.to(cards, { y: -lift, duration: motion.lift.duration, ease: motion.lift.ease }, motion.lift.start);
+      timeline.to(cards, { x: 0, y: 0, scale: 1, rotation: 0, autoAlpha: 1,
+        duration: motion.spread.duration, ease: motion.spread.ease }, motion.spread.start);
+      timeline.to(envelope, { autoAlpha: 0, duration: motion.envelope.duration, ease: motion.envelope.ease }, motion.envelope.start);
+      timeline.to($ui, { autoAlpha: 1, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
+      if (reduced.matches) { timeline.progress(1); interactive(true); }
+      else trigger = ScrollTrigger.create({ trigger: section, animation: timeline, ...motion.scroll,
+        onUpdate: self => interactive(self.progress >= 0.999),
+        onRefresh: self => interactive(self.progress >= 0.999) });
     }
-
-    $toggles.on("click.testimonialEnvelope", event => { event.preventDefault(); setOpen(!open); });
-    $button.on("keydown.testimonialEnvelope", event => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      event.preventDefault(); setOpen(!open);
+    const unbind = bindControlActivation($buttons, "testimonialSwiper", $button => {
+      if (!ready) return;
+      const direction = $button.is("[testimonial-next]") ? 1 : -1;
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      carousel.scrollBy({ left: direction * (cards[0].offsetWidth + gap), behavior: reduced.matches ? "instant" : "smooth" });
     });
-    $cards.on("mouseenter.testimonialEnvelope", function () {
-      if (canHover.matches) { hovered = this; revealCard(this); }
-    }).on("mouseleave.testimonialEnvelope", function () {
-      if (hovered === this) hovered = null;
-      if (canHover.matches) revealCard(focused || hovered);
-    }).on("focusin.testimonialEnvelope", function () {
-      focused = this; revealCard(this);
-    }).on("focusout.testimonialEnvelope", function () {
-      if (focused === this) focused = null;
-      revealCard(hovered);
-    }).on("click.testimonialEnvelope", function () {
-      if (!canHover.matches) revealCard(this);
-    }).on("keydown.testimonialEnvelope", function (event) {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      event.preventDefault(); revealCard(this);
+    function down(event) {
+      if (!ready || event.pointerType !== "mouse" || event.button !== 0 || event.target.closest("a,button,input")) return;
+      drag = { id: event.pointerId, x: event.clientX, scroll: carousel.scrollLeft };
+      carousel.setPointerCapture(event.pointerId);
+      carousel.style.cursor = "grabbing"; carousel.style.scrollSnapType = "none";
+      event.preventDefault();
+    }
+    function move(event) { if (drag) carousel.scrollLeft = drag.scroll + drag.x - event.clientX; }
+    function up() {
+      if (!drag) return;
+      if (carousel.hasPointerCapture(drag.id)) carousel.releasePointerCapture(drag.id);
+      drag = null; carousel.style.cursor = "grab"; carousel.style.scrollSnapType = "x proximity";
+    }
+    let width = carousel.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (width === carousel.clientWidth) return;
+      width = carousel.clientWidth;
+      cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(build);
     });
-    $envelope.on("keydown.testimonialEnvelope", event => {
-      if (event.key === "Escape" && open) { setOpen(false); $button[0].focus(); }
-    });
-    const resize = new ResizeObserver(measure);
-    resize.observe(envelope);
-    $cards.each((_, el) => resize.observe(el));
-    $cards.find("[testimonial-card-content]").each((_, el) => resize.observe(el));
-    const motionChanged = () => setOpen(open, true);
-    reducedMotion.addEventListener("change", motionChanged);
-    measure(); setOpen(false, true);
-    if (document.fonts) document.fonts.ready.then(() => { if (!disposed) measure(); });
+    observer.observe(carousel);
+    carousel.addEventListener("scroll", updateButtons, { passive: true });
+    carousel.addEventListener("pointerdown", down); carousel.addEventListener("pointermove", move);
+    carousel.addEventListener("pointerup", up); carousel.addEventListener("pointercancel", up);
+    reduced.addEventListener("change", build);
+    build();
+    document.fonts?.ready.then(() => { if (!disposed) build(); });
     cleanups.push(() => {
-      disposed = true; if (transition) transition.kill(); gsap.killTweensOf($moving);
-      resize.disconnect(); reducedMotion.removeEventListener("change", motionChanged);
-      $envelope.add($toggles).add($cards).off(".testimonialEnvelope"); restore();
+      disposed = true; up(); trigger?.kill(); timeline?.kill(); unbind(); observer.disconnect();
+      cancelAnimationFrame(resizeFrame); reduced.removeEventListener("change", build);
+      carousel.removeEventListener("scroll", updateButtons); carousel.removeEventListener("pointerdown", down);
+      carousel.removeEventListener("pointermove", move); carousel.removeEventListener("pointerup", up);
+      carousel.removeEventListener("pointercancel", up); restore();
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());

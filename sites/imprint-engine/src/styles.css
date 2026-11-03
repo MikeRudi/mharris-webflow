@@ -293,7 +293,7 @@
   }
 
   .search-icon {
-    display: none;
+    display: inline-flex;
   }
 
   .section-padding {
@@ -927,33 +927,61 @@
   }
 
   .drop-text-section {
-    height: auto;
+    background-color: #111;
+    width: 100%;
+    height: 250dvh;
     min-height: 0;
-    padding: 1rem 1.25rem 4rem;
+    padding: 0;
+    display: block;
+    position: relative;
+    overflow: visible;
   }
 
   .drop-text-layout {
+    background-color: #f3f3f7;
     flex-direction: column-reverse;
     row-gap: 1rem;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    min-height: 0;
+    display: block;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
   }
 
   .drop-text-content {
+    z-index: 0;
+    grid-row-gap: 1.5rem;
+    color: #111;
+    align-items: flex-end;
     row-gap: 1rem;
     width: 100%;
-    padding-left: 0;
+    padding: 0 0 0 2.5rem;
+    position: absolute;
+    top: 5rem;
+    right: 1.25rem;
   }
 
   .drop-text-artwork {
+    z-index: 2;
+    isolation: auto;
     width: 100%;
+    min-width: 0;
     height: 12rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .drop-text-ripples {
-    width: 20rem;
+    width: 24rem;
   }
 
   .drop-text-mark {
-    width: 5.75rem;
+    width: 8rem;
     height: auto;
   }
 
@@ -1071,7 +1099,7 @@
   }
 
   .testimonial-envelope {
-    width: min(100%, 31rem);
+    width: 22rem;
     max-width: none;
     height: auto;
     margin-top: 0;
@@ -1182,7 +1210,8 @@
   }
 
   .teams-header {
-    grid-row-gap: 1.75rem;
+    grid-row-gap: 1.5rem;
+    min-height: 0;
   }
 
   .team-profiles {
@@ -1190,7 +1219,7 @@
     aspect-ratio: auto;
     flex-shrink: 0;
     order: -1;
-    height: 13rem;
+    height: 30rem;
     margin-top: 0;
     margin-bottom: 0;
     position: relative;
@@ -1199,10 +1228,10 @@
   .team-profile-canvas {
     aspect-ratio: auto;
     width: 100%;
-    height: 13rem;
+    height: 100%;
     position: relative;
-    top: 0;
-    left: 0;
+    top: 0%;
+    left: 0%;
     transform: none;
   }
 
@@ -2507,6 +2536,261 @@
   .cat-image-merch {
     flex-shrink: 0;
     width: 14rem;
+  }
+
+  .team-profile-position-25 {
+    width: 2.75rem;
+    top: calc(9% - 1.375rem);
+    left: calc(12% - 1.375rem);
+  }
+
+  .team-profile-position-26 {
+    width: 2.75rem;
+    top: calc(9% - 1.375rem);
+    left: calc(37% - 1.375rem);
+  }
+
+  .team-profile-position-27 {
+    width: 2.75rem;
+    top: calc(9% - 1.375rem);
+    left: calc(62% - 1.375rem);
+  }
+
+  .team-profile-position-28 {
+    width: 2.75rem;
+    top: calc(9% - 1.375rem);
+    left: calc(87% - 1.375rem);
+  }
+
+  .team-profile-position-29 {
+    width: 2.75rem;
+    top: calc(27% - 1.375rem);
+    left: calc(12% - 1.375rem);
+  }
+
+  .team-profile-position-30 {
+    width: 2.75rem;
+    top: calc(27% - 1.375rem);
+    left: calc(37% - 1.375rem);
+  }
+
+  .team-profile-position-31 {
+    width: 2.75rem;
+    top: calc(27% - 1.375rem);
+    left: calc(62% - 1.375rem);
+  }
+
+  .team-profile-position-32 {
+    width: 2.75rem;
+    top: calc(27% - 1.375rem);
+    left: calc(87% - 1.375rem);
+  }
+
+  .team-profile-position-33 {
+    width: 2.75rem;
+    top: calc(45% - 1.375rem);
+    left: calc(12% - 1.375rem);
+  }
+
+  .team-profile-position-34 {
+    width: 2.75rem;
+    top: calc(45% - 1.375rem);
+    left: calc(37% - 1.375rem);
+  }
+
+  .team-profile-position-35 {
+    width: 2.75rem;
+    top: calc(45% - 1.375rem);
+    left: calc(62% - 1.375rem);
+  }
+
+  .team-profile-position-36 {
+    width: 2.75rem;
+    top: calc(45% - 1.375rem);
+    left: calc(87% - 1.375rem);
+  }
+
+  .team-profile-position-37 {
+    width: 2.75rem;
+    top: calc(63% - 1.375rem);
+    left: calc(12% - 1.375rem);
+  }
+
+  .team-profile-position-38 {
+    width: 2.75rem;
+    top: calc(63% - 1.375rem);
+    left: calc(37% - 1.375rem);
+  }
+
+  .team-profile-position-39 {
+    width: 2.75rem;
+    top: calc(63% - 1.375rem);
+    left: calc(62% - 1.375rem);
+  }
+
+  .team-profile-position-40 {
+    width: 2.75rem;
+    top: calc(63% - 1.375rem);
+    left: calc(87% - 1.375rem);
+  }
+
+  .team-profile-position-41 {
+    width: 2.75rem;
+    top: calc(81% - 1.375rem);
+    left: calc(50% - 1.375rem);
+  }
+
+  .team-profile-position-42 {
+    width: 1.25rem;
+    top: calc(14% - .625rem);
+    left: calc(19% - .625rem);
+  }
+
+  .team-profile-position-43 {
+    width: 1.25rem;
+    top: calc(14% - .625rem);
+    left: calc(44% - .625rem);
+  }
+
+  .team-profile-position-44 {
+    width: 1.25rem;
+    top: calc(14% - .625rem);
+    left: calc(69% - .625rem);
+  }
+
+  .team-profile-position-45 {
+    width: 1.25rem;
+    top: calc(14% - .625rem);
+    left: calc(94% - .625rem);
+  }
+
+  .team-profile-position-46 {
+    width: 1.25rem;
+    top: calc(32% - .625rem);
+    left: calc(19% - .625rem);
+  }
+
+  .team-profile-position-47 {
+    width: 1.25rem;
+    top: calc(32% - .625rem);
+    left: calc(44% - .625rem);
+  }
+
+  .team-profile-position-48 {
+    width: 1.25rem;
+    top: calc(32% - .625rem);
+    left: calc(69% - .625rem);
+  }
+
+  .team-profile-position-49 {
+    width: 1.25rem;
+    top: calc(32% - .625rem);
+    left: calc(94% - .625rem);
+  }
+
+  .team-profile-position-50 {
+    width: 1.25rem;
+    top: calc(50% - .625rem);
+    left: calc(19% - .625rem);
+  }
+
+  .team-profile-position-51 {
+    width: 1.25rem;
+    top: calc(50% - .625rem);
+    left: calc(44% - .625rem);
+  }
+
+  .team-profile-position-52 {
+    width: 1.25rem;
+    top: calc(50% - .625rem);
+    left: calc(69% - .625rem);
+  }
+
+  .team-profile-position-53 {
+    width: 1.25rem;
+    top: calc(50% - .625rem);
+    left: calc(94% - .625rem);
+  }
+
+  .team-profile-position-54 {
+    width: 1.25rem;
+    top: calc(68% - .625rem);
+    left: calc(19% - .625rem);
+  }
+
+  .team-profile-position-55 {
+    width: 1.25rem;
+    top: calc(68% - .625rem);
+    left: calc(44% - .625rem);
+  }
+
+  .team-profile-position-57 {
+    width: 1.25rem;
+    top: calc(68% - .625rem);
+    left: calc(94% - .625rem);
+  }
+
+  .team-profile-position-58 {
+    width: 1.25rem;
+    top: calc(86% - .625rem);
+    left: calc(57% - .625rem);
+  }
+
+  .team-profile-position-59 {
+    width: 1.25rem;
+    top: calc(5% - .625rem);
+    left: calc(7% - .625rem);
+  }
+
+  .team-profile-position-60 {
+    width: 1.25rem;
+    top: calc(5% - .625rem);
+    left: calc(32% - .625rem);
+  }
+
+  .team-profile-position-61 {
+    width: 1.25rem;
+    top: calc(5% - .625rem);
+    left: calc(57% - .625rem);
+  }
+
+  .country-tiles-section {
+    padding: 3rem 1.25rem;
+  }
+
+  .country-tiles-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .testimonial-slide {
+    flex-basis: 22rem;
+    width: 22rem;
+    padding: 1.25rem;
+  }
+
+  .drop-outro-copy {
+    padding-left: 2.5rem;
+    top: 5rem;
+    right: 1.25rem;
+  }
+
+  .nav-search-control {
+    border-bottom: 1px solid #0003;
+    width: 100%;
+    padding-bottom: 1rem;
+  }
+
+  .nav-search-field {
+    width: 100%;
+  }
+
+  .nav-search-input {
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  .nav-search-results {
+    grid-template-columns: 1fr;
   }
 }
 /* END NATIVE TABLET EXTENSION */
