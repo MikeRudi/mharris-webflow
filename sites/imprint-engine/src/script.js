@@ -524,7 +524,7 @@ function homeAnimation() {
   };
   // FINAL RIPPLE — triggered by scroll, but durations/staggers here are seconds.
   const homeEndRipple = {
-    start: "finish.clip",
+    start: "finish.rightBracket:end",
     expand: { start: 0, duration: 1.2, ease: "power1.in", stagger: 0.08, fromScale: 0.08, scale: 1 },
     reveal: {
       start: "expand", duration: 0.35, ease: "power1.in", stagger: 0.08,
@@ -1380,7 +1380,7 @@ function homeAnimation() {
     addHomeStep(group, "content", $homeEndContent, { opacity: 0 }, { opacity: 1 }, motion.content);
   });
 
-  // 11 — Play independently once the clip starts; reset only when scrolling back before it.
+  // 11 — Play independently once the brackets close; reset when scrolling back before closure.
   const homeRippleTimeline = gsap.timeline({ paused: true, id: "home-end-ripple" });
   const $endRings = $("[home-end-ripple]");
   addHomeStep(homeRippleTimeline, "expand", $endRings,

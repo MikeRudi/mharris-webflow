@@ -88,12 +88,12 @@ orbit and star rotation use `none` for a constant rate.
 | `landingRipple`, `line` | After landing, currently 35% | Water ripple and line drawing |
 | `dropColours` | After resizing, currently 40.5% | Fill the drop and sharpen it |
 | `finish` | After the line, currently 52% | Clip through 70%; brackets start at 66.4%, everything settles by 71% |
-| `homeEndRipple` | At clip start, currently 52% | Play independently in seconds, adding no scroll distance |
+| `homeEndRipple` | When the brackets close, currently 70.9% | Play independently in seconds, adding no scroll distance |
 
 `homeEndRipple.expand` controls growth from `fromScale: 0.08` to the native size
 (`scale: 1`), over 1.2 seconds with 0.08-second stagger. Its reveal takes 0.35
 seconds, with outer/middle/inner opacity 0.4/0.4/0.6. It keeps playing when the
-user stops scrolling. Scrolling back before the clip resets it for the next entry;
+user stops scrolling. Scrolling back before bracket closure resets it for the next entry;
 it is killed on breakpoint cleanup. The earlier landing ripple remains scrubbed. The flattened
 ellipse dimensions, vertical offsets, thick borders and blur are authored in
 Webflow, matching the selected Figma ellipses; JS does not replace that artwork
