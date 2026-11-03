@@ -2774,9 +2774,10 @@ function homeOutroAnimation() {
       const right = mark?.querySelector(".drop-text-bracket-right");
       const droplet = mark?.querySelector(".drop-text-droplet");
       const rings = section.querySelector(".drop-text-ripples");
+      const copy = section.querySelector(".drop-text-content");
       if (!layout || !dark || !gradient || !line || !mark) return;
       const restore = rememberAttributes($(section).add(layout).add(dark).add(gradient).add(line)
-        .add(left).add(right).add(droplet).add(rings), ["style"]);
+        .add(left).add(right).add(droplet).add(rings).add(copy), ["style"]);
       const clip = { progress: 0 };
       function clipPath(progress) {
         if (progress <= 0) return "inset(0 100% 0 0)";
@@ -2811,6 +2812,8 @@ function homeOutroAnimation() {
       timeline.to(gradient, { autoAlpha: 1, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
       timeline.to(rings, { opacity: 0, duration: motion.drop.duration, ease: motion.drop.ease }, motion.drop.start);
       timeline.to(clip, { progress: 1, duration: motion.clip.duration, ease: motion.clip.ease, onUpdate: draw }, motion.clip.start);
+      if (mobile && copy) timeline.fromTo(copy, { color: "#111111" }, { color: "#ffffff",
+        duration: motion.clip.duration, ease: motion.clip.ease }, motion.clip.start);
       timeline.to(line, { autoAlpha: 1, duration: motion.lineReveal.duration, ease: motion.lineReveal.ease }, motion.lineReveal.start);
       timeline.to(line, { scaleX: 0, duration: motion.lineRetract.duration, ease: motion.lineRetract.ease }, motion.lineRetract.start);
       timeline.to(gradient, { autoAlpha: 0, duration: motion.dropLeave.duration, ease: motion.dropLeave.ease }, motion.dropLeave.start);
