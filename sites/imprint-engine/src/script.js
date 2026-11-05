@@ -1769,7 +1769,8 @@ function teamProfilesAnimation() {
 
     // HOVER + RELEASE — scale, image reveal, then the delayed fade after a drag.
     hover: {
-      scaleAmount: 0.15, // Clip +15%, image -15%; shared timing below.
+      clipScale: 1.4375, // Previous 1.15 reveal enlarged by 25%.
+      imageScale: 0.85, // Native 120% image keeps 2% coverage beyond the enlarged clip.
       connectedParentScale: 1.3, // Extra overall scale for connected circles only.
       duration: 0.3,
       ease: "power1.out",
@@ -2280,8 +2281,8 @@ function teamProfilesAnimation() {
           scale: (_index, target) => target === member.element
             ? member.parentScale * (active && member !== node ? controls.connectedParentScale : 1)
             : target === member.clip
-            ? member.clipScale * (active ? 1 + controls.scaleAmount : 1)
-            : member.imageScale * (active ? 1 - controls.scaleAmount : 1),
+            ? member.clipScale * (active ? controls.clipScale : 1)
+            : member.imageScale * (active ? controls.imageScale : 1),
           duration: instant ? 0 : controls.duration, ease: controls.ease, overwrite: "auto",
         });
         if (member.image) {
