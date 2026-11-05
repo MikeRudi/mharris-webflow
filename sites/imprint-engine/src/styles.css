@@ -3428,6 +3428,19 @@
   backdrop-filter: none;
 }
 
+/* Both clipped scenes need full-width surfaces, including the background revealed beneath them. */
+[lander-wrap].max-width {
+  width: 100%;
+  max-width: none;
+}
+
+.drop-text-section[drop-outro] {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
 @media screen and (max-width: 1199px) {
   /* An optional mobile image uses the same header and content props. */
   [header-desktop-image]:has(+ [header-mobile-image]:not(.w-condition-invisible)) {

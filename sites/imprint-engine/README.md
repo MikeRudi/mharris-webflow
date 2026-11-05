@@ -90,6 +90,9 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
   and sit on the left. The gradient drop includes the lander's star reflection.
   The line lives inside the black clip, so it is hidden on the white background.
   The FAQ overlaps the section tail and enters near the end of the clip reveal.
+- Both homepage clip sections span the viewport on wide screens: the opening
+  lander removes its width cap and the closing section extends outside page-content.
+  Their clip measurements continue to use the actual expanded scene dimensions.
 - Accordion 04 has a Black Background variant, applied to the homepage instance.
   Its background extends to both viewport edges outside the capped content wrapper.
 - `navigationSearch()` expands the desktop input to 8rem and groups existing
