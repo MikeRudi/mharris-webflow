@@ -4140,7 +4140,6 @@ function testimonialEnvelopeAnimation() {
     scroll: { start: "top 70%", end: "center center", fromBelowViewport: 0.3 },
     lift: { start: 0, duration: 0.32, distance: 4, ease: "power1.in" },
     spread: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
-    controls: { start: 0.88, duration: 0.12, ease: "power1.in" },
     swipe: { duration: 0.45, ease: "power1.inOut", edgeCards: 2 },
     stack: { width: 0.76, top: [0.07, 0.21, 0.36], left: [0.13, 0.08, 0.14], rotation: [2, -2, 4] },
   };
@@ -4155,10 +4154,8 @@ function testimonialEnvelopeAnimation() {
     const pocket = envelope?.querySelector("[testimonial-envelope-front]");
     const $buttons = $section.find("[testimonial-previous], [testimonial-next]");
     const $controls = $section.find("[testimonial-controls]");
-    const $arrows = $buttons.closest(".testimonial-arrows");
-    const $ui = $section.find("[testimonial-complete-ui]").add($controls.children().not($arrows));
     if (!carousel || !track || !cards.length || !envelope) return;
-    const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add(track).add($ui).add($controls).add($buttons),
+    const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add(track).add($controls).add($buttons),
       ["style", "class", "aria-hidden", "inert", "tabindex", "role", "aria-disabled"]);
     let timeline, trigger, visibilityTrigger, ready = false, drag = null, resizeFrame, disposed = false;
     let arrowTween = null, loopStep = 0, movingCards = false, openedOnce = false;
@@ -4209,7 +4206,6 @@ function testimonialEnvelopeAnimation() {
       carousel.style.scrollSnapType = "none";
       carousel.style.overflowAnchor = "none"; track.style.overflowAnchor = "none";
       carousel.style.cursor = ready ? "grab" : "default";
-      $ui.each((_, node) => { node.inert = !ready; });
       cards.forEach((card, i) => {
         card.inert = !ready;
         card.setAttribute("aria-hidden", String(!ready && Number(card.getAttribute("testimonial-slide")) > 3));
@@ -4282,7 +4278,6 @@ function testimonialEnvelopeAnimation() {
         rotation: i => starts[i].rotation, autoAlpha: i => starts[i].visible ? 1 : 0,
         zIndex: i => 10 + (starts[i].number % 3 || 3), transformOrigin: "50% 50%",
         clipPath: i => `inset(0px 0px ${starts[i].clippedBottom}px 0px)` });
-      gsap.set($ui, { autoAlpha: 0 });
       gsap.set($controls, { autoAlpha: 1 });
       $controls.prop("inert", false);
       ready = true; interactive(false);
@@ -4295,7 +4290,6 @@ function testimonialEnvelopeAnimation() {
       timeline.to(cards, { clipPath: "inset(0px 0px 0px 0px)", duration: motion.spread.duration,
         ease: motion.spread.ease }, motion.spread.start);
       if (pocket) timeline.set(pocket, { zIndex: 1 }, motion.spread.start + motion.lift.duration);
-      timeline.to($ui, { autoAlpha: 1, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
       if (reduced.matches) { finishOpening(); return; }
       timeline.progress(revealProgress).pause();
       trigger = ScrollTrigger.create({ trigger: section, endTrigger: carousel,

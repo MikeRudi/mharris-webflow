@@ -83,6 +83,8 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
   original 15 cards. The reveal never reverses while visible; leaving the viewport
   resets the letter instantly so it opens forward again on entry from either side.
   Arrows are always available; an early click finishes the reveal first.
+  The heading, paragraph and CTA sit above the envelope and stay visible from
+  the start; arrows retain their position beside the carousel.
   No duplicate props or progress bar are added.
 - `homeOutroAnimation()` reverses the lander's drop/clip/line sequence within a
   native sticky layout. Mobile uses opacity and one readable copy layer; desktop
