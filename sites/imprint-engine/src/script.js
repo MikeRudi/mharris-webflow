@@ -4137,7 +4137,7 @@ function testimonialEnvelopeAnimation() {
   if (!window.gsap || !window.ScrollTrigger) return null;
   // Begin before the envelope reaches mid-screen; finish with the cards centered.
   const motion = {
-    scroll: { start: "top 70%", end: "center center", scrub: true },
+    scroll: { start: "top 70%", end: "center center", fromBelowViewport: 0.3 },
     lift: { start: 0, duration: 0.32, distance: 4, ease: "power1.in" },
     spread: { start: 0.22, duration: 0.78, ease: "power1.inOut" },
     controls: { start: 0.88, duration: 0.12, ease: "power1.in" },
@@ -4160,8 +4160,9 @@ function testimonialEnvelopeAnimation() {
     if (!carousel || !track || !cards.length || !envelope) return;
     const restore = rememberAttributes($(cards).add(envelope).add(pocket).add(carousel).add(track).add($ui).add($controls).add($buttons),
       ["style", "class", "aria-hidden", "inert", "tabindex", "role", "aria-disabled"]);
-    let timeline, trigger, ready = false, drag = null, resizeFrame, disposed = false;
+    let timeline, trigger, visibilityTrigger, ready = false, drag = null, resizeFrame, disposed = false;
     let arrowTween = null, loopStep = 0, movingCards = false, openedOnce = false;
+    let revealProgress = 0, entryDirection = 0;
     const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
 
     function updateButtons() {
@@ -4223,13 +4224,40 @@ function testimonialEnvelopeAnimation() {
     }
     function finishOpening() {
       openedOnce = true;
-      trigger?.kill(false, true); trigger = null;
+      revealProgress = 1;
       timeline.progress(1).pause();
       interactive(true);
     }
+    function resetOpening() {
+      if (reduced.matches || !timeline) return;
+      entryDirection = 0;
+      if (!openedOnce && revealProgress === 0) return;
+      openedOnce = false; revealProgress = 0;
+      stopArrow(); up(); interactive(false);
+      timeline.pause(0);
+    }
+    function renderOpening() {
+      if (!trigger || !visibilityTrigger?.isActive || openedOnce) return;
+      const scroll = trigger.scroll();
+      const start = entryDirection < 0
+        ? visibilityTrigger.end - window.innerHeight * motion.scroll.fromBelowViewport
+        : trigger.start;
+      const progress = entryDirection < 0
+        ? (start - scroll) / Math.max(1, start - trigger.end)
+        : (scroll - start) / Math.max(1, trigger.end - start);
+      // Scroll can advance the reveal, but cannot fold visible cards back into the letter.
+      revealProgress = Math.max(revealProgress, gsap.utils.clamp(0, 1, progress));
+      timeline.progress(revealProgress).pause();
+      if (revealProgress >= 0.999) finishOpening();
+    }
+    function enterSection(direction) {
+      if (!entryDirection) entryDirection = direction;
+      renderOpening();
+    }
     function build() {
       if (disposed) return;
-      trigger?.kill(); timeline?.kill();
+      trigger?.kill(); visibilityTrigger?.kill(); timeline?.kill();
+      trigger = null; visibilityTrigger = null;
       restoreOrder();
       gsap.set(cards, { clearProps: "transform,opacity,visibility,clipPath" });
       const unit = rem();
@@ -4268,12 +4296,17 @@ function testimonialEnvelopeAnimation() {
         ease: motion.spread.ease }, motion.spread.start);
       if (pocket) timeline.set(pocket, { zIndex: 1 }, motion.spread.start + motion.lift.duration);
       timeline.to($ui, { autoAlpha: 1, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
-      if (reduced.matches || openedOnce) finishOpening();
-      else trigger = ScrollTrigger.create({ trigger: section, endTrigger: carousel, animation: timeline, ...motion.scroll,
-        onUpdate: self => { if (self.progress >= 0.999) finishOpening(); },
-        onRefresh: self => { if (self.progress >= 0.999) finishOpening(); } });
-      // Creation can refresh synchronously before the trigger assignment completes.
-      if (openedOnce && trigger) finishOpening();
+      if (reduced.matches) { finishOpening(); return; }
+      timeline.progress(revealProgress).pause();
+      trigger = ScrollTrigger.create({ trigger: section, endTrigger: carousel,
+        start: motion.scroll.start, end: motion.scroll.end, onUpdate: renderOpening, onRefresh: renderOpening });
+      visibilityTrigger = ScrollTrigger.create({ trigger: section, start: "top bottom", end: "bottom top",
+        onEnter: () => enterSection(1), onEnterBack: () => enterSection(-1),
+        onLeave: resetOpening, onLeaveBack: resetOpening, onUpdate: renderOpening,
+        onRefresh: self => { if (!self.isActive) resetOpening(); } });
+      if (!visibilityTrigger.isActive) resetOpening();
+      else if (openedOnce) finishOpening();
+      else enterSection(visibilityTrigger.direction);
     }
     const unbind = bindControlActivation($buttons, "testimonialSwiper", $button => {
       if (!ready) finishOpening();
@@ -4317,7 +4350,7 @@ function testimonialEnvelopeAnimation() {
     build();
     document.fonts?.ready.then(() => { if (!disposed) build(); });
     cleanups.push(() => {
-      disposed = true; up(); trigger?.kill(); timeline?.kill(); unbind(); observer.disconnect();
+      disposed = true; up(); trigger?.kill(); visibilityTrigger?.kill(); timeline?.kill(); unbind(); observer.disconnect();
       cancelAnimationFrame(resizeFrame); reduced.removeEventListener("change", build);
       restoreOrder();
       carousel.removeEventListener("scroll", keepLoopCentered); carousel.removeEventListener("wheel", stopArrow);

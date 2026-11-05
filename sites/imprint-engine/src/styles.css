@@ -3558,6 +3558,20 @@
   display: none;
 }
 
+/* The FAQ sits in the capped page-content wrapper; its black background still reaches both viewport edges. */
+[home-faq][data-wf--accordion-04--variant="black-background"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background-color: inherit;
+  z-index: -1;
+  pointer-events: none;
+}
+
 /* A row's hover/focus reveals its child arrow; active arrows stay visible. */
 /* The shared typography embed overrides native variant font sizes. Keep the
    Product variants on the saved type scale without exposing layout props. */

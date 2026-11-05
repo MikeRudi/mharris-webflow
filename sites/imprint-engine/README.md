@@ -80,8 +80,9 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
   absolute behind the carousel and stays fixed while cards scroll over it. The
   scrub starts at section top at 70% and ends with the carousel centered in the
   viewport. Swipe, arrows and dragging loop in both directions by recycling the
-  original 15 cards. Once opened, the carousel stays active when scrolling back
-  up. Arrows are always available; an early click finishes the reveal first.
+  original 15 cards. The reveal never reverses while visible; leaving the viewport
+  resets the letter instantly so it opens forward again on entry from either side.
+  Arrows are always available; an early click finishes the reveal first.
   No duplicate props or progress bar are added.
 - `homeOutroAnimation()` reverses the lander's drop/clip/line sequence within a
   native sticky layout. Mobile uses opacity and one readable copy layer; desktop
@@ -90,6 +91,7 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
   The line lives inside the black clip, so it is hidden on the white background.
   The FAQ overlaps the section tail and enters near the end of the clip reveal.
 - Accordion 04 has a Black Background variant, applied to the homepage instance.
+  Its background extends to both viewport edges outside the capped content wrapper.
 - `navigationSearch()` expands the desktop input to 8rem and groups existing
   navigation links by page category. Close clears the query and collapses search.
   Desktop search locks page scrolling; mobile reuses the menu's existing lock.
