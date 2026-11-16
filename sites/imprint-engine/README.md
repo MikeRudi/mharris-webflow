@@ -17,6 +17,11 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- Careers benefits no longer needs a component embed. `careerBenefits()` uses
+  `.career-benefits`, `.career-benefits-track` and `.career-benefit-card`, creates
+  the draggable scrollbar, and keeps the normal vertical page scroll active.
+  Its migrated CSS includes glass cards, stepped offsets and 2.6rem scrollbar
+  side margins. Cards move by dragging or the range control, without wheel handling.
 - Custom Products uses native reusable components and instant category/decoration
   filters. See `custom-products-notes.txt` for the component IDs, props and checks.
 - Keep this site's custom code inside this site folder.

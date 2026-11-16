@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), customProducts(), careerOpenings(), productUpdates(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
@@ -100,6 +100,121 @@ function productUpdates() {
     render();
     cleanups.push(() => { unbind(); restoreItems(); restoreMore(); });
   });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
+
+function careerBenefits() {
+  const dragThreshold = 6;
+  const cleanups = [];
+
+  $(".career-benefits").each(function () {
+    const root = this, $track = $(root).find(".career-benefits-track").first();
+    const track = $track[0];
+    if (!track || track.dataset.benefitsReady) return;
+
+    const restoreTrack = rememberAttributes($track, ["id", "data-benefits-ready"]);
+    track.dataset.benefitsReady = "true";
+    // Keep this drag-only track in the page's normal vertical Lenis flow.
+    $track.removeAttr("data-lenis-prevent").off("wheel.siteLenis touchmove.siteLenis");
+    if (!track.id) track.id = uniqueElementId("career-benefits-track");
+
+    const $controls = $('<div class="career-benefits-slider-controls"></div>');
+    const $bar = $('<input class="career-benefits-scrollbar" type="range" min="0" max="100" step="0.1" value="0">')
+      .attr({ "aria-label": "Scroll employee benefits", "aria-controls": track.id });
+    $controls.append($bar).insertAfter($track);
+    const controls = $controls[0], bar = $bar[0];
+    let frame = null, destroyed = false, drag = null, suppressClick = false;
+
+    function update() {
+      frame = null;
+      const max = track.scrollWidth - track.clientWidth;
+      controls.hidden = max <= 1;
+      if (controls.hidden) return;
+      bar.value = String(100 * track.scrollLeft / max);
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const width = Math.min(bar.clientWidth, Math.max(
+        1.5 * rem, bar.clientWidth * track.clientWidth / track.scrollWidth
+      ));
+      bar.style.setProperty("--thumb-width", width + "px");
+    }
+
+    function schedule() {
+      if (destroyed || frame !== null) return;
+      frame = requestAnimationFrame(update);
+    }
+
+    $bar.on("input.careerBenefits", () => {
+      track.scrollLeft = (track.scrollWidth - track.clientWidth) * Number(bar.value) / 100;
+    });
+
+    $track.on("pointerdown.careerBenefits", event => {
+      const pointer = event.originalEvent;
+      if (!pointer.isPrimary || pointer.button !== 0) return;
+      if ($(event.target).closest("a, button, input, textarea, select, [contenteditable]").length) return;
+      suppressClick = false;
+      drag = { id: pointer.pointerId, x: pointer.clientX, y: pointer.clientY,
+        scroll: track.scrollLeft, active: false };
+    });
+
+    $track.on("pointermove.careerBenefits", event => {
+      const pointer = event.originalEvent;
+      if (!drag || drag.id !== pointer.pointerId) return;
+      const dx = pointer.clientX - drag.x, dy = pointer.clientY - drag.y;
+      if (!drag.active) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < dragThreshold) return;
+        // Vertical gestures stay with the page; only a horizontal drag moves cards.
+        if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; }
+        drag.active = true;
+        suppressClick = true;
+        track.setPointerCapture(pointer.pointerId);
+        $track.addClass("is-benefits-dragging");
+      }
+      if (pointer.cancelable) event.preventDefault();
+      track.scrollLeft = drag.scroll - dx;
+    });
+
+    function endDrag(event) {
+      const pointer = event.originalEvent;
+      if (!drag || drag.id !== pointer.pointerId) return;
+      drag = null;
+      $track.removeClass("is-benefits-dragging");
+      if (track.hasPointerCapture(pointer.pointerId)) track.releasePointerCapture(pointer.pointerId);
+      if (event.type === "pointercancel") suppressClick = false;
+    }
+
+    function preventDragClick(event) {
+      if (!suppressClick) return;
+      event.preventDefault();
+      event.stopPropagation();
+      suppressClick = false;
+    }
+
+    $track.on("pointerup.careerBenefits pointercancel.careerBenefits lostpointercapture.careerBenefits", endDrag)
+      .on("dragstart.careerBenefits", event => event.preventDefault())
+      .on("scroll.careerBenefits", schedule);
+    track.addEventListener("click", preventDragClick, true);
+    root.addEventListener("load", schedule, true);
+    const observer = new ResizeObserver(schedule);
+    observer.observe(track);
+    observer.observe(controls);
+    $track.children(".career-benefit-card").each((_, card) => observer.observe(card));
+    document.fonts.ready.then(schedule);
+    update();
+
+    cleanups.push(() => {
+      destroyed = true;
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      $track.off(".careerBenefits").removeClass("is-benefits-dragging");
+      if (drag && track.hasPointerCapture(drag.id)) track.releasePointerCapture(drag.id);
+      drag = null;
+      track.removeEventListener("click", preventDragClick, true);
+      root.removeEventListener("load", schedule, true);
+      $controls.remove();
+      restoreTrack();
+    });
+  });
+
   return () => cleanups.forEach(cleanup => cleanup());
 }
 

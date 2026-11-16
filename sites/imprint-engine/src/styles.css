@@ -13,6 +13,116 @@
   color: #6425ab;
 }
 
+/* Careers benefits: migrated from the component embed. */
+.career-benefits { --benefit-step: 3rem; }
+
+.career-benefits-track {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.career-benefits-track::-webkit-scrollbar { display: none; }
+
+.career-benefits-track.is-benefits-dragging,
+.career-benefits-track.is-benefits-dragging * {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.career-benefits-track > .career-benefit-card {
+  flex-shrink: 0;
+  align-self: flex-start;
+  background: linear-gradient(145deg, rgba(255,255,255,0.34), rgba(255,255,255,0.08));
+  border: 1px solid rgba(255,255,255,0.5);
+  -webkit-backdrop-filter: blur(1rem);
+  backdrop-filter: blur(1rem);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+}
+
+.career-benefits-track > .career-benefit-card:nth-child(6n+1) { margin-top: 0; }
+.career-benefits-track > .career-benefit-card:nth-child(6n+2),
+.career-benefits-track > .career-benefit-card:nth-child(6n+6) { margin-top: var(--benefit-step); }
+.career-benefits-track > .career-benefit-card:nth-child(6n+3),
+.career-benefits-track > .career-benefit-card:nth-child(6n+5) { margin-top: calc(var(--benefit-step) * 2); }
+.career-benefits-track > .career-benefit-card:nth-child(6n+4) { margin-top: calc(var(--benefit-step) * 3); }
+
+.career-benefits-slider-controls {
+  position: relative;
+  margin: 2rem 2.6rem 0;
+  width: calc(100% - 5.2rem);
+}
+
+input.career-benefits-scrollbar {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 1.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.career-benefits-slider-controls[hidden] { display: none; }
+
+.career-benefits-scrollbar::-webkit-slider-runnable-track {
+  height: 0.1875rem;
+  border: 0;
+  border-radius: 1rem;
+  background: #d9d9dd;
+}
+
+.career-benefits-scrollbar::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: var(--thumb-width, 40%);
+  height: 0.1875rem;
+  margin-top: 0;
+  border: 0;
+  border-radius: 1rem;
+  background: #99999d;
+  box-shadow: none;
+  cursor: grab;
+}
+
+.career-benefits-scrollbar::-moz-range-track {
+  height: 0.1875rem;
+  border: 0;
+  border-radius: 1rem;
+  background: #d9d9dd;
+}
+
+.career-benefits-scrollbar::-moz-range-thumb {
+  width: var(--thumb-width, 40%);
+  height: 0.1875rem;
+  border: 0;
+  border-radius: 1rem;
+  background: #99999d;
+  box-shadow: none;
+  cursor: grab;
+}
+
+.career-benefits-scrollbar::-moz-range-progress { background: transparent; }
+.career-benefits-scrollbar:focus-visible {
+  outline: 2px solid #9E5AF2;
+  outline-offset: 0.25rem;
+}
+
+@media screen and (max-width: 991px) {
+  .career-benefits { --benefit-step: 1.5rem; }
+}
+
 [git-test] {
   background-color: green;
   transition: transform 0.4s ease;
