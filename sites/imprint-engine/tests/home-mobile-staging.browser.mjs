@@ -80,7 +80,7 @@ try {
         artwork: document.querySelector("[home-gradient-svg]").getAttribute("viewBox"),
       }));
       assert.equal(state.count, 1); assert.ok(state.doc <= state.width + 1);
-      if (width < 1200) {
+      if (width < 992) {
         assert.ok(state.logosTop > state.introBottom, JSON.stringify(state));
         await seek(.52);
         const copy = await page.locator("[home-third-up]").boundingBox();

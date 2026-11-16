@@ -34,7 +34,7 @@ Use pinned jsDelivr releases when switching to stable production code.
 ## Homepage mobile — 20 October 2026
 
 The supplied `Website.png` and `Frame 2147236654/6655/6656.png` are the mobile
-references. The original `homeAnimation()` now runs below 1200px as well as on
+references. The original `homeAnimation()` now runs below 992px as well as on
 desktop. It retains its percentage scrub controls, separate entrance and idle
 card rotation; the static mobile card slider has been removed.
 
@@ -105,7 +105,7 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
 The additional testimonial slots repeat the supplied examples as editable
 defaults. This implementation does not record Michael's final tracker approval.
 
-Tablet (1199px and below) is the first mobile layer. The lander uses the same
+Tablet (991px and below) is the first mobile layer. The lander uses the same
 centred card arrangement on tablet and phone. Tablet uses larger tile images,
 wider `text-ch` copy and eight logos per row at the viewport bottom; phones
 retain four logos per row. `homeMobile.tablet` owns the tablet copy and logo controls.
@@ -114,10 +114,9 @@ the main options and have a Back control; all mobile menu changes are instant.
 While open, the original nav temporarily moves outside the hero clip, then
 returns to its component position on close. Links and props are never cloned.
 
-Webflow's native tablet breakpoint stops at 991px. The generated block at the
-top of `src/styles.css` extends those native tablet styles through 1199px.
-After publishing tablet style edits, run `node sites/imprint-engine/sync-tablet-styles.mjs`
-to refresh that block. Keep styling in Webflow; the extension reuses its output.
+As of 16 November 2026, CSS and JavaScript use Webflow's native breakpoints:
+991px and below for tablet/mobile, and 992px and above for desktop. The generated
+tablet extension has been removed; no synchronization step is needed.
 The menu header stays white above scrolling items, with inset dividers and
 bottom-aligned actions. Smaller mobile tiles keep readable labels and fade out
 at the back; their stacking order stays fixed on desktop and mobile to avoid snaps.
@@ -149,7 +148,7 @@ process accordion, FAQ and envelope. It does not submit forms.
 
 ## Solutions by Product mobile — 21 October 2026
 
-Page Header 01 stacks its artwork above the existing content below 1200px.
+Page Header 01 stacks its artwork above the existing content below 992px.
 The optional `Mobile Image` and `Use Mobile Image` content props select square
 assets on Product overview, Merchandise, Kits, Events, Print and Packaging.
 Apparel also uses a square mobile reframe. Signage and Custom Products have text-only
@@ -174,7 +173,7 @@ Shop Slider's mobile background uses contain sizing inside the section height,
 positioned behind the cards, rather than enlarging the artwork to cover a tall frame.
 
 Accordion 06 uses the Product overview's pale tab background and single horizontally
-scrolling row below 1200px. Its native `accord-06-marker` reuses the existing
+scrolling row below 992px. Its native `accord-06-marker` reuses the existing
 `active-marker` behavior; the desktop underlines remain on desktop. Tab labels
 and content bindings remain on the original component.
 

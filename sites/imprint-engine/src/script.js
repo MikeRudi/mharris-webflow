@@ -40,9 +40,9 @@ function initLenis() {
   };
 }
 
-// Include wider tablets in the mobile layout; native tablet styles are extended in styles.css.
-const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 1200px)", fn);
-const onMobile = (fn) => gsap.matchMedia().add("(max-width: 1199px)", fn);
+// Match Webflow native tablet and desktop breakpoints.
+const onDesktop = (fn) => gsap.matchMedia().add("(min-width: 992px)", fn);
+const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 
 function initSite() {
   if (isWebflowEditor()) return null;
@@ -391,7 +391,7 @@ function homeAnimation() {
   // MOBILE FRAMING — the same scrub sequence, with room for the opening logos.
   // All mobile measurements are rem; native Webflow styles consume these values.
   const homeMobile = {
-    enabled: window.matchMedia("(max-width: 1199px)").matches,
+    enabled: window.matchMedia("(max-width: 991px)").matches,
     scroll: { enabled: true, maxSpeedRemPerSecond: 55, maxAheadRem: 24, settleSeconds: 0.16 },
     viewport: { refreshDelaySeconds: 0.15 },
     introHeightRem: 62.625,
@@ -1763,7 +1763,7 @@ function teamProfilesAnimation() {
       photoOpacityThreshold: 0.01,
     },
     mobile: {
-      media: "(max-width: 1199px)",
+      media: "(max-width: 991px)",
       visibleCircles: ["01", "03", "04", "05", "16", "17", "19", "21", "22", "24"],
     },
 
@@ -2485,7 +2485,7 @@ function flexGrowAnimation() {
     },
     mobile: {
       start: 0,
-      media: "(max-width: 1199px)",
+      media: "(max-width: 991px)",
       instant: true,
       imageAspectRatio: 2,
       imageGapRem: 1,
@@ -2843,7 +2843,7 @@ function homeOutroAnimation() {
     dropLeave: { start: 0.78, duration: 0.12, ease: "power1.in" },
   };
   const cleanups = [], media = gsap.matchMedia();
-  media.add({ mobile: "(max-width: 1199px)", desktop: "(min-width: 1200px)",
+  media.add({ mobile: "(max-width: 991px)", desktop: "(min-width: 992px)",
     reduced: "(prefers-reduced-motion: reduce)" }, context => {
     const mobile = context.conditions.mobile, reduced = context.conditions.reduced;
     $("[drop-outro]").each(function () {
@@ -3007,7 +3007,7 @@ function navigationDropdowns() {
     open: { backgroundColor: "#ffffff", color: "#111111", radius: "2rem" },
   };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const desktopMenu = window.matchMedia("(min-width: 1200px)");
+  const desktopMenu = window.matchMedia("(min-width: 992px)");
   const cleanups = [];
 
   $roots.each(function (index) {
@@ -3127,7 +3127,7 @@ function navigationSearch() {
     field: { width: "8rem", duration: 0.25, ease: "power1.inOut" },
     panel: { duration: 0.2, ease: "power1.in", y: -6 },
   };
-  const mobile = window.matchMedia("(max-width: 1199px)");
+  const mobile = window.matchMedia("(max-width: 991px)");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const cleanups = [];
   $("[nav-menu-root]").each(function (index) {
