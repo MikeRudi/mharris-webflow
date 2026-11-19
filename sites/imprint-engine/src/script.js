@@ -237,19 +237,23 @@ function featureDetails() {
     const $copy = $dialog.find("[final-feature-modal-copy]");
     const $close = $dialog.find("[final-feature-modal-close]");
     if (!dialog.showModal || !$component.length || !$title.length || !$copy.length) return;
-    const $triggers = $component.find("[final-feature-name]").filter(function () {
+    const $names = $component.find("[final-feature-name]").filter(function () {
       return $(this).closest("[final-feature-category]").find("[final-feature-details]").text().trim().length > 0;
     });
+    const $triggers = $names.closest(".final-feature-row");
     const restoreDialog = rememberAttributes($dialog, ["id", "aria-labelledby", "aria-describedby"]);
     const restoreTitle = rememberAttributes($title, ["id"]);
     const restoreCopy = rememberAttributes($copy, ["id"]);
-    const restoreTriggers = rememberAttributes($triggers, ["class", "aria-haspopup", "aria-controls", "line-hover-item"]);
+    const restoreNames = rememberAttributes($names, ["class", "line-hover-item"]);
+    const restoreTriggers = rememberAttributes($triggers, ["class", "role", "tabindex", "aria-label", "aria-haspopup", "aria-controls"]);
     const originalTitle = $title.text(), originalCopy = $copy.html();
     if (!dialog.id) dialog.id = uniqueElementId("feature-details-dialog");
     if (!$title.attr("id")) $title.attr("id", uniqueElementId("feature-details-title"));
     if (!$copy.attr("id")) $copy.attr("id", uniqueElementId("feature-details-copy"));
     $dialog.attr({ "aria-labelledby": $title.attr("id"), "aria-describedby": $copy.attr("id") });
-    $triggers.addClass("final-feature-trigger").attr({ "aria-haspopup": "dialog", "aria-controls": dialog.id, "line-hover-item": "" });
+    $names.addClass("final-feature-trigger").attr("line-hover-item", "");
+    $triggers.addClass("final-feature-row-trigger").attr({ role: "button", tabindex: "0", "aria-haspopup": "dialog", "aria-controls": dialog.id })
+      .each(function () { $(this).attr("aria-label", $(this).find("[final-feature-name]").text().trim()); });
     let scrollLock = null, trigger = null, backdropDown = false;
 
     function restoreScroll() {
@@ -263,7 +267,7 @@ function featureDetails() {
       const details = $trigger.closest("[final-feature-category]").find("[final-feature-details]")[0];
       if (!details || dialog.open) return;
       trigger = $trigger[0];
-      $title.text($trigger.text().trim());
+      $title.text($trigger.find("[final-feature-name]").text().trim());
       $copy.empty().append($(details).contents().clone());
       const html = document.documentElement;
       scrollLock = { html: html.style.overflow,
@@ -275,15 +279,22 @@ function featureDetails() {
       $close[0]?.focus({ preventScroll: true });
     }
     function close() { if (dialog.open) dialog.close(); }
-    const unbindTriggers = bindControlActivation($triggers, "featureDetails", open);
+    $triggers.on("click.featureDetails", function (event) {
+      // Preserve the existing warehouse-pricing links inside plan cells.
+      if ($(event.target).closest("a,button,input,select,textarea").length) return;
+      event.preventDefault(); open($(this));
+    }).on("keydown.featureDetails", function (event) {
+      if (event.target !== this || (event.key !== "Enter" && event.key !== " ")) return;
+      event.preventDefault(); open($(this));
+    });
     const unbindClose = bindControlActivation($close, "featureDetails", close);
     $dialog.on("pointerdown.featureDetails", event => { backdropDown = event.target === dialog; })
       .on("click.featureDetails", event => { if (backdropDown && event.target === dialog) close(); })
       .on("close.featureDetails", () => { restoreScroll(); trigger?.focus({ preventScroll: true }); });
     cleanups.push(() => {
       close(); restoreScroll();
-      unbindTriggers(); unbindClose(); $dialog.off(".featureDetails");
-      restoreDialog(); restoreTitle(); restoreCopy(); restoreTriggers();
+      $triggers.off(".featureDetails"); unbindClose(); $dialog.off(".featureDetails");
+      restoreDialog(); restoreTitle(); restoreCopy(); restoreNames(); restoreTriggers();
       $title.text(originalTitle); $copy.html(originalCopy);
     });
   });
@@ -3853,6 +3864,12 @@ function lineHover() {
     enter: { start: 0, duration: 0.3, ease: "power1.in", clipPath: "inset(0% 0% 0% 0%)" },
     leave: { start: 0, duration: 0.3, ease: "power1.in", clipPath: "inset(0% 0% 0% 100%)" },
     hidden: "inset(0% 100% 0% 0%)",
+    pricing: {
+      enter: { start: 0, duration: 0.18, ease: "power1.in", clipPath: "inset(0% 0% 0% 0%)" },
+      leave: { start: 0, duration: 0.18, ease: "power1.in", clipPath: "inset(0% 0% 0% 100%)" },
+      fadeIn: { start: 0, duration: 0.12, ease: "power1.out", opacity: 1 },
+      fadeOut: { start: 0, duration: 0.18, ease: "power1.out", opacity: 0 },
+    },
   };
   const cleanups = [];
   $("[line-hover-item]").each(function () {
@@ -3865,9 +3882,28 @@ function lineHover() {
     if (!$line.length) return;
     const restore = rememberAttributes($line, ["style"]);
     let hovered = false, closed = !$item.hasClass("is-active");
+    let rowPhase = "hidden", rowWantsVisible = false, rowTimeline = null;
     gsap.set($line, { clipPath: $item.hasClass("is-active") ? lineMotion.enter.clipPath : lineMotion.hidden });
 
+    function playRow(enter) {
+      const motion = lineMotion.pricing[enter ? "enter" : "leave"];
+      const fade = lineMotion.pricing[enter ? "fadeIn" : "fadeOut"];
+      rowPhase = enter ? "revealing" : "hiding";
+      if (enter) gsap.set($line, { clipPath: lineMotion.hidden, opacity: 0 });
+      rowTimeline = gsap.timeline({ onComplete: () => {
+        rowPhase = enter ? "shown" : "hidden";
+        if (rowWantsVisible !== enter) playRow(rowWantsVisible);
+      } });
+      rowTimeline.to($line, { clipPath: motion.clipPath, duration: motion.duration, ease: motion.ease }, motion.start)
+        .to($line, { opacity: fade.opacity, duration: fade.duration, ease: fade.ease }, fade.start);
+    }
+
     function animate(enter) {
+      if (generated) {
+        rowWantsVisible = enter;
+        if ((enter && rowPhase === "hidden") || (!enter && rowPhase === "shown")) playRow(enter);
+        return;
+      }
       const motion = lineMotion[enter ? "enter" : "leave"];
       if (enter && closed) gsap.set($line, { clipPath: lineMotion.hidden });
       closed = false;
@@ -3879,7 +3915,7 @@ function lineHover() {
       .on("mouseleave.lineHover", () => { hovered = false; animate($hover[0].contains(document.activeElement)); })
       .on("focusin.lineHover", () => animate(true))
       .on("focusout.lineHover", (event) => { if (!$hover[0].contains(event.relatedTarget)) animate(hovered); });
-    cleanups.push(() => { $hover.off(".lineHover"); gsap.killTweensOf($line); if (generated) $line.remove(); else restore(); });
+    cleanups.push(() => { $hover.off(".lineHover"); rowTimeline?.kill(); gsap.killTweensOf($line); if (generated) $line.remove(); else restore(); });
   });
   return () => cleanups.forEach((cleanup) => cleanup());
 }

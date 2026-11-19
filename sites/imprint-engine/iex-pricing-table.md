@@ -32,7 +32,7 @@ Source: https://imprintengine.com/platform/#pricing-form
 Audit: `reference-data/iex-pricing-tables-2026-11-19.json`.
 Feature Description is an optional short description under the name. Feature
 Details is the rich text shown in the feature popup. A populated Feature Details
-field makes its feature name clickable; clearing it leaves the name plain.
+field makes its whole row clickable; clearing it leaves the row noninteractive.
 
 The 48 linked source features have popups. The 17 Stores features had no source
 links, so their Feature Details fields are empty and their names stay plain.
@@ -65,7 +65,10 @@ copy; the exceptions are recorded in the audit.
   styles. JavaScript fills the title and rich text from the clicked CMS row,
   locks background scrolling, and supports X, Escape and backdrop closing.
   Native dialog behavior keeps background controls inert. Focus returns to the
-  feature name on close. Cleanup restores states.
+  row on close. Existing warehouse-pricing links keep their destinations.
+  Pricing row lines reveal in 0.18s and complete before fading/wiping out in
+  0.18s, so fast pointer movement does not interrupt earlier rows. Cleanup
+  restores states.
 
 ## Pricing FAQ spacing
 
