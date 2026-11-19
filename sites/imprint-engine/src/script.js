@@ -135,7 +135,9 @@ function featureComparison() {
       this.appendChild(link);
       links.push(link);
     });
-    let activeColumn = -1, resizeFrame = null;
+    const originalClip = body.style.getPropertyValue("clip-path");
+    const originalClipPriority = body.style.getPropertyPriority("clip-path");
+    let activeColumn = -1, resizeFrame = null, clipFrame = null, lastClip = -1;
 
     function activate($filter, immediate = false) {
       let state;
@@ -156,6 +158,7 @@ function featureComparison() {
         });
         highlight(-1);
         syncHeader();
+        clipRows();
         cancelAnimationFrame(resizeFrame);
         resizeFrame = requestAnimationFrame(() => {
           if (window.lenis) window.lenis.resize();
@@ -178,6 +181,19 @@ function featureComparison() {
     }
 
     function syncHeader() { header.scrollLeft = body.scrollLeft; }
+    // Keep scrolled rows behind the sticky black header, including above the nav.
+    function clipRows() {
+      cancelAnimationFrame(clipFrame);
+      clipFrame = null;
+      const bodyRect = body.getBoundingClientRect();
+      const inset = Math.max(0, Math.min(bodyRect.height, header.getBoundingClientRect().bottom - bodyRect.top));
+      if (inset === lastClip) return;
+      lastClip = inset;
+      body.style.setProperty("clip-path", `inset(${inset}px 0 0 0)`);
+    }
+    function scheduleClip() {
+      if (clipFrame === null) clipFrame = requestAnimationFrame(clipRows);
+    }
     const unbind = bindControlActivation($filters, "featureComparison", $filter => activate($filter));
     $table.on("pointerover.featureComparison", event => {
       if (event.originalEvent.pointerType === "touch") return;
@@ -185,7 +201,9 @@ function featureComparison() {
       highlight(cell ? Number(cell.getAttribute("final-feature-column")) : -1);
     }).on("pointerleave.featureComparison", () => highlight(-1));
     body.addEventListener("scroll", syncHeader, { passive: true });
-    const observer = new ResizeObserver(syncHeader);
+    window.addEventListener("scroll", scheduleClip, { passive: true });
+    window.addEventListener("resize", scheduleClip, { passive: true });
+    const observer = new ResizeObserver(() => { syncHeader(); scheduleClip(); });
     observer.observe(body);
     observer.observe(header);
     activate($filters.first(), true);
@@ -194,7 +212,12 @@ function featureComparison() {
     cleanups.push(() => {
       unbind(); $table.off(".featureComparison"); observer.disconnect();
       body.removeEventListener("scroll", syncHeader);
+      window.removeEventListener("scroll", scheduleClip);
+      window.removeEventListener("resize", scheduleClip);
+      cancelAnimationFrame(clipFrame);
       cancelAnimationFrame(resizeFrame);
+      if (originalClip) body.style.setProperty("clip-path", originalClip, originalClipPriority);
+      else body.style.removeProperty("clip-path");
       if (window.Flip) Flip.killFlipsOf(marker);
       markerParent.insertBefore(marker, markerNext && markerNext.parentNode === markerParent ? markerNext : null);
       links.forEach(link => { link.replaceWith(...link.childNodes); });
