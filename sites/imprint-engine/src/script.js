@@ -49,7 +49,7 @@ function initSite() {
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
-    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoIntroAnimation()];
+    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -82,50 +82,112 @@ function initSite() {
 
 $(initSite);
 
-function videoIntroAnimation() {
-  // FIRST PLAY — both fades start together; Flowplay owns playback and its controls.
+function videoPopupAnimation() {
+  // FULLSCREEN PLAYER — Webflow owns layout; Flowplay owns playback and controls.
   const motion = {
-    intro: { start: 0, opacity: 0, duration: 0.3, ease: "power1.in" },
-    controls: { start: 0, opacity: 1, duration: 0.3, ease: "power1.in" },
+    open: { start: 0, opacity: 1, duration: 0.3, ease: "power1.in" },
+    close: { start: 0, opacity: 0, duration: 0.2, ease: "power1.in" },
   };
   if (!window.gsap) return null;
   const cleanups = [];
-  $('[f-data-video="wrapper"]').each(function () {
-    const $wrap = $(this), $intro = $wrap.find("[video-intro]").first();
-    const $controls = $wrap.find("[video-controls]").first();
-    const video = $wrap.find('video[f-data-video="video-element"]')[0];
-    if (!$intro.length || !$controls.length || !video) return;
-    const restore = rememberAttributes($intro.add($controls), ["style", "aria-hidden", "inert"]);
-    let started = Boolean($wrap.data("videoIntroStarted") || !video.paused || video.currentTime > 0);
-    let timeline = null;
-    gsap.set($intro, { autoAlpha: started ? 0 : 1, pointerEvents: started ? "none" : "auto" });
-    gsap.set($controls, { autoAlpha: started ? 1 : 0 });
-    $intro.attr("aria-hidden", String(started)).prop("inert", started);
-    $controls.attr("aria-hidden", String(!started)).prop("inert", !started);
+  let closeActive = null;
+  $("[video-popup]").each(function (index) {
+    const popup = this, $popup = $(popup), key = $popup.attr("video-popup");
+    const $open = $("[video-popup-open]").filter(function () { return this.getAttribute("video-popup-open") === key; });
+    const $close = $popup.find("[video-popup-close]");
+    const video = $popup.find('video[f-data-video="video-element"]')[0];
+    if (!key || !$open.length || !$close.length || !video) return;
+    const namespace = `videoPopup${index}`;
+    const restorePopup = rememberAttributes($popup, ["style", "id", "role", "aria-modal", "aria-label", "aria-hidden", "inert", "tabindex", "data-lenis-prevent"]);
+    const restoreOpen = rememberAttributes($open, ["aria-haspopup", "aria-controls", "aria-expanded"]);
+    if (!popup.id) popup.id = uniqueElementId("video-popup");
+    $popup.attr({ role: "dialog", "aria-modal": "true", "aria-hidden": "true", tabindex: "-1", "data-lenis-prevent": "" }).prop("inert", true);
+    if (!$popup.attr("aria-label")) $popup.attr("aria-label", "Video player");
+    $open.attr({ "aria-haspopup": "dialog", "aria-controls": popup.id, "aria-expanded": "false" });
+    gsap.set(popup, { display: "none", autoAlpha: 0 });
+    let opened = false, closing = false, tween = null, trigger = null, marker = null, scrollLock = null;
+    let restoreBackground = null;
 
-    function revealControls(event) {
-      if (event && event.type === "click") event.preventDefault();
-      if (started) return;
-      started = true;
-      $wrap.data("videoIntroStarted", true);
-      const moveFocus = $intro[0].contains(document.activeElement);
-      $intro.attr("aria-hidden", "true").prop("inert", true);
-      $controls.attr("aria-hidden", "false").prop("inert", false);
-      gsap.set($intro, { pointerEvents: "none" });
-      timeline = gsap.timeline({ onComplete: () => {
-        if (moveFocus) $controls.find('[f-data-video="pause-button"], [f-data-video="play-button"]').filter(":visible").first().trigger("focus");
-      } });
-      timeline.to($intro, { autoAlpha: motion.intro.opacity, duration: motion.intro.duration, ease: motion.intro.ease }, motion.intro.start);
-      timeline.to($controls, { autoAlpha: motion.controls.opacity, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
+    function finishClose() {
+      gsap.set(popup, { display: "none", autoAlpha: 0 });
+      $popup.attr("aria-hidden", "true").prop("inert", true);
+      $open.attr("aria-expanded", "false");
+      $(document).off(`.${namespace}`);
+      if (restoreBackground) { restoreBackground(); restoreBackground = null; }
+      if (marker) { marker.replaceWith(popup); marker = null; }
+      if (scrollLock) {
+        document.documentElement.style.overflow = scrollLock.overflow;
+        document.documentElement.style.scrollbarGutter = scrollLock.gutter;
+        if (!scrollLock.stopped) window.lenis?.start();
+        scrollLock = null;
+      }
+      opened = false; closing = false;
+      if (closeActive === close) closeActive = null;
+      if (trigger?.isConnected) trigger.focus({ preventScroll: true });
     }
 
-    $intro.on("click.videoIntro", revealControls);
-    $(video).on("play.videoIntro", revealControls);
+    function close(immediate = false) {
+      if (!opened || (closing && !immediate)) return;
+      closing = true;
+      if (tween) tween.kill();
+      $popup.find('[f-data-video="pause-button"]').first().trigger("click");
+      video.pause();
+      if (immediate) { finishClose(); return; }
+      tween = gsap.to(popup, { autoAlpha: motion.close.opacity, delay: motion.close.start,
+        duration: motion.close.duration, ease: motion.close.ease, onComplete: finishClose });
+    }
+
+    function focusables() {
+      return $popup.find('button, a[href], input, select, textarea, [tabindex]').filter(":visible")
+        .filter(function () { return !this.disabled && this.tabIndex >= 0 && !this.closest("[inert]"); });
+    }
+
+    function open($trigger) {
+      if (opened) return;
+      if (closeActive) closeActive(true);
+      opened = true; trigger = $trigger[0]; closeActive = close;
+      // Keep fixed positioning independent of animated/transformed section ancestors.
+      marker = document.createComment("video-popup-position");
+      popup.before(marker);
+      document.body.appendChild(popup);
+      const $background = $(document.body).children().not(popup).not("script, style, link");
+      restoreBackground = rememberAttributes($background, ["inert"]);
+      $background.prop("inert", true);
+      const html = document.documentElement;
+      scrollLock = { overflow: html.style.overflow, gutter: html.style.scrollbarGutter, stopped: Boolean(window.lenis?.isStopped) };
+      window.lenis?.stop();
+      html.style.scrollbarGutter = "auto"; html.style.overflow = "hidden";
+      $popup.attr("aria-hidden", "false").prop("inert", false);
+      $open.attr("aria-expanded", "true");
+      gsap.set(popup, { display: "flex", visibility: "visible", opacity: 0 });
+      tween = gsap.to(popup, { autoAlpha: motion.open.opacity, delay: motion.open.start,
+        duration: motion.open.duration, ease: motion.open.ease });
+      $close[0].focus({ preventScroll: true });
+      $(document).on(`keydown.${namespace}`, function (event) {
+        if (event.key === "Escape") { event.preventDefault(); close(); }
+        if (event.key !== "Tab") return;
+        const items = focusables().toArray(), first = items[0], last = items[items.length - 1];
+        if (!first) { event.preventDefault(); popup.focus({ preventScroll: true }); return; }
+        if (event.shiftKey && (document.activeElement === first || !items.includes(document.activeElement))) {
+          event.preventDefault(); last.focus({ preventScroll: true });
+        } else if (!event.shiftKey && (document.activeElement === last || !items.includes(document.activeElement))) {
+          event.preventDefault(); first.focus({ preventScroll: true });
+        }
+      });
+      // Use Flowplay's control so its Play/Pause icons stay in sync.
+      const play = $popup.find('[f-data-video="play-button"]')[0];
+      if (play) play.click();
+      else video.play().catch(() => {});
+    }
+
+    const unbindOpen = bindControlActivation($open, namespace, open);
+    const unbindClose = bindControlActivation($close, namespace, () => close());
+    $popup.on(`wheel.${namespace} touchmove.${namespace}`, event => event.stopPropagation());
     cleanups.push(() => {
-      $intro.off(".videoIntro");
-      $(video).off(".videoIntro");
-      if (timeline) timeline.kill();
-      restore();
+      close(true);
+      if (tween) tween.kill();
+      unbindOpen(); unbindClose(); $popup.off(`.${namespace}`);
+      restorePopup(); restoreOpen();
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());

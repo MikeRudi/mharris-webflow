@@ -17,13 +17,20 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
-- Flowplay's initial play button uses `f-data-video="poster-button"` and the
-  empty `video-intro` hook inside `f-data-video="wrapper"`. The controls wrapper
-  uses the empty `video-controls` hook. `videoIntroAnimation()` hides controls
-  initially, then crossfades the intro and controls together in 0.3s with
-  `power1.in` on first click/play. Pausing does not restore the intro. Keep these
-  elements' native display settings enabled; Flowplay manages its Play/Pause
-  button display. Do not add Flowplay's `poster` hook to the fading intro.
+- Flowplay opens in a fullscreen popup via `videoPopupAnimation()`. Add
+  `video-popup-open="about-video"` to `.video-initial-play`. The fixed popup has
+  `video-popup="about-video"` and `f-data-video="wrapper"`; its close control has
+  `video-popup-close="true"`. Keep the video embed and existing Flowplay controls
+  inside it, with their existing Flowplay attributes. Remove `video-intro` and
+  `f-data-video="poster-button"` from the external initial play button.
+  Set the popup's native position to fixed, inset 0, z-index above navigation,
+  background and flex alignment in Webflow, then display None. Code opens it as
+  Flex, fading in over 0.3s and out over 0.2s (`power1.in`). Controls are visible
+  throughout playback and pause; keep their native display enabled. Closing or
+  Escape pauses without rewinding, restores page scrolling and trigger focus.
+  While open, the entire player wrapper moves to body to escape transformed
+  ancestors, then returns to its original position. Use standalone popup styles.
+  Use matching, unique hook values for additional players.
 - IEX Feature Comparison uses native Webflow layout, sticky header and orange
   highlight styles. Its native Collection List reads 65 rows from IEX Pricing
   Tables. `featureComparison()` filters categories, switches the Stores header,
