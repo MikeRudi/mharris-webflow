@@ -57,7 +57,8 @@ function initSite() {
       const homeCleanup = homeAnimation();
       const footerCleanup = footerEnginePixels();
       const teamCleanup = teamProfilesAnimation();
-      return () => [teamCleanup, footerCleanup, homeCleanup, lineCleanup].forEach((cleanup) => cleanup && cleanup());
+      const videoMagnetCleanup = videoPlayMagnet();
+      return () => [videoMagnetCleanup, teamCleanup, footerCleanup, homeCleanup, lineCleanup].forEach((cleanup) => cleanup && cleanup());
     });
     cleanups.push(() => desktop.revert());
     const mobile = onMobile(() => {
@@ -81,6 +82,71 @@ function initSite() {
 }
 
 $(initSite);
+
+function videoPlayMagnet() {
+  // PLAY BUTTON MAGNET — a restrained pull, with the native resting position preserved.
+  const motion = {
+    follow: { strength: 0.18, maxRem: 3, duration: 0.3, ease: "power1.in" },
+    reset: { duration: 0.4, ease: "power1.in" },
+  };
+  if (!window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return null;
+  const cleanups = [];
+  $("[video-wrap], .video-wrap").each(function (index) {
+    const wrap = this, $wrap = $(wrap);
+    const $buttons = $wrap.find("[initial-play], .initial-play, .video-initial-play").filter(function () {
+      return $(this).closest("[video-wrap], .video-wrap")[0] === wrap && !this.closest("[video-popup]");
+    });
+    const button = $buttons.filter("[initial-play], .initial-play")[0] || $buttons[0];
+    if (!button) return;
+    const namespace = `videoPlayMagnet${index}`;
+    const restore = rememberAttributes($(button), ["style"]);
+    const baseX = Number(gsap.getProperty(button, "x")) || 0;
+    const baseY = Number(gsap.getProperty(button, "y")) || 0;
+    const xTo = gsap.quickTo(button, "x", { duration: motion.follow.duration, ease: motion.follow.ease });
+    const yTo = gsap.quickTo(button, "y", { duration: motion.follow.duration, ease: motion.follow.ease });
+    let bounds = null, resetTween = null;
+
+    function measure() {
+      const rect = wrap.getBoundingClientRect(), buttonRect = button.getBoundingClientRect();
+      const scaleX = rect.width / (wrap.offsetWidth || rect.width || 1);
+      const scaleY = rect.height / (wrap.offsetHeight || rect.height || 1);
+      bounds = {
+        x: buttonRect.left + buttonRect.width / 2 - (Number(gsap.getProperty(button, "x")) - baseX) * scaleX,
+        y: buttonRect.top + buttonRect.height / 2 - (Number(gsap.getProperty(button, "y")) - baseY) * scaleY,
+        scaleX, scaleY,
+        limit: motion.follow.maxRem * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16),
+      };
+    }
+
+    function move(event) {
+      if (event.originalEvent?.pointerType === "touch") return;
+      if (!bounds) measure();
+      if (resetTween) { resetTween.kill(); resetTween = null; }
+      const x = (event.clientX - bounds.x) / bounds.scaleX * motion.follow.strength;
+      const y = (event.clientY - bounds.y) / bounds.scaleY * motion.follow.strength;
+      const distance = Math.hypot(x, y), clamp = distance > bounds.limit ? bounds.limit / distance : 1;
+      xTo(baseX + x * clamp); yTo(baseY + y * clamp);
+    }
+
+    function reset() {
+      bounds = null;
+      xTo.tween.pause(); yTo.tween.pause();
+      if (resetTween) resetTween.kill();
+      resetTween = gsap.to(button, { x: baseX, y: baseY, ...motion.reset, overwrite: "auto" });
+    }
+
+    $wrap.on(`pointerenter.${namespace} pointermove.${namespace}`, move)
+      .on(`pointerleave.${namespace} pointercancel.${namespace}`, reset);
+    $(button).on(`click.${namespace}`, reset);
+    $(window).on(`resize.${namespace} scroll.${namespace}`, () => { bounds = null; })
+      .on(`blur.${namespace}`, reset);
+    cleanups.push(() => {
+      $wrap.off(`.${namespace}`); $(button).off(`.${namespace}`); $(window).off(`.${namespace}`);
+      xTo.tween.kill(); yTo.tween.kill(); if (resetTween) resetTween.kill(); restore();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
 
 function videoPopupAnimation() {
   // FULLSCREEN PLAYER — Webflow owns layout; Flowplay owns playback and controls.
