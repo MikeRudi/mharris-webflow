@@ -84,6 +84,12 @@ $(initSite);
 
 function featureComparison() {
   const motion = { underline: { duration: 0.3, ease: "power1.in" } };
+  const categories = {
+    support: "Service & Support",
+    infrastructure: "Infrastructure",
+    technology: "Technology",
+    stores: "IEX Stores (Add-On)",
+  };
   const cleanups = [];
   $("[final-feature-table]").each(function () {
     const $table = $(this), $filters = $table.find("[final-feature-filter-item]");
@@ -102,13 +108,34 @@ function featureComparison() {
     const restoreMarker = rememberAttributes($marker, ["style"]);
     const $rows = $table.find(".final-feature-row");
     const $cells = $rows.children(".final-feature-cell");
+    const $items = $table.find("[final-feature-category]");
+    const $heads = $(header).find("[final-feature-head]");
+    const restoreRows = rememberAttributes($rows, ["class", "hidden"]);
+    const restoreItems = rememberAttributes($items, ["hidden"]);
     const $ticks = $cells.find(".text").filter((_, element) => element.textContent.trim() === "✓");
-    const restoreCells = rememberAttributes($cells, ["class", "final-feature-column"]);
+    const restoreCells = rememberAttributes($cells, ["class", "final-feature-column", "hidden"]);
     const restoreTicks = rememberAttributes($ticks, ["class"]);
     $rows.each(function () {
       $(this).children(".final-feature-cell").each((index, cell) => cell.setAttribute("final-feature-column", index));
     });
-    let activeColumn = -1;
+    // Stores uses two wider plan columns; layout styles remain native to Webflow.
+    $items.each(function () {
+      const stores = this.getAttribute("final-feature-category") === categories.stores;
+      $(this).find(".final-feature-row").toggleClass("final-feature-stores-row", stores);
+      if (stores) $(this).find('[final-feature-column="2"], [final-feature-column="3"]').prop("hidden", true);
+    });
+    const links = [];
+    $table.find("[final-feature-link]").each(function () {
+      const href = this.getAttribute("final-feature-link");
+      if (!href || !/^https?:\/\//i.test(href)) return;
+      const link = document.createElement("a");
+      link.className = "final-feature-link";
+      link.href = href;
+      while (this.firstChild) link.appendChild(this.firstChild);
+      this.appendChild(link);
+      links.push(link);
+    });
+    let activeColumn = -1, resizeFrame = null;
 
     function activate($filter, immediate = false) {
       let state;
@@ -119,7 +146,22 @@ function featureComparison() {
       $filters.removeClass("is-active").attr("aria-pressed", "false");
       $filter.addClass("is-active").attr("aria-pressed", "true").append(marker);
       if (state) Flip.from(state, { ...motion.underline, absolute: true });
-      // Only the selected underline changes until the other tables are supplied.
+      if ($items.length) {
+        const key = $filter.attr("final-feature-filter-item"), category = categories[key];
+        const stores = key === "stores";
+        $items.each(function () { this.hidden = this.getAttribute("final-feature-category") !== category; });
+        $heads.each(function () {
+          this.hidden = (this.getAttribute("final-feature-head") === "stores") !== stores;
+          $(this).removeClass("final-feature-inactive");
+        });
+        highlight(-1);
+        syncHeader();
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => {
+          if (window.lenis) window.lenis.resize();
+          if (window.ScrollTrigger) ScrollTrigger.refresh();
+        });
+      }
     }
 
     function highlight(column) {
@@ -152,9 +194,11 @@ function featureComparison() {
     cleanups.push(() => {
       unbind(); $table.off(".featureComparison"); observer.disconnect();
       body.removeEventListener("scroll", syncHeader);
+      cancelAnimationFrame(resizeFrame);
       if (window.Flip) Flip.killFlipsOf(marker);
       markerParent.insertBefore(marker, markerNext && markerNext.parentNode === markerParent ? markerNext : null);
-      restoreFilters(); restoreMarker(); restoreCells(); restoreTicks();
+      links.forEach(link => { link.replaceWith(...link.childNodes); });
+      restoreFilters(); restoreMarker(); restoreRows(); restoreItems(); restoreCells(); restoreTicks();
       addedHooks.forEach(([element, name]) => element.removeAttribute(name));
     });
   });

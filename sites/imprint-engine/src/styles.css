@@ -2,7 +2,10 @@
 [home-faq-item][hidden],
 [updates-item][hidden],
 [career-job][hidden],
-[career-empty][hidden] {
+[career-empty][hidden],
+[final-feature-category][hidden],
+[final-feature-head][hidden],
+[final-feature-column][hidden] {
   display: none !important;
 }
 

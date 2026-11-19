@@ -1,0 +1,975 @@
+{
+  "source": "https://imprintengine.com/platform/#pricing-form",
+  "capturedOn": "2026-11-19",
+  "categories": [
+    {
+      "name": "Service & Support",
+      "key": "support",
+      "headers": [
+        "Free",
+        "Express",
+        "Pro",
+        "Enterprise"
+      ],
+      "count": 14
+    },
+    {
+      "name": "Infrastructure",
+      "key": "infrastructure",
+      "headers": [
+        "Free",
+        "Express",
+        "Pro",
+        "Enterprise"
+      ],
+      "count": 9
+    },
+    {
+      "name": "Technology",
+      "key": "technology",
+      "headers": [
+        "Free",
+        "Express",
+        "Pro",
+        "Enterprise"
+      ],
+      "count": 25
+    },
+    {
+      "name": "IEX Stores (Add-On)",
+      "key": "stores",
+      "headers": [
+        "Basic",
+        "Advanced"
+      ],
+      "count": 17
+    }
+  ],
+  "footnote": "* Additional fees may apply based on scope",
+  "issues": [
+    "Source Gmail & Outlook info link incorrectly opens Dedicated brand manager; omitted that unrelated description."
+  ],
+  "items": [
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Global Customer Support",
+        "slug": "support-global-customer-support",
+        "table-category": "Service & Support",
+        "display-order": 101,
+        "feature-details": "<p>Access to our globally available customer support teams that handle all support related issues.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Global Shipping, Tracking, Customs, Returns & End User Support",
+        "slug": "support-global-shipping-tracking-customs-returns-end-user-support",
+        "table-category": "Service & Support",
+        "display-order": 102,
+        "feature-details": "<p>Our teams handle all shipping &amp; customs related support and tracking issues that may arise.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Free Product Mock Ups",
+        "slug": "support-free-product-mock-ups",
+        "table-category": "Service & Support",
+        "display-order": 103,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Brand Management Support",
+        "slug": "support-brand-management-support",
+        "table-category": "Service & Support",
+        "display-order": 104,
+        "feature-details": "<p>Our teams will work directly with you to come up with ideation and designing of products. Please note, depending on scope, additional costs may be required.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Brand Audit & Verification",
+        "slug": "support-brand-audit-verification",
+        "table-category": "Service & Support",
+        "display-order": 105,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Global Product Sourcing Support",
+        "slug": "support-global-product-sourcing-support",
+        "table-category": "Service & Support",
+        "display-order": 106,
+        "feature-details": "<p>If you have product needs to that require us to source the same or similar products across the globe. Example: I want the same product in Europe and India.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Team training and onboarding",
+        "slug": "support-team-training-and-onboarding",
+        "table-category": "Service & Support",
+        "display-order": 107,
+        "feature-details": "<p>We provide both onboarding training and ongoing training to team members at your organization.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Dedicated brand manager",
+        "slug": "support-dedicated-brand-manager",
+        "table-category": "Service & Support",
+        "display-order": 108,
+        "feature-details": "<p>Your dedicated brand manager will be assigned to you and work with you on every project you have.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Dedicated Slack channel",
+        "slug": "support-dedicated-slack-channel",
+        "table-category": "Service & Support",
+        "display-order": 109,
+        "feature-details": "<p>A shared slack channel with our internal teams and your organization.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Annual Product/Brand Strategy planning",
+        "slug": "support-annual-product-brand-strategy-planning",
+        "table-category": "Service & Support",
+        "display-order": 110,
+        "feature-details": "<p>As an extension to your team we will prepare and present our expert suggestions based on trends, data, and your upcoming needs.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Integration/API Support*",
+        "slug": "support-integration-api-support",
+        "table-category": "Service & Support",
+        "display-order": 111,
+        "feature-details": "<p>Our in-house development team can help support with any integration setup or API questions you may have.  *Please note additional costs may be incurred based on scope of the support required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Custom product design, development and manufacturing*",
+        "slug": "support-custom-product-design-development-and-manufacturing",
+        "table-category": "Service & Support",
+        "display-order": 112,
+        "feature-details": "<p>See our full offering of Creative Services here\n*Please note additional costs may be incurred based on scope of the support required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Creative design support*",
+        "slug": "support-creative-design-support",
+        "table-category": "Service & Support",
+        "display-order": 113,
+        "feature-details": "<p>See our full offering of Creative Services here\n*Please note additional costs may be incurred based on scope of the support required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Product Photography*",
+        "slug": "support-product-photography",
+        "table-category": "Service & Support",
+        "display-order": 114,
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Ship Globally",
+        "slug": "infrastructure-ship-globally",
+        "table-category": "Infrastructure",
+        "display-order": 201,
+        "feature-details": "<p>We ship globally to over to 180 countries currently.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "In-House decoration access",
+        "slug": "infrastructure-in-house-decoration-access",
+        "table-category": "Infrastructure",
+        "display-order": 202,
+        "feature-details": "<p>Access to our decoration team. Access and control from project start to finish.\n*Availability varies by region</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Fulfillment & handling costs",
+        "slug": "infrastructure-fulfillment-handling-costs",
+        "table-category": "Infrastructure",
+        "display-order": 203,
+        "feature-details": "<p>All handling and fulfillment costs are billed per shipment.</p>",
+        "plan-1-value": "Per shipment",
+        "plan-2-value": "Per shipment",
+        "plan-3-value": "Per shipment",
+        "plan-4-value": "Per shipment"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Shipping costs",
+        "slug": "infrastructure-shipping-costs",
+        "table-category": "Infrastructure",
+        "display-order": 204,
+        "feature-details": "<p>All shipping costs are billed per shipment.</p>",
+        "plan-1-value": "Per shipment",
+        "plan-2-value": "Per shipment",
+        "plan-3-value": "Per shipment",
+        "plan-4-value": "Per shipment"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Pallet & Bin Storage (per month)",
+        "slug": "infrastructure-pallet-bin-storage-per-month",
+        "table-category": "Infrastructure",
+        "display-order": 205,
+        "plan-1-value": "—",
+        "plan-2-value": "Warehouse Pricing",
+        "plan-2-link": "https://www.imprintengine.com/warehouse-pricing/",
+        "plan-3-value": "Warehouse Pricing",
+        "plan-3-link": "https://www.imprintengine.com/warehouse-pricing/",
+        "plan-4-value": "Warehouse Pricing",
+        "plan-4-link": "https://www.imprintengine.com/warehouse-pricing/"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Number of skus",
+        "slug": "infrastructure-number-of-skus",
+        "table-category": "Infrastructure",
+        "display-order": 206,
+        "feature-details": "<p>The total amount of product skus you can have within storage within our warehouse. Please note, this only applies to the parent sku and not for any child skus. Example: You have a t-shirt that has 6 different sizes associated to it. This would only count as 1 sku and not 6.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Online Inventory Management",
+        "slug": "infrastructure-online-inventory-management",
+        "table-category": "Infrastructure",
+        "display-order": 207,
+        "feature-details": "<p>View your real time inventory directly through our IEX Portal</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Intake Existing Inventory*",
+        "slug": "infrastructure-intake-existing-inventory",
+        "table-category": "Infrastructure",
+        "display-order": 208,
+        "feature-details": "<p>We can onboard your existing inventory into our warehouse and iventory management systems. Volume and state of inventory determine hourly costs to intake.  *Warehouse labor costs will apply</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Multi country inventory management",
+        "slug": "infrastructure-multi-country-inventory-management",
+        "table-category": "Infrastructure",
+        "display-order": 209,
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Branded product catalogs",
+        "slug": "technology-branded-product-catalogs",
+        "table-category": "Technology",
+        "display-order": 301,
+        "feature-details": "<p>See your logo on the products we present you – no guesswork needed.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Included IEX portal seats",
+        "slug": "technology-included-iex-portal-seats",
+        "table-category": "Technology",
+        "display-order": 302,
+        "feature-details": "<p>Number of users with access to the IEX portal by plan. You may add users beyond this number for an additional monthly fee.</p>",
+        "plan-1-value": "1",
+        "plan-2-value": "5",
+        "plan-3-value": "25",
+        "plan-4-value": "Unlimited"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Additional portal seats ($/month)",
+        "slug": "technology-additional-portal-seats-month",
+        "table-category": "Technology",
+        "display-order": 303,
+        "feature-details": "<p>Price per user beyond included seats by plan. This is a monthly fee based on user count per portal.</p>",
+        "plan-1-value": "–",
+        "plan-2-value": "$25",
+        "plan-3-value": "$20",
+        "plan-4-value": "Unlimited"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "AI Email Assistance",
+        "slug": "technology-ai-email-assistance",
+        "table-category": "Technology",
+        "display-order": 304,
+        "feature-details": "<p>Leverage AI to write or improve your emails to recipients</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Bulk order creation",
+        "slug": "technology-bulk-order-creation",
+        "table-category": "Technology",
+        "display-order": 305,
+        "feature-details": "<p>Create as many redemption links or orders as you’d like with the bulk order feature utlizing CSV upload.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Direct Shipping",
+        "slug": "technology-direct-shipping",
+        "table-category": "Technology",
+        "display-order": 306,
+        "feature-details": "<p>Send your product to a location without recipient participation. Ideal for events, restocks, or any other needs to move your items to a known location.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Standard Reporting & Analytics",
+        "slug": "technology-standard-reporting-analytics",
+        "table-category": "Technology",
+        "display-order": 307,
+        "feature-details": "<p>Standard reporting includes order data such as shipping address, products, business reason, etc. Any simple order data that is included in the portal or stores is available.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Integrate with Gmail & Outlook",
+        "slug": "technology-integrate-with-gmail-outlook",
+        "table-category": "Technology",
+        "display-order": 308,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Multiple Organizations",
+        "slug": "technology-multiple-organizations",
+        "table-category": "Technology",
+        "display-order": 309,
+        "feature-details": "<p>This allows for multiple instances of the portal to be used under one billing agreement. \n*Please note, multiple organizations are only allowed under an enterprise plan.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "1 included",
+        "plan-3-value": "1 included",
+        "plan-4-value": "3 included"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Branded IEX Portal",
+        "slug": "technology-branded-iex-portal",
+        "table-category": "Technology",
+        "display-order": 310,
+        "feature-details": "<p>Maintain your branding throughout the IEX Portal – From internal views to recipient experience through branded redemption links</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "User Management",
+        "slug": "technology-user-management",
+        "table-category": "Technology",
+        "display-order": 311,
+        "feature-details": "<p>Create and remove users yourself as needs change.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Automate with Zapier",
+        "slug": "technology-automate-with-zapier",
+        "table-category": "Technology",
+        "display-order": 312,
+        "feature-details": "<p>Use Zapier to connect to the IEX portal and create your own automations &amp; workflows.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "API Access",
+        "slug": "technology-api-access",
+        "table-category": "Technology",
+        "display-order": 313,
+        "feature-details": "<p>Access to build your own workflows using our API endpoints. \n*Please note, additional support for this feature is only available with enterprise plans.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "2FA Protected Sends",
+        "slug": "technology-2fa-protected-sends",
+        "table-category": "Technology",
+        "display-order": 314,
+        "feature-details": "<p>When creating sends within the IEX portal, add 2FA for enhanced security and access control.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Custom reporting* (Custom order and product reports generated from our ERP)",
+        "slug": "technology-custom-reporting-custom-order-and-product-reports-generated-from-our-erp",
+        "table-category": "Technology",
+        "display-order": 315,
+        "feature-details": "<p>Custom order and product reports generated from our ERP. We will review your teams needs and collaborate on additional reporting. Depending on complexity, additional development hours maybe required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Campaign Management Support",
+        "slug": "technology-campaign-management-support",
+        "table-category": "Technology",
+        "display-order": 316,
+        "feature-details": "<p>Our teams will help support any campaign management within the IEX portal including training.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Send digital gift cards",
+        "slug": "technology-send-digital-gift-cards",
+        "table-category": "Technology",
+        "display-order": 317,
+        "feature-details": "<p>Send varying digital gift cards to anyone using the IEX portal. Please note there is a $5 charge per gift card sent.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "$5 per send",
+        "plan-4-value": "$5 per send"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Department product visibility",
+        "slug": "technology-department-product-visibility",
+        "table-category": "Technology",
+        "display-order": 318,
+        "feature-details": "<p>After adding users into departments, you can limit what products in inventory those departments see within the IEX portal.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Send on behalf",
+        "slug": "technology-send-on-behalf",
+        "table-category": "Technology",
+        "display-order": 319,
+        "feature-details": "<p>Use this feature to create sends on behalf of someone else. \nExample: A department manager wants to allow their assistant to send out gifts to employees through the IEX portal so it appears it’s coming from the department manager.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "HRIS integrations & automations",
+        "slug": "technology-hris-integrations-automations",
+        "table-category": "Technology",
+        "display-order": 320,
+        "feature-details": "<p>Integrate with a wide range of HRIS apps to automate sends on an employees hire date, employment anniversary or their birthday.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Integrate with HubSpot & Salesforce",
+        "slug": "technology-integrate-with-hubspot-salesforce",
+        "table-category": "Technology",
+        "display-order": 321,
+        "feature-details": "<p>Integrate with HubSpot and Salesforce to keep track of sends within your CRM</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Multi currency support",
+        "slug": "technology-multi-currency-support",
+        "table-category": "Technology",
+        "display-order": 322,
+        "feature-details": "<p>Assign location specific pricing on products for global budget management.\nExample: Some of products that are located within our North American based warehouse would be labeled at USD, while your other products that are located in Ireland would be labeled in Euros.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Department budget controls",
+        "slug": "technology-department-budget-controls",
+        "table-category": "Technology",
+        "display-order": 323,
+        "feature-details": "<p>Assign and manage budgets for departments (groups of individual employees) to control what amount of products they are allowed to use when creating sends per month.\nExample: you want to limit your sales team to only be able to send out $5,000 worth of client gifts per month.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Customized reply email",
+        "slug": "technology-customized-reply-email",
+        "table-category": "Technology",
+        "display-order": 324,
+        "feature-details": "<p>Customize the email address that users can reply to when sending emails directly from the IEX portal.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "SSO Login*",
+        "slug": "technology-sso-login",
+        "table-category": "Technology",
+        "display-order": 325,
+        "feature-details": "<p>Use your existing SSO service to manage access to the IEX portal. Additional fees may apply depending on the service used.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Admin Seats Included",
+        "slug": "stores-admin-seats-included",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 401,
+        "plan-1-value": "2",
+        "plan-2-value": "10"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Included hosting and infrastructure support (Shopify or AWS)",
+        "slug": "stores-included-hosting-and-infrastructure-support-shopify-or-aws",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 402,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Custom Domain Name/Configuration",
+        "slug": "stores-custom-domain-name-configuration",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 403,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "End User Support",
+        "slug": "stores-end-user-support",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 404,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Accept Credit Cards",
+        "slug": "stores-accept-credit-cards",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 405,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Merchant of record & sales tax management",
+        "slug": "stores-merchant-of-record-sales-tax-management",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 406,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "SSO & Identity Management*",
+        "slug": "stores-sso-identity-management",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 407,
+        "plan-1-value": "Add on Available",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Print On Demand (Print, Apparel, & Merchandise)",
+        "slug": "stores-print-on-demand-print-apparel-merchandise",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 408,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Sell Gift Cards",
+        "slug": "stores-sell-gift-cards",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 409,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Employee Credit System*",
+        "slug": "stores-employee-credit-system",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 410,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Global Multi-Location Product Management*",
+        "slug": "stores-global-multi-location-product-management",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 411,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Advanced Checkout Features*",
+        "slug": "stores-advanced-checkout-features",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 412,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Role-based product visibility*",
+        "slug": "stores-role-based-product-visibility",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 413,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Punch Out Access*",
+        "slug": "stores-punch-out-access",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 414,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Custom UX design*",
+        "slug": "stores-custom-ux-design",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 415,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Workflows & Integrations*",
+        "slug": "stores-workflows-integrations",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 416,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    },
+    {
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "name": "Custom reporting* (Custom order and product reports generated from our ERP)",
+        "slug": "stores-custom-reporting-custom-order-and-product-reports-generated-from-our-erp",
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 417,
+        "plan-1-value": "—",
+        "plan-2-value": "✓"
+      }
+    }
+  ]
+}
