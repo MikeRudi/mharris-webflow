@@ -243,13 +243,13 @@ function featureDetails() {
     const restoreDialog = rememberAttributes($dialog, ["id", "aria-labelledby", "aria-describedby"]);
     const restoreTitle = rememberAttributes($title, ["id"]);
     const restoreCopy = rememberAttributes($copy, ["id"]);
-    const restoreTriggers = rememberAttributes($triggers, ["class", "aria-haspopup", "aria-controls"]);
+    const restoreTriggers = rememberAttributes($triggers, ["class", "aria-haspopup", "aria-controls", "line-hover-item"]);
     const originalTitle = $title.text(), originalCopy = $copy.html();
     if (!dialog.id) dialog.id = uniqueElementId("feature-details-dialog");
     if (!$title.attr("id")) $title.attr("id", uniqueElementId("feature-details-title"));
     if (!$copy.attr("id")) $copy.attr("id", uniqueElementId("feature-details-copy"));
     $dialog.attr({ "aria-labelledby": $title.attr("id"), "aria-describedby": $copy.attr("id") });
-    $triggers.addClass("final-feature-trigger").attr({ "aria-haspopup": "dialog", "aria-controls": dialog.id });
+    $triggers.addClass("final-feature-trigger").attr({ "aria-haspopup": "dialog", "aria-controls": dialog.id, "line-hover-item": "" });
     let scrollLock = null, trigger = null, backdropDown = false;
 
     function restoreScroll() {
@@ -3856,7 +3856,11 @@ function lineHover() {
   };
   const cleanups = [];
   $("[line-hover-item]").each(function () {
-    const $item = $(this), $line = $item.find("[line-hover]").first();
+    const $item = $(this);
+    let $line = $item.find("[line-hover]").first();
+    // CMS feature names keep their text binding; add only the decorative line.
+    const generated = !$line.length && this.hasAttribute("final-feature-name");
+    if (generated) $line = $("<span>", { class: "link-underline", "line-hover": "", "aria-hidden": "true" }).appendTo($item);
     if (!$line.length) return;
     const restore = rememberAttributes($line, ["style"]);
     let hovered = false, closed = !$item.hasClass("is-active");
@@ -3874,7 +3878,7 @@ function lineHover() {
       .on("mouseleave.lineHover", () => { hovered = false; animate(this.contains(document.activeElement)); })
       .on("focusin.lineHover", () => animate(true))
       .on("focusout.lineHover", (event) => { if (!this.contains(event.relatedTarget)) animate(hovered); });
-    cleanups.push(() => { $item.off(".lineHover"); gsap.killTweensOf($line); restore(); });
+    cleanups.push(() => { $item.off(".lineHover"); gsap.killTweensOf($line); if (generated) $line.remove(); else restore(); });
   });
   return () => cleanups.forEach((cleanup) => cleanup());
 }
