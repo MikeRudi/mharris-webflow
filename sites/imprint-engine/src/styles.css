@@ -9,6 +9,10 @@
   display: none !important;
 }
 
+/* Native dialog visibility; its card and purple overlay are styled in Webflow. */
+[final-feature-modal]:not([open]) { display: none !important; }
+[final-feature-modal]::backdrop { background: transparent; }
+
 [faq-category] { border-bottom: 1px solid transparent; }
 [faq-category].is-active { border-bottom-color: currentColor; }
 

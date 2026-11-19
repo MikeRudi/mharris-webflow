@@ -47,7 +47,9 @@
   ],
   "footnote": "* Additional fees may apply based on scope",
   "issues": [
-    "Source Gmail & Outlook info link incorrectly opens Dedicated brand manager; omitted that unrelated description."
+    "The Gmail/Outlook info link on the old site opens Dedicated brand manager. Its popup uses verified table availability instead.",
+    "Free Product Mock Ups has an empty source popup; its popup uses verified table availability.",
+    "The 17 Stores items have no source links and must remain plain text without popups."
   ],
   "items": [
     {
@@ -91,7 +93,8 @@
         "plan-1-value": "✓",
         "plan-2-value": "✓",
         "plan-3-value": "✓",
-        "plan-4-value": "✓"
+        "plan-4-value": "✓",
+        "feature-details": "<p><strong>Free:</strong> Included</p><p><strong>Starter:</strong> Included</p><p><strong>Growth:</strong> Included</p><p><strong>Partnership:</strong> Included</p>"
       }
     },
     {
@@ -120,7 +123,8 @@
         "plan-1-value": "—",
         "plan-2-value": "✓",
         "plan-3-value": "✓",
-        "plan-4-value": "✓"
+        "plan-4-value": "✓",
+        "feature-details": "<p>A designer will audit your brand assets and ensure they are production ready</p>"
       }
     },
     {
@@ -254,7 +258,8 @@
         "plan-1-value": "—",
         "plan-2-value": "—",
         "plan-3-value": "—",
-        "plan-4-value": "✓"
+        "plan-4-value": "✓",
+        "feature-details": "<p>See our full offering of Creative Services <a href=\"https://imprintengine.com/creative-services/\">here</a></p>\n<p>*Please note additional costs may be incurred based on scope of the support required.  </p>"
       }
     },
     {
@@ -331,7 +336,8 @@
         "plan-3-value": "Warehouse Pricing",
         "plan-3-link": "https://www.imprintengine.com/warehouse-pricing/",
         "plan-4-value": "Warehouse Pricing",
-        "plan-4-link": "https://www.imprintengine.com/warehouse-pricing/"
+        "plan-4-link": "https://www.imprintengine.com/warehouse-pricing/",
+        "feature-details": "<p>Full details of this pricing is provided on our warehouse pricing page</p>"
       }
     },
     {
@@ -390,7 +396,8 @@
         "plan-1-value": "—",
         "plan-2-value": "—",
         "plan-3-value": "—",
-        "plan-4-value": "✓"
+        "plan-4-value": "✓",
+        "feature-details": "<p>Store and Ship from more than one of our warehouses (US, Ireland, UK, India)</p>"
       }
     },
     {
@@ -509,7 +516,8 @@
         "plan-1-value": "—",
         "plan-2-value": "✓",
         "plan-3-value": "✓",
-        "plan-4-value": "✓"
+        "plan-4-value": "✓",
+        "feature-details": "<p><strong>Free:</strong> Not included</p><p><strong>Starter:</strong> Included</p><p><strong>Growth:</strong> Included</p><p><strong>Partnership:</strong> Included</p>"
       }
     },
     {
@@ -970,6 +978,287 @@
         "plan-1-value": "—",
         "plan-2-value": "✓"
       }
+    }
+  ],
+  "detailSources": [
+    {
+      "slug": "support-global-customer-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-global-shipping-tracking-customs-returns-end-user-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-free-product-mock-ups",
+      "source": "Table availability summary",
+      "reason": "Source popup body is empty"
+    },
+    {
+      "slug": "support-brand-management-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-brand-audit-verification",
+      "source": "Recovered old-site popup"
+    },
+    {
+      "slug": "support-global-product-sourcing-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-team-training-and-onboarding",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-dedicated-brand-manager",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-dedicated-slack-channel",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-annual-product-brand-strategy-planning",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-integration-api-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-custom-product-design-development-and-manufacturing",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-creative-design-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "support-product-photography",
+      "source": "Recovered old-site popup"
+    },
+    {
+      "slug": "infrastructure-ship-globally",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "infrastructure-in-house-decoration-access",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "infrastructure-fulfillment-handling-costs",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "infrastructure-shipping-costs",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "infrastructure-pallet-bin-storage-per-month",
+      "source": "Recovered old-site popup"
+    },
+    {
+      "slug": "infrastructure-number-of-skus",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "infrastructure-online-inventory-management",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "infrastructure-intake-existing-inventory",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "infrastructure-multi-country-inventory-management",
+      "source": "Recovered old-site popup"
+    },
+    {
+      "slug": "technology-branded-product-catalogs",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-included-iex-portal-seats",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-additional-portal-seats-month",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-ai-email-assistance",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-bulk-order-creation",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-direct-shipping",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-standard-reporting-analytics",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-integrate-with-gmail-outlook",
+      "source": "Table availability summary",
+      "reason": "Old link opens unrelated brand-manager popup"
+    },
+    {
+      "slug": "technology-multiple-organizations",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-branded-iex-portal",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-user-management",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-automate-with-zapier",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-api-access",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-2fa-protected-sends",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-custom-reporting-custom-order-and-product-reports-generated-from-our-erp",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-campaign-management-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-send-digital-gift-cards",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-department-product-visibility",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-send-on-behalf",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-hris-integrations-automations",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-integrate-with-hubspot-salesforce",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-multi-currency-support",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-department-budget-controls",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-customized-reply-email",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "technology-sso-login",
+      "source": "Old-site popup"
+    },
+    {
+      "slug": "stores-admin-seats-included",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-included-hosting-and-infrastructure-support-shopify-or-aws",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-custom-domain-name-configuration",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-end-user-support",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-accept-credit-cards",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-merchant-of-record-sales-tax-management",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-sso-identity-management",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-print-on-demand-print-apparel-merchandise",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-sell-gift-cards",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-employee-credit-system",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-global-multi-location-product-management",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-advanced-checkout-features",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-role-based-product-visibility",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-punch-out-access",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-custom-ux-design",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-workflows-integrations",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
+    },
+    {
+      "slug": "stores-custom-reporting-custom-order-and-product-reports-generated-from-our-erp",
+      "source": "No popup",
+      "reason": "No source link; keep item as plain text"
     }
   ]
 }

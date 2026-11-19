@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
@@ -223,6 +223,68 @@ function featureComparison() {
       links.forEach(link => { link.replaceWith(...link.childNodes); });
       restoreFilters(); restoreMarker(); restoreRows(); restoreItems(); restoreCells(); restoreTicks();
       addedHooks.forEach(([element, name]) => element.removeAttribute(name));
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
+
+function featureDetails() {
+  const cleanups = [];
+  $("[final-feature-modal]").each(function () {
+    const dialog = this, $dialog = $(dialog);
+    const $component = $dialog.closest(".pricing-table-wrap");
+    const $title = $dialog.find("[final-feature-modal-title]");
+    const $copy = $dialog.find("[final-feature-modal-copy]");
+    const $close = $dialog.find("[final-feature-modal-close]");
+    if (!dialog.showModal || !$component.length || !$title.length || !$copy.length) return;
+    const $triggers = $component.find("[final-feature-name]").filter(function () {
+      return $(this).closest("[final-feature-category]").find("[final-feature-details]").text().trim().length > 0;
+    });
+    const restoreDialog = rememberAttributes($dialog, ["id", "aria-labelledby", "aria-describedby"]);
+    const restoreTitle = rememberAttributes($title, ["id"]);
+    const restoreCopy = rememberAttributes($copy, ["id"]);
+    const restoreTriggers = rememberAttributes($triggers, ["class", "aria-haspopup", "aria-controls"]);
+    const originalTitle = $title.text(), originalCopy = $copy.html();
+    if (!dialog.id) dialog.id = uniqueElementId("feature-details-dialog");
+    if (!$title.attr("id")) $title.attr("id", uniqueElementId("feature-details-title"));
+    if (!$copy.attr("id")) $copy.attr("id", uniqueElementId("feature-details-copy"));
+    $dialog.attr({ "aria-labelledby": $title.attr("id"), "aria-describedby": $copy.attr("id") });
+    $triggers.addClass("final-feature-trigger").attr({ "aria-haspopup": "dialog", "aria-controls": dialog.id });
+    let scrollLock = null, trigger = null, backdropDown = false;
+
+    function restoreScroll() {
+      if (!scrollLock) return;
+      document.documentElement.style.overflow = scrollLock.html;
+      document.documentElement.style.scrollbarGutter = scrollLock.gutter;
+      if (!scrollLock.stopped) window.lenis?.start();
+      scrollLock = null;
+    }
+    function open($trigger) {
+      const details = $trigger.closest("[final-feature-category]").find("[final-feature-details]")[0];
+      if (!details || dialog.open) return;
+      trigger = $trigger[0];
+      $title.text($trigger.text().trim());
+      $copy.empty().append($(details).contents().clone());
+      const html = document.documentElement;
+      scrollLock = { html: html.style.overflow,
+        gutter: html.style.scrollbarGutter, stopped: Boolean(window.lenis?.isStopped) };
+      window.lenis?.stop();
+      html.style.scrollbarGutter = "stable";
+      html.style.overflow = "hidden";
+      dialog.showModal();
+      $close[0]?.focus({ preventScroll: true });
+    }
+    function close() { if (dialog.open) dialog.close(); }
+    const unbindTriggers = bindControlActivation($triggers, "featureDetails", open);
+    const unbindClose = bindControlActivation($close, "featureDetails", close);
+    $dialog.on("pointerdown.featureDetails", event => { backdropDown = event.target === dialog; })
+      .on("click.featureDetails", event => { if (backdropDown && event.target === dialog) close(); })
+      .on("close.featureDetails", () => { restoreScroll(); trigger?.focus({ preventScroll: true }); });
+    cleanups.push(() => {
+      close(); restoreScroll();
+      unbindTriggers(); unbindClose(); $dialog.off(".featureDetails");
+      restoreDialog(); restoreTitle(); restoreCopy(); restoreTriggers();
+      $title.text(originalTitle); $copy.html(originalCopy);
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());

@@ -30,10 +30,16 @@ Plan 2 = Advanced. Existing component identity and prop definitions remain.
 
 Source: https://imprintengine.com/platform/#pricing-form
 Audit: `reference-data/iex-pricing-tables-2026-11-19.json`.
-Source modal copy is retained in Feature Details, without adding unrequested
-popups. Feature Description is an optional short description under the name.
-The source Gmail/Outlook modal pointed to unrelated brand-manager copy; that
-incorrect modal content was excluded and recorded in the audit.
+Feature Description is an optional short description under the name. Feature
+Details is the rich text shown in the feature popup. A populated Feature Details
+field makes its feature name clickable; clearing it leaves the name plain.
+
+The 48 linked source features have popups. The 17 Stores features had no source
+links, so their Feature Details fields are empty and their names stay plain.
+46 descriptions are copied from the source popups. The source Free Product
+Mock Ups popup was empty, and Gmail/Outlook pointed to unrelated brand-manager
+copy. Those two use factual plan-availability summaries pending descriptive
+copy; the exceptions are recorded in the audit.
 
 ## Native bindings and behavior
 
@@ -41,6 +47,7 @@ incorrect modal content was excluded and recorded in the audit.
 - `final-feature-category` on Collection Item → Table Category.
 - `final-feature-name` Text Block → Name.
 - `final-feature-description` Text Block → Feature Description.
+- `final-feature-details` hidden Rich Text → Feature Details.
 - `final-feature-value="1"` through `"4"` Text Blocks → Plan 1–4 Value.
 - Plan 2–4 Text Blocks' `final-feature-link` → matching Plan Link fields.
   These provide the three warehouse-pricing links present in the source.
@@ -51,7 +58,21 @@ incorrect modal content was excluded and recorded in the audit.
   native Webflow styles. Custom CSS only enforces the behavioral hidden state.
 - JavaScript filters CMS items, switches headers, moves the underline, highlights
   the hovered plan, creates optional anchors from CMS URLs and synchronizes
-  the sticky header with horizontal table scrolling. Cleanup restores states.
+  the sticky header with horizontal table scrolling. The table body is clipped
+  at the sticky header's lower edge so rows disappear behind it.
+- `final-feature-modal` is a native dialog outside the table body. The popup's
+  card, overlay, typography and close control are native Webflow elements and
+  styles. JavaScript fills the title and rich text from the clicked CMS row,
+  locks background scrolling, and supports X, Escape and backdrop closing.
+  Native dialog behavior keeps background controls inert. Focus returns to the
+  feature name on close. Cleanup restores states.
+
+## Pricing FAQ spacing
+
+The pricing page's Accordion 04 instance uses `Pricing Black Background`
+(`73e3ffd4-a825-f4c1-b33c-f3af75cf1783`), copied from Black Background. Its tablet
+and phone margin-top is `0rem`, removing the inherited `-15dvh` overlap that covered the
+last pricing row. Other pages and the original variant are unchanged.
 
 ## Validation
 
@@ -61,5 +82,9 @@ Published HTML contains all 65 rows in source order. Desktop (1440), tablet
 counts, both header layouts, cell alignment, warehouse links, desktop orange
 hover, horizontal header synchronization and no horizontal page overflow.
 No page JavaScript errors occurred in these checks.
+
+Popup checks cover all 48 populated detail fields against the saved CMS audit,
+all 17 plain Stores names, X/Escape/backdrop closing, returned keyboard focus,
+background scroll locking and card bounds at the same three viewport widths.
 
 Implementation is awaiting Michael's review; no tracker approval flags changed.

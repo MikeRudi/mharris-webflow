@@ -21,6 +21,8 @@ Use pinned jsDelivr releases when switching to stable production code.
   highlight styles. Its native Collection List reads 65 rows from IEX Pricing
   Tables. `featureComparison()` filters categories, switches the Stores header,
   moves the underline, highlights columns and syncs horizontal scrolling.
+  `featureDetails()` opens the native popup from CMS Feature Details. Empty
+  details leave the feature name unlinked, matching the old Stores table.
   See `iex-pricing-table.md` for CMS fields and the source-data audit.
 - Careers benefits no longer needs a component embed. `careerBenefits()` uses
   `.career-benefits`, `.career-benefits-track` and `.career-benefit-card`, creates
