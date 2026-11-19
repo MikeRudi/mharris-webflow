@@ -124,17 +124,6 @@ function featureComparison() {
       $(this).find(".final-feature-row").toggleClass("final-feature-stores-row", stores);
       if (stores) $(this).find('[final-feature-column="2"], [final-feature-column="3"]').prop("hidden", true);
     });
-    const links = [];
-    $table.find("[final-feature-link]").each(function () {
-      const href = this.getAttribute("final-feature-link");
-      if (!href || !/^https?:\/\//i.test(href)) return;
-      const link = document.createElement("a");
-      link.className = "final-feature-link";
-      link.href = href;
-      while (this.firstChild) link.appendChild(this.firstChild);
-      this.appendChild(link);
-      links.push(link);
-    });
     const originalClip = body.style.getPropertyValue("clip-path");
     const originalClipPriority = body.style.getPropertyPriority("clip-path");
     let activeColumn = -1, resizeFrame = null, clipFrame = null, lastClip = -1;
@@ -220,7 +209,6 @@ function featureComparison() {
       else body.style.removeProperty("clip-path");
       if (window.Flip) Flip.killFlipsOf(marker);
       markerParent.insertBefore(marker, markerNext && markerNext.parentNode === markerParent ? markerNext : null);
-      links.forEach(link => { link.replaceWith(...link.childNodes); });
       restoreFilters(); restoreMarker(); restoreRows(); restoreItems(); restoreCells(); restoreTicks();
       addedHooks.forEach(([element, name]) => element.removeAttribute(name));
     });
@@ -280,8 +268,6 @@ function featureDetails() {
     }
     function close() { if (dialog.open) dialog.close(); }
     $triggers.on("click.featureDetails", function (event) {
-      // Preserve the existing warehouse-pricing links inside plan cells.
-      if ($(event.target).closest("a,button,input,select,textarea").length) return;
       event.preventDefault(); open($(this));
     }).on("keydown.featureDetails", function (event) {
       if (event.target !== this || (event.key !== "Enter" && event.key !== " ")) return;

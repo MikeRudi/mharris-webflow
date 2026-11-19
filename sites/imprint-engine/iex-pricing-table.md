@@ -17,7 +17,7 @@ and item limiting off. It contains the 65 source rows:
 | technology | Technology | 25 | 301–325 |
 | stores | IEX Stores (Add-On) | 17 | 401–417 |
 
-Edit names, descriptions, plan values, links and ordering in the CMS, then
+Edit names, descriptions, plan values and ordering in the CMS, then
 publish. Keep Table Category equal to one of the four values above. Plan values
 are plain text, including ✓, — and descriptive values. Stores only uses Plans
 1 and 2. Plan 3 and 4 cells are hidden for Stores rows.
@@ -49,15 +49,14 @@ copy; the exceptions are recorded in the audit.
 - `final-feature-description` Text Block → Feature Description.
 - `final-feature-details` hidden Rich Text → Feature Details.
 - `final-feature-value="1"` through `"4"` Text Blocks → Plan 1–4 Value.
-- Plan 2–4 Text Blocks' `final-feature-link` → matching Plan Link fields.
-  These provide the three warehouse-pricing links present in the source.
+- Plan Link fields are no longer used. Plan-cell clicks open the row popup.
 - `final-feature-head="stores"` identifies the alternate two-column header;
   the original empty-valued hook identifies the main four-column header.
 - `final-feature-stores-row` defines the two-column layout natively.
 - Header, row, typography, spacing, backgrounds and orange hover colours are
   native Webflow styles. Custom CSS only enforces the behavioral hidden state.
 - JavaScript filters CMS items, switches headers, moves the underline, highlights
-  the hovered plan, creates optional anchors from CMS URLs and synchronizes
+  the hovered plan and synchronizes
   the sticky header with horizontal table scrolling. The table body is clipped
   at the sticky header's lower edge so rows disappear behind it.
 - `final-feature-modal` is a native dialog outside the table body. The popup's
@@ -65,7 +64,7 @@ copy; the exceptions are recorded in the audit.
   styles. JavaScript fills the title and rich text from the clicked CMS row,
   locks background scrolling, and supports X, Escape and backdrop closing.
   Native dialog behavior keeps background controls inert. Focus returns to the
-  row on close. Existing warehouse-pricing links keep their destinations.
+  row on close without retaining the hover line.
   Pricing row lines reveal in 0.18s and complete before fading/wiping out in
   0.18s, so fast pointer movement does not interrupt earlier rows. Cleanup
   restores states.
@@ -82,7 +81,7 @@ last pricing row. Other pages and the original variant are unchanged.
 The staged CMS import was checked field-for-field against the saved source.
 Published HTML contains all 65 rows in source order. Desktop (1440), tablet
 (768) and phone (390) checks cover every row name/value, all four category
-counts, both header layouts, cell alignment, warehouse links, desktop orange
+counts, both header layouts, cell alignment, desktop orange
 hover, horizontal header synchronization and no horizontal page overflow.
 No page JavaScript errors occurred in these checks.
 
