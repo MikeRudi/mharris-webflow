@@ -1,0 +1,1481 @@
+{
+  "collection": {
+    "id": "6afec116b0e4107807152c0b",
+    "displayName": "IEX Pricing Tables",
+    "singularName": "IEX Pricing Table",
+    "slug": "iex-pricing-table",
+    "createdOn": "2026-11-19T09:27:50.103Z",
+    "lastUpdated": "2026-11-19T12:00:49.883Z",
+    "fields": [
+      {
+        "id": "2f401aad02326e44930864b22ec1af41",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "PlainText",
+        "slug": "table-category",
+        "displayName": "Table Category"
+      },
+      {
+        "id": "ff82fdaefa5ff2b0cbb4c87ed27a04b8",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "Number",
+        "slug": "display-order",
+        "displayName": "Display Order",
+        "validations": {
+          "format": "integer",
+          "allowNegative": true,
+          "precision": 1
+        }
+      },
+      {
+        "id": "288454553974ea664df09548dd8a03a6",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "PlainText",
+        "slug": "feature-description",
+        "displayName": "Feature Description"
+      },
+      {
+        "id": "1e4104202f11cf882111a756d1137dee",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "RichText",
+        "slug": "feature-details",
+        "displayName": "Feature Details"
+      },
+      {
+        "id": "1798932361aa038e65c99d1bb05fc6c3",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "PlainText",
+        "slug": "plan-1-value",
+        "displayName": "Plan 1 Value"
+      },
+      {
+        "id": "65c58de0eba36d6c37bd6662253af92b",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "PlainText",
+        "slug": "plan-2-value",
+        "displayName": "Plan 2 Value"
+      },
+      {
+        "id": "dc2207e96186926ee37a4cf836a4d25f",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "PlainText",
+        "slug": "plan-3-value",
+        "displayName": "Plan 3 Value"
+      },
+      {
+        "id": "2910ec85176a3d419752503c805374b2",
+        "isEditable": true,
+        "isRequired": false,
+        "type": "PlainText",
+        "slug": "plan-4-value",
+        "displayName": "Plan 4 Value"
+      },
+      {
+        "id": "3e00fd9af1b4d3d9aa73aaf7c13ca724",
+        "isEditable": true,
+        "isRequired": true,
+        "type": "PlainText",
+        "slug": "name",
+        "displayName": "Name",
+        "validations": {
+          "maxLength": 256
+        }
+      },
+      {
+        "id": "8cf2e9380df0bdd47937ae7cab110930",
+        "isEditable": true,
+        "isRequired": true,
+        "type": "PlainText",
+        "slug": "slug",
+        "displayName": "Slug",
+        "validations": {
+          "maxLength": 256,
+          "pattern": {},
+          "messages": {
+            "pattern": "Must be alphanumerical and not contain any spaces or special characters",
+            "maxLength": "Must be less than 256 characters"
+          }
+        }
+      }
+    ],
+    "fieldGroups": []
+  },
+  "items": [
+    {
+      "id": "6afec2e0a366bf116367addf",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.739Z",
+      "createdOn": "2026-11-19T09:35:28.196Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 417,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Custom reporting* (Custom order and product reports generated from our ERP)",
+        "slug": "stores-custom-reporting-custom-order-and-product-reports-generated-from-our-erp"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367addd",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.740Z",
+      "createdOn": "2026-11-19T09:35:28.162Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 416,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Workflows & Integrations*",
+        "slug": "stores-workflows-integrations"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367addb",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.741Z",
+      "createdOn": "2026-11-19T09:35:28.123Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 415,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Custom UX design*",
+        "slug": "stores-custom-ux-design"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367add9",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.741Z",
+      "createdOn": "2026-11-19T09:35:28.102Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 414,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Punch Out Access*",
+        "slug": "stores-punch-out-access"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367add7",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.742Z",
+      "createdOn": "2026-11-19T09:35:28.058Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 413,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Role-based product visibility*",
+        "slug": "stores-role-based-product-visibility"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367add5",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.743Z",
+      "createdOn": "2026-11-19T09:35:28.043Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 412,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Advanced Checkout Features*",
+        "slug": "stores-advanced-checkout-features"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367add3",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.743Z",
+      "createdOn": "2026-11-19T09:35:28.010Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 411,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Global Multi-Location Product Management*",
+        "slug": "stores-global-multi-location-product-management"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367add1",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:18.744Z",
+      "createdOn": "2026-11-19T09:35:27.978Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 410,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Employee Credit System*",
+        "slug": "stores-employee-credit-system"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adcf",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.885Z",
+      "createdOn": "2026-11-19T09:35:27.960Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 409,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Sell Gift Cards",
+        "slug": "stores-sell-gift-cards"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adcd",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.887Z",
+      "createdOn": "2026-11-19T09:35:27.921Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 408,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Print On Demand (Print, Apparel, & Merchandise)",
+        "slug": "stores-print-on-demand-print-apparel-merchandise"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adcb",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.887Z",
+      "createdOn": "2026-11-19T09:35:27.904Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 407,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "Add on Available",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "SSO & Identity Management*",
+        "slug": "stores-sso-identity-management"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adc9",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.888Z",
+      "createdOn": "2026-11-19T09:35:27.782Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 406,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Merchant of record & sales tax management",
+        "slug": "stores-merchant-of-record-sales-tax-management"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adc7",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.889Z",
+      "createdOn": "2026-11-19T09:35:26.530Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 405,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Accept Credit Cards",
+        "slug": "stores-accept-credit-cards"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adc5",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.889Z",
+      "createdOn": "2026-11-19T09:35:26.224Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 404,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "End User Support",
+        "slug": "stores-end-user-support"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adc3",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.890Z",
+      "createdOn": "2026-11-19T09:35:26.179Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 403,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Custom Domain Name/Configuration",
+        "slug": "stores-custom-domain-name-configuration"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adc1",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:20.890Z",
+      "createdOn": "2026-11-19T09:35:26.139Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 402,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Included hosting and infrastructure support (Shopify or AWS)",
+        "slug": "stores-included-hosting-and-infrastructure-support-shopify-or-aws"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adbf",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:29:22.562Z",
+      "createdOn": "2026-11-19T09:35:26.110Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "IEX Stores (Add-On)",
+        "display-order": 401,
+        "feature-description": null,
+        "feature-details": null,
+        "plan-1-value": "2",
+        "plan-2-value": "10",
+        "plan-3-value": null,
+        "plan-4-value": null,
+        "name": "Admin Seats Included",
+        "slug": "stores-admin-seats-included"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adbd",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:28.886Z",
+      "createdOn": "2026-11-19T09:35:26.085Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 325,
+        "feature-description": null,
+        "feature-details": "<p>Use your existing SSO service to manage access to the IEX portal. Additional fees may apply depending on the service used.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "SSO Login*",
+        "slug": "technology-sso-login"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adbb",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:28.886Z",
+      "createdOn": "2026-11-19T09:35:26.064Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 324,
+        "feature-description": null,
+        "feature-details": "<p>Customize the email address that users can reply to when sending emails directly from the IEX portal.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Customized reply email",
+        "slug": "technology-customized-reply-email"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adb9",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:28.887Z",
+      "createdOn": "2026-11-19T09:35:26.046Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 323,
+        "feature-description": null,
+        "feature-details": "<p>Assign and manage budgets for departments (groups of individual employees) to control what amount of products they are allowed to use when creating sends per month.\nExample: you want to limit your sales team to only be able to send out $5,000 worth of client gifts per month.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Department budget controls",
+        "slug": "technology-department-budget-controls"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adb7",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:28.887Z",
+      "createdOn": "2026-11-19T09:35:26.024Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 322,
+        "feature-description": null,
+        "feature-details": "<p>Assign location specific pricing on products for global budget management.\nExample: Some of products that are located within our North American based warehouse would be labeled at USD, while your other products that are located in Ireland would be labeled in Euros.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Multi currency support",
+        "slug": "technology-multi-currency-support"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adb5",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:28.887Z",
+      "createdOn": "2026-11-19T09:35:25.993Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 321,
+        "feature-description": null,
+        "feature-details": "<p>Integrate with HubSpot and Salesforce to keep track of sends within your CRM</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Integrate with HubSpot & Salesforce",
+        "slug": "technology-integrate-with-hubspot-salesforce"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adb3",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:28.887Z",
+      "createdOn": "2026-11-19T09:35:25.975Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 320,
+        "feature-description": null,
+        "feature-details": "<p>Integrate with a wide range of HRIS apps to automate sends on an employees hire date, employment anniversary or their birthday.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "HRIS integrations & automations",
+        "slug": "technology-hris-integrations-automations"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adb1",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:28.888Z",
+      "createdOn": "2026-11-19T09:35:25.957Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 319,
+        "feature-description": null,
+        "feature-details": "<p>Use this feature to create sends on behalf of someone else. \nExample: A department manager wants to allow their assistant to send out gifts to employees through the IEX portal so it appears it’s coming from the department manager.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Send on behalf",
+        "slug": "technology-send-on-behalf"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adaf",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.349Z",
+      "createdOn": "2026-11-19T09:35:25.942Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 318,
+        "feature-description": null,
+        "feature-details": "<p>After adding users into departments, you can limit what products in inventory those departments see within the IEX portal.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Department product visibility",
+        "slug": "technology-department-product-visibility"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adad",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.350Z",
+      "createdOn": "2026-11-19T09:35:25.914Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 317,
+        "feature-description": null,
+        "feature-details": "<p>Send varying digital gift cards to anyone using the IEX portal. Please note there is a $5 charge per gift card sent.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "$5 per send",
+        "plan-4-value": "$5 per send",
+        "name": "Send digital gift cards",
+        "slug": "technology-send-digital-gift-cards"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367adab",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.350Z",
+      "createdOn": "2026-11-19T09:35:25.892Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 316,
+        "feature-description": null,
+        "feature-details": "<p>Our teams will help support any campaign management within the IEX portal including training.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Campaign Management Support",
+        "slug": "technology-campaign-management-support"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ada9",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.350Z",
+      "createdOn": "2026-11-19T09:35:25.875Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 315,
+        "feature-description": null,
+        "feature-details": "<p>Custom order and product reports generated from our ERP. We will review your teams needs and collaborate on additional reporting. Depending on complexity, additional development hours maybe required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Custom reporting* (Custom order and product reports generated from our ERP)",
+        "slug": "technology-custom-reporting-custom-order-and-product-reports-generated-from-our-erp"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ada7",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.351Z",
+      "createdOn": "2026-11-19T09:35:25.852Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 314,
+        "feature-description": null,
+        "feature-details": "<p>When creating sends within the IEX portal, add 2FA for enhanced security and access control.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "2FA Protected Sends",
+        "slug": "technology-2fa-protected-sends"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ada5",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.351Z",
+      "createdOn": "2026-11-19T09:35:25.824Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 313,
+        "feature-description": null,
+        "feature-details": "<p>Access to build your own workflows using our API endpoints. \n*Please note, additional support for this feature is only available with enterprise plans.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "API Access",
+        "slug": "technology-api-access"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ada3",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.351Z",
+      "createdOn": "2026-11-19T09:35:25.803Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 312,
+        "feature-description": null,
+        "feature-details": "<p>Use Zapier to connect to the IEX portal and create your own automations &amp; workflows.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Automate with Zapier",
+        "slug": "technology-automate-with-zapier"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ada1",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:37.352Z",
+      "createdOn": "2026-11-19T09:35:25.787Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 311,
+        "feature-description": null,
+        "feature-details": "<p>Create and remove users yourself as needs change.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "User Management",
+        "slug": "technology-user-management"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad9f",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:46.374Z",
+      "createdOn": "2026-11-19T09:35:25.772Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 310,
+        "feature-description": null,
+        "feature-details": "<p>Maintain your branding throughout the IEX Portal – From internal views to recipient experience through branded redemption links</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Branded IEX Portal",
+        "slug": "technology-branded-iex-portal"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad9d",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:46.375Z",
+      "createdOn": "2026-11-19T09:35:25.756Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 309,
+        "feature-description": null,
+        "feature-details": "<p>This allows for multiple instances of the portal to be used under one billing agreement. \n*Please note, multiple organizations are only allowed under an enterprise plan.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "1 included",
+        "plan-3-value": "1 included",
+        "plan-4-value": "3 included",
+        "name": "Multiple Organizations",
+        "slug": "technology-multiple-organizations"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad9b",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:28:48.466Z",
+      "createdOn": "2026-11-19T09:35:25.734Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 308,
+        "feature-description": null,
+        "feature-details": "<p><strong>Free:</strong> Not included</p><p><strong>Starter:</strong> Included</p><p><strong>Growth:</strong> Included</p><p><strong>Partnership:</strong> Included</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Integrate with Gmail & Outlook",
+        "slug": "technology-integrate-with-gmail-outlook"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad99",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:46.375Z",
+      "createdOn": "2026-11-19T09:35:25.718Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 307,
+        "feature-description": null,
+        "feature-details": "<p>Standard reporting includes order data such as shipping address, products, business reason, etc. Any simple order data that is included in the portal or stores is available.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Standard Reporting & Analytics",
+        "slug": "technology-standard-reporting-analytics"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad97",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:46.375Z",
+      "createdOn": "2026-11-19T09:35:25.703Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 306,
+        "feature-description": null,
+        "feature-details": "<p>Send your product to a location without recipient participation. Ideal for events, restocks, or any other needs to move your items to a known location.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Direct Shipping",
+        "slug": "technology-direct-shipping"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad95",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:46.376Z",
+      "createdOn": "2026-11-19T09:35:25.685Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 305,
+        "feature-description": null,
+        "feature-details": "<p>Create as many redemption links or orders as you’d like with the bulk order feature utlizing CSV upload.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Bulk order creation",
+        "slug": "technology-bulk-order-creation"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad93",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:46.376Z",
+      "createdOn": "2026-11-19T09:35:25.638Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 304,
+        "feature-description": null,
+        "feature-details": "<p>Leverage AI to write or improve your emails to recipients</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "AI Email Assistance",
+        "slug": "technology-ai-email-assistance"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad91",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:46.377Z",
+      "createdOn": "2026-11-19T09:35:25.613Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 303,
+        "feature-description": null,
+        "feature-details": "<p>Price per user beyond included seats by plan. This is a monthly fee based on user count per portal.</p>",
+        "plan-1-value": "–",
+        "plan-2-value": "$25",
+        "plan-3-value": "$20",
+        "plan-4-value": "Unlimited",
+        "name": "Additional portal seats ($/month)",
+        "slug": "technology-additional-portal-seats-month"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad8f",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:53.827Z",
+      "createdOn": "2026-11-19T09:35:25.582Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 302,
+        "feature-description": null,
+        "feature-details": "<p>Number of users with access to the IEX portal by plan. You may add users beyond this number for an additional monthly fee.</p>",
+        "plan-1-value": "1",
+        "plan-2-value": "5",
+        "plan-3-value": "25",
+        "plan-4-value": "Unlimited",
+        "name": "Included IEX portal seats",
+        "slug": "technology-included-iex-portal-seats"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad8d",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:53.828Z",
+      "createdOn": "2026-11-19T09:35:25.563Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Technology",
+        "display-order": 301,
+        "feature-description": null,
+        "feature-details": "<p>See your logo on the products we present you – no guesswork needed.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Branded product catalogs",
+        "slug": "technology-branded-product-catalogs"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad8b",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:28:48.466Z",
+      "createdOn": "2026-11-19T09:35:25.548Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 209,
+        "feature-description": null,
+        "feature-details": "<p>Store and Ship from more than one of our warehouses (US, Ireland, UK, India)</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Multi country inventory management",
+        "slug": "infrastructure-multi-country-inventory-management"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad89",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:53.828Z",
+      "createdOn": "2026-11-19T09:35:25.533Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 208,
+        "feature-description": null,
+        "feature-details": "<p>We can onboard your existing inventory into our warehouse and iventory management systems. Volume and state of inventory determine hourly costs to intake.  *Warehouse labor costs will apply</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Intake Existing Inventory*",
+        "slug": "infrastructure-intake-existing-inventory"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad87",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:53.829Z",
+      "createdOn": "2026-11-19T09:35:25.517Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 207,
+        "feature-description": null,
+        "feature-details": "<p>View your real time inventory directly through our IEX Portal</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Online Inventory Management",
+        "slug": "infrastructure-online-inventory-management"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad85",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:53.829Z",
+      "createdOn": "2026-11-19T09:35:25.501Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 206,
+        "feature-description": null,
+        "feature-details": "<p>The total amount of product skus you can have within storage within our warehouse. Please note, this only applies to the parent sku and not for any child skus. Example: You have a t-shirt that has 6 different sizes associated to it. This would only count as 1 sku and not 6.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Number of skus",
+        "slug": "infrastructure-number-of-skus"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad83",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:28:48.466Z",
+      "createdOn": "2026-11-19T09:35:25.486Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 205,
+        "feature-description": null,
+        "feature-details": "<p>Full details of this pricing is provided on our warehouse pricing page</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "Warehouse Pricing",
+        "plan-3-value": "Warehouse Pricing",
+        "plan-4-value": "Warehouse Pricing",
+        "name": "Pallet & Bin Storage (per month)",
+        "slug": "infrastructure-pallet-bin-storage-per-month"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad81",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:36:53.830Z",
+      "createdOn": "2026-11-19T09:35:25.471Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 204,
+        "feature-description": null,
+        "feature-details": "<p>All shipping costs are billed per shipment.</p>",
+        "plan-1-value": "Per shipment",
+        "plan-2-value": "Per shipment",
+        "plan-3-value": "Per shipment",
+        "plan-4-value": "Per shipment",
+        "name": "Shipping costs",
+        "slug": "infrastructure-shipping-costs"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad7f",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:04.963Z",
+      "createdOn": "2026-11-19T09:35:25.451Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 203,
+        "feature-description": null,
+        "feature-details": "<p>All handling and fulfillment costs are billed per shipment.</p>",
+        "plan-1-value": "Per shipment",
+        "plan-2-value": "Per shipment",
+        "plan-3-value": "Per shipment",
+        "plan-4-value": "Per shipment",
+        "name": "Fulfillment & handling costs",
+        "slug": "infrastructure-fulfillment-handling-costs"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad7d",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:04.964Z",
+      "createdOn": "2026-11-19T09:35:25.436Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 202,
+        "feature-description": null,
+        "feature-details": "<p>Access to our decoration team. Access and control from project start to finish.\n*Availability varies by region</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "In-House decoration access",
+        "slug": "infrastructure-in-house-decoration-access"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad7b",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:04.964Z",
+      "createdOn": "2026-11-19T09:35:25.420Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Infrastructure",
+        "display-order": 201,
+        "feature-description": null,
+        "feature-details": "<p>We ship globally to over to 180 countries currently.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Ship Globally",
+        "slug": "infrastructure-ship-globally"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad79",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:28:48.465Z",
+      "createdOn": "2026-11-19T09:35:25.405Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 114,
+        "feature-description": null,
+        "feature-details": "<p>See our full offering of Creative Services <a href=\"https://imprintengine.com/creative-services/\">here</a></p>\n<p>*Please note additional costs may be incurred based on scope of the support required.  </p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Product Photography*",
+        "slug": "support-product-photography"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad77",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:04.964Z",
+      "createdOn": "2026-11-19T09:35:25.348Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 113,
+        "feature-description": null,
+        "feature-details": "<p>See our full offering of Creative Services here\n*Please note additional costs may be incurred based on scope of the support required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Creative design support*",
+        "slug": "support-creative-design-support"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad75",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:04.964Z",
+      "createdOn": "2026-11-19T09:35:25.321Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 112,
+        "feature-description": null,
+        "feature-details": "<p>See our full offering of Creative Services here\n*Please note additional costs may be incurred based on scope of the support required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Custom product design, development and manufacturing*",
+        "slug": "support-custom-product-design-development-and-manufacturing"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad73",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:04.965Z",
+      "createdOn": "2026-11-19T09:35:25.304Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 111,
+        "feature-description": null,
+        "feature-details": "<p>Our in-house development team can help support with any integration setup or API questions you may have.  *Please note additional costs may be incurred based on scope of the support required.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Integration/API Support*",
+        "slug": "support-integration-api-support"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad71",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:04.965Z",
+      "createdOn": "2026-11-19T09:35:25.285Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 110,
+        "feature-description": null,
+        "feature-details": "<p>As an extension to your team we will prepare and present our expert suggestions based on trends, data, and your upcoming needs.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "—",
+        "plan-4-value": "✓",
+        "name": "Annual Product/Brand Strategy planning",
+        "slug": "support-annual-product-brand-strategy-planning"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad6f",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:13.315Z",
+      "createdOn": "2026-11-19T09:35:25.269Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 109,
+        "feature-description": null,
+        "feature-details": "<p>A shared slack channel with our internal teams and your organization.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Dedicated Slack channel",
+        "slug": "support-dedicated-slack-channel"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad6d",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:13.315Z",
+      "createdOn": "2026-11-19T09:35:25.254Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 108,
+        "feature-description": null,
+        "feature-details": "<p>Your dedicated brand manager will be assigned to you and work with you on every project you have.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "—",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Dedicated brand manager",
+        "slug": "support-dedicated-brand-manager"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad6b",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:13.315Z",
+      "createdOn": "2026-11-19T09:35:25.228Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 107,
+        "feature-description": null,
+        "feature-details": "<p>We provide both onboarding training and ongoing training to team members at your organization.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Team training and onboarding",
+        "slug": "support-team-training-and-onboarding"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad69",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:13.316Z",
+      "createdOn": "2026-11-19T09:35:25.212Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 106,
+        "feature-description": null,
+        "feature-details": "<p>If you have product needs to that require us to source the same or similar products across the globe. Example: I want the same product in Europe and India.</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Global Product Sourcing Support",
+        "slug": "support-global-product-sourcing-support"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad67",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:28:48.464Z",
+      "createdOn": "2026-11-19T09:35:25.196Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 105,
+        "feature-description": null,
+        "feature-details": "<p>A designer will audit your brand assets and ensure they are production ready</p>",
+        "plan-1-value": "—",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Brand Audit & Verification",
+        "slug": "support-brand-audit-verification"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad65",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:13.316Z",
+      "createdOn": "2026-11-19T09:35:25.182Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 104,
+        "feature-description": null,
+        "feature-details": "<p>Our teams will work directly with you to come up with ideation and designing of products. Please note, depending on scope, additional costs may be required.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Brand Management Support",
+        "slug": "support-brand-management-support"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad63",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T11:35:25.112Z",
+      "lastUpdated": "2026-11-19T11:28:48.463Z",
+      "createdOn": "2026-11-19T09:35:25.165Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 103,
+        "feature-description": null,
+        "feature-details": "<p><strong>Free:</strong> Included</p><p><strong>Starter:</strong> Included</p><p><strong>Growth:</strong> Included</p><p><strong>Partnership:</strong> Included</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Free Product Mock Ups",
+        "slug": "support-free-product-mock-ups"
+      }
+    },
+    {
+      "id": "6afec2e0a366bf116367ad61",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:37:13.316Z",
+      "createdOn": "2026-11-19T09:35:25.140Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 102,
+        "feature-description": null,
+        "feature-details": "<p>Our teams handle all shipping &amp; customs related support and tracking issues that may arise.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Global Shipping, Tracking, Customs, Returns & End User Support",
+        "slug": "support-global-shipping-tracking-customs-returns-end-user-support"
+      }
+    },
+    {
+      "id": "6afec2b1798de0d00f82eda6",
+      "cmsLocaleId": "6abe87a8a3a5f3288a780ced",
+      "lastPublished": "2026-11-19T09:54:00.160Z",
+      "lastUpdated": "2026-11-19T09:34:54.923Z",
+      "createdOn": "2026-11-19T09:34:41.339Z",
+      "isArchived": false,
+      "isDraft": false,
+      "fieldData": {
+        "table-category": "Service & Support",
+        "display-order": 101,
+        "feature-description": null,
+        "feature-details": "<p>Access to our globally available customer support teams that handle all support related issues.</p>",
+        "plan-1-value": "✓",
+        "plan-2-value": "✓",
+        "plan-3-value": "✓",
+        "plan-4-value": "✓",
+        "name": "Global Customer Support",
+        "slug": "support-global-customer-support"
+      }
+    }
+  ],
+  "pagination": {
+    "limit": 100,
+    "offset": 0,
+    "total": 65
+  }
+}

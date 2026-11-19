@@ -18,7 +18,7 @@ and item limiting off. It contains the 65 source rows:
 | stores | IEX Stores (Add-On) | 17 | 401–417 |
 
 Edit names, descriptions, plan values and ordering in the CMS, then
-publish. Keep Table Category equal to one of the four values above. Plan values
+publish. Table Category is an Option dropdown with the four choices above. Plan values
 are plain text, including ✓, — and descriptive values. Stores only uses Plans
 1 and 2. Plan 3 and 4 cells are hidden for Stores rows.
 
@@ -44,7 +44,9 @@ copy; the exceptions are recorded in the audit.
 ## Native bindings and behavior
 
 - `final-feature-cms` → native Collection List Wrapper, IEX Pricing Tables.
-- `final-feature-category` on Collection Item → Table Category.
+- `final-feature-category` on Collection Item → Table Category dropdown
+  (`table-category-dropdown`, field `c0d9c6e67ecac9abbd5e7ec49d7d2ee4`). Webflow
+  renders the selected option's label, so the existing filters need no code change.
 - `final-feature-name` Text Block → Name.
 - `final-feature-description` Text Block → Feature Description.
 - `final-feature-details` hidden Rich Text → Feature Details.
@@ -77,6 +79,14 @@ and phone margin-top is `0rem`, removing the inherited `-15dvh` overlap that cov
 last pricing row. Other pages and the original variant are unchanged.
 
 ## Validation
+
+Table Category was migrated from Plain Text to Option on 19 November 2026.
+All 65 selections were mapped and other CMS content was verified unchanged.
+The Collection Item attribute was rebound in Designer, then the old text field
+was removed. Backup before migration:
+`reference-data/iex-pricing-category-backup-2026-11-19-140440.json`.
+Staging checks at 1440, 768 and 390px verify all 65 categories and plan values,
+filter counts 14/9/25/17, both sticky header sets, and popup opening/closing.
 
 The staged CMS import was checked field-for-field against the saved source.
 Published HTML contains all 65 rows in source order. Desktop (1440), tablet
