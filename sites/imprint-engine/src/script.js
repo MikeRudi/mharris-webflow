@@ -106,9 +106,47 @@ function videoPopupAnimation() {
     $open.attr({ "aria-haspopup": "dialog", "aria-controls": popup.id, "aria-expanded": "false" });
     gsap.set(popup, { display: "none", autoAlpha: 0 });
     let opened = false, closing = false, tween = null, trigger = null, marker = null, scrollLock = null;
-    let restoreBackground = null;
+    let restoreBackground = null, fullscreenEntered = false;
+
+    function ownsFullscreen() {
+      const element = document.fullscreenElement || document.webkitFullscreenElement;
+      return Boolean(element && (element === popup || popup.contains(element)));
+    }
+
+    function exitFullscreen() {
+      if (!ownsFullscreen()) return;
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!exit) return;
+      try { Promise.resolve(exit.call(document)).catch(() => {}); } catch (_) {}
+    }
+
+    function enterFullscreen() {
+      const request = popup.requestFullscreen || popup.webkitRequestFullscreen;
+      if (!request) return;
+      // Request inside the Play gesture; rejection leaves the existing popup usable.
+      try {
+        const result = popup.requestFullscreen
+          ? request.call(popup, { navigationUI: "hide" }) : request.call(popup);
+        Promise.resolve(result).then(() => {
+          if (!opened || closing) exitFullscreen();
+          else fullscreenEntered = ownsFullscreen();
+        }).catch(() => {});
+      } catch (_) {}
+    }
+
+    function fullscreenChanged() {
+      if (ownsFullscreen()) {
+        fullscreenEntered = true;
+        if (!opened || closing) exitFullscreen();
+      } else if (fullscreenEntered) {
+        fullscreenEntered = false;
+        if (opened && !closing) close();
+      }
+    }
 
     function finishClose() {
+      exitFullscreen();
+      fullscreenEntered = false;
       gsap.set(popup, { display: "none", autoAlpha: 0 });
       $popup.attr("aria-hidden", "true").prop("inert", true);
       $open.attr("aria-expanded", "false");
@@ -163,7 +201,8 @@ function videoPopupAnimation() {
       tween = gsap.to(popup, { autoAlpha: motion.open.opacity, delay: motion.open.start,
         duration: motion.open.duration, ease: motion.open.ease });
       $close[0].focus({ preventScroll: true });
-      $(document).on(`keydown.${namespace}`, function (event) {
+      $(document).on(`fullscreenchange.${namespace} webkitfullscreenchange.${namespace}`, fullscreenChanged)
+        .on(`keydown.${namespace}`, function (event) {
         if (event.key === "Escape") { event.preventDefault(); close(); }
         if (event.key !== "Tab") return;
         const items = focusables().toArray(), first = items[0], last = items[items.length - 1];
@@ -178,6 +217,7 @@ function videoPopupAnimation() {
       const play = $popup.find('[f-data-video="play-button"]')[0];
       if (play) play.click();
       else video.play().catch(() => {});
+      enterFullscreen();
     }
 
     const unbindOpen = bindControlActivation($open, namespace, open);

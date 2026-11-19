@@ -26,8 +26,12 @@ Use pinned jsDelivr releases when switching to stable production code.
   Set the popup's native position to fixed, inset 0, z-index above navigation,
   background and flex alignment in Webflow, then display None. Code opens it as
   Flex, fading in over 0.3s and out over 0.2s (`power1.in`). Controls are visible
-  throughout playback and pause; keep their native display enabled. Closing or
-  Escape pauses without rewinding, restores page scrolling and trigger focus.
+  throughout playback and pause; keep their native display enabled. Play requests
+  true browser fullscreen for the whole player, with navigation UI hidden where
+  supported. Missing or rejected fullscreen support keeps the same fixed popup
+  as the fallback. Closing exits fullscreen; Escape or the browser's fullscreen
+  exit also closes the popup. All exits pause without rewinding and restore page
+  scrolling and trigger focus.
   While open, the entire player wrapper moves to body to escape transformed
   ancestors, then returns to its original position. Use standalone popup styles.
   Use matching, unique hook values for additional players.
