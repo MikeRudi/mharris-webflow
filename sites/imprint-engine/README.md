@@ -18,11 +18,13 @@ Use pinned jsDelivr releases when switching to stable production code.
 ## Notes
 
 - `videoPlayMagnet()` adds a desktop cursor pull to `.initial-play` (or the
-  existing `.video-initial-play`) inside `.video-wrap`. It moves 18% toward the
-  cursor, capped at 3rem, following over 0.3s and returning over 0.4s with
-  `power1.in`. It preserves native positioning, resets on leave/click, and skips
-  touch pointers and reduced motion. Remove its desktop initializer to undo the
-  trial. The matching `video-wrap` and `initial-play` attribute hooks also work.
+  existing `.video-initial-play`) inside `.video-wrap`. Its center follows the
+  cursor directly over 0.35s, returning to its native position over 0.55s with
+  `power2.out`. The same two axis tweens handle both directions from the current
+  rendered position, so rapid leave/re-entry does not snap or restart from home.
+  It resets on leave/click and skips touch pointers and reduced motion. Remove
+  its desktop initializer to undo the trial. The matching `video-wrap` and
+  `initial-play` attribute hooks also work.
 - Flowplay opens in a fullscreen popup via `videoPopupAnimation()`. Add
   `video-popup-open="about-video"` to `.video-initial-play`. The fixed popup has
   `video-popup="about-video"` and `f-data-video="wrapper"`; its close control has

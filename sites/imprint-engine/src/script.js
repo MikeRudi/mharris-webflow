@@ -84,10 +84,11 @@ function initSite() {
 $(initSite);
 
 function videoPlayMagnet() {
-  // PLAY BUTTON MAGNET — a restrained pull, with the native resting position preserved.
+  // PLAY BUTTON FOLLOW — one continuous tween per axis, including the return home.
   const motion = {
-    follow: { strength: 0.18, maxRem: 3, duration: 0.3, ease: "power1.in" },
-    reset: { duration: 0.4, ease: "power1.in" },
+    follow: { duration: 0.35 },
+    reset: { duration: 0.55 },
+    ease: "power2.out",
   };
   if (!window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return null;
   const cleanups = [];
@@ -102,9 +103,17 @@ function videoPlayMagnet() {
     const restore = rememberAttributes($(button), ["style"]);
     const baseX = Number(gsap.getProperty(button, "x")) || 0;
     const baseY = Number(gsap.getProperty(button, "y")) || 0;
-    const xTo = gsap.quickTo(button, "x", { duration: motion.follow.duration, ease: motion.follow.ease });
-    const yTo = gsap.quickTo(button, "y", { duration: motion.follow.duration, ease: motion.follow.ease });
-    let bounds = null, resetTween = null;
+    const xTo = gsap.quickTo(button, "x", { duration: motion.follow.duration, ease: motion.ease });
+    const yTo = gsap.quickTo(button, "y", { duration: motion.follow.duration, ease: motion.ease });
+    let bounds = null;
+
+    function moveTo(x, y, duration) {
+      const currentX = Number(gsap.getProperty(button, "x"));
+      const currentY = Number(gsap.getProperty(button, "y"));
+      xTo.tween.duration(duration); yTo.tween.duration(duration);
+      // Explicit live starts keep rapid leave/re-entry continuous, even mid-return.
+      xTo(x, currentX); yTo(y, currentY);
+    }
 
     function measure() {
       const rect = wrap.getBoundingClientRect(), buttonRect = button.getBoundingClientRect();
@@ -114,25 +123,20 @@ function videoPlayMagnet() {
         x: buttonRect.left + buttonRect.width / 2 - (Number(gsap.getProperty(button, "x")) - baseX) * scaleX,
         y: buttonRect.top + buttonRect.height / 2 - (Number(gsap.getProperty(button, "y")) - baseY) * scaleY,
         scaleX, scaleY,
-        limit: motion.follow.maxRem * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16),
       };
     }
 
     function move(event) {
       if (event.originalEvent?.pointerType === "touch") return;
       if (!bounds) measure();
-      if (resetTween) { resetTween.kill(); resetTween = null; }
-      const x = (event.clientX - bounds.x) / bounds.scaleX * motion.follow.strength;
-      const y = (event.clientY - bounds.y) / bounds.scaleY * motion.follow.strength;
-      const distance = Math.hypot(x, y), clamp = distance > bounds.limit ? bounds.limit / distance : 1;
-      xTo(baseX + x * clamp); yTo(baseY + y * clamp);
+      const x = (event.clientX - bounds.x) / bounds.scaleX;
+      const y = (event.clientY - bounds.y) / bounds.scaleY;
+      moveTo(baseX + x, baseY + y, motion.follow.duration);
     }
 
     function reset() {
       bounds = null;
-      xTo.tween.pause(); yTo.tween.pause();
-      if (resetTween) resetTween.kill();
-      resetTween = gsap.to(button, { x: baseX, y: baseY, ...motion.reset, overwrite: "auto" });
+      moveTo(baseX, baseY, motion.reset.duration);
     }
 
     $wrap.on(`pointerenter.${namespace} pointermove.${namespace}`, move)
@@ -142,7 +146,7 @@ function videoPlayMagnet() {
       .on(`blur.${namespace}`, reset);
     cleanups.push(() => {
       $wrap.off(`.${namespace}`); $(button).off(`.${namespace}`); $(window).off(`.${namespace}`);
-      xTo.tween.kill(); yTo.tween.kill(); if (resetTween) resetTween.kill(); restore();
+      xTo.tween.kill(); yTo.tween.kill(); restore();
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());
