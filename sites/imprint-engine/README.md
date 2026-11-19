@@ -17,6 +17,10 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- IEX Feature Comparison uses native Webflow layout, sticky header and orange
+  highlight styles. `featureComparison()` moves the filter underline, highlights
+  the hovered plan column and syncs the header with horizontal table scrolling.
+  The four filters currently share the existing table; additional content is pending.
 - Careers benefits no longer needs a component embed. `careerBenefits()` uses
   `.career-benefits`, `.career-benefits-track` and `.career-benefit-card`, creates
   the draggable scrollbar, and keeps the normal vertical page scroll active.

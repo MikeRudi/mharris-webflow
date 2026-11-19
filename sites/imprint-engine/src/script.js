@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
 
@@ -81,6 +81,85 @@ function initSite() {
 }
 
 $(initSite);
+
+function featureComparison() {
+  const motion = { underline: { duration: 0.3, ease: "power1.in" } };
+  const cleanups = [];
+  $("[final-feature-table]").each(function () {
+    const $table = $(this), $filters = $table.find("[final-feature-filter-item]");
+    const addedHooks = [];
+    ["final-feature-header-wrap", "final-feature-body"].forEach(name => {
+      $table.find(`.${name}`).each(function () {
+        if (!this.hasAttribute(name)) { this.setAttribute(name, ""); addedHooks.push([this, name]); }
+      });
+    });
+    const $marker = $table.find("[final-feature-marker]").first(), marker = $marker[0];
+    const header = $table.find("[final-feature-header-wrap]")[0];
+    const body = $table.find("[final-feature-body]")[0];
+    if (!$filters.length || !marker || !header || !body) return;
+    const markerParent = marker.parentNode, markerNext = marker.nextSibling;
+    const restoreFilters = rememberAttributes($filters, ["class", "aria-pressed"]);
+    const restoreMarker = rememberAttributes($marker, ["style"]);
+    const $rows = $table.find(".final-feature-row");
+    const $cells = $rows.children(".final-feature-cell");
+    const $ticks = $cells.find(".text").filter((_, element) => element.textContent.trim() === "✓");
+    const restoreCells = rememberAttributes($cells, ["class", "final-feature-column"]);
+    const restoreTicks = rememberAttributes($ticks, ["class"]);
+    $rows.each(function () {
+      $(this).children(".final-feature-cell").each((index, cell) => cell.setAttribute("final-feature-column", index));
+    });
+    let activeColumn = -1;
+
+    function activate($filter, immediate = false) {
+      let state;
+      const animate = !immediate && window.Flip && window.gsap &&
+        window.matchMedia("(min-width: 992px) and (prefers-reduced-motion: no-preference)").matches;
+      if (window.Flip) Flip.killFlipsOf(marker);
+      if (animate) state = Flip.getState(marker);
+      $filters.removeClass("is-active").attr("aria-pressed", "false");
+      $filter.addClass("is-active").attr("aria-pressed", "true").append(marker);
+      if (state) Flip.from(state, { ...motion.underline, absolute: true });
+      // Only the selected underline changes until the other tables are supplied.
+    }
+
+    function highlight(column) {
+      if (column === activeColumn) return;
+      activeColumn = column;
+      $cells.removeClass("final-feature-column-active final-feature-heading-active");
+      $ticks.removeClass("final-feature-tick-active");
+      if (column < 0) return;
+      const $column = $cells.filter(`[final-feature-column="${column}"]`);
+      $column.filter((_, cell) => !header.contains(cell)).addClass("final-feature-column-active");
+      $column.filter((_, cell) => header.contains(cell)).addClass("final-feature-heading-active");
+      $ticks.filter((_, tick) => Number(tick.closest("[final-feature-column]").getAttribute("final-feature-column")) === column)
+        .addClass("final-feature-tick-active");
+    }
+
+    function syncHeader() { header.scrollLeft = body.scrollLeft; }
+    const unbind = bindControlActivation($filters, "featureComparison", $filter => activate($filter));
+    $table.on("pointerover.featureComparison", event => {
+      if (event.originalEvent.pointerType === "touch") return;
+      const cell = $(event.target).closest("[final-feature-column]")[0];
+      highlight(cell ? Number(cell.getAttribute("final-feature-column")) : -1);
+    }).on("pointerleave.featureComparison", () => highlight(-1));
+    body.addEventListener("scroll", syncHeader, { passive: true });
+    const observer = new ResizeObserver(syncHeader);
+    observer.observe(body);
+    observer.observe(header);
+    activate($filters.first(), true);
+    syncHeader();
+
+    cleanups.push(() => {
+      unbind(); $table.off(".featureComparison"); observer.disconnect();
+      body.removeEventListener("scroll", syncHeader);
+      if (window.Flip) Flip.killFlipsOf(marker);
+      markerParent.insertBefore(marker, markerNext && markerNext.parentNode === markerParent ? markerNext : null);
+      restoreFilters(); restoreMarker(); restoreCells(); restoreTicks();
+      addedHooks.forEach(([element, name]) => element.removeAttribute(name));
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
 
 function productUpdates() {
   const cleanups = [];
