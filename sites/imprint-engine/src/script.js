@@ -3912,9 +3912,9 @@ function lineHover() {
         onComplete: () => { closed = !enter && !$item.hasClass("is-active"); } });
     }
     $hover.on("mouseenter.lineHover", () => { hovered = true; animate(true); })
-      .on("mouseleave.lineHover", () => { hovered = false; animate($hover[0].contains(document.activeElement)); })
-      .on("focusin.lineHover", () => animate(true))
-      .on("focusout.lineHover", (event) => { if (!$hover[0].contains(event.relatedTarget)) animate(hovered); });
+      .on("mouseleave.lineHover", () => { hovered = false; animate(!generated && $hover[0].contains(document.activeElement)); })
+      .on("focusin.lineHover", () => { if (!generated) animate(true); })
+      .on("focusout.lineHover", (event) => { if (!generated && !$hover[0].contains(event.relatedTarget)) animate(hovered); });
     cleanups.push(() => { $hover.off(".lineHover"); rowTimeline?.kill(); gsap.killTweensOf($line); if (generated) $line.remove(); else restore(); });
   });
   return () => cleanups.forEach((cleanup) => cleanup());
