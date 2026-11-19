@@ -49,7 +49,7 @@ function initSite() {
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
-    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider()];
+    compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoIntroAnimation()];
 
   if (window.gsap) {
     const desktop = onDesktop(() => {
@@ -81,6 +81,55 @@ function initSite() {
 }
 
 $(initSite);
+
+function videoIntroAnimation() {
+  // FIRST PLAY — both fades start together; Flowplay owns playback and its controls.
+  const motion = {
+    intro: { start: 0, opacity: 0, duration: 0.3, ease: "power1.in" },
+    controls: { start: 0, opacity: 1, duration: 0.3, ease: "power1.in" },
+  };
+  if (!window.gsap) return null;
+  const cleanups = [];
+  $('[f-data-video="wrapper"]').each(function () {
+    const $wrap = $(this), $intro = $wrap.find("[video-intro]").first();
+    const $controls = $wrap.find("[video-controls]").first();
+    const video = $wrap.find('video[f-data-video="video-element"]')[0];
+    if (!$intro.length || !$controls.length || !video) return;
+    const restore = rememberAttributes($intro.add($controls), ["style", "aria-hidden", "inert"]);
+    let started = Boolean($wrap.data("videoIntroStarted") || !video.paused || video.currentTime > 0);
+    let timeline = null;
+    gsap.set($intro, { autoAlpha: started ? 0 : 1, pointerEvents: started ? "none" : "auto" });
+    gsap.set($controls, { autoAlpha: started ? 1 : 0 });
+    $intro.attr("aria-hidden", String(started)).prop("inert", started);
+    $controls.attr("aria-hidden", String(!started)).prop("inert", !started);
+
+    function revealControls(event) {
+      if (event && event.type === "click") event.preventDefault();
+      if (started) return;
+      started = true;
+      $wrap.data("videoIntroStarted", true);
+      const moveFocus = $intro[0].contains(document.activeElement);
+      $intro.attr("aria-hidden", "true").prop("inert", true);
+      $controls.attr("aria-hidden", "false").prop("inert", false);
+      gsap.set($intro, { pointerEvents: "none" });
+      timeline = gsap.timeline({ onComplete: () => {
+        if (moveFocus) $controls.find('[f-data-video="pause-button"], [f-data-video="play-button"]').filter(":visible").first().trigger("focus");
+      } });
+      timeline.to($intro, { autoAlpha: motion.intro.opacity, duration: motion.intro.duration, ease: motion.intro.ease }, motion.intro.start);
+      timeline.to($controls, { autoAlpha: motion.controls.opacity, duration: motion.controls.duration, ease: motion.controls.ease }, motion.controls.start);
+    }
+
+    $intro.on("click.videoIntro", revealControls);
+    $(video).on("play.videoIntro", revealControls);
+    cleanups.push(() => {
+      $intro.off(".videoIntro");
+      $(video).off(".videoIntro");
+      if (timeline) timeline.kill();
+      restore();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
 
 function featureComparison() {
   const motion = { underline: { duration: 0.3, ease: "power1.in" } };

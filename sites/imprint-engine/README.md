@@ -17,6 +17,13 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- Flowplay's initial play button uses `f-data-video="poster-button"` and the
+  empty `video-intro` hook inside `f-data-video="wrapper"`. The controls wrapper
+  uses the empty `video-controls` hook. `videoIntroAnimation()` hides controls
+  initially, then crossfades the intro and controls together in 0.3s with
+  `power1.in` on first click/play. Pausing does not restore the intro. Keep these
+  elements' native display settings enabled; Flowplay manages its Play/Pause
+  button display. Do not add Flowplay's `poster` hook to the fading intro.
 - IEX Feature Comparison uses native Webflow layout, sticky header and orange
   highlight styles. Its native Collection List reads 65 rows from IEX Pricing
   Tables. `featureComparison()` filters categories, switches the Stores header,
