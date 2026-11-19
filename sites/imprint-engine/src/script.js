@@ -3858,9 +3858,9 @@ function lineHover() {
   $("[line-hover-item]").each(function () {
     const $item = $(this);
     let $line = $item.find("[line-hover]").first();
-    // CMS feature names keep their text binding; add only the decorative line.
+    // Feature-name hover animates the row divider, leaving the name unlined.
     const generated = !$line.length && this.hasAttribute("final-feature-name");
-    if (generated) $line = $("<span>", { class: "link-underline", "line-hover": "", "aria-hidden": "true" }).appendTo($item);
+    if (generated) $line = $("<span>", { class: "link-underline", "line-hover": "", "aria-hidden": "true" }).appendTo($item.closest(".final-feature-row"));
     if (!$line.length) return;
     const restore = rememberAttributes($line, ["style"]);
     let hovered = false, closed = !$item.hasClass("is-active");
