@@ -3858,9 +3858,10 @@ function lineHover() {
   $("[line-hover-item]").each(function () {
     const $item = $(this);
     let $line = $item.find("[line-hover]").first();
-    // Feature-name hover animates the row divider, leaving the name unlined.
+    // Pricing rows animate their divider across the full hover area.
     const generated = !$line.length && this.hasAttribute("final-feature-name");
-    if (generated) $line = $("<span>", { class: "link-underline", "line-hover": "", "aria-hidden": "true" }).appendTo($item.closest(".final-feature-row"));
+    const $hover = generated ? $item.closest(".final-feature-row") : $item;
+    if (generated) $line = $("<span>", { class: "link-underline", "line-hover": "", "aria-hidden": "true" }).appendTo($hover);
     if (!$line.length) return;
     const restore = rememberAttributes($line, ["style"]);
     let hovered = false, closed = !$item.hasClass("is-active");
@@ -3874,11 +3875,11 @@ function lineHover() {
         duration: motion.duration, delay: motion.start, ease: motion.ease, overwrite: true,
         onComplete: () => { closed = !enter && !$item.hasClass("is-active"); } });
     }
-    $item.on("mouseenter.lineHover", () => { hovered = true; animate(true); })
-      .on("mouseleave.lineHover", () => { hovered = false; animate(this.contains(document.activeElement)); })
+    $hover.on("mouseenter.lineHover", () => { hovered = true; animate(true); })
+      .on("mouseleave.lineHover", () => { hovered = false; animate($hover[0].contains(document.activeElement)); })
       .on("focusin.lineHover", () => animate(true))
-      .on("focusout.lineHover", (event) => { if (!this.contains(event.relatedTarget)) animate(hovered); });
-    cleanups.push(() => { $item.off(".lineHover"); gsap.killTweensOf($line); if (generated) $line.remove(); else restore(); });
+      .on("focusout.lineHover", (event) => { if (!$hover[0].contains(event.relatedTarget)) animate(hovered); });
+    cleanups.push(() => { $hover.off(".lineHover"); gsap.killTweensOf($line); if (generated) $line.remove(); else restore(); });
   });
   return () => cleanups.forEach((cleanup) => cleanup());
 }
