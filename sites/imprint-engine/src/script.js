@@ -48,7 +48,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientHorizontalAnimation(),
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientAnimations(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
   if (window.gsap) {
@@ -4344,28 +4344,40 @@ function catalogueAnimation() {
   return () => cleanups.forEach(cleanup => cleanup());
 }
 
-function gradientHorizontalAnimation() {
-  // HORIZONTAL FORCE — animate inner artwork; preserve native size, position and -50% Y.
+function gradientAnimations() {
+  // GRADIENT MOTION — all travel uses vw/vh; native size, position and transforms stay intact.
   const motion = {
-    travelMultipliers: { horizontal: 1, "horizontal-2": 2 },
+    variants: {
+      horizontal: { direction: "horizontal", travel: 1 },
+      "horizontal-2": { direction: "horizontal", travel: 2 },
+      vertical: { direction: "vertical", travel: 1 },
+      "vertical-2": { direction: "vertical", travel: 2 },
+      float: { direction: "float", travel: 1 },
+      "float-2": { direction: "float", travel: 2 },
+    },
     sweep: {
-      from: { xPercent: -16, skewX: -8 },
-      to: { xPercent: 30, skewX: 12 },
+      from: { xVw: -16, skewX: -8 },
+      to: { xVw: 30, skewX: 12 },
       duration: 11, ease: "sine.inOut", phaseStep: 1.8,
     },
-    width: { from: 0.72, to: 1.35, duration: 7.5, ease: "sine.inOut" },
+    float: { // X distances are vw; Y distances are vh.
+      x: { from: -22, to: 26, duration: 13, ease: "sine.inOut" },
+      y: { from: 18, to: -24, duration: 17, ease: "sine.inOut" },
+    },
+    breath: { from: 0.72, to: 1.35, duration: 7.5, ease: "sine.inOut" },
     layers: [
-      { opacity: 1, from: { xPercent: 0, yPercent: 0, scaleX: 1, scaleY: 1 },
-        to: { xPercent: 8, yPercent: -2, scaleX: 1.15, scaleY: 0.82 }, duration: 8 },
-      { opacity: 0.42, from: { xPercent: -20, yPercent: -3, scaleX: 0.72, scaleY: 0.9 },
-        to: { xPercent: 16, yPercent: 2, scaleX: 1.08, scaleY: 0.72 }, duration: 9.5 },
-      { opacity: 0.3, from: { xPercent: 16, yPercent: 4, scaleX: 0.5, scaleY: 1.06 },
-        to: { xPercent: -12, yPercent: -2, scaleX: 0.78, scaleY: 1.18 }, duration: 7 },
+      { opacity: 1, from: { xVw: 0, yVh: 0, scaleX: 1, scaleY: 1 },
+        to: { xVw: 8, yVh: -2, scaleX: 1.15, scaleY: 0.82 }, duration: 8 },
+      { opacity: 0.42, from: { xVw: -20, yVh: -3, scaleX: 0.72, scaleY: 0.9 },
+        to: { xVw: 16, yVh: 2, scaleX: 1.08, scaleY: 0.72 }, duration: 9.5 },
+      { opacity: 0.3, from: { xVw: 16, yVh: 4, scaleX: 0.5, scaleY: 1.06 },
+        to: { xVw: -12, yVh: -2, scaleX: 0.78, scaleY: 1.18 }, duration: 7 },
     ],
     visibility: { rootMargin: "200px 0px" },
   };
   // Keep the earlier numbered hook working while existing Designer elements are renamed.
-  const selector = '[gradient-animate="horizontal"], [gradient-animate="horizontal-2"], [gradient-animate-1]:not([gradient-animate])';
+  const selector = Object.keys(motion.variants).map(value => `[gradient-animate="${value}"]`).join(", ")
+    + ', [gradient-animate-1]:not([gradient-animate])';
   const wrapperSelector = '[gradient-animate="wrap"], [gradient-animate-wrap]';
   const $wrappers = $(wrapperSelector);
   if (!window.gsap || !$wrappers.find(selector).length) return null;
@@ -4380,15 +4392,32 @@ function gradientHorizontalAnimation() {
       }).each(function (index) {
         const gradient = this, style = getComputedStyle(gradient);
         if (style.backgroundImage === "none" && style.backgroundColor === "rgba(0, 0, 0, 0)") return;
-        const variant = gradient.getAttribute("gradient-animate") === "horizontal-2" ? "horizontal-2" : "horizontal";
-        const travel = motion.travelMultipliers[variant];
-        const withTravel = values => ({ ...values, xPercent: values.xPercent * travel });
+        const variant = gradient.getAttribute("gradient-animate") || "horizontal";
+        const { direction, travel } = motion.variants[variant];
+        function pose(values) {
+          const result = {};
+          const verticalAxes = { scaleX: "scaleY", scaleY: "scaleX", skewX: "skewY" };
+          Object.entries(values).forEach(([property, value]) => {
+            if (property === "xVw" || property === "yVh") {
+              const primary = property === "xVw";
+              const axis = (direction === "vertical" ? !primary : primary) ? "x" : "y";
+              const multiplier = primary || direction === "float" ? travel : 1;
+              result[axis] = `${value * multiplier}${axis === "x" ? "vw" : "vh"}`;
+              return;
+            }
+            const key = direction === "vertical" ? (verticalAxes[property] || property) : property;
+            result[key] = value;
+          });
+          return result;
+        }
+        const breathPose = scale => direction === "vertical" ? { scaleY: scale }
+          : direction === "float" ? { scaleX: scale, scaleY: scale } : { scaleX: scale };
         const artwork = { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor,
           backgroundSize: style.backgroundSize, backgroundPosition: style.backgroundPosition,
           backgroundRepeat: style.backgroundRepeat, borderRadius: style.borderRadius };
         const restore = rememberAttributes($(gradient), ["style"]);
         const field = document.createElement("div");
-        field.className = "gradient-horizontal-motion";
+        field.className = `gradient-${direction}-motion`;
         field.setAttribute("gradient-motion-field", variant);
         field.setAttribute("aria-hidden", "true");
         Object.assign(field.style, { position: "absolute", inset: "0", pointerEvents: "none" });
@@ -4396,30 +4425,42 @@ function gradientHorizontalAnimation() {
         gradient.appendChild(field);
         const layers = motion.layers.map((settings, layerIndex) => {
           const layer = document.createElement("div");
-          layer.className = "gradient-horizontal-motion-layer";
+          layer.className = `gradient-${direction}-motion-layer`;
           layer.setAttribute("gradient-motion-layer", String(layerIndex));
           Object.assign(layer.style, artwork, { position: "absolute", inset: "0", pointerEvents: "none" });
           field.appendChild(layer);
-          gsap.set(layer, { ...withTravel(settings.from), opacity: settings.opacity, transformOrigin: "50% 50%" });
+          gsap.set(layer, { ...pose(settings.from), opacity: settings.opacity, transformOrigin: "50% 50%" });
           return layer;
         });
         // Reuse the authored colours/fades; only the animated copies replace their paint.
         gradient.style.backgroundImage = "none";
         gradient.style.backgroundColor = "transparent";
-        gsap.set(field, { ...withTravel(motion.sweep.from), scaleX: motion.width.from, transformOrigin: "50% 50%" });
-        const tweens = [gsap.to(field, { ...withTravel(motion.sweep.to), duration: motion.sweep.duration,
-          ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true })];
+        const tweens = [];
+        if (direction === "float") {
+          gsap.set(field, { x: `${motion.float.x.from * travel}vw`, y: `${motion.float.y.from * travel}vh`,
+            ...breathPose(motion.breath.from), transformOrigin: "50% 50%" });
+          // Different axis durations create a flowing path instead of a diagonal shuttle.
+          ["x", "y"].forEach(axis => {
+            const settings = motion.float[axis];
+            tweens.push(gsap.to(field, { [axis]: `${settings.to * travel}${axis === "x" ? "vw" : "vh"}`,
+              duration: settings.duration, ease: settings.ease, repeat: -1, yoyo: true, paused: true }));
+          });
+        } else {
+          gsap.set(field, { ...pose(motion.sweep.from), ...breathPose(motion.breath.from), transformOrigin: "50% 50%" });
+          tweens.push(gsap.to(field, { ...pose(motion.sweep.to), duration: motion.sweep.duration,
+            ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
+        }
         layers.forEach((layer, i) => {
           const settings = motion.layers[i];
-          tweens.push(gsap.to(layer, { ...withTravel(settings.to), duration: settings.duration,
+          tweens.push(gsap.to(layer, { ...pose(settings.to), duration: settings.duration,
             ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
         });
         tweens.forEach((tween, i) => tween.totalTime(index * motion.sweep.phaseStep + i * 0.6, true));
-        // Width breathes independently of the slower horizontal sweep.
-        const widthTween = gsap.to(field, { scaleX: motion.width.to, duration: motion.width.duration,
-          ease: motion.width.ease, repeat: -1, yoyo: true, paused: true });
-        widthTween.totalTime(index * motion.sweep.phaseStep, true);
-        tweens.push(widthTween);
+        // Breathe along the sweep axis, or both axes for free-floating gradients.
+        const breathTween = gsap.to(field, { ...breathPose(motion.breath.to), duration: motion.breath.duration,
+          ease: motion.breath.ease, repeat: -1, yoyo: true, paused: true });
+        breathTween.totalTime(index * motion.sweep.phaseStep, true);
+        tweens.push(breathTween);
         const entry = { gradient, field, layers, tweens, restore, visible: !hasObserver, active: false };
         group.entries.push(entry);
         watched.set(gradient, entry);
