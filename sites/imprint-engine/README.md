@@ -18,7 +18,9 @@ Use pinned jsDelivr releases when switching to stable production code.
 ## Notes
 
 - `gradientHorizontalAnimation()` implements `gradient-animate="horizontal"`
-  inside `gradient-animate="wrap"`. The earlier `gradient-animate-1` and
+  inside `gradient-animate="wrap"`. Use `gradient-animate="horizontal-2"` for
+  twice the horizontal travel in both the overall sweep and its inner layers;
+  breathing, vertical movement, shear and timing stay the same. The earlier `gradient-animate-1` and
   `gradient-animate-wrap` hooks remain compatibility aliases while existing
   elements are renamed. Each gradient's
   native background supplies three runtime layers; GSAP sweeps, stretches and

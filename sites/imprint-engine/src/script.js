@@ -4347,6 +4347,7 @@ function catalogueAnimation() {
 function gradientHorizontalAnimation() {
   // HORIZONTAL FORCE — animate inner artwork; preserve native size, position and -50% Y.
   const motion = {
+    travelMultipliers: { horizontal: 1, "horizontal-2": 2 },
     sweep: {
       from: { xPercent: -16, skewX: -8 },
       to: { xPercent: 30, skewX: 12 },
@@ -4364,7 +4365,7 @@ function gradientHorizontalAnimation() {
     visibility: { rootMargin: "200px 0px" },
   };
   // Keep the earlier numbered hook working while existing Designer elements are renamed.
-  const selector = '[gradient-animate="horizontal"], [gradient-animate-1]:not([gradient-animate])';
+  const selector = '[gradient-animate="horizontal"], [gradient-animate="horizontal-2"], [gradient-animate-1]:not([gradient-animate])';
   const wrapperSelector = '[gradient-animate="wrap"], [gradient-animate-wrap]';
   const $wrappers = $(wrapperSelector);
   if (!window.gsap || !$wrappers.find(selector).length) return null;
@@ -4379,13 +4380,16 @@ function gradientHorizontalAnimation() {
       }).each(function (index) {
         const gradient = this, style = getComputedStyle(gradient);
         if (style.backgroundImage === "none" && style.backgroundColor === "rgba(0, 0, 0, 0)") return;
+        const variant = gradient.getAttribute("gradient-animate") === "horizontal-2" ? "horizontal-2" : "horizontal";
+        const travel = motion.travelMultipliers[variant];
+        const withTravel = values => ({ ...values, xPercent: values.xPercent * travel });
         const artwork = { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor,
           backgroundSize: style.backgroundSize, backgroundPosition: style.backgroundPosition,
           backgroundRepeat: style.backgroundRepeat, borderRadius: style.borderRadius };
         const restore = rememberAttributes($(gradient), ["style"]);
         const field = document.createElement("div");
         field.className = "gradient-horizontal-motion";
-        field.setAttribute("gradient-motion-field", "horizontal");
+        field.setAttribute("gradient-motion-field", variant);
         field.setAttribute("aria-hidden", "true");
         Object.assign(field.style, { position: "absolute", inset: "0", pointerEvents: "none" });
         if (style.position === "static") gradient.style.position = "relative";
@@ -4396,18 +4400,18 @@ function gradientHorizontalAnimation() {
           layer.setAttribute("gradient-motion-layer", String(layerIndex));
           Object.assign(layer.style, artwork, { position: "absolute", inset: "0", pointerEvents: "none" });
           field.appendChild(layer);
-          gsap.set(layer, { ...settings.from, opacity: settings.opacity, transformOrigin: "50% 50%" });
+          gsap.set(layer, { ...withTravel(settings.from), opacity: settings.opacity, transformOrigin: "50% 50%" });
           return layer;
         });
         // Reuse the authored colours/fades; only the animated copies replace their paint.
         gradient.style.backgroundImage = "none";
         gradient.style.backgroundColor = "transparent";
-        gsap.set(field, { ...motion.sweep.from, scaleX: motion.width.from, transformOrigin: "50% 50%" });
-        const tweens = [gsap.to(field, { ...motion.sweep.to, duration: motion.sweep.duration,
+        gsap.set(field, { ...withTravel(motion.sweep.from), scaleX: motion.width.from, transformOrigin: "50% 50%" });
+        const tweens = [gsap.to(field, { ...withTravel(motion.sweep.to), duration: motion.sweep.duration,
           ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true })];
         layers.forEach((layer, i) => {
           const settings = motion.layers[i];
-          tweens.push(gsap.to(layer, { ...settings.to, duration: settings.duration,
+          tweens.push(gsap.to(layer, { ...withTravel(settings.to), duration: settings.duration,
             ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
         });
         tweens.forEach((tween, i) => tween.totalTime(index * motion.sweep.phaseStep + i * 0.6, true));
