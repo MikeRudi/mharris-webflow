@@ -48,7 +48,7 @@ function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
   const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
-    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(),
+    catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientHorizontalAnimation(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
   if (window.gsap) {
@@ -4342,6 +4342,110 @@ function catalogueAnimation() {
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());
+}
+
+function gradientHorizontalAnimation() {
+  // HORIZONTAL FORCE — animate inner artwork; preserve native size, position and -50% Y.
+  const motion = {
+    sweep: {
+      from: { xPercent: -16, skewX: -8, scaleX: 0.96 },
+      to: { xPercent: 30, skewX: 12, scaleX: 1.2 },
+      duration: 11, ease: "sine.inOut", phaseStep: 1.8,
+    },
+    layers: [
+      { opacity: 1, from: { xPercent: 0, yPercent: 0, scaleX: 1, scaleY: 1 },
+        to: { xPercent: 8, yPercent: -2, scaleX: 1.15, scaleY: 0.82 }, duration: 8 },
+      { opacity: 0.42, from: { xPercent: -20, yPercent: -3, scaleX: 0.72, scaleY: 0.9 },
+        to: { xPercent: 16, yPercent: 2, scaleX: 1.08, scaleY: 0.72 }, duration: 9.5 },
+      { opacity: 0.3, from: { xPercent: 16, yPercent: 4, scaleX: 0.5, scaleY: 1.06 },
+        to: { xPercent: -12, yPercent: -2, scaleX: 0.78, scaleY: 1.18 }, duration: 7 },
+    ],
+    visibility: { rootMargin: "200px 0px" },
+  };
+  // Keep the earlier numbered hook working while existing Designer elements are renamed.
+  const selector = '[gradient-animate="horizontal"], [gradient-animate-1]:not([gradient-animate])';
+  const wrapperSelector = '[gradient-animate="wrap"], [gradient-animate-wrap]';
+  const $wrappers = $(wrapperSelector);
+  if (!window.gsap || !$wrappers.find(selector).length) return null;
+  const media = gsap.matchMedia();
+  media.add("(prefers-reduced-motion: no-preference)", () => {
+    const groups = [], watched = new Map();
+    const hasObserver = Boolean(window.IntersectionObserver);
+    $wrappers.each(function () {
+      const wrapper = this, group = { visible: !hasObserver, entries: [] };
+      $(wrapper).find(selector).filter(function () {
+        return $(this).closest(wrapperSelector)[0] === wrapper;
+      }).each(function (index) {
+        const gradient = this, style = getComputedStyle(gradient);
+        if (style.backgroundImage === "none" && style.backgroundColor === "rgba(0, 0, 0, 0)") return;
+        const artwork = { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor,
+          backgroundSize: style.backgroundSize, backgroundPosition: style.backgroundPosition,
+          backgroundRepeat: style.backgroundRepeat, borderRadius: style.borderRadius };
+        const restore = rememberAttributes($(gradient), ["style"]);
+        const field = document.createElement("div");
+        field.className = "gradient-horizontal-motion";
+        field.setAttribute("gradient-motion-field", "horizontal");
+        field.setAttribute("aria-hidden", "true");
+        Object.assign(field.style, { position: "absolute", inset: "0", pointerEvents: "none" });
+        if (style.position === "static") gradient.style.position = "relative";
+        gradient.appendChild(field);
+        const layers = motion.layers.map((settings, layerIndex) => {
+          const layer = document.createElement("div");
+          layer.className = "gradient-horizontal-motion-layer";
+          layer.setAttribute("gradient-motion-layer", String(layerIndex));
+          Object.assign(layer.style, artwork, { position: "absolute", inset: "0", pointerEvents: "none" });
+          field.appendChild(layer);
+          gsap.set(layer, { ...settings.from, opacity: settings.opacity, transformOrigin: "50% 50%" });
+          return layer;
+        });
+        // Reuse the authored colours/fades; only the animated copies replace their paint.
+        gradient.style.backgroundImage = "none";
+        gradient.style.backgroundColor = "transparent";
+        gsap.set(field, { ...motion.sweep.from, transformOrigin: "50% 50%" });
+        const tweens = [gsap.to(field, { ...motion.sweep.to, duration: motion.sweep.duration,
+          ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true })];
+        layers.forEach((layer, i) => {
+          const settings = motion.layers[i];
+          tweens.push(gsap.to(layer, { ...settings.to, duration: settings.duration,
+            ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
+        });
+        tweens.forEach((tween, i) => tween.totalTime(index * motion.sweep.phaseStep + i * 0.6, true));
+        const entry = { gradient, field, layers, tweens, restore, visible: !hasObserver, active: false };
+        group.entries.push(entry);
+        watched.set(gradient, entry);
+      });
+      if (group.entries.length) { groups.push(group); watched.set(wrapper, group); }
+    });
+
+    function sync() {
+      groups.forEach(group => group.entries.forEach(entry => {
+        const active = group.visible && entry.visible && !document.hidden;
+        if (active === entry.active) return;
+        entry.active = active;
+        [entry.field, ...entry.layers].forEach(layer => {
+          if (active) layer.style.willChange = "transform";
+          else layer.style.removeProperty("will-change");
+        });
+        entry.tweens.forEach(tween => active ? tween.play() : tween.pause());
+      }));
+    }
+    const observer = hasObserver && new IntersectionObserver(entries => {
+      entries.forEach(entry => { const item = watched.get(entry.target); if (item) item.visible = entry.isIntersecting; });
+      sync();
+    }, { rootMargin: motion.visibility.rootMargin });
+    if (observer) watched.forEach((_value, element) => observer.observe(element));
+    document.addEventListener("visibilitychange", sync);
+    sync();
+    return () => {
+      if (observer) observer.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+      groups.forEach(group => group.entries.forEach(entry => {
+        entry.tweens.forEach(tween => tween.kill());
+        entry.field.remove(); entry.restore();
+      }));
+    };
+  });
+  return () => media.revert();
 }
 
 function gradientBreathOne() {
