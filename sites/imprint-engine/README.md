@@ -23,17 +23,18 @@ Use pinned jsDelivr releases when switching to stable production code.
   the overall movement and inner layers, keeping breathing and timing the same.
   All travel is in viewport units: X uses `vw`, Y uses `vh`, including the inner
   layers. Horizontal sweeps from -16vw to 30vw; vertical from -16vh to 30vh.
-  Float uses -22vw to 26vw on X and 18vh to -24vh on Y. Viewport units remain in
+  Float uses -11vw to 13vw on X and 9vh to -12vh on Y. Viewport units remain in
   the animated transforms so they follow viewport resizing automatically.
   Vertical swaps the horizontal movement/shape axes. Float drifts independently
-  on X (13 seconds each way) and Y (17 seconds), breathing on both axes.
+  on X (13 seconds each way) and Y (17 seconds), breathing from 90% to 110% on
+  both axes. Its inner layers use half the travel and stretch of the other presets.
   The earlier `gradient-animate-1` and
   `gradient-animate-wrap` hooks remain compatibility aliases while existing
   elements are renamed. Each gradient's
   native background supplies three runtime layers; GSAP sweeps, stretches and
   shears those layers to produce flow without changing the outer
   element's authored width, ratio, position or -50% Y transform. An independent
-  breath scales the inner artwork from 72% to 135% over 7.5 seconds each
+  breath scales horizontal/vertical artwork from 72% to 135% over 7.5 seconds each
   way, using `sine.inOut`. Colours and
   fades stay in the authored gradient styles. Motion pauses when its wrapper or
   gradient is offscreen, or the tab is hidden. Reduced motion keeps the native

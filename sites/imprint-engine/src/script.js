@@ -4361,8 +4361,10 @@ function gradientAnimations() {
       duration: 11, ease: "sine.inOut", phaseStep: 1.8,
     },
     float: { // X distances are vw; Y distances are vh.
-      x: { from: -22, to: 26, duration: 13, ease: "sine.inOut" },
-      y: { from: 18, to: -24, duration: 17, ease: "sine.inOut" },
+      x: { from: -11, to: 13, duration: 13, ease: "sine.inOut" },
+      y: { from: 9, to: -12, duration: 17, ease: "sine.inOut" },
+      breath: { from: 0.9, to: 1.1, duration: 7.5, ease: "sine.inOut" },
+      layers: { travel: 0.5, stretch: 0.5 },
     },
     breath: { from: 0.72, to: 1.35, duration: 7.5, ease: "sine.inOut" },
     layers: [
@@ -4394,6 +4396,7 @@ function gradientAnimations() {
         if (style.backgroundImage === "none" && style.backgroundColor === "rgba(0, 0, 0, 0)") return;
         const variant = gradient.getAttribute("gradient-animate") || "horizontal";
         const { direction, travel } = motion.variants[variant];
+        const breath = direction === "float" ? motion.float.breath : motion.breath;
         function pose(values) {
           const result = {};
           const verticalAxes = { scaleX: "scaleY", scaleY: "scaleX", skewX: "skewY" };
@@ -4401,12 +4404,13 @@ function gradientAnimations() {
             if (property === "xVw" || property === "yVh") {
               const primary = property === "xVw";
               const axis = (direction === "vertical" ? !primary : primary) ? "x" : "y";
-              const multiplier = primary || direction === "float" ? travel : 1;
+              const multiplier = direction === "float" ? travel * motion.float.layers.travel : primary ? travel : 1;
               result[axis] = `${value * multiplier}${axis === "x" ? "vw" : "vh"}`;
               return;
             }
             const key = direction === "vertical" ? (verticalAxes[property] || property) : property;
-            result[key] = value;
+            result[key] = direction === "float" && (property === "scaleX" || property === "scaleY")
+              ? 1 + (value - 1) * motion.float.layers.stretch : value;
           });
           return result;
         }
@@ -4438,7 +4442,7 @@ function gradientAnimations() {
         const tweens = [];
         if (direction === "float") {
           gsap.set(field, { x: `${motion.float.x.from * travel}vw`, y: `${motion.float.y.from * travel}vh`,
-            ...breathPose(motion.breath.from), transformOrigin: "50% 50%" });
+            ...breathPose(breath.from), transformOrigin: "50% 50%" });
           // Different axis durations create a flowing path instead of a diagonal shuttle.
           ["x", "y"].forEach(axis => {
             const settings = motion.float[axis];
@@ -4446,7 +4450,7 @@ function gradientAnimations() {
               duration: settings.duration, ease: settings.ease, repeat: -1, yoyo: true, paused: true }));
           });
         } else {
-          gsap.set(field, { ...pose(motion.sweep.from), ...breathPose(motion.breath.from), transformOrigin: "50% 50%" });
+          gsap.set(field, { ...pose(motion.sweep.from), ...breathPose(breath.from), transformOrigin: "50% 50%" });
           tweens.push(gsap.to(field, { ...pose(motion.sweep.to), duration: motion.sweep.duration,
             ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
         }
@@ -4457,8 +4461,8 @@ function gradientAnimations() {
         });
         tweens.forEach((tween, i) => tween.totalTime(index * motion.sweep.phaseStep + i * 0.6, true));
         // Breathe along the sweep axis, or both axes for free-floating gradients.
-        const breathTween = gsap.to(field, { ...breathPose(motion.breath.to), duration: motion.breath.duration,
-          ease: motion.breath.ease, repeat: -1, yoyo: true, paused: true });
+        const breathTween = gsap.to(field, { ...breathPose(breath.to), duration: breath.duration,
+          ease: breath.ease, repeat: -1, yoyo: true, paused: true });
         breathTween.totalTime(index * motion.sweep.phaseStep, true);
         tweens.push(breathTween);
         const entry = { gradient, field, layers, tweens, restore, visible: !hasObserver, active: false };
