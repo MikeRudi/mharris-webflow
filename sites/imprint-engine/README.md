@@ -19,8 +19,10 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 - `gradientAnimations()` implements `gradient-animate="horizontal"`, `vertical`
   and `float`, plus `horizontal-2`, `vertical-2` and `float-2`, inside
-  `gradient-animate="wrap"`. The `-2` variants double directional travel in both
-  the overall movement and inner layers, keeping breathing and timing the same.
+  `gradient-animate="wrap"`. `vertical-2` and `float-2` double directional travel
+  in both the overall movement and inner layers, keeping breathing and timing
+  the same. `horizontal-2` has been reduced to the base horizontal travel range
+  because its doubled viewport movement was too large.
   All travel is in viewport units: X uses `vw`, Y uses `vh`, including the inner
   layers. Horizontal sweeps from -16vw to 30vw; vertical from -16vh to 30vh.
   Float uses -11vw to 13vw on X and 9vh to -12vh on Y. Viewport units remain in

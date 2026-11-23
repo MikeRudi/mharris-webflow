@@ -4349,7 +4349,7 @@ function gradientAnimations() {
   const motion = {
     variants: {
       horizontal: { direction: "horizontal", travel: 1 },
-      "horizontal-2": { direction: "horizontal", travel: 2 },
+      "horizontal-2": { direction: "horizontal", travel: 1 }, // Reduced after switching travel to viewport units.
       vertical: { direction: "vertical", travel: 1 },
       "vertical-2": { direction: "vertical", travel: 2 },
       float: { direction: "float", travel: 1 },
