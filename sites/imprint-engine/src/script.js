@@ -4348,10 +4348,11 @@ function gradientHorizontalAnimation() {
   // HORIZONTAL FORCE — animate inner artwork; preserve native size, position and -50% Y.
   const motion = {
     sweep: {
-      from: { xPercent: -16, skewX: -8, scaleX: 0.96 },
-      to: { xPercent: 30, skewX: 12, scaleX: 1.2 },
+      from: { xPercent: -16, skewX: -8 },
+      to: { xPercent: 30, skewX: 12 },
       duration: 11, ease: "sine.inOut", phaseStep: 1.8,
     },
+    width: { from: 0.72, to: 1.35, duration: 7.5, ease: "sine.inOut" },
     layers: [
       { opacity: 1, from: { xPercent: 0, yPercent: 0, scaleX: 1, scaleY: 1 },
         to: { xPercent: 8, yPercent: -2, scaleX: 1.15, scaleY: 0.82 }, duration: 8 },
@@ -4401,7 +4402,7 @@ function gradientHorizontalAnimation() {
         // Reuse the authored colours/fades; only the animated copies replace their paint.
         gradient.style.backgroundImage = "none";
         gradient.style.backgroundColor = "transparent";
-        gsap.set(field, { ...motion.sweep.from, transformOrigin: "50% 50%" });
+        gsap.set(field, { ...motion.sweep.from, scaleX: motion.width.from, transformOrigin: "50% 50%" });
         const tweens = [gsap.to(field, { ...motion.sweep.to, duration: motion.sweep.duration,
           ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true })];
         layers.forEach((layer, i) => {
@@ -4410,6 +4411,11 @@ function gradientHorizontalAnimation() {
             ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
         });
         tweens.forEach((tween, i) => tween.totalTime(index * motion.sweep.phaseStep + i * 0.6, true));
+        // Width breathes independently of the slower horizontal sweep.
+        const widthTween = gsap.to(field, { scaleX: motion.width.to, duration: motion.width.duration,
+          ease: motion.width.ease, repeat: -1, yoyo: true, paused: true });
+        widthTween.totalTime(index * motion.sweep.phaseStep, true);
+        tweens.push(widthTween);
         const entry = { gradient, field, layers, tweens, restore, visible: !hasObserver, active: false };
         group.entries.push(entry);
         watched.set(gradient, entry);

@@ -23,7 +23,9 @@ Use pinned jsDelivr releases when switching to stable production code.
   elements are renamed. Each gradient's
   native background supplies three runtime layers; GSAP sweeps, stretches and
   shears those layers to produce horizontal flow without changing the outer
-  element's authored width, ratio, position or -50% Y transform. Colours and
+  element's authored width, ratio, position or -50% Y transform. An independent
+  width breath scales the inner artwork from 72% to 135% over 7.5 seconds each
+  way, using `sine.inOut`. Colours and
   fades stay in the authored gradient styles. Motion pauses when its wrapper or
   gradient is offscreen, or the tab is hidden. Reduced motion keeps the native
   artwork static; cleanup restores it and removes all generated layers.
