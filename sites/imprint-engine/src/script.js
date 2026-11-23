@@ -4358,7 +4358,7 @@ function gradientAnimations() {
     sweep: {
       from: { xVw: -16, skewX: -8 },
       to: { xVw: 30, skewX: 12 },
-      duration: 11, ease: "sine.inOut", phaseStep: 1.8,
+      duration: 11, ease: "sine.inOut",
     },
     float: { // X distances are vw; Y distances are vh.
       x: { from: -11, to: 13, duration: 13, ease: "sine.inOut" },
@@ -4391,7 +4391,7 @@ function gradientAnimations() {
       const wrapper = this, group = { visible: !hasObserver, entries: [] };
       $(wrapper).find(selector).filter(function () {
         return $(this).closest(wrapperSelector)[0] === wrapper;
-      }).each(function (index) {
+      }).each(function () {
         const gradient = this, style = getComputedStyle(gradient);
         if (style.backgroundImage === "none" && style.backgroundColor === "rgba(0, 0, 0, 0)") return;
         const variant = gradient.getAttribute("gradient-animate") || "horizontal";
@@ -4459,13 +4459,11 @@ function gradientAnimations() {
           tweens.push(gsap.to(layer, { ...pose(settings.to), duration: settings.duration,
             ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
         });
-        tweens.forEach((tween, i) => tween.totalTime(index * motion.sweep.phaseStep + i * 0.6, true));
         // Breathe along the sweep axis, or both axes for free-floating gradients.
         const breathTween = gsap.to(field, { ...breathPose(breath.to), duration: breath.duration,
           ease: breath.ease, repeat: -1, yoyo: true, paused: true });
-        breathTween.totalTime(index * motion.sweep.phaseStep, true);
         tweens.push(breathTween);
-        const entry = { gradient, field, layers, tweens, restore, visible: !hasObserver, active: false };
+        const entry = { gradient, field, layers, tweens, restore, direction, visible: !hasObserver, active: false };
         group.entries.push(entry);
         watched.set(gradient, entry);
       });
@@ -4473,16 +4471,21 @@ function gradientAnimations() {
     });
 
     function sync() {
-      groups.forEach(group => group.entries.forEach(entry => {
-        const active = group.visible && entry.visible && !document.hidden;
-        if (active === entry.active) return;
-        entry.active = active;
-        [entry.field, ...entry.layers].forEach(layer => {
-          if (active) layer.style.willChange = "transform";
-          else layer.style.removeProperty("will-change");
+      groups.forEach(group => {
+        // Layered horizontal glows share a phase and must never pause independently.
+        const horizontalVisible = group.entries.some(entry => entry.direction === "horizontal" && entry.visible);
+        group.entries.forEach(entry => {
+          const visible = entry.direction === "horizontal" ? horizontalVisible : entry.visible;
+          const active = group.visible && visible && !document.hidden;
+          if (active === entry.active) return;
+          entry.active = active;
+          [entry.field, ...entry.layers].forEach(layer => {
+            if (active) layer.style.willChange = "transform";
+            else layer.style.removeProperty("will-change");
+          });
+          entry.tweens.forEach(tween => active ? tween.play() : tween.pause());
         });
-        entry.tweens.forEach(tween => active ? tween.play() : tween.pause());
-      }));
+      });
     }
     const observer = hasObserver && new IntersectionObserver(entries => {
       entries.forEach(entry => { const item = watched.get(entry.target); if (item) item.visible = entry.isIntersecting; });

@@ -23,6 +23,10 @@ Use pinned jsDelivr releases when switching to stable production code.
   in both the overall movement and inner layers, keeping breathing and timing
   the same. `horizontal-2` has been reduced to the base horizontal travel range
   because its doubled viewport movement was too large.
+  All horizontal gradients in a wrapper share the same phase, including their
+  matching inner layers and breathing. They pause/resume together while any
+  horizontal gradient is visible, keeping layered colours and glows in sync.
+  No gradient preset uses a stagger or a per-layer timing offset.
   All travel is in viewport units: X uses `vw`, Y uses `vh`, including the inner
   layers. Horizontal sweeps from -16vw to 30vw; vertical from -16vh to 30vh.
   Float uses -11vw to 13vw on X and 9vh to -12vh on Y. Viewport units remain in
