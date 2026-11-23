@@ -4345,7 +4345,7 @@ function catalogueAnimation() {
 }
 
 function gradientAnimations() {
-  // GRADIENT MOTION — all travel uses vw/vh; native size, position and transforms stay intact.
+  // GRADIENT MOTION — animate the authored elements; backgrounds and native transforms stay intact.
   const motion = {
     variants: {
       horizontal: { direction: "horizontal", travel: 1 },
@@ -4356,25 +4356,15 @@ function gradientAnimations() {
       "float-2": { direction: "float", travel: 2 },
     },
     sweep: {
-      from: { xVw: -16, skewX: -8 },
-      to: { xVw: 30, skewX: 12 },
+      from: -16, to: 30,
       duration: 11, ease: "sine.inOut",
     },
     float: { // X distances are vw; Y distances are vh.
       x: { from: -11, to: 13, duration: 13, ease: "sine.inOut" },
       y: { from: 9, to: -12, duration: 17, ease: "sine.inOut" },
       breath: { from: 0.9, to: 1.1, duration: 7.5, ease: "sine.inOut" },
-      layers: { travel: 0.5, stretch: 0.5 },
     },
     breath: { from: 0.72, to: 1.35, duration: 7.5, ease: "sine.inOut" },
-    layers: [
-      { opacity: 1, from: { xVw: 0, yVh: 0, scaleX: 1, scaleY: 1 },
-        to: { xVw: 8, yVh: -2, scaleX: 1.15, scaleY: 0.82 }, duration: 8 },
-      { opacity: 0.42, from: { xVw: -20, yVh: -3, scaleX: 0.72, scaleY: 0.9 },
-        to: { xVw: 16, yVh: 2, scaleX: 1.08, scaleY: 0.72 }, duration: 9.5 },
-      { opacity: 0.3, from: { xVw: 16, yVh: 4, scaleX: 0.5, scaleY: 1.06 },
-        to: { xVw: -12, yVh: -2, scaleX: 0.78, scaleY: 1.18 }, duration: 7 },
-    ],
     visibility: { rootMargin: "200px 0px" },
   };
   // Keep the earlier numbered hook working while existing Designer elements are renamed.
@@ -4392,97 +4382,52 @@ function gradientAnimations() {
       $(wrapper).find(selector).filter(function () {
         return $(this).closest(wrapperSelector)[0] === wrapper;
       }).each(function () {
-        const gradient = this, style = getComputedStyle(gradient);
-        if (style.backgroundImage === "none" && style.backgroundColor === "rgba(0, 0, 0, 0)") return;
+        const gradient = this;
         const variant = gradient.getAttribute("gradient-animate") || "horizontal";
         const { direction, travel } = motion.variants[variant];
         const breath = direction === "float" ? motion.float.breath : motion.breath;
-        function pose(values) {
-          const result = {};
-          const verticalAxes = { scaleX: "scaleY", scaleY: "scaleX", skewX: "skewY" };
-          Object.entries(values).forEach(([property, value]) => {
-            if (property === "xVw" || property === "yVh") {
-              const primary = property === "xVw";
-              const axis = (direction === "vertical" ? !primary : primary) ? "x" : "y";
-              const multiplier = direction === "float" ? travel * motion.float.layers.travel : primary ? travel : 1;
-              result[axis] = `${value * multiplier}${axis === "x" ? "vw" : "vh"}`;
-              return;
-            }
-            const key = direction === "vertical" ? (verticalAxes[property] || property) : property;
-            result[key] = direction === "float" && (property === "scaleX" || property === "scaleY")
-              ? 1 + (value - 1) * motion.float.layers.stretch : value;
-          });
-          return result;
-        }
-        const breathPose = scale => direction === "vertical" ? { scaleY: scale }
-          : direction === "float" ? { scaleX: scale, scaleY: scale } : { scaleX: scale };
-        const artwork = { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor,
-          backgroundSize: style.backgroundSize, backgroundPosition: style.backgroundPosition,
-          backgroundRepeat: style.backgroundRepeat, borderRadius: style.borderRadius };
         const restore = rememberAttributes($(gradient), ["style"]);
-        const field = document.createElement("div");
-        field.className = `gradient-${direction}-motion`;
-        field.setAttribute("gradient-motion-field", variant);
-        field.setAttribute("aria-hidden", "true");
-        Object.assign(field.style, { position: "absolute", inset: "0", pointerEvents: "none" });
-        if (style.position === "static") gradient.style.position = "relative";
-        gradient.appendChild(field);
-        const layers = motion.layers.map((settings, layerIndex) => {
-          const layer = document.createElement("div");
-          layer.className = `gradient-${direction}-motion-layer`;
-          layer.setAttribute("gradient-motion-layer", String(layerIndex));
-          Object.assign(layer.style, artwork, { position: "absolute", inset: "0", pointerEvents: "none" });
-          field.appendChild(layer);
-          gsap.set(layer, { ...pose(settings.from), opacity: settings.opacity, transformOrigin: "50% 50%" });
-          return layer;
+        const breathPose = scale => ({
+          "--gradient-motion-scale-x": direction === "vertical" ? 1 : scale,
+          "--gradient-motion-scale-y": direction === "horizontal" ? 1 : scale,
         });
-        // Reuse the authored colours/fades; only the animated copies replace their paint.
-        gradient.style.backgroundImage = "none";
-        gradient.style.backgroundColor = "transparent";
+        // Individual motion properties compose with Webflow's native transform (including -50% Y).
+        gradient.style.translate = "var(--gradient-motion-x) var(--gradient-motion-y)";
+        gradient.style.scale = "var(--gradient-motion-scale-x) var(--gradient-motion-scale-y)";
+        gsap.set(gradient, { "--gradient-motion-x": "0vw", "--gradient-motion-y": "0vh", ...breathPose(breath.from) });
         const tweens = [];
         if (direction === "float") {
-          gsap.set(field, { x: `${motion.float.x.from * travel}vw`, y: `${motion.float.y.from * travel}vh`,
-            ...breathPose(breath.from), transformOrigin: "50% 50%" });
           // Different axis durations create a flowing path instead of a diagonal shuttle.
           ["x", "y"].forEach(axis => {
             const settings = motion.float[axis];
-            tweens.push(gsap.to(field, { [axis]: `${settings.to * travel}${axis === "x" ? "vw" : "vh"}`,
+            const property = `--gradient-motion-${axis}`, unit = axis === "x" ? "vw" : "vh";
+            gsap.set(gradient, { [property]: `${settings.from * travel}${unit}` });
+            tweens.push(gsap.to(gradient, { [property]: `${settings.to * travel}${unit}`,
               duration: settings.duration, ease: settings.ease, repeat: -1, yoyo: true, paused: true }));
           });
         } else {
-          gsap.set(field, { ...pose(motion.sweep.from), ...breathPose(breath.from), transformOrigin: "50% 50%" });
-          tweens.push(gsap.to(field, { ...pose(motion.sweep.to), duration: motion.sweep.duration,
+          const property = direction === "horizontal" ? "--gradient-motion-x" : "--gradient-motion-y";
+          const unit = direction === "horizontal" ? "vw" : "vh";
+          gsap.set(gradient, { [property]: `${motion.sweep.from * travel}${unit}` });
+          tweens.push(gsap.to(gradient, { [property]: `${motion.sweep.to * travel}${unit}`, duration: motion.sweep.duration,
             ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
         }
-        layers.forEach((layer, i) => {
-          const settings = motion.layers[i];
-          tweens.push(gsap.to(layer, { ...pose(settings.to), duration: settings.duration,
-            ease: motion.sweep.ease, repeat: -1, yoyo: true, paused: true }));
-        });
         // Breathe along the sweep axis, or both axes for free-floating gradients.
-        const breathTween = gsap.to(field, { ...breathPose(breath.to), duration: breath.duration,
+        const breathTween = gsap.to(gradient, { ...breathPose(breath.to), duration: breath.duration,
           ease: breath.ease, repeat: -1, yoyo: true, paused: true });
         tweens.push(breathTween);
-        const entry = { gradient, field, layers, tweens, restore, direction, visible: !hasObserver, active: false };
+        const entry = { tweens, restore, active: false };
         group.entries.push(entry);
-        watched.set(gradient, entry);
       });
       if (group.entries.length) { groups.push(group); watched.set(wrapper, group); }
     });
 
     function sync() {
       groups.forEach(group => {
-        // Layered horizontal glows share a phase and must never pause independently.
-        const horizontalVisible = group.entries.some(entry => entry.direction === "horizontal" && entry.visible);
         group.entries.forEach(entry => {
-          const visible = entry.direction === "horizontal" ? horizontalVisible : entry.visible;
-          const active = group.visible && visible && !document.hidden;
+          const active = group.visible && !document.hidden;
           if (active === entry.active) return;
           entry.active = active;
-          [entry.field, ...entry.layers].forEach(layer => {
-            if (active) layer.style.willChange = "transform";
-            else layer.style.removeProperty("will-change");
-          });
           entry.tweens.forEach(tween => active ? tween.play() : tween.pause());
         });
       });
@@ -4499,7 +4444,7 @@ function gradientAnimations() {
       document.removeEventListener("visibilitychange", sync);
       groups.forEach(group => group.entries.forEach(entry => {
         entry.tweens.forEach(tween => tween.kill());
-        entry.field.remove(); entry.restore();
+        entry.restore();
       }));
     };
   });

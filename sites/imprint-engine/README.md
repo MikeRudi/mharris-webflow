@@ -20,31 +20,29 @@ Use pinned jsDelivr releases when switching to stable production code.
 - `gradientAnimations()` implements `gradient-animate="horizontal"`, `vertical`
   and `float`, plus `horizontal-2`, `vertical-2` and `float-2`, inside
   `gradient-animate="wrap"`. `vertical-2` and `float-2` double directional travel
-  in both the overall movement and inner layers, keeping breathing and timing
-  the same. `horizontal-2` has been reduced to the base horizontal travel range
+  while keeping breathing and timing the same. `horizontal-2` has been reduced to the base horizontal travel range
   because its doubled viewport movement was too large.
-  All horizontal gradients in a wrapper share the same phase, including their
-  matching inner layers and breathing. They pause/resume together while any
-  horizontal gradient is visible, keeping layered colours and glows in sync.
-  No gradient preset uses a stagger or a per-layer timing offset.
-  All travel is in viewport units: X uses `vw`, Y uses `vh`, including the inner
-  layers. Horizontal sweeps from -16vw to 30vw; vertical from -16vh to 30vh.
+  Gradients start without stagger and pause/resume together based on their
+  wrapper's visibility, keeping horizontal colours and glows in sync.
+  All travel is in viewport units: X uses `vw`, Y uses `vh`.
+  Horizontal sweeps from -16vw to 30vw; vertical from -16vh to 30vh.
   Float uses -11vw to 13vw on X and 9vh to -12vh on Y. Viewport units remain in
   the animated transforms so they follow viewport resizing automatically.
-  Vertical swaps the horizontal movement/shape axes. Float drifts independently
+  Vertical uses the Y axis. Float drifts independently
   on X (13 seconds each way) and Y (17 seconds), breathing from 90% to 110% on
-  both axes. Its inner layers use half the travel and stretch of the other presets.
+  both axes.
   The earlier `gradient-animate-1` and
   `gradient-animate-wrap` hooks remain compatibility aliases while existing
-  elements are renamed. Each gradient's
-  native background supplies three runtime layers; GSAP sweeps, stretches and
-  shears those layers to produce flow without changing the outer
-  element's authored width, ratio, position or -50% Y transform. An independent
+  elements are renamed. GSAP animates the existing Webflow gradient elements
+  through individual CSS translate/scale properties and motion custom properties.
+  Code creates no elements, copies no backgrounds and never hides the authored
+  gradients. Native backgrounds, blur, width, ratio, position and transforms
+  (including -50% Y) remain authored in Webflow. An independent
   breath scales horizontal/vertical artwork from 72% to 135% over 7.5 seconds each
   way, using `sine.inOut`. Colours and
-  fades stay in the authored gradient styles. Motion pauses when its wrapper or
-  gradient is offscreen, or the tab is hidden. Reduced motion keeps the native
-  artwork static; cleanup restores it and removes all generated layers.
+  fades stay in the authored gradient styles. Motion pauses when its wrapper
+  is offscreen or the tab is hidden. Reduced motion keeps the native artwork
+  static; cleanup restores original inline styles.
 - `videoPlayMagnet()` adds a desktop cursor pull to `.initial-play` (or the
   existing `.video-initial-play`) inside `.video-wrap`. Its center follows the
   cursor directly over 0.35s, returning to its native position over 0.55s with
