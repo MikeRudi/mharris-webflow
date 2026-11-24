@@ -5080,8 +5080,14 @@ function homeFaqAnimation() {
   const faqMotion = { toggle: { duration: 0.3, ease: "power1.in" } };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const cleanups = [];
-  $sections.each(function () {
-    const $items = $(this).find("[home-faq-item]");
+  $sections.each(function (sectionIndex) {
+    const $section = $(this);
+    const $categoryWrap = $section.find("[faq-categories], .faq-categories").first();
+    const categoryMode = $categoryWrap.length && !$categoryWrap.closest(".w-condition-invisible").length;
+    const $allSource = $section.find("[faq-cms-all]").first();
+    const $selectedSource = $section.find("[faq-cms-questions]").not("[faq-cms-all]").first();
+    const $source = categoryMode ? $allSource : $selectedSource;
+    let $items = ($source.length ? $source : $section).find("[home-faq-item]");
     const addedCategoryHooks = [];
     $(this).find(".faq-categories > .filter1-tabs-item").each(function (index) {
       if (!this.hasAttribute("faq-category")) {
@@ -5089,50 +5095,74 @@ function homeFaqAnimation() {
         addedCategoryHooks.push(this);
       }
     });
-    const $categories = $(this).find("[faq-category]");
-    const $more = $(this).find("[faq-more]");
+    const $categories = $section.find("[faq-category]");
+    const $more = $section.find("[faq-more]");
     const hasMore = $more.length && !$more.closest(".w-condition-invisible").length;
     let shown = hasMore ? 4 : Infinity;
     let category = "";
-    const restoreCategories = rememberAttributes($categories, ["class", "aria-pressed"]);
+    const restoreCategories = rememberAttributes($categories, ["class", "aria-pressed", "hidden"]);
     const restoreItemVisibility = rememberAttributes($items, ["hidden"]);
-    const restoreMore = rememberAttributes($more, ["aria-disabled"]);
+    const restoreMore = rememberAttributes($more, ["aria-disabled", "hidden"]);
+    const categoryKey = value => String(value || "").trim().toLowerCase().replace(/\s+/g, "-");
+    function tabCategory($tab) {
+      const key = $tab.attr("faq-category") || "";
+      if (key === "0" || key === "all") return "";
+      return categoryKey(/^\d*$/.test(key) ? $tab.text() : key);
+    }
+    function itemCategories(item) {
+      return ($(item).attr("faq-item-category") || "").split(",").map(categoryKey).filter(Boolean);
+    }
+    const selectedCategories = new Set();
+    const seenCategories = new Set();
+    $categories.each(function () {
+      const key = tabCategory($(this));
+      this.hidden = !$(this).text().trim() || seenCategories.has(key);
+      if (!this.hidden) {
+        seenCategories.add(key);
+        if (key) selectedCategories.add(key);
+      }
+    });
+    const matchesSelection = item => !categoryMode || !$allSource.length ||
+      itemCategories(item).some(key => selectedCategories.has(key));
+    const controller = new AbortController();
+    let destroyed = false, loading = false, nextPage = "";
+    const loadedItems = [];
+    const itemCleanups = [];
+    const restoreBusy = rememberAttributes($source, ["aria-busy"]);
+    const nextLink = source => source?.querySelector(".w-pagination-next[href]")?.getAttribute("href") || "";
+    if (categoryMode && $allSource.length && selectedCategories.size) nextPage = nextLink($allSource[0]);
     function filterQuestions() {
       let matched = 0;
       $items.each(function () {
         if ($(this).hasClass("w-condition-invisible")) return;
-        const assigned = ($(this).attr("faq-item-category") || "").trim().toLowerCase();
-        const matches = !category || !assigned || assigned.split(",").map(v => v.trim()).includes(category);
+        const assigned = itemCategories(this);
+        const matches = matchesSelection(this) && (!categoryMode || !category || assigned.includes(category));
         if (matches) matched++;
         this.hidden = !matches || matched > shown;
       });
-      $more.attr("aria-disabled", String(matched <= shown));
+      $more.attr("aria-disabled", String(matched <= shown && !nextPage));
+      $more.prop("hidden", matched <= shown && !nextPage);
       if (window.ScrollTrigger) ScrollTrigger.refresh();
     }
     const unbindCategories = bindControlActivation($categories, "faqCategories", ($category) => {
-      category = $category.attr("faq-category") === "0" ? "" : $category.text().trim().toLowerCase();
+      category = tabCategory($category);
       shown = hasMore ? 4 : Infinity;
       $categories.removeClass("is-active").attr("aria-pressed", "false");
       $category.addClass("is-active").attr("aria-pressed", "true");
       filterQuestions();
     });
-    const unbindMore = bindControlActivation($more, "faqMore", () => { shown += 4; filterQuestions(); });
-    $categories.attr("aria-pressed", "false").filter(".is-active").attr("aria-pressed", "true");
-    if (hasMore) filterQuestions();
-    const $buttons = $items.find("[home-faq-button]");
-    const $panels = $items.find("[home-faq-panel]");
-    const restoreButtons = rememberAttributes($buttons, ["aria-expanded", "aria-controls"]);
-    const restorePanels = rememberAttributes($panels, ["id", "style", "aria-hidden", "inert"]);
-    let transition;
-    $items.each(function () {
-      const $button = $(this).find("[home-faq-button]").first();
-      const $panel = $(this).find("[home-faq-panel]").first();
-      if (!$button.length || !$panel.length) return;
-      if (!$panel[0].id) $panel[0].id = uniqueElementId("home-faq-answer");
-      $button.attr({ "aria-expanded": "false", "aria-controls": $panel[0].id });
-      $panel.attr({ "aria-hidden": "true", inert: "" });
+    const unbindMore = bindControlActivation($more, "faqMore", ($button) => {
+      if ($button.attr("aria-disabled") === "true") return;
+      shown += 4;
+      filterQuestions();
+      loadCategoryPages();
     });
-    const unbind = bindControlActivation($buttons, "homeFaq", ($button) => {
+    $categories.removeClass("is-active").attr("aria-pressed", "false").filter(function () {
+      return !this.hidden && tabCategory($(this)) === "";
+    }).first().addClass("is-active").attr("aria-pressed", "true");
+    filterQuestions();
+    let transition;
+    function toggleQuestion($button) {
       const opening = $button.attr("aria-expanded") !== "true";
       if (transition) transition.kill();
       // Refresh downstream scroll positions once, after all panel heights settle.
@@ -5153,14 +5183,74 @@ function homeFaqAnimation() {
           }, 0);
         } else $panel.css("height", open ? "auto" : 0);
       });
-    });
+    }
+    function prepareItems($newItems) {
+      const $buttons = $newItems.find("[home-faq-button]");
+      const $panels = $newItems.find("[home-faq-panel]");
+      const restoreButtons = rememberAttributes($buttons, ["aria-expanded", "aria-controls"]);
+      const restorePanels = rememberAttributes($panels, ["id", "style", "aria-hidden", "inert"]);
+      $newItems.each(function () {
+        const $button = $(this).find("[home-faq-button]").first();
+        const $panel = $(this).find("[home-faq-panel]").first();
+        if (!$button.length || !$panel.length) return;
+        if (!$panel[0].id) $panel[0].id = uniqueElementId("home-faq-answer");
+        $button.attr({ "aria-expanded": "false", "aria-controls": $panel[0].id });
+        $panel.attr({ "aria-hidden": "true", inert: "" }).css("height", 0);
+      });
+      const unbind = bindControlActivation($buttons, "homeFaq", toggleQuestion);
+      itemCleanups.push(() => {
+        unbind();
+        if (window.gsap) gsap.killTweensOf($panels);
+        restoreButtons(); restorePanels();
+      });
+    }
+    // Read published CMS pagination, keeping only this instance's chosen categories.
+    // No API credentials or copied CMS content are stored in the custom code.
+    async function loadCategoryPages() {
+      if (loading || !nextPage || destroyed) return;
+      loading = true;
+      $source.attr("aria-busy", "true");
+      try {
+        while (nextPage && !destroyed) {
+          const url = new URL(nextPage, window.location.href);
+          if (url.origin !== window.location.origin) throw new Error("Invalid FAQ pagination URL");
+          const response = await fetch(url.href, { signal: controller.signal });
+          if (!response.ok) throw new Error(`FAQ page returned ${response.status}`);
+          const page = new DOMParser().parseFromString(await response.text(), "text/html");
+          if (destroyed) return;
+          const source = page.querySelectorAll("[home-faq]")[sectionIndex]?.querySelector("[faq-cms-all]");
+          if (!source) throw new Error("FAQ CMS source missing from pagination response");
+          const following = nextLink(source);
+          if (following && new URL(following, url).href === url.href) throw new Error("Repeated FAQ pagination URL");
+          const added = [...source.querySelectorAll("[home-faq-item]")].filter(matchesSelection);
+          added.forEach(item => {
+            item.hidden = true;
+            $source.find(".w-dyn-items").first().append(item);
+            loadedItems.push(item);
+          });
+          const $added = $(added);
+          $items = $items.add($added);
+          prepareItems($added);
+          nextPage = following;
+          filterQuestions();
+        }
+      } catch (error) {
+        if (!destroyed && error.name !== "AbortError") console.warn("FAQ CMS loading failed; Load More retries.", error);
+      } finally {
+        loading = false;
+        if (!destroyed) $source.attr("aria-busy", "false");
+      }
+    }
+    prepareItems($items);
+    loadCategoryPages();
     cleanups.push(() => {
-      unbind();
+      destroyed = true; controller.abort();
+      itemCleanups.forEach(cleanup => cleanup());
+      loadedItems.forEach(item => item.remove());
+      restoreBusy();
       unbindCategories(); unbindMore(); restoreCategories(); restoreItemVisibility(); restoreMore();
       addedCategoryHooks.forEach(item => item.removeAttribute("faq-category"));
       if (transition) transition.kill();
-      if (window.gsap) gsap.killTweensOf($panels);
-      restoreButtons(); restorePanels();
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());

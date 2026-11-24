@@ -1,5 +1,7 @@
 /* Content filtering must override native flex/grid display rules. */
 [home-faq-item][hidden],
+[faq-category][hidden],
+[faq-more][hidden],
 [updates-item][hidden],
 [career-job][hidden],
 [career-empty][hidden],
