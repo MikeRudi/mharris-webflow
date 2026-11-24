@@ -17,22 +17,21 @@ Use **Typography** beside **Add page** for the project's saved class sizes, line
 heights, letter spacing and font weights. Imprint Engine's values were imported
 from its saved desktop typography text file and live in the project JSON's
 `typography` field. Heading sizes use a 1440px viewport and 16px root reference.
-Each page has seven independent checkboxes: **Design ready**, **Developing in Webflow**,
-**Desktop**, **Mobile**, **Awaiting content**, **Client’s hands**, and **Complete**. They appear
-in the table and page dialog and save automatically in the project JSON. The filter
-checkboxes show pages matching every selected checkbox. Seven compact totals at
-the top count checked items in the page groups, excluding Removed entries.
-Navigation, CMS collections and References sit under **Other groups** in the
-sidebar. They remain editable there but are excluded from All groups and its totals.
+Each page has four independent checkboxes: **Desktop**, **Mobile**, **Missing content**,
+and **Complete**. They appear in the table and page dialog and save automatically
+in the project JSON. Design previews and staging links remain beside them.
+All page groups appear in one full-width list, without a sidebar, filters or totals.
+Navigation, CMS collections and References and their records were removed from
+the local Imprint Engine tracker on 24 November 2026.
 Only Michael's explicit final confirmation authorizes checking Complete, Desktop or Mobile.
 Implementation, testing and publishing alone do not count as approval.
-The checkbox fields are `designReady`, `workingInWebflow`, `desktop`, `mobile`,
-`awaitingContent`, `clientsHands`, and `complete`. These are the current workflow values;
+The checkbox fields are `desktop`, `mobile`, `missingContent`, and `complete`.
+These are the current workflow values;
 the old `status` and `webflow` fields remain as historical metadata, including
 Removed entries. Do not use the old status fields for new updates.
-`workflow.mjs` carries existing saved designs, Webflow presence and approvals into
-the checkboxes on load without overwriting explicit checkbox values. Desktop and
-Client’s hands start unchecked. The new values persist with the next local save.
+`workflow.mjs` migrates Awaiting content to Missing content and Client’s hands to
+Complete, preserving existing Complete approvals. It removes the obsolete checkbox
+fields. Schema version 3 prevents older browser windows from saving the old format.
 Imprint Engine's eight desktop to-dos were imported on 13 October 2026, initially unchecked,
 along with unchecked Mobile controls for every existing tracker entry.
 The plain-text snapshot is imprint-page-list.txt; it is not automatically regenerated after edits.
@@ -48,9 +47,10 @@ Live URL: https://imprint-engine-tracker.vercel.app/
 Vercel project: `imprint-engine-tracker` (`prj_zPB8ACLEsqDCAW7bn5Z6uB4QTBRy`).
 Connected repository: `MikeRudi/mharris-webflow`, production branch `main`.
 
-The `public/` folder is a static snapshot for colleagues. It includes page groups,
-search, checklist filtering, seven disabled status checkboxes,
-staging links and full-resolution, lossless design previews. It has no editing API,
+The `public/` folder is a static snapshot for colleagues. The next export uses the
+simplified page groups and four disabled status checkboxes, staging links and
+full-resolution, lossless design previews. The currently published snapshot stays
+unchanged until exported and pushed. It has no editing API,
 project creation, to-do list, typography editor or Add page controls.
 
 Local editing remains at `http://127.0.0.1:4318`.
@@ -66,8 +66,7 @@ Do not deploy the local server or the complete `data/` folder. Each deployment i
 snapshot; local status edits reach colleagues after exporting and pushing again.
 
 Figma's Design > Dev page is the current design inventory. Entries marked Removed
-remain in the list but are excluded from the progress totals. CMS collections are
-listed separately and do not count toward page totals.
+remain in the page list as historical records.
 View design opens a locally saved PNG. Files are organised by group and page under:
 
 `C:/Users/miker/OneDrive/Desktop/Imprint Engine/Figma exports/`

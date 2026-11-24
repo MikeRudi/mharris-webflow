@@ -1,37 +1,34 @@
 /* BEGIN WORKFLOW */
 const workflowFields = [
-  ['designReady', 'Design ready'],
-  ['workingInWebflow', 'Developing in Webflow'],
   ['desktop', 'Desktop'],
   ['mobile', 'Mobile'],
-  ['awaitingContent', 'Awaiting content'],
-  ['clientsHands', "Client’s hands"],
+  ['missingContent', 'Missing content'],
   ['complete', 'Complete'],
 ];
 
 // Existing approvals carry across; new checkboxes never infer approval.
 function normalizePage(page) {
-  page.designReady ??= Boolean(page.previewFile || page.previewUrl);
-  page.workingInWebflow ??= page.webflow === 'yes';
   page.desktop ??= false;
-  page.awaitingContent ??= page.status === 'awaiting-content';
   page.mobile ??= false;
-  page.clientsHands ??= false;
-  page.complete ??= page.status === 'complete';
+  page.missingContent ??= page.awaitingContent ?? page.status === 'awaiting-content';
+  page.complete = Boolean(page.complete ?? page.status === 'complete') || page.clientsHands === true;
+  delete page.designReady;
+  delete page.workingInWebflow;
+  delete page.awaitingContent;
+  delete page.clientsHands;
   return page;
 }
 
 function normalizeProject(project) {
   project.pages.forEach(normalizePage);
-  project.groups.forEach(group => { if (group.name === 'CMS collection') group.name = 'CMS collections'; });
-  project.schemaVersion = 2;
+  project.schemaVersion = 3;
   return project;
 }
 /* END WORKFLOW */
 
 const $ = selector => document.querySelector(selector);
 const readOnly = document.documentElement.dataset.readOnly === 'true';
-let project, activeGroup = 'all', editingId = null, saveQueue = Promise.resolve(), pending = 0, todoSaveTimer = null;
+let project, editingId = null, saveQueue = Promise.resolve(), pending = 0, todoSaveTimer = null;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const safeUrl = value => { try { const u = new URL(value); return ['http:', 'https:'].includes(u.protocol) ? u.href : ''; } catch { return ''; } };
 
@@ -76,11 +73,8 @@ async function loadProject(id) {
   await saveQueue;
   project = normalizeProject(await request(readOnly ? '/project.json' : `/api/projects/${id}`));
   project.todos ??= [];
-  activeGroup = 'all';
   $('#project-title').textContent = project.name;
   setSaveStatus(readOnly ? '' : 'All changes saved locally');
-  $('#search').value = '';
-  $('#workflow-filters').innerHTML = '<legend>Show pages checked for</legend>' + workflowFields.map(([field, label]) => `<label><input type="checkbox" class="check-control" data-filter="${field}">${escape(label)}</label>`).join('');
   localStorage.setItem('michael-webdev-project', id);
   render();
 }
@@ -88,29 +82,16 @@ async function loadProject(id) {
 function render() {
   if (!project) return;
   const pages = project.pages;
-  const otherGroups = project.groups.filter(g => ['navigation', 'references'].includes(g.id) || /^(navigation|references|cms collections?)$/i.test(g.name) || pages.some(p => p.groupId === g.id && p.kind === 'collection'));
-  const otherGroupIds = new Set(otherGroups.map(g => g.id));
-  const isPageGroupItem = p => p.kind !== 'collection' && !otherGroupIds.has(p.groupId);
-  const activeItems = pages.filter(p => isPageGroupItem(p) && p.webflow !== 'removed');
-  $('#metrics').innerHTML = workflowFields.map(([field, label]) => `<div class="metric"><span>${escape(label)}</span><strong>${activeItems.filter(p => p[field]).length}</strong></div>`).join('');
-  const groupButton = g => `<button type="button" data-group="${escape(g.id)}" class="${g.id === activeGroup ? 'selected' : ''}" aria-current="${g.id === activeGroup ? 'true' : 'false'}"><span>${escape(g.name)}</span><span>${pages.filter(p => g.id === 'all' ? isPageGroupItem(p) : p.groupId === g.id).length}</span></button>`;
-  $('#groups').innerHTML = [{ id: 'all', name: 'All groups' }, ...project.groups.filter(g => !otherGroupIds.has(g.id))].map(groupButton).join('') +
-    (otherGroups.length ? '<h2 class="sidebar-label other-groups-label">OTHER GROUPS</h2>' + otherGroups.map(groupButton).join('') : '');
-  const q = $('#search').value.trim().toLowerCase();
-  const checkedFilters = [...document.querySelectorAll('[data-filter]:checked')].map(input => input.dataset.filter);
-  const filtered = pages.filter(p => (activeGroup === 'all' ? isPageGroupItem(p) : p.groupId === activeGroup) && checkedFilters.every(field => p[field]) && [p.name, p.figmaFrame, p.content, p.notes].join(' ').toLowerCase().includes(q));
-  $('#result-count').textContent = `${filtered.length} ${filtered.length === 1 ? 'item' : 'items'} shown`;
-  $('#empty').hidden = filtered.length !== 0;
+  $('#empty').hidden = pages.length !== 0;
   $('#page-list').innerHTML = project.groups.map(group => {
-    const items = filtered.filter(p => p.groupId === group.id);
+    const items = pages.filter(p => p.groupId === group.id);
     if (!items.length) return '';
-    const allGroup = pages.filter(p => p.groupId === group.id);
     return `<section class="group-section">
-      <div class="group-heading"><div><h2>${escape(group.name)}</h2>${group.note ? `<p>${escape(group.note)}</p>` : ''}</div><span>${allGroup.filter(p => p.complete).length} / ${allGroup.length} complete</span></div>
+      <div class="group-heading"><div><h2>${escape(group.name)}</h2>${group.note ? `<p>${escape(group.note)}</p>` : ''}</div></div>
       <div class="table-wrap"><table class="page-table"><thead><tr>
         <th scope="col">${items.every(p => p.kind === 'collection') ? 'Collection' : 'Page / design'}</th>
         ${workflowFields.map(([, label]) => `<th scope="col" class="status-column">${escape(label)}</th>`).join('')}
-        <th scope="col" class="design-column">Design</th><th scope="col" class="link-column"><span class="sr-only">Link</span></th>
+        <th scope="col" class="design-column">Design</th><th scope="col" class="link-column">Link</th>
       </tr></thead><tbody>${items.map(p => `<tr data-state="${escape(p.webflow || '')}">
         <td>${readOnly ? (safeUrl(p.webflowUrl) ? `<a class="page-name" href="${escape(safeUrl(p.webflowUrl))}" target="_blank" rel="noreferrer">${escape(p.name)}</a>` : `<span class="page-name">${escape(p.name)}</span>`) : `<button class="page-name" data-page="${escape(p.id)}">${escape(p.name)}</button>`}
           ${p.webflow === 'removed' ? '<span class="type-tag">Removed</span>' : p.kind && !['page', 'collection'].includes(p.kind) ? `<span class="type-tag">${escape(p.kind)}</span>` : ''}
@@ -124,7 +105,7 @@ function render() {
 
 function openDetail(id) {
   if (readOnly) return;
-  const page = project.pages.find(p => p.id === id) || normalizePage({ name: '', kind: 'page', groupId: activeGroup === 'all' ? project.groups[0]?.id : activeGroup });
+  const page = project.pages.find(p => p.id === id) || normalizePage({ name: '', kind: 'page', groupId: project.groups[0]?.id });
   editingId = id || null;
   $('#detail-title').textContent = page.name || 'Add a page';
   $('#form-error').textContent = '';
@@ -138,9 +119,6 @@ function openDetail(id) {
   $('#detail').showModal();
 }
 
-$('#groups').addEventListener('click', event => { const button = event.target.closest('[data-group]'); if (button) { activeGroup = button.dataset.group; render(); } });
-$('#search').addEventListener('input', render);
-$('#workflow-filters').addEventListener('change', render);
 if (!readOnly) {
 $('#page-list').addEventListener('click', event => { const button = event.target.closest('[data-page]'); if (button) openDetail(button.dataset.page); });
 $('#page-list').addEventListener('change', async event => {

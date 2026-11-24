@@ -40,79 +40,16 @@ button:disabled { cursor: wait; border-style: dashed; }
 .primary { border-color: var(--ink); font-weight: 700; }
 .primary:hover { box-shadow: inset 0 0 0 1px var(--ink); }
 
-/* Index */
-.sidebar {
-  position: fixed;
-  inset: 0 auto 0 0;
-  width: 256px;
-  padding: 30px 20px;
-  border-right: 1px solid var(--line);
-  background: var(--paper);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-.sidebar[hidden] { display: none; }
-.sidebar .sidebar-label {
-  display: block;
-  margin: 0 11px 12px;
-  font: 700 13px/1.35 Arial, Helvetica, sans-serif;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-}
-.sidebar .sidebar-label.other-groups-label { margin: 26px 11px 12px; }
-#groups { display: grid; gap: 3px; }
-#groups button {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border: 0;
-  padding: 11px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 400;
-  line-height: 1.4;
-  letter-spacing: .02em;
-}
-#groups button span:last-child { font-weight: 400; font-variant-numeric: tabular-nums; }
-#groups button.selected { font-weight: 750; box-shadow: inset 2px 0 var(--ink); }
-#groups button:hover span:first-child { text-decoration: underline; text-underline-offset: 3px; }
-#groups button[data-group]+button[data-group]::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: 11px;
-  right: 11px;
-  border-top: 1px solid var(--line);
-  pointer-events: none;
-}
-
-/* Header and totals */
-main { margin-left: 256px; padding: 44px 48px 24px; max-width: 1600px; }
+/* Header */
+main { width: 100%; padding: 44px 48px 24px; }
 header { margin-bottom: 24px; }
 .heading-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .heading-title { display: flex; align-items: center; gap: 14px; min-width: 0; }
 h1 { margin: 12px 0; font-size: 34px; font-weight: 700; line-height: 1.2; letter-spacing: -1.1px; }
 .header-actions { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
-.checklist-totals { display: flex; flex-wrap: wrap; gap: 0; margin: 0; border-block: 1px solid var(--line); }
-.checklist-totals .metric {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 10px 0;
-  padding: 0 14px;
-  border-right: 1px solid var(--line);
-}
-.checklist-totals .metric:first-child { padding-left: 0; }
-.checklist-totals .metric:last-child { border-right: 0; }
-.checklist-totals .metric span { font-size: 10px; font-weight: 400; letter-spacing: .04em; text-transform: uppercase; }
-.checklist-totals .metric strong { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.save-status-row { margin-top: 12px; text-align: right; font-size: 11px; font-weight: 400; }
+.save-status-row { margin: 12px 0 24px; text-align: right; font-size: 11px; font-weight: 400; }
 
-/* Search and checklist filters */
-.toolbar { display: flex; flex-wrap: wrap; gap: 16px; margin: 28px 0 16px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+/* Form controls */
 input, textarea, select {
   min-width: 0;
   border: 1px solid var(--line-strong);
@@ -122,12 +59,8 @@ input, textarea, select {
   font-weight: 400;
 }
 input::placeholder, textarea::placeholder { color: var(--ink); opacity: 1; font-weight: 400; }
-.search { display: flex; align-items: center; flex: 1 1 100%; min-height: 42px; gap: 8px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); }
-.search input { width: 100%; border: 0; padding-left: 0; font-size: 12px; }
-.search span { font-size: 22px; }
-.workflow-filters { display: flex; flex-wrap: wrap; gap: 12px 20px; border: 0; padding: 0; margin: 0; }
-.workflow-filters legend, .detail-checks legend { margin-bottom: 12px; padding: 0; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
-.workflow-filters label, .detail-checks label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 400; letter-spacing: .025em; text-transform: uppercase; cursor: pointer; }
+.detail-checks legend { margin-bottom: 12px; padding: 0; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.detail-checks label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 400; letter-spacing: .025em; text-transform: uppercase; cursor: pointer; }
 .check-control {
   appearance: none;
   position: relative;
@@ -161,22 +94,19 @@ input::placeholder, textarea::placeholder { color: var(--ink); opacity: 1; font-
 .detail-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; border: 0; padding: 0; margin: 20px 0; }
 
 /* Page sections and tables */
-.list-intro { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 24px; font-size: 11px; font-weight: 400; }
-#result-count { text-transform: uppercase; letter-spacing: .04em; }
 .group-section { margin-bottom: 36px; }
 .group-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 14px; }
 .group-heading h2 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-.group-heading span { font-size: 11px; font-weight: 400; letter-spacing: .035em; text-transform: uppercase; }
 .group-heading p { margin: 5px 0 0; font-size: 12px; font-weight: 400; }
 .table-wrap { position: relative; overflow-x: auto; border-block: 1px solid var(--line-strong); }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 th { padding: 15px 16px; text-align: left; font-size: 12px; font-weight: 400; line-height: 1.4; letter-spacing: .025em; text-transform: uppercase; }
 td { padding: 15px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
-.page-table { min-width: 1040px; }
-.page-table th:first-child { width: 25%; }
-.page-table .status-column { width: 8.5%; padding-left: 6px; padding-right: 6px; text-align: center; }
-.page-table .design-column { width: 11.5%; }
-.page-table .link-column { width: 4%; }
+.page-table { min-width: 780px; }
+.page-table th:first-child { width: 35%; }
+.page-table .status-column { width: 11%; padding-left: 6px; padding-right: 6px; text-align: center; }
+.page-table .design-column { width: 14%; }
+.page-table .link-column { width: 7%; }
 .page-name { border: 0; padding: 0; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; }
 a.page-name { text-decoration: none; }
 .page-name:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -250,23 +180,17 @@ html[data-read-only] span.page-name:hover { text-decoration: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 @media (max-width: 1100px) {
-  .sidebar { width: 220px; }
-  main { margin-left: 220px; padding: 30px 24px; }
+  main { padding: 30px 24px; }
   .heading-row { align-items: flex-start; flex-direction: column; gap: 8px; }
   .header-actions { margin-bottom: 12px; }
   td, th { padding: 14px 10px; }
 }
 @media (max-width: 760px) {
-  .sidebar { position: static; width: auto; padding: 20px; border-right: 0; border-bottom: 1px solid var(--line); }
   main { margin: 0; padding: 24px 16px; }
   .heading-title { flex-wrap: wrap; gap: 8px 14px; }
   h1 { font-size: 29px; }
-  .checklist-totals .metric { padding: 0 10px; }
-  .checklist-totals .metric:first-child { padding-left: 0; }
-  .list-intro { flex-wrap: wrap; }
   .group-heading { align-items: flex-start; }
   .group-heading h2 { font-size: 14px; }
-  .group-heading span { white-space: nowrap; }
   td, th { padding: 13px 8px; }
   .form-grid, .detail-checks { grid-template-columns: 1fr; gap: 14px; }
   dialog { padding: 20px; }

@@ -11,7 +11,7 @@ const output = path.join(root, 'public');
 const source = normalizeProject(JSON.parse(await readFile(path.join(root, 'data/imprint-engine.json'), 'utf8')));
 const exportsRoot = path.resolve(process.env.TRACKER_EXPORTS_ROOT || 'C:/Users/miker/OneDrive/Desktop/Imprint Engine/Figma exports');
 const require = createRequire(import.meta.url);
-const sharp = require(process.env.TRACKER_SHARP_PATH || 'sharp');
+let sharp;
 
 // Keep the browser self-contained so the running local server needs no restart.
 const appPath = path.join(root, 'dist/app.js');
@@ -35,6 +35,7 @@ for (const page of source.pages) {
     // Keep full resolution and lossless pixels so design text stays sharp.
     const existing = await stat(target).catch(() => null);
     if (!existing || (await stat(input)).mtimeMs > existing.mtimeMs) {
+      sharp ??= require(process.env.TRACKER_SHARP_PATH || 'sharp');
       await sharp(input, { limitInputPixels: false }).webp({ lossless: true, effort: 4 }).toFile(target);
     }
     bytes += (await stat(target)).size;
@@ -43,7 +44,7 @@ for (const page of source.pages) {
   pages.push(published);
 }
 const project = {
-  id: source.id, name: source.name, updatedAt: source.updatedAt,
+  schemaVersion: source.schemaVersion, id: source.id, name: source.name, updatedAt: source.updatedAt,
   groups: source.groups.map(({ id, name }) => ({ id, name })), pages
 };
 await writeFile(path.join(output, 'project.json'), JSON.stringify(project, null, 2) + '\n');
