@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), articleListing(), storyGallery(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientAnimations(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
@@ -83,6 +83,108 @@ function initSite() {
 }
 
 $(initSite);
+
+function articleListing() {
+  // Shared CMS listing controls for Success Stories and Blogs.
+  const paging = { initial: 12, more: 3 };
+  const cleanups = [];
+  $("[article-list]").each(function (index) {
+    const root = this, $root = $(root), namespace = `.articleListing${index}`;
+    const $items = $root.find("[article-item]");
+    const $filters = $root.find("[article-filter]");
+    const $search = $root.find("[article-search]");
+    const $more = $root.find("[article-more]");
+    const $empty = $root.find("[article-empty]");
+    const $clear = $root.find("[article-clear]");
+    if (!$items.length) return;
+    const normalize = value => String(value || "").trim().toLowerCase();
+    const entries = $items.toArray().map(element => ({
+      element,
+      topics: Array.from(element.querySelectorAll("[article-topic]"), topic => normalize(topic.textContent)),
+      text: normalize(element.textContent),
+    }));
+    const available = new Set(entries.flatMap(entry => entry.topics));
+    const filters = $filters.toArray().map(element => ({
+      element,
+      input: element.querySelector('input[type="checkbox"]'),
+      topic: normalize(element.textContent),
+    }));
+    const restore = rememberAttributes($items.add($filters).add($more).add($empty), ["hidden", "aria-hidden", "aria-live"]);
+    let visibleLimit = paging.initial, refreshFrame = null;
+    filters.forEach(filter => { filter.element.hidden = !available.has(filter.topic); });
+    $empty.attr("aria-live", "polite");
+
+    function render() {
+      const selected = filters.filter(filter => !filter.element.hidden && filter.input?.checked).map(filter => filter.topic);
+      const query = normalize($search.val());
+      let matched = 0;
+      entries.forEach(entry => {
+        const matches = (!selected.length || entry.topics.some(topic => selected.includes(topic))) && (!query || entry.text.includes(query));
+        entry.element.hidden = !matches || matched >= visibleLimit;
+        if (matches) matched += 1;
+      });
+      $more.prop("hidden", matched <= visibleLimit);
+      $empty.prop("hidden", matched !== 0);
+      if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
+      refreshFrame = requestAnimationFrame(() => {
+        refreshFrame = null;
+        window.lenis?.resize();
+        window.ScrollTrigger?.refresh();
+      });
+    }
+    function resetPage() { visibleLimit = paging.initial; render(); }
+    $filters.on(`change${namespace}`, 'input[type="checkbox"]', resetPage);
+    $search.on(`input${namespace}`, resetPage);
+    $more.on(`click${namespace}`, event => { event.preventDefault(); visibleLimit += paging.more; render(); });
+    $clear.on(`click${namespace}`, event => {
+      event.preventDefault();
+      filters.forEach(filter => { if (filter.input) filter.input.checked = false; });
+      $filters.find(".w-checkbox-input").removeClass("w--redirected-checked");
+      $search.val("");
+      resetPage();
+    });
+    $root.find("form").on(`submit${namespace}`, event => event.preventDefault());
+    render();
+    cleanups.push(() => {
+      $filters.add($search).add($more).add($clear).add($root.find("form")).off(namespace);
+      if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
+      restore();
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
+
+function storyGallery() {
+  const motion = { duration: 0.35, ease: "power1.in" };
+  const cleanups = [];
+  $("[story-gallery-track]").each(function (index) {
+    const track = this, $section = $(track).parent(), namespace = `.storyGallery${index}`;
+    const $previous = $section.find("[data-story-prev]");
+    const $next = $section.find("[data-story-next]");
+    let tween = null;
+    function update() {
+      $previous.prop("disabled", track.scrollLeft <= 1);
+      $next.prop("disabled", track.scrollLeft >= track.scrollWidth - track.clientWidth - 1);
+    }
+    function move(direction) {
+      const card = track.firstElementChild;
+      if (!card) return;
+      const step = card.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).columnGap) || 0);
+      const next = Math.max(0, Math.min(track.scrollWidth - track.clientWidth, track.scrollLeft + direction * step));
+      tween?.kill();
+      if (window.gsap && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        tween = gsap.to(track, { scrollLeft: next, ...motion, onUpdate: update });
+      } else { track.scrollLeft = next; update(); }
+    }
+    $previous.on(`click${namespace}`, () => move(-1));
+    $next.on(`click${namespace}`, () => move(1));
+    const observer = new ResizeObserver(update);
+    observer.observe(track);
+    update();
+    cleanups.push(() => { tween?.kill(); observer.disconnect(); $previous.add($next).off(namespace).prop("disabled", false); });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
 
 function wallCmsLayout() {
   // CMS WALL — repeat the composition, keeping each row inside its native width.
