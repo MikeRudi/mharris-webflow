@@ -25,6 +25,9 @@ Use pinned jsDelivr releases when switching to stable production code.
   font-size overrides to this site's head code, runtime CSS, or `mobile-type`
   hooks. The body's existing em layout scale is separate from these rem-based
   typography classes.
+  Component/variant sizes must not override elements carrying these classes;
+  the old text, FAQ, form, homepage, gallery and product-card overrides were
+  cleared when consolidating typography on 24 November 2026.
 - `gradientAnimations()` implements `gradient-animate="horizontal"`, `vertical`
   and `float`, plus `horizontal-2`, `vertical-2` and `float-2`, inside
   `gradient-animate="wrap"`. `vertical-2` and `float-2` double directional travel
