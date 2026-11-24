@@ -112,6 +112,7 @@ function articleListing() {
     const restore = rememberAttributes($items.add($filters).add($more).add($empty).add($pagination).add($root), ["hidden", "aria-hidden", "aria-live", "aria-busy"]);
     const controller = new AbortController();
     const appended = [];
+    const appendedHover = [];
     let nextUrl = $pagination.find(".w-pagination-next").attr("href");
     let loading = Boolean(nextUrl && list), destroyed = false;
     let visibleLimit = paging.initial, refreshFrame = null;
@@ -155,18 +156,21 @@ function articleListing() {
           if (destroyed) return;
           const source = page.querySelectorAll("[article-list]")[index];
           if (!source) throw new Error("Article list missing from next page");
+          const pageItems = [];
           source.querySelectorAll("[article-item]").forEach(item => {
             const element = document.importNode(item, true);
             element.querySelectorAll("img").forEach(image => { image.loading = "lazy"; });
             element.hidden = true;
             list.appendChild(element);
             appended.push(element);
+            pageItems.push(element);
             entries.push({
               element,
               topics: Array.from(element.querySelectorAll("[article-topic]"), topic => normalize(topic.textContent)),
               text: normalize(element.textContent),
             });
           });
+          if (window.gsap) appendedHover.push(onDesktop(() => lineHover($(pageItems))));
           nextUrl = source.querySelector("[article-pagination] .w-pagination-next")?.getAttribute("href");
           render();
         }
@@ -196,6 +200,7 @@ function articleListing() {
     cleanups.push(() => {
       destroyed = true;
       controller.abort();
+      appendedHover.forEach(media => media.revert());
       $filters.add($search).add($more).add($clear).add($root.find("form")).off(namespace);
       if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
       appended.forEach(element => element.remove());
@@ -4266,13 +4271,14 @@ function navTheme() {
   };
 }
 
-function lineHover() {
+function lineHover(scope = document) {
   if (!window.gsap) return null;
   // UNDERLINE CONTROLS — each state owns its timing, including keyboard focus.
   const lineMotion = {
     enter: { start: 0, duration: 0.3, ease: "power1.in", clipPath: "inset(0% 0% 0% 0%)" },
     leave: { start: 0, duration: 0.3, ease: "power1.in", clipPath: "inset(0% 0% 0% 100%)" },
     hidden: "inset(0% 100% 0% 0%)",
+    arrow: { x: "0.3em", duration: 0.3, ease: "power1.in" },
     pricing: {
       enter: { start: 0, duration: 0.18, ease: "power1.in", clipPath: "inset(0% 0% 0% 0%)" },
       leave: { start: 0, duration: 0.18, ease: "power1.in", clipPath: "inset(0% 0% 0% 100%)" },
@@ -4281,7 +4287,9 @@ function lineHover() {
     },
   };
   const cleanups = [];
-  $("[line-hover-item]").each(function () {
+  const bound = lineHover.bound || (lineHover.bound = new WeakSet());
+  $(scope).find("[line-hover-item]").add($(scope).filter("[line-hover-item]")).each(function () {
+    if (bound.has(this)) return;
     const $item = $(this);
     let $line = $item.find("[line-hover]").first();
     // Pricing rows animate their divider across the full hover area.
@@ -4289,7 +4297,9 @@ function lineHover() {
     const $hover = generated ? $item.closest(".final-feature-row") : $item;
     if (generated) $line = $("<span>", { class: "link-underline", "line-hover": "", "aria-hidden": "true" }).appendTo($hover);
     if (!$line.length) return;
-    const restore = rememberAttributes($line, ["style"]);
+    bound.add(this);
+    const $arrow = $item.find("[btn-2-arrow]").first();
+    const restore = rememberAttributes($line.add($arrow), ["style"]);
     let hovered = false, closed = !$item.hasClass("is-active");
     let rowPhase = "hidden", rowWantsVisible = false, rowTimeline = null;
     gsap.set($line, { clipPath: $item.hasClass("is-active") ? lineMotion.enter.clipPath : lineMotion.hidden });
@@ -4308,6 +4318,8 @@ function lineHover() {
     }
 
     function animate(enter) {
+      if ($arrow.length) gsap.to($arrow, { x: enter ? lineMotion.arrow.x : 0,
+        duration: lineMotion.arrow.duration, ease: lineMotion.arrow.ease, overwrite: true });
       if (generated) {
         rowWantsVisible = enter;
         if ((enter && rowPhase === "hidden") || (!enter && rowPhase === "shown")) playRow(enter);
@@ -4324,7 +4336,7 @@ function lineHover() {
       .on("mouseleave.lineHover", () => { hovered = false; animate(!generated && $hover[0].contains(document.activeElement)); })
       .on("focusin.lineHover", () => { if (!generated) animate(true); })
       .on("focusout.lineHover", (event) => { if (!generated && !$hover[0].contains(event.relatedTarget)) animate(hovered); });
-    cleanups.push(() => { $hover.off(".lineHover"); rowTimeline?.kill(); gsap.killTweensOf($line); if (generated) $line.remove(); else restore(); });
+    cleanups.push(() => { bound.delete($item[0]); $hover.off(".lineHover"); rowTimeline?.kill(); gsap.killTweensOf($line.add($arrow)); if (generated) $line.remove(); else restore(); });
   });
   return () => cleanups.forEach((cleanup) => cleanup());
 }
