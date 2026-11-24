@@ -257,6 +257,20 @@ Native responsive overrides keep Service headers consistent with Page Header 01
 on phones and tablets. The detail-page Accordion 06 instances retain their shared
 horizontal mobile tabs. Mobile approval remains unchecked for Michael's review.
 
+## Wall of Love CMS — 24 November 2026
+
+Wall of Love Grid uses the Testimonials CMS collection for image, label and author.
+Its native `Testimonials` selection prop controls which cards appear and their order
+on each component instance. The initial selection is 01–29; newly created CMS items
+must be added to that selection. The original individual card props were removed;
+the section Heading and Description props remain.
+
+`wallCmsLayout()` applies a repeatable desktop composition through `wall-cms-grid`
+and `wall-cms-card` hooks. It varies each row's left inset within the available space
+and staggers cards vertically where a row has multiple cards. Image loading and
+resizing recalculate the rows. At tablet and phone sizes it restores native margins.
+Card styling and image sizing remain editable in Webflow.
+
 ## Animation regression checks
 
 See [homepage-design.md](homepage-design.md) for native Webflow styling,

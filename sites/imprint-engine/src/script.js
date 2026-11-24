@@ -58,7 +58,8 @@ function initSite() {
       const footerCleanup = footerEnginePixels();
       const teamCleanup = teamProfilesAnimation();
       const videoMagnetCleanup = videoPlayMagnet();
-      return () => [videoMagnetCleanup, teamCleanup, footerCleanup, homeCleanup, lineCleanup].forEach((cleanup) => cleanup && cleanup());
+      const wallCleanup = wallCmsLayout();
+      return () => [wallCleanup, videoMagnetCleanup, teamCleanup, footerCleanup, homeCleanup, lineCleanup].forEach((cleanup) => cleanup && cleanup());
     });
     cleanups.push(() => desktop.revert());
     const mobile = onMobile(() => {
@@ -82,6 +83,86 @@ function initSite() {
 }
 
 $(initSite);
+
+function wallCmsLayout() {
+  // CMS WALL — repeat the composition, keeping each row inside its native width.
+  const spacing = {
+    leftRem: [2, 8, 0, 12, 4, 0, 10, 18],
+    topRem: [[0, 4, 1.5], [3, 0], [0, 2], [4, 0]],
+  };
+  const cleanups = [];
+  $("[wall-cms-grid]").each(function () {
+    const grid = this;
+    const cards = Array.from(grid.querySelectorAll("[wall-cms-card]"));
+    if (!cards.length) return;
+    const originals = cards.map(card => ({
+      left: card.style.marginLeft,
+      top: card.style.marginTop,
+    }));
+    let frame = null, refreshTimer = null, lastWidth = 0;
+
+    function layout() {
+      frame = null;
+      cards.forEach(card => { card.style.marginLeft = "0rem"; card.style.marginTop = "0rem"; });
+      const bounds = grid.getBoundingClientRect();
+      if (!bounds.width) return;
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const rows = [];
+      cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (!rect.width) return;
+        let row = rows[rows.length - 1];
+        if (!row || Math.abs(rect.top - row.top) > 2) {
+          row = { top: rect.top, cards: [], right: rect.right };
+          rows.push(row);
+        }
+        row.cards.push(card);
+        row.right = Math.max(row.right, rect.right);
+      });
+      rows.forEach((row, index) => {
+        const room = Math.max(0, bounds.right - row.right - 2);
+        const inset = Math.min(spacing.leftRem[index % spacing.leftRem.length], room / rem);
+        row.cards[0].style.marginLeft = `${inset}rem`;
+        if (row.cards.length < 2) return;
+        const offsets = spacing.topRem[index % spacing.topRem.length];
+        row.cards.forEach((card, position) => {
+          card.style.marginTop = `${offsets[position % offsets.length]}rem`;
+        });
+      });
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        window.lenis?.resize();
+        window.ScrollTrigger?.refresh();
+      }, 150);
+    }
+
+    function schedule() {
+      if (frame === null) frame = requestAnimationFrame(layout);
+    }
+    const observer = new ResizeObserver(entries => {
+      const width = entries[0].contentRect.width;
+      if (Math.abs(width - lastWidth) < 0.5) return;
+      lastWidth = width;
+      schedule();
+    });
+    observer.observe(grid);
+    grid.addEventListener("load", schedule, true);
+    window.addEventListener("resize", schedule);
+    schedule();
+    cleanups.push(() => {
+      observer.disconnect();
+      grid.removeEventListener("load", schedule, true);
+      window.removeEventListener("resize", schedule);
+      if (frame !== null) cancelAnimationFrame(frame);
+      clearTimeout(refreshTimer);
+      cards.forEach((card, index) => {
+        card.style.marginLeft = originals[index].left;
+        card.style.marginTop = originals[index].top;
+      });
+    });
+  });
+  return () => cleanups.forEach(cleanup => cleanup());
+}
 
 function videoPlayMagnet() {
   // PLAY BUTTON FOLLOW — one continuous tween per axis, including the return home.
