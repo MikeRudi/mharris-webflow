@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), articleListing(), storyGallery(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), articleListing(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientAnimations(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
@@ -150,38 +150,6 @@ function articleListing() {
       if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
       restore();
     });
-  });
-  return () => cleanups.forEach(cleanup => cleanup());
-}
-
-function storyGallery() {
-  const motion = { duration: 0.35, ease: "power1.in" };
-  const cleanups = [];
-  $("[story-gallery-track]").each(function (index) {
-    const track = this, $section = $(track).parent(), namespace = `.storyGallery${index}`;
-    const $previous = $section.find("[data-story-prev]");
-    const $next = $section.find("[data-story-next]");
-    let tween = null;
-    function update() {
-      $previous.prop("disabled", track.scrollLeft <= 1);
-      $next.prop("disabled", track.scrollLeft >= track.scrollWidth - track.clientWidth - 1);
-    }
-    function move(direction) {
-      const card = track.firstElementChild;
-      if (!card) return;
-      const step = card.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).columnGap) || 0);
-      const next = Math.max(0, Math.min(track.scrollWidth - track.clientWidth, track.scrollLeft + direction * step));
-      tween?.kill();
-      if (window.gsap && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        tween = gsap.to(track, { scrollLeft: next, ...motion, onUpdate: update });
-      } else { track.scrollLeft = next; update(); }
-    }
-    $previous.on(`click${namespace}`, () => move(-1));
-    $next.on(`click${namespace}`, () => move(1));
-    const observer = new ResizeObserver(update);
-    observer.observe(track);
-    update();
-    cleanups.push(() => { tween?.kill(); observer.disconnect(); $previous.add($next).off(namespace).prop("disabled", false); });
   });
   return () => cleanups.forEach(cleanup => cleanup());
 }
