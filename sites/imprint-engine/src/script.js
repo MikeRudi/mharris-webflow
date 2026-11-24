@@ -96,25 +96,31 @@ function articleListing() {
     const $more = $root.find("[article-more]");
     const $empty = $root.find("[article-empty]");
     const $clear = $root.find("[article-clear]");
-    if (!$items.length) return;
+    const $pagination = $root.find("[article-pagination]");
+    const list = $root.find("[article-items]")[0] || $items[0]?.parentElement;
     const normalize = value => String(value || "").trim().toLowerCase();
     const entries = $items.toArray().map(element => ({
       element,
       topics: Array.from(element.querySelectorAll("[article-topic]"), topic => normalize(topic.textContent)),
       text: normalize(element.textContent),
     }));
-    const available = new Set(entries.flatMap(entry => entry.topics));
     const filters = $filters.toArray().map(element => ({
       element,
       input: element.querySelector('input[type="checkbox"]'),
       topic: normalize(element.textContent),
     }));
-    const restore = rememberAttributes($items.add($filters).add($more).add($empty), ["hidden", "aria-hidden", "aria-live"]);
+    const restore = rememberAttributes($items.add($filters).add($more).add($empty).add($pagination).add($root), ["hidden", "aria-hidden", "aria-live", "aria-busy"]);
+    const controller = new AbortController();
+    const appended = [];
+    let nextUrl = $pagination.find(".w-pagination-next").attr("href");
+    let loading = Boolean(nextUrl && list), destroyed = false;
     let visibleLimit = paging.initial, refreshFrame = null;
-    filters.forEach(filter => { filter.element.hidden = !available.has(filter.topic); });
+    $pagination.prop("hidden", true);
     $empty.attr("aria-live", "polite");
 
     function render() {
+      const available = new Set(entries.flatMap(entry => entry.topics));
+      filters.forEach(filter => { filter.element.hidden = !loading && !available.has(filter.topic); });
       const selected = filters.filter(filter => !filter.element.hidden && filter.input?.checked).map(filter => filter.topic);
       const query = normalize($search.val());
       let matched = 0;
@@ -123,14 +129,55 @@ function articleListing() {
         entry.element.hidden = !matches || matched >= visibleLimit;
         if (matches) matched += 1;
       });
-      $more.prop("hidden", matched <= visibleLimit);
-      $empty.prop("hidden", matched !== 0);
+      $more.prop("hidden", matched <= visibleLimit && !loading);
+      $empty.prop("hidden", matched !== 0 || loading);
+      $root.attr("aria-busy", String(loading));
       if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
       refreshFrame = requestAnimationFrame(() => {
         refreshFrame = null;
         window.lenis?.resize();
         window.ScrollTrigger?.refresh();
       });
+    }
+    // Read native CMS pagination so filters include posts beyond Webflow's first 100.
+    async function loadRemainingPages() {
+      const visited = new Set([window.location.href]);
+      try {
+        while (nextUrl && !destroyed) {
+          const url = new URL(nextUrl, window.location.href);
+          if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || visited.has(url.href)) {
+            throw new Error("Unexpected article pagination URL");
+          }
+          visited.add(url.href);
+          const response = await fetch(url.href, { signal: controller.signal });
+          if (!response.ok) throw new Error(`Article page returned ${response.status}`);
+          const page = new DOMParser().parseFromString(await response.text(), "text/html");
+          if (destroyed) return;
+          const source = page.querySelectorAll("[article-list]")[index];
+          if (!source) throw new Error("Article list missing from next page");
+          source.querySelectorAll("[article-item]").forEach(item => {
+            const element = document.importNode(item, true);
+            element.querySelectorAll("img").forEach(image => { image.loading = "lazy"; });
+            element.hidden = true;
+            list.appendChild(element);
+            appended.push(element);
+            entries.push({
+              element,
+              topics: Array.from(element.querySelectorAll("[article-topic]"), topic => normalize(topic.textContent)),
+              text: normalize(element.textContent),
+            });
+          });
+          nextUrl = source.querySelector("[article-pagination] .w-pagination-next")?.getAttribute("href");
+          render();
+        }
+      } catch (error) {
+        if (destroyed) return;
+        // Keep Webflow's native links available if a page could not be loaded.
+        $pagination.prop("hidden", false);
+        console.warn("Article pagination could not finish loading.", error);
+      } finally {
+        if (!destroyed) { loading = false; render(); }
+      }
     }
     function resetPage() { visibleLimit = paging.initial; render(); }
     $filters.on(`change${namespace}`, 'input[type="checkbox"]', resetPage);
@@ -145,9 +192,13 @@ function articleListing() {
     });
     $root.find("form").on(`submit${namespace}`, event => event.preventDefault());
     render();
+    if (loading) loadRemainingPages();
     cleanups.push(() => {
+      destroyed = true;
+      controller.abort();
       $filters.add($search).add($more).add($clear).add($root.find("form")).off(namespace);
       if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
+      appended.forEach(element => element.remove());
       restore();
     });
   });
