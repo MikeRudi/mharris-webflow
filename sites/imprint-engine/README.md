@@ -17,6 +17,14 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- Typography is edited only in Webflow's **Hidden Classes** component. Its
+  `typography-embed` controls `h-1` through `h-9` on desktop (992px and up).
+  Native styles on `h-1`–`h-9`, `p-1`–`p-4`, and `b-1`–`b-2` control the other
+  type settings and tablet/phone sizes. Tablet sizes are in rem; phone
+  breakpoints inherit them unless a native phone override is set. Do not add
+  font-size overrides to this site's head code, runtime CSS, or `mobile-type`
+  hooks. The body's existing em layout scale is separate from these rem-based
+  typography classes.
 - `gradientAnimations()` implements `gradient-animate="horizontal"`, `vertical`
   and `float`, plus `horizontal-2`, `vertical-2` and `float-2`, inside
   `gradient-animate="wrap"`. `vertical-2` and `float-2` double directional travel

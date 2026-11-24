@@ -48,43 +48,7 @@ HEAD CODE
   }
 </style>
 
-<style>
-  :root {
-    --h1: clamp(4.5rem, -1.0357rem + 8.9286vw, 7rem);
-    --h2: clamp(3.0625rem, -0.1205rem + 5.1339vw, 4.5rem);
-    --h3: clamp(2.75rem, -0.1563rem + 4.6875vw, 4.0625rem);
-    --h4: clamp(2.4375rem, 0.0848rem + 3.7946vw, 3.5rem);
-    --h5: clamp(2.25rem, 0.3125rem + 3.125vw, 3.125rem);
-    --h6: clamp(1.875rem, 0.4911rem + 2.2321vw, 2.5rem);
-    --h7: clamp(1.5625rem, 0.5938rem + 1.5625vw, 2rem);
-    --h8: clamp(1.3125rem, 0.8973rem + 0.6696vw, 1.5rem);
-    --h9: clamp(1.125rem, 0.8482rem + 0.4464vw, 1.25rem);
-  }
-
-  @media screen and (min-width: 1440px) {
-    :root {
-      --h1: clamp(7rem, 6.4375rem + 0.625vw, 7.1875rem);
-      --h2: clamp(4.5rem, 4.125rem + 0.4167vw, 4.625rem);
-      --h3: clamp(4.0625rem, 3.6875rem + 0.4167vw, 4.1875rem);
-      --h4: clamp(3.5rem, 3.2188rem + 0.3125vw, 3.5938rem);
-      --h5: clamp(3.125rem, 2.8438rem + 0.3125vw, 3.2188rem);
-      --h6: clamp(2.5rem, 2.3125rem + 0.2083vw, 2.5625rem);
-      --h7: clamp(2rem, 1.8125rem + 0.2083vw, 2.0625rem);
-      --h8: clamp(1.5rem, 1.4063rem + 0.1042vw, 1.5313rem);
-      --h9: clamp(1.25rem, 1.1563rem + 0.1042vw, 1.2813rem);
-    }
-  }
-
-  .h-1 { font-size: var(--h1); }
-  .h-2 { font-size: var(--h2); }
-  .h-3 { font-size: var(--h3); }
-  .h-4 { font-size: var(--h4); }
-  .h-5 { font-size: var(--h5); }
-  .h-6 { font-size: var(--h6); }
-  .h-7 { font-size: var(--h7); }
-  .h-8 { font-size: var(--h8); }
-  .h-9 { font-size: var(--h9); }
-</style>
+<!-- Typography is managed in the Hidden Classes component only. -->
 
 <style id="nav-underline-initial-state">
   /* Match lineHover() before the asynchronous site script loads. */
