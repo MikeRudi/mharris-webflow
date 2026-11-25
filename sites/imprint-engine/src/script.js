@@ -1159,7 +1159,7 @@ function homeAnimation() {
     },
     cards: { horizontalSpread: 1.12, verticalSpread: 0.6, scale: 0.85, radiusScale: 0.9, centerYRem: 8, offsetYRem: 0, riseYRem: -14,
       rotation: 33, skewX: -22.5, maxRadiusRem: 14, edgeAllowance: 0.15 },
-    cardOpacity: { back: 0.18, front: 1, fadeStart: 0, fadeEnd: 1 },
+    cardOpacity: { back: 0.18, front: 1, fadeStart: 0, fadeEnd: 0.5 },
     text: { headingCharacters: 22, paragraphCharacters: 48 },
     tablet: {
       minWidth: 768,
@@ -1424,6 +1424,7 @@ function homeAnimation() {
   let homeRestingPreviousX = 0;
   let homeRestingPreviousY = 0;
   let homeRestingSphere = [];
+  let homeRestingDepthOrder = [];
 
   function buildHomeRestingSphere() {
     homeRestingRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -1445,7 +1446,7 @@ function homeAnimation() {
         transformOrigin: "center center",
         ...(homeMobile.enabled ? { rotation: mobileCards.rotation, skewX: mobileCards.skewX } : {}),
       });
-      // Keep overlap order stable: sorting transparent tiles every frame visibly snaps.
+      // Desktop keeps its approved overlap order; mobile follows the rotating depth.
       gsap.set(element, { zIndex: 100 + Math.round((isFront ? 1 : isBack ? -1 : 0) * 30) + index });
 
       return {
@@ -1457,6 +1458,10 @@ function homeAnimation() {
         setScaleX: gsap.quickSetter(card, "scaleX"),
         setScaleY: gsap.quickSetter(card, "scaleY"),
         setOpacity: gsap.quickSetter(card, "opacity"),
+        setZIndex: homeMobile.enabled ? gsap.quickSetter(element, "zIndex") : null,
+        index,
+        renderedDepth: 0,
+        lastZIndex: null,
         x: bounds.left - transformX + bounds.width / 2,
         y: bounds.top - transformY + bounds.height / 2,
         depth: isFront ? 1 : isBack ? -1 : index % 2 === 0 ? 0.35 : -0.35,
@@ -1517,6 +1522,7 @@ function homeAnimation() {
         radius: radius * orbitFit,
       };
     });
+    homeRestingDepthOrder = homeMobile.enabled ? homeRestingSphere.slice() : [];
   }
 
   function premultiplyHomeRestingMatrix(left) {
@@ -1559,6 +1565,7 @@ function homeAnimation() {
         homeRestingMatrix[6] * item.x +
         homeRestingMatrix[7] * item.y +
         homeRestingMatrix[8] * item.z;
+      item.renderedDepth = depth;
       // Depth changes opacity and position, never the tile or label size.
       const scale = viewScale;
       // Every card uses the same continuous depth curve: no front/middle/back states.
@@ -1584,6 +1591,17 @@ function homeAnimation() {
       item.setScaleY(scale);
       item.setOpacity(opacity);
     });
+
+    // Reorder only at depth crossings, with opacity driven by that same depth.
+    if (homeMobile.enabled) {
+      homeRestingDepthOrder.sort((a, b) => a.renderedDepth - b.renderedDepth || a.index - b.index);
+      homeRestingDepthOrder.forEach((item, index) => {
+        const zIndex = 100 + index;
+        if (item.lastZIndex === zIndex) return;
+        item.setZIndex(zIndex);
+        item.lastZIndex = zIndex;
+      });
+    }
   }
 
   function updateHomeRestingSphere() {
