@@ -3542,47 +3542,53 @@ function dropTextAnimation() {
       ease: "power1.out",
     },
   };
-  const cleanups = [];
+  const media = gsap.matchMedia();
+  media.add({ mobile: "(max-width: 991px)", desktop: "(min-width: 992px)" }, context => {
+    const cleanups = [];
+    $layouts.each(function () {
+      // The mobile homepage outro uses one crossfade, without the blurred ripple animation.
+      if (context.conditions.mobile && $(this).closest("[drop-outro]").length) return;
+      const $rings = $(this).find("[drop-text-ripple]");
+      if (!$rings.length) return;
 
-  $layouts.each(function () {
-    const $rings = $(this).find("[drop-text-ripple]");
-    if (!$rings.length) return;
+      const rippleTimeline = rippleAnimation($rings, {
+        ...rippleControls.expand,
+        fade: rippleControls.fade,
+        settle: rippleControls.settle,
+      });
+      if (!rippleTimeline) return;
 
-    const rippleTimeline = rippleAnimation($rings, {
-      ...rippleControls.expand,
-      fade: rippleControls.fade,
-      settle: rippleControls.settle,
-    });
-    if (!rippleTimeline) return;
+      const trigger = ScrollTrigger.create({
+        trigger: this,
+        start: rippleControls.trigger.start,
+        onLeave: () => rippleTimeline.progress(1).pause(),
+        onEnter: () => rippleTimeline.play(),
+        onLeaveBack: () => rippleTimeline.reverse(),
+      });
 
-    const trigger = ScrollTrigger.create({
-      trigger: this,
-      start: rippleControls.trigger.start,
-      onLeave: () => rippleTimeline.progress(1).pause(),
-      onEnter: () => rippleTimeline.play(),
-      onLeaveBack: () => rippleTimeline.reverse(),
-    });
-
-    cleanups.push(() => {
-      trigger.kill();
-      rippleTimeline.kill();
-      gsap.set($rings, {
-        clearProps: "transform,opacity,visibility,filter,box-shadow",
+      cleanups.push(() => {
+        trigger.kill();
+        rippleTimeline.kill();
+        gsap.set($rings, {
+          clearProps: "transform,opacity,visibility,filter,box-shadow",
+        });
       });
     });
+
+    return () => cleanups.forEach((cleanup) => cleanup());
   });
-
-  if (!cleanups.length) return null;
-
-  return () => {
-    cleanups.forEach((cleanup) => cleanup());
-  };
+  return () => media.revert();
 }
 
 function homeOutroAnimation() {
   if (!window.gsap || !window.ScrollTrigger) return null;
-  // Fractions of the sticky section's scroll; mobile keeps the lighter opacity transition.
+  // Desktop uses fractions of the sticky scroll; mobile uses a short timed crossfade.
   const motion = {
+    mobile: {
+      trigger: { start: "top 45%" },
+      background: { start: 0, duration: 0.65, ease: "power1.inOut" },
+      drop: { start: 0.1, duration: 0.45, ease: "power1.inOut" },
+    },
     scroll: { viewportDistance: 0.5 },
     brackets: { start: 0.02, duration: 0.16, distance: 1.2, ease: "power1.in" },
     drop: { start: 0.06, duration: 0.18, ease: "power1.in" },
@@ -3608,6 +3614,28 @@ function homeOutroAnimation() {
       if (!layout || !dark || !gradient || !line || !mark) return;
       const restore = rememberAttributes($(section).add(layout).add(dark).add(gradient).add(line)
         .add(left).add(right).add(droplet).add(rings).add(copy), ["style"]);
+      if (mobile) {
+        // Stable viewport sizing and normal flow avoid browser-bar resizing and sticky release jumps.
+        gsap.set(section, { height: "auto", minHeight: 0 });
+        gsap.set(layout, { position: "relative", top: 0, height: "100svh", minHeight: "36rem" });
+        gsap.set(dark, { opacity: 0, clipPath: "none" });
+        gsap.set(gradient, { autoAlpha: 0 });
+        gsap.set($(line).add(rings), { autoAlpha: 0 });
+        const fade = motion.mobile.background, drop = motion.mobile.drop;
+        const timeline = gsap.timeline({ paused: true })
+          .to(dark, { opacity: 1, duration: fade.duration, ease: fade.ease }, fade.start)
+          .to($(left).add(right).add(droplet), { autoAlpha: 0, duration: drop.duration, ease: drop.ease }, drop.start)
+          .to(gradient, { autoAlpha: 1, duration: drop.duration, ease: drop.ease }, drop.start);
+        if (copy) timeline.to(copy, { color: "#ffffff", duration: fade.duration, ease: fade.ease }, fade.start);
+        let trigger;
+        if (reduced) timeline.progress(1);
+        else trigger = ScrollTrigger.create({
+          trigger: section, start: motion.mobile.trigger.start, animation: timeline,
+          toggleActions: "play complete none none", once: true,
+        });
+        cleanups.push(() => { trigger?.kill(); timeline.kill(); restore(); });
+        return;
+      }
       const clip = { progress: 0 };
       let clipWidth = layout.clientWidth, clipHeight = layout.clientHeight, renderedProgress = -1;
       function clipPath(progress) {

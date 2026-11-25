@@ -189,7 +189,11 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
   the start; arrows retain their position beside the carousel.
   No duplicate props or progress bar are added.
 - `homeOutroAnimation()` reverses the lander's drop/clip/line sequence within a
-  native sticky layout. Mobile uses opacity and one readable copy layer; desktop
+  native sticky layout on desktop. Tablet/phones use normal page flow, a stable
+  `100svh` scene (minimum 36rem), and a single 0.65s background/text fade with a
+  0.45s logo-to-gradient crossfade. Mobile skips sticky pinning, scroll scrubbing,
+  line retraction and blurred ripples; its transition plays once per page load.
+  Mobile uses one readable copy layer; desktop
   clips a white copy layer over the original black copy. Both copies share props
   and sit on the left. The gradient drop includes the lander's star reflection.
   The line lives inside the black clip, so it is hidden on the white background.
