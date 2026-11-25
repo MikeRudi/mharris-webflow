@@ -17,6 +17,16 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- Accordion 01 – Split 6 has six Card Heading/Image pairs plus Use Single Image
+  and Image in each Item group. Item 4 retains its existing image/default mode.
+  A blank card heading removes that card; desktop counts 2/3 use one equal-width
+  row, 4 uses two columns/two rows, and 6 keeps three columns/two rows. Tablet and
+  phones retain the native two-column layout. Native Webflow owns card styling,
+  the grid minimum height, and image ratio/padding; `accordionSplitCards()` only
+  filters blank cards and switches between the native image and split grid.
+  Hooks: `accord-split-panel`, `ac-1-split-6-grid`, `accord-split-card`,
+  `accord-split-heading`, and `ac-1-img-single`.
+
 - Typography is edited only in Webflow's **Hidden Classes** component. Its
   `typography-embed` controls `h-1` through `h-9` on desktop (992px and up).
   Native styles on `h-1`–`h-9`, `p-1`–`p-4`, and `b-1`–`b-2` control the other
