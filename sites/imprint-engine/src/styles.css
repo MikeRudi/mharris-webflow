@@ -10,10 +10,20 @@
 [article-more][hidden],
 [article-empty][hidden],
 [article-pagination][hidden],
+[ac-1-split-6-grid][hidden],
+[accord-split-card][hidden],
 [final-feature-category][hidden],
 [final-feature-head][hidden],
 [final-feature-column][hidden] {
   display: none !important;
+}
+
+/* Conditional content layout only; card styling and grid height stay in Webflow. */
+[ac-1-split-6-grid][data-card-count="1"] { grid-template-columns: minmax(0, 1fr); }
+[ac-1-split-6-grid][data-card-count="2"],
+[ac-1-split-6-grid][data-card-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media screen and (min-width: 992px) {
+  [ac-1-split-6-grid][data-card-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 /* Native dialog visibility; its card and purple overlay are styled in Webflow. */

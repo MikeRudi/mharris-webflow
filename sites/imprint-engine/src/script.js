@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), articleListing(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), articleListing(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionSplitCards(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientAnimations(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
@@ -5498,6 +5498,31 @@ function homeFaqAnimation() {
     });
   });
   return () => cleanups.forEach(cleanup => cleanup());
+}
+
+function accordionSplitCards() {
+  const $panels = $("[accord-split-panel]");
+  if (!$panels.length) return null;
+  const cleanups = [];
+  $panels.each(function () {
+    const $panel = $(this);
+    const $grid = $panel.children("[ac-1-split-6-grid]");
+    const $cards = $grid.find("[accord-split-card]");
+    if (!$grid.length) return;
+    const restore = rememberAttributes($grid.add($cards), ["hidden", "data-card-count"]);
+    // Native Webflow visibility is bound to this item's Use Single Image prop.
+    const image = $panel.children("[ac-1-img-single]")[0];
+    const singleImage = image && !image.classList.contains("w-condition-invisible") && !image.hidden;
+    let count = 0;
+    $cards.each(function () {
+      const filled = Boolean($(this).find("[accord-split-heading]").text().trim());
+      this.hidden = !filled;
+      if (filled) count += 1;
+    });
+    $grid.attr("data-card-count", count).prop("hidden", Boolean(singleImage) || count === 0);
+    cleanups.push(restore);
+  });
+  return () => cleanups.forEach((cleanup) => cleanup());
 }
 
 function accordionOne() {
