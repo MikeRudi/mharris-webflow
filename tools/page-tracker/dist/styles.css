@@ -99,7 +99,7 @@ a.page-name { text-decoration: none; }
 .page-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .page-sub { margin-top: 4px; overflow: hidden; font-size: 11px; font-weight: 400; white-space: nowrap; text-overflow: ellipsis; }
 .type-tag { display: inline-block; margin-left: 6px; padding: 2px 5px; border: 1px solid var(--line); border-radius: var(--radius); font-size: 9px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
-tr[data-state='removed'] .page-name { font-weight: 400; text-decoration: line-through; }
+tr[data-state='removed'] .page-name { text-decoration: line-through; }
 .preview-button { display: inline-block; padding: 7px 9px; border: 1px solid var(--line-strong); border-radius: var(--radius); font-size: 10px; font-weight: 500; letter-spacing: .035em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
 .preview-button:hover { border-color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .open-link { text-decoration: none; font-size: 18px; }
