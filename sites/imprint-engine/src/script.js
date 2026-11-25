@@ -4125,7 +4125,8 @@ function mobileNavigation() {
       showMain();
       returnTrigger = trigger;
       activeSubmenu = submenu;
-      $main.css("visibility", "hidden").attr("aria-hidden", "true").prop("inert", true);
+      // Keep the main menu visible beneath the sliding submenu, but not interactive.
+      $main.attr("aria-hidden", "true").prop("inert", true);
       $(trigger).attr("aria-expanded", "true");
       submenu.inert = false;
       $(submenu).attr("aria-hidden", "false");
