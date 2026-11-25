@@ -3585,7 +3585,8 @@ function homeOutroAnimation() {
   // Desktop uses fractions of the sticky scroll; mobile uses a short timed crossfade.
   const motion = {
     mobile: {
-      trigger: { start: "top 45%" },
+      trigger: { visibleAmount: 0.5 },
+      layout: { topRem: 6.5, bottomRem: 2.5, gapRem: 2 },
       background: { start: 0, duration: 0.65, ease: "power1.inOut" },
       drop: { start: 0.1, duration: 0.45, ease: "power1.inOut" },
     },
@@ -3611,29 +3612,46 @@ function homeOutroAnimation() {
       const droplet = mark?.querySelector(".drop-text-droplet");
       const rings = section.querySelector(".drop-text-ripples");
       const copy = section.querySelector(".drop-text-content");
+      const artwork = section.querySelector(".drop-text-artwork");
       if (!layout || !dark || !gradient || !line || !mark) return;
       const restore = rememberAttributes($(section).add(layout).add(dark).add(gradient).add(line)
-        .add(left).add(right).add(droplet).add(rings).add(copy), ["style"]);
-      if (mobile) {
-        // Stable viewport sizing and normal flow avoid browser-bar resizing and sticky release jumps.
+        .add(left).add(right).add(droplet).add(rings).add(copy).add(artwork), ["style"]);
+      if (mobile && artwork && copy) {
+        // Content determines height; browser chrome cannot reposition this scene.
+        const spacing = motion.mobile.layout;
         gsap.set(section, { height: "auto", minHeight: 0 });
-        gsap.set(layout, { position: "relative", top: 0, height: "100svh", minHeight: "36rem" });
+        gsap.set(layout, { position: "relative", top: 0, height: "auto", minHeight: 0,
+          display: "flex", flexDirection: "column", justifyContent: "flex-start",
+          rowGap: `${spacing.gapRem}rem`, paddingTop: `${spacing.topRem}rem`, paddingBottom: `${spacing.bottomRem}rem` });
+        gsap.set(copy, { position: "relative", top: "auto", left: "auto", right: "auto" });
+        gsap.set(artwork, { position: "relative", top: "auto", left: "auto", marginTop: 0, transform: "none" });
+        // Both versions of the drop share the same centre, independent of text wrapping.
+        const gradientParent = gradient.parentNode, gradientNext = gradient.nextSibling;
+        artwork.appendChild(gradient);
+        gsap.set(gradient, { marginTop: 0, autoAlpha: 0 });
         gsap.set(dark, { opacity: 0, clipPath: "none" });
-        gsap.set(gradient, { autoAlpha: 0 });
         gsap.set($(line).add(rings), { autoAlpha: 0 });
         const fade = motion.mobile.background, drop = motion.mobile.drop;
         const timeline = gsap.timeline({ paused: true })
           .to(dark, { opacity: 1, duration: fade.duration, ease: fade.ease }, fade.start)
           .to($(left).add(right).add(droplet), { autoAlpha: 0, duration: drop.duration, ease: drop.ease }, drop.start)
           .to(gradient, { autoAlpha: 1, duration: drop.duration, ease: drop.ease }, drop.start);
-        if (copy) timeline.to(copy, { color: "#ffffff", duration: fade.duration, ease: fade.ease }, fade.start);
-        let trigger;
-        if (reduced) timeline.progress(1);
-        else trigger = ScrollTrigger.create({
-          trigger: section, start: motion.mobile.trigger.start, animation: timeline,
-          toggleActions: "play complete none none", once: true,
+        timeline.to(copy, { color: "#ffffff", duration: fade.duration, ease: fade.ease }, fade.start);
+        let observer;
+        if (reduced || !window.IntersectionObserver) timeline.progress(1);
+        else {
+          observer = new IntersectionObserver(entries => {
+            if (!entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= motion.mobile.trigger.visibleAmount)) return;
+            timeline.play();
+            observer.disconnect();
+          }, { threshold: motion.mobile.trigger.visibleAmount });
+          observer.observe(artwork);
+        }
+        cleanups.push(() => {
+          observer?.disconnect(); timeline.kill();
+          gradientParent.insertBefore(gradient, gradientNext);
+          restore();
         });
-        cleanups.push(() => { trigger?.kill(); timeline.kill(); restore(); });
         return;
       }
       const clip = { progress: 0 };

@@ -189,10 +189,13 @@ See `homepage-november-3-report.txt` for component IDs, editable content and QA.
   the start; arrows retain their position beside the carousel.
   No duplicate props or progress bar are added.
 - `homeOutroAnimation()` reverses the lander's drop/clip/line sequence within a
-  native sticky layout on desktop. Tablet/phones use normal page flow, a stable
-  `100svh` scene (minimum 36rem), and a single 0.65s background/text fade with a
-  0.45s logo-to-gradient crossfade. Mobile skips sticky pinning, scroll scrubbing,
-  line retraction and blurred ripples; its transition plays once per page load.
+  native sticky layout on desktop. Tablet/phones use a content-height column,
+  with copy above the artwork and both drop versions sharing the artwork's centre.
+  A visibility observer starts a 0.65s background/text fade and 0.45s drop crossfade
+  when half the artwork is visible. Mobile skips viewport-based scene heights,
+  sticky pinning, ScrollTrigger scrubbing, line retraction and blurred ripples;
+  its transition plays once per page load. Cleanup restores the original gradient
+  parent and native styles when returning to desktop.
   Mobile uses one readable copy layer; desktop
   clips a white copy layer over the original black copy. Both copies share props
   and sit on the left. The gradient drop includes the lander's star reflection.
