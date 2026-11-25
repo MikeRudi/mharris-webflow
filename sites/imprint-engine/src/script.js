@@ -4041,8 +4041,15 @@ function navigationSearch() {
 
 
 function mobileNavigation() {
-  // TABLET + PHONE MENU — instant page changes; layout lives in Webflow.
-  const menuControls = { openLabel: "Menu", closeLabel: "Close", focusOnOpen: true, closeIconAngle: 45 };
+  // TABLET + PHONE MENU — hamburger stays instant; submenus slide horizontally.
+  const menuControls = {
+    openLabel: "Menu", closeLabel: "Close", focusOnOpen: true, closeIconAngle: 45,
+    submenu: {
+      reveal: { fromXPercent: -100, duration: 0.35, ease: "power1.in" },
+      hide: { toXPercent: -100, duration: 0.3, ease: "power1.in" }
+    }
+  };
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const $roots = $("[nav-menu-root]");
   const cleanups = [];
   let closeCurrent = null;
@@ -4069,6 +4076,7 @@ function mobileNavigation() {
     panel.inert = true;
     let open = false, scrollY = 0, bodyStyle = null, wasLenisStopped = false;
     let activeSubmenu = null, returnTrigger = null, placeholder = null;
+    let submenuTween = null;
     const bodyProperties = ["position", "top", "left", "right", "width", "overflow"];
     const focusable = () => $root.find("a[href], button:not([disabled]), input:not([disabled]), [tabindex='0']")
       .filter((_, element) => element.getClientRects().length && !element.closest("[inert]") &&
@@ -4086,14 +4094,27 @@ function mobileNavigation() {
     }
 
     function showMain(returnFocus = false) {
+      const outgoing = activeSubmenu;
+      submenuTween?.kill();
+      submenuTween = null;
       gsap.killTweensOf($submenus);
-      gsap.set($submenus, { display: "none", autoAlpha: 0, y: 0 });
       $submenus.attr("aria-hidden", "true").each((_, element) => { element.inert = true; });
       $triggers.removeClass("is-active").attr("aria-expanded", "false");
-      $main.css("visibility", "").attr("aria-hidden", "false").prop("inert", false);
       activeSubmenu = null;
       panel.scrollTop = 0;
-      if (returnFocus) returnTrigger?.focus({ preventScroll: true });
+      const finish = () => {
+        gsap.set($submenus, { display: "none", autoAlpha: 0, xPercent: 0, y: 0 });
+        $main.css("visibility", "").attr("aria-hidden", "false").prop("inert", false);
+        submenuTween = null;
+        if (returnFocus) returnTrigger?.focus({ preventScroll: true });
+      };
+      if (returnFocus && outgoing && !reducedMotion) {
+        const hide = menuControls.submenu.hide;
+        submenuTween = gsap.to(outgoing, {
+          xPercent: hide.toXPercent, duration: hide.duration, ease: hide.ease,
+          overwrite: true, onComplete: finish
+        });
+      } else finish();
     }
 
     function showSubmenu(trigger) {
@@ -4108,7 +4129,15 @@ function mobileNavigation() {
       $(trigger).attr("aria-expanded", "true");
       submenu.inert = false;
       $(submenu).attr("aria-hidden", "false");
-      gsap.set(submenu, { display: "block", autoAlpha: 1, y: 0 });
+      const reveal = menuControls.submenu.reveal;
+      gsap.set(submenu, { display: "block", autoAlpha: 1, y: 0,
+        xPercent: reducedMotion ? 0 : reveal.fromXPercent });
+      if (!reducedMotion) {
+        submenuTween = gsap.to(submenu, {
+          xPercent: 0, duration: reveal.duration, ease: reveal.ease, overwrite: true,
+          onComplete: () => { submenuTween = null; }
+        });
+      }
       submenu.scrollTop = 0;
       submenu.querySelector("[nav-mobile-back]")?.focus({ preventScroll: true });
     }
