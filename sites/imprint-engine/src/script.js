@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), articleListing(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionSplitCards(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), articleListing(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionSplitCards(), accordionImageCards(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientAnimations(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
@@ -5520,6 +5520,34 @@ function accordionSplitCards() {
       if (filled) count += 1;
     });
     $grid.attr("data-card-count", count).prop("hidden", Boolean(singleImage) || count === 0);
+    cleanups.push(restore);
+  });
+  return () => cleanups.forEach((cleanup) => cleanup());
+}
+
+function accordionImageCards() {
+  const $panels = $("[accord-gallery-panel]");
+  if (!$panels.length) return null;
+  const cleanups = [];
+  $panels.each(function () {
+    const $panel = $(this);
+    const $gallery = $panel.children("[accord-gallery]");
+    const $single = $panel.children("[accord-gallery-single]");
+    const $cards = $gallery.children("[accord-gallery-card]");
+    if (!$gallery.length || !$single.length || !$cards.length) return;
+    const override = $panel.children("[accord-gallery-override]")[0];
+    // Webflow binds the separate override image to Use Single Image.
+    const singleOverride = Boolean(override && !override.classList.contains("w-condition-invisible") && !override.hidden);
+    const restore = rememberAttributes($gallery.add($single).add($cards), ["hidden"]);
+    let count = 0;
+    $cards.each(function (index) {
+      // The first image is always available; optional cards are enabled by their heading.
+      const filled = index === 0 || Boolean($(this).find("[accord-gallery-heading]").text().trim());
+      this.hidden = !filled;
+      if (filled) count += 1;
+    });
+    $gallery.prop("hidden", singleOverride || count === 1);
+    $single.prop("hidden", singleOverride || count > 1);
     cleanups.push(restore);
   });
   return () => cleanups.forEach((cleanup) => cleanup());

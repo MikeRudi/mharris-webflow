@@ -17,8 +17,19 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- Accordion 01 – Single and Split now share the same one/two/three-image behavior.
+  Each Item group has Card 1, Card 2, and Card 3 Heading/Paragraph/Image props.
+  Use Single Image replaces the cards with the separate Single Image prop.
+  With that toggle off and Card 2/3 Heading blank, only Card 1's full-width image shows.
+  Filling either optional heading enables that card and the split layout. Native
+  Webflow flex styles give two or three equal columns, stacked from tablet down.
+  Existing component identities and prop IDs are retained. `accordionImageCards()`
+  handles only visibility through `accord-gallery-panel`, `accord-gallery`,
+  `accord-gallery-card`, `accord-gallery-heading`, `accord-gallery-single`,
+  and `accord-gallery-override`.
+
 - Accordion 01 – Split 6 has six Card Heading/Image pairs plus Use Single Image
-  and Image in each Item group. Item 4 retains its existing image/default mode.
+  and Single Image in each Item group. Item 4 retains its existing image/default mode.
   A blank card heading removes that card; desktop counts 2/3 use one equal-width
   row, 4 uses two columns/two rows, and 6 keeps three columns/two rows. Tablet and
   phones retain the native two-column layout. Native Webflow owns card styling,
