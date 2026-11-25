@@ -47,7 +47,7 @@ const onMobile = (fn) => gsap.matchMedia().add("(max-width: 991px)", fn);
 function initSite() {
   if (isWebflowEditor()) return null;
   if (initSite.cleanup) initSite.cleanup();
-  const cleanups = [initLenis(), articleListing(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionSplitCards(), accordionImageCards(), accordionOne(), filterOne(),
+  const cleanups = [initLenis(), articleListing(), customProducts(), careerBenefits(), careerOpenings(), productUpdates(), featureComparison(), featureDetails(), navTheme(), navigationDropdowns(), navigationSearch(), accordionLabels(), accordionSplitCards(), accordionImageCards(), accordionOne(), filterOne(),
     catalogueAnimation(), homeFaqAnimation(), homeBackgroundMotion(), gradientBreathOne(), gradientAnimations(),
     compareDropAnimation(), compareGradientAnimation(), dropTextAnimation(), homeOutroAnimation(), testimonialEnvelopeAnimation(), flexGrowAnimation(), shopSlider(), videoPopupAnimation()];
 
@@ -5500,6 +5500,23 @@ function homeFaqAnimation() {
   return () => cleanups.forEach(cleanup => cleanup());
 }
 
+function accordionLabels() {
+  const cleanups = [];
+  $("[accord-label-filter]").each(function () {
+    const wrap = this, $wrap = $(wrap);
+    const $items = $wrap.find("[accord-item]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
+    const $panels = $wrap.find("[accord-reveal]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
+    cleanups.push(rememberAttributes($items.add($panels), ["hidden"]));
+    $items.each(function () {
+      const item = this.getAttribute("accord-item");
+      const blank = !$(this).find("[accord-label]").text().trim();
+      this.hidden = blank;
+      $panels.filter((_, panel) => panel.getAttribute("accord-reveal") === item).prop("hidden", blank);
+    });
+  });
+  return () => cleanups.forEach((cleanup) => cleanup());
+}
+
 function accordionSplitCards() {
   const $panels = $("[accord-split-panel]");
   if (!$panels.length) return null;
@@ -5573,12 +5590,13 @@ function accordionOne() {
   });
   $wraps.each(function (wrapIndex) {
     const wrap = this, $wrap = $(wrap);
-    const $items = $wrap.find("[accord-item]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
-    const $panels = $wrap.find("[accord-reveal]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
+    const $allItems = $wrap.find("[accord-item]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
+    const $items = $allItems.filter((_, element) => !element.hidden);
+    const $panels = $wrap.find("[accord-reveal]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap && !element.hidden);
     if (!$items.length) return;
     const $labels = $items.find("[accord-1-title]");
     const restoreLabels = rememberAttributes($labels, ["class"]);
-    const $marker = $items.find("[active-marker]").first();
+    const $marker = $allItems.find("[active-marker]").first();
     const marker = $marker[0], markerParent = marker && marker.parentNode, markerNext = marker && marker.nextSibling;
     const restoreItems = rememberAttributes($items, ["class", "aria-expanded", "aria-controls"]);
     const restorePanels = rememberAttributes($panels, ["id", "class", "style", "aria-hidden", "inert"]);

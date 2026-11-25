@@ -17,6 +17,10 @@ Use pinned jsDelivr releases when switching to stable production code.
 
 ## Notes
 
+- All three Accordion 01 components have ten Item groups. A blank Label hides
+  that item's selector and reveal on the published site through `accordionLabels()`.
+  New items start with empty content. No separate Show Item toggle is needed.
+
 - Accordion 01 – Single and Split now share the same one/two/three-image behavior.
   Each Item group has Card 1, Card 2, and Card 3 Heading/Paragraph/Image props.
   Use Single Image replaces the cards with the separate Single Image prop.
