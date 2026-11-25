@@ -28,7 +28,10 @@ function normalizeProject(project) {
 
 const $ = selector => document.querySelector(selector);
 const readOnly = document.documentElement.dataset.readOnly === 'true';
+const sharedChecklist = document.documentElement.dataset.sharedChecklist === 'true';
 let project, editingId = null, saveQueue = Promise.resolve(), pending = 0, todoSaveTimer = null;
+let sharedReady = false, sharedRevision = -1, sharedRequest = 0, sharedRefreshing = false;
+const sharedPending = new Map();
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const safeUrl = value => { try { const u = new URL(value); return ['http:', 'https:'].includes(u.protocol) ? u.href : ''; } catch { return ''; } };
 
@@ -77,6 +80,77 @@ async function loadProject(id) {
   setSaveStatus(readOnly ? '' : 'All changes saved locally');
   localStorage.setItem('michael-webdev-project', id);
   render();
+  if (sharedChecklist) await refreshSharedChecklist();
+}
+
+function syncSharedInputs() {
+  for (const input of document.querySelectorAll('#page-list [data-field]')) {
+    const page = project.pages.find(item => item.id === input.dataset.id);
+    input.checked = page[input.dataset.field];
+    input.disabled = !sharedReady || sharedPending.has(`${page.id}:${input.dataset.field}`);
+  }
+}
+
+function applySharedState(state) {
+  if (state.revision < sharedRevision) return;
+  sharedRevision = state.revision;
+  for (const page of project.pages) {
+    for (const [field] of workflowFields) {
+      if (!sharedPending.has(`${page.id}:${field}`) && typeof state.pages[page.id]?.[field] === 'boolean') {
+        page[field] = state.pages[page.id][field];
+      }
+    }
+  }
+}
+
+async function sharedRequestJSON(init) {
+  return request('/api/checklist', { cache: 'no-store', signal: AbortSignal.timeout(15000), ...init });
+}
+
+async function refreshSharedChecklist() {
+  if (!project || pending || sharedRefreshing || document.hidden) return;
+  sharedRefreshing = true;
+  const version = sharedRequest;
+  if (!sharedReady) setSaveStatus('Loading shared checklist…');
+  try {
+    const state = await sharedRequestJSON();
+    if (version !== sharedRequest || pending) return;
+    applySharedState(state);
+    sharedReady = true;
+    syncSharedInputs();
+    setSaveStatus('All changes saved');
+  } catch {
+    if (version === sharedRequest && !pending) setSaveStatus('Could not refresh shared checklist. Retrying…', true);
+  } finally { sharedRefreshing = false; }
+}
+
+function saveSharedCheckbox(input) {
+  const page = project.pages.find(item => item.id === input.dataset.id);
+  const field = input.dataset.field, key = `${page.id}:${field}`;
+  if (!sharedReady || sharedPending.has(key)) return;
+  const previous = page[field], value = input.checked;
+  page[field] = value;
+  sharedPending.set(key, value);
+  sharedRequest++;
+  pending++;
+  syncSharedInputs();
+  setSaveStatus('Saving…');
+  saveQueue = saveQueue.then(async () => {
+    try {
+      const state = await sharedRequestJSON({ method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pageId: page.id, field, value }) });
+      sharedPending.delete(key);
+      applySharedState(state);
+      setSaveStatus(pending > 1 ? 'Saving…' : 'All changes saved');
+    } catch {
+      page[field] = previous;
+      sharedPending.delete(key);
+      setSaveStatus('Could not confirm save. Please check your connection and try again.', true);
+    } finally {
+      pending--;
+      syncSharedInputs();
+    }
+  });
 }
 
 function render() {
@@ -96,7 +170,7 @@ function render() {
         <td>${readOnly ? (safeUrl(p.webflowUrl) ? `<a class="page-name" href="${escape(safeUrl(p.webflowUrl))}" target="_blank" rel="noreferrer">${escape(p.name)}</a>` : `<span class="page-name">${escape(p.name)}</span>`) : `<button class="page-name" data-page="${escape(p.id)}">${escape(p.name)}</button>`}
           ${p.webflow === 'removed' ? '<span class="type-tag">Removed</span>' : p.kind && !['page', 'collection'].includes(p.kind) ? `<span class="type-tag">${escape(p.kind)}</span>` : ''}
           <div class="page-sub">${escape(p.kind === 'collection' ? '' : p.summary || p.figmaFrame || '')}</div></td>
-        ${workflowFields.map(([field, label]) => `<td class="status-column"><input class="check-control" type="checkbox" ${readOnly ? 'disabled' : ''} data-id="${escape(p.id)}" data-field="${field}" ${p[field] ? 'checked' : ''} aria-label="${escape(p.name)}: ${escape(label)}"></td>`).join('')}
+        ${workflowFields.map(([field, label]) => `<td class="status-column"><input class="check-control" type="checkbox" ${readOnly && (!sharedChecklist || !sharedReady) ? 'disabled' : ''} data-id="${escape(p.id)}" data-field="${field}" ${p[field] ? 'checked' : ''} aria-label="${escape(p.name)}: ${escape(label)}"></td>`).join('')}
         <td>${p.previewFile || p.previewUrl ? `<a class="preview-button" href="${readOnly ? escape(p.previewUrl) : `/api/projects/${encodeURIComponent(project.id)}/pages/${encodeURIComponent(p.id)}/preview`}" target="_blank" rel="noreferrer" aria-label="View ${escape(p.name)} design">View design</a>` : '<span class="muted">—</span>'}</td>
         <td>${safeUrl(p.webflowUrl) ? `<a class="open-link" href="${escape(safeUrl(p.webflowUrl))}" target="_blank" rel="noreferrer" aria-label="Open ${escape(p.name)} in staging">↗</a>` : '<span class="muted">—</span>'}</td>
       </tr>`).join('')}</tbody></table></div></section>`;
@@ -119,14 +193,23 @@ function openDetail(id) {
   $('#detail').showModal();
 }
 
-if (!readOnly) {
-$('#page-list').addEventListener('click', event => { const button = event.target.closest('[data-page]'); if (button) openDetail(button.dataset.page); });
+if (!readOnly || sharedChecklist) {
 $('#page-list').addEventListener('change', async event => {
   const input = event.target.closest('[data-field]'); if (!input) return;
+  if (sharedChecklist) return saveSharedCheckbox(input);
   const page = project.pages.find(p => p.id === input.dataset.id);
   page[input.dataset.field] = input.checked;
   render(); await save().catch(() => {});
 });
+}
+if (sharedChecklist) {
+  setInterval(refreshSharedChecklist, 15000);
+  window.addEventListener('focus', refreshSharedChecklist);
+  window.addEventListener('online', refreshSharedChecklist);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshSharedChecklist(); });
+}
+if (!readOnly) {
+$('#page-list').addEventListener('click', event => { const button = event.target.closest('[data-page]'); if (button) openDetail(button.dataset.page); });
 $('#new-page').addEventListener('click', () => openDetail(null));
 $('#open-typography').addEventListener('click', () => { renderTypography(); $('#typography-dialog').showModal(); });
 $('#close-typography').addEventListener('click', () => $('#typography-dialog').close());

@@ -1,5 +1,11 @@
 {
   "framework": null,
+  "functions": {
+    "api/checklist.js": {
+      "maxDuration": 30,
+      "includeFiles": "project.json"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",

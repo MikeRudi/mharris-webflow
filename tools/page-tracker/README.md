@@ -41,17 +41,19 @@ Resources, Customers and Pages Product names were supplied by Michael on 13 Octo
 The reference Webflow API snapshot is preserved in data/reference/.
 This tool does not modify or publish Webflow.
 
-## View-only Vercel site
+## Shared Vercel checklist
 
 Live URL: https://imprint-engine-tracker.vercel.app/
 Vercel project: `imprint-engine-tracker` (`prj_zPB8ACLEsqDCAW7bn5Z6uB4QTBRy`).
 Connected repository: `MikeRudi/mharris-webflow`, production branch `main`.
 
-The `public/` folder is a static snapshot for colleagues. The next export uses the
-simplified page groups and four disabled status checkboxes, staging links and
-full-resolution, lossless design previews. The currently published snapshot stays
-unchanged until exported and pushed. It has no editing API,
-project creation, to-do list, typography editor or Add page controls.
+The `public/` folder contains the shared tracker. Anyone with its link can change
+Desktop, Mobile, Missing content and Complete. Each click saves one checkbox
+through `/api/checklist` into a private Vercel Blob store. Other open trackers
+refresh every 15 seconds and when brought back into focus. Failed saves show an
+error and revert the optimistic checkbox; no browser-only save is treated as shared.
+Page names, groups, links and design previews still come from the exported snapshot.
+Public visitors cannot edit those details or access the local to-do list.
 
 Local editing remains at `http://127.0.0.1:4318`.
 To update the online snapshot, install this folder's dependencies once, then run
@@ -62,8 +64,19 @@ an existing Sharp installation instead of installing dependencies locally.
 
 Vercel settings: existing GitHub repository, root directory
 `tools/page-tracker/public`, framework Other, no build command, output directory `.`.
-Do not deploy the local server or the complete `data/` folder. Each deployment is a
-snapshot; local status edits reach colleagues after exporting and pushing again.
+Do not deploy the local server or the complete `data/` folder. The public folder's
+package.json installs the Blob SDK for the Vercel Function. The connected private
+store is `imprint-engine-tracker-checklist` (`store_aLB0G41Sp9k4AW4c`); its
+`BLOB_READ_WRITE_TOKEN` belongs only in Vercel environment variables.
+
+The first live request seeds shared checkboxes from project.json. Later exports
+add new pages without replacing existing shared checkbox values. Local editing
+continues to save the separate local JSON; it does not sync checkbox edits to or
+from the live tracker. Use the live URL for the shared checklist.
+Conditional Blob writes merge concurrent edits without losing other checkboxes.
+Preview deployments use a separate state document, protecting production values.
+Run `node --test tools/page-tracker/checklist.test.mjs` from the repository root
+after installing dependencies in `tools/page-tracker/public` to verify persistence.
 
 Figma's Design > Dev page is the current design inventory. Entries marked Removed
 remain in the page list as historical records.

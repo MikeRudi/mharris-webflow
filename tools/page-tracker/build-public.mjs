@@ -50,7 +50,7 @@ const project = {
 await writeFile(path.join(output, 'project.json'), JSON.stringify(project, null, 2) + '\n');
 
 let html = await readFile(path.join(root, 'dist/index.html'), 'utf8');
-html = html.replace('<html lang="en">', '<html lang="en" data-read-only="true">')
+html = html.replace('<html lang="en">', '<html lang="en" data-read-only="true" data-shared-checklist="true">')
   .replace("<title>Michael's Webdev Tracker</title>", '<title>Imprint Engine — Page Tracker</title><meta name="robots" content="noindex,nofollow">')
   .replace(/  <label class="small-label"[\s\S]*?<button class="text-button" id="new-project">[\s\S]*?<\/button>/, '')
   .replace(/<div class="header-actions">[\s\S]*?<\/div>/, '')
@@ -63,6 +63,7 @@ await copyFile(path.join(root, 'workflow.mjs'), path.join(output, 'workflow.mjs'
 await writeFile(path.join(output, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
 await writeFile(path.join(output, 'vercel.json'), JSON.stringify({
   framework: null,
+  functions: { 'api/checklist.js': { maxDuration: 30, includeFiles: 'project.json' } },
   headers: [
     { source: '/(.*)', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] },
     { source: '/project.json', headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }] }
