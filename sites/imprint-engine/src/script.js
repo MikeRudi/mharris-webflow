@@ -5502,14 +5502,17 @@ function homeFaqAnimation() {
 
 function accordionLabels() {
   const cleanups = [];
-  $("[accord-label-filter]").each(function () {
+  $("[accord-wrap]").each(function () {
     const wrap = this, $wrap = $(wrap);
+    if (!$wrap.find("[accord-label]").length) return;
     const $items = $wrap.find("[accord-item]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
     const $panels = $wrap.find("[accord-reveal]").filter((_, element) => $(element).closest("[accord-wrap]")[0] === wrap);
     cleanups.push(rememberAttributes($items.add($panels), ["hidden"]));
     $items.each(function () {
       const item = this.getAttribute("accord-item");
-      const blank = !$(this).find("[accord-label]").text().trim();
+      const $label = $(this).find("[accord-label]");
+      if (!$label.length) return;
+      const blank = !$label.text().trim();
       this.hidden = blank;
       $panels.filter((_, panel) => panel.getAttribute("accord-reveal") === item).prop("hidden", blank);
     });
