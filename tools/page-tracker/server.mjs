@@ -3,7 +3,7 @@ import { readFile, writeFile, readdir, mkdir, copyFile, rename } from 'node:fs/p
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { workflowFields, normalizeProject } from './workflow.mjs';
+import { workflowFields, workflowSchemaVersion, normalizeProject } from './workflow.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(root, 'data');
@@ -63,7 +63,7 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'POST' && url.pathname === '/api/projects') {
       const input = await body(req);
-      const p = { schemaVersion: 3, id: randomUUID(), name: String(input.name || '').trim(), revision: 1, updatedAt: new Date().toISOString(), groups: [{ id: 'general', name: 'General' }], pages: [], notes: '' };
+      const p = { schemaVersion: workflowSchemaVersion, id: randomUUID(), name: String(input.name || '').trim(), revision: 1, updatedAt: new Date().toISOString(), groups: [{ id: 'general', name: 'General' }], pages: [], notes: '' };
       validate(p); await writeFile(projectPath(p.id), JSON.stringify(p, null, 2), { flag: 'wx' });
       return json(res, 201, p);
     }
@@ -73,7 +73,7 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'GET') return json(res, 200, normalizeProject(JSON.parse(await readFile(file, 'utf8'))));
       if (req.method === 'PUT') {
         const input = await body(req);
-        if (input.schemaVersion !== 3) throw Error('The tracker has been updated. Refresh this page before editing.');
+        if (input.schemaVersion !== workflowSchemaVersion) throw Error('The tracker has been updated. Refresh this page before editing.');
         const p = normalizeProject(input); validate(p);
         if (p.id !== match[1]) throw Error('Project ID mismatch.');
         const job = writes.then(async () => {

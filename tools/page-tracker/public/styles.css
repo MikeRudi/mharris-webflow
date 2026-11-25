@@ -90,8 +90,8 @@ table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 th { padding: 15px 16px; text-align: left; font-size: 12px; font-weight: 400; line-height: 1.4; letter-spacing: .025em; text-transform: uppercase; }
 td { padding: 15px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
 .page-table { min-width: 780px; }
-.page-table th:first-child { width: 35%; }
-.page-table .status-column { width: 11%; padding-left: 6px; padding-right: 6px; text-align: center; }
+.page-table th:first-child { width: 34%; }
+.page-table .status-column { width: 9%; padding-left: 6px; padding-right: 6px; text-align: center; }
 .page-table .design-column { width: 14%; }
 .page-table .link-column { width: 7%; }
 .page-name { border: 0; padding: 0; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; }

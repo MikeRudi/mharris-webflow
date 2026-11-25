@@ -1,17 +1,18 @@
 /* BEGIN WORKFLOW */
+const workflowSchemaVersion = 4;
+
 const workflowFields = [
-  ['desktop', 'Desktop'],
-  ['mobile', 'Mobile'],
-  ['missingContent', 'Missing content'],
+  ['desktop', 'Dev Desktop'],
+  ['mobile', 'Dev Mobile'],
+  ['monti', 'Monti'],
+  ['scott', 'Scott'],
   ['complete', 'Complete'],
 ];
 
-// Existing approvals carry across; new checkboxes never infer approval.
+// Approvals are explicit checkbox values, never inferred from historical status.
 function normalizePage(page) {
-  page.desktop ??= false;
-  page.mobile ??= false;
-  page.missingContent ??= page.awaitingContent ?? page.status === 'awaiting-content';
-  page.complete = Boolean(page.complete ?? page.status === 'complete') || page.clientsHands === true;
+  for (const [field] of workflowFields) page[field] ??= false;
+  delete page.missingContent;
   delete page.designReady;
   delete page.workingInWebflow;
   delete page.awaitingContent;
@@ -21,7 +22,7 @@ function normalizePage(page) {
 
 function normalizeProject(project) {
   project.pages.forEach(normalizePage);
-  project.schemaVersion = 3;
+  project.schemaVersion = workflowSchemaVersion;
   return project;
 }
 /* END WORKFLOW */
@@ -92,6 +93,7 @@ function syncSharedInputs() {
 }
 
 function applySharedState(state) {
+  if (state.schemaVersion !== workflowSchemaVersion) throw Error('Refresh the tracker to load the updated columns.');
   if (state.revision < sharedRevision) return;
   sharedRevision = state.revision;
   for (const page of project.pages) {
@@ -138,7 +140,7 @@ function saveSharedCheckbox(input) {
   saveQueue = saveQueue.then(async () => {
     try {
       const state = await sharedRequestJSON({ method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pageId: page.id, field, value }) });
+        headers: { 'Content-Type': 'application/json', 'X-Tracker-Schema': String(workflowSchemaVersion) }, body: JSON.stringify({ pageId: page.id, field, value }) });
       sharedPending.delete(key);
       applySharedState(state);
       setSaveStatus(pending > 1 ? 'Saving…' : 'All changes saved');
@@ -164,15 +166,15 @@ function render() {
       <div class="group-heading"><div><h2>${escape(group.name)}</h2>${group.note ? `<p>${escape(group.note)}</p>` : ''}</div></div>
       <div class="table-wrap"><table class="page-table"><thead><tr>
         <th scope="col">${items.every(p => p.kind === 'collection') ? 'Collection' : 'Page / design'}</th>
-        ${workflowFields.map(([, label]) => `<th scope="col" class="status-column">${escape(label)}</th>`).join('')}
         <th scope="col" class="design-column">Design</th><th scope="col" class="link-column">Link</th>
+        ${workflowFields.map(([, label]) => `<th scope="col" class="status-column">${escape(label)}</th>`).join('')}
       </tr></thead><tbody>${items.map(p => `<tr data-state="${escape(p.webflow || '')}">
         <td>${readOnly ? (safeUrl(p.webflowUrl) ? `<a class="page-name" href="${escape(safeUrl(p.webflowUrl))}" target="_blank" rel="noreferrer">${escape(p.name)}</a>` : `<span class="page-name">${escape(p.name)}</span>`) : `<button class="page-name" data-page="${escape(p.id)}">${escape(p.name)}</button>`}
           ${p.webflow === 'removed' ? '<span class="type-tag">Removed</span>' : p.kind && !['page', 'collection'].includes(p.kind) ? `<span class="type-tag">${escape(p.kind)}</span>` : ''}
           <div class="page-sub">${escape(p.kind === 'collection' ? '' : p.summary || p.figmaFrame || '')}</div></td>
-        ${workflowFields.map(([field, label]) => `<td class="status-column"><input class="check-control" type="checkbox" ${readOnly && (!sharedChecklist || !sharedReady) ? 'disabled' : ''} data-id="${escape(p.id)}" data-field="${field}" ${p[field] ? 'checked' : ''} aria-label="${escape(p.name)}: ${escape(label)}"></td>`).join('')}
         <td>${p.previewFile || p.previewUrl ? `<a class="preview-button" href="${readOnly ? escape(p.previewUrl) : `/api/projects/${encodeURIComponent(project.id)}/pages/${encodeURIComponent(p.id)}/preview`}" target="_blank" rel="noreferrer" aria-label="View ${escape(p.name)} design">View design</a>` : '<span class="muted">—</span>'}</td>
         <td>${safeUrl(p.webflowUrl) ? `<a class="open-link" href="${escape(safeUrl(p.webflowUrl))}" target="_blank" rel="noreferrer" aria-label="Open ${escape(p.name)} in staging">↗</a>` : '<span class="muted">—</span>'}</td>
+        ${workflowFields.map(([field, label]) => `<td class="status-column"><input class="check-control" type="checkbox" ${readOnly && (!sharedChecklist || !sharedReady) ? 'disabled' : ''} data-id="${escape(p.id)}" data-field="${field}" ${p[field] ? 'checked' : ''} aria-label="${escape(p.name)}: ${escape(label)}"></td>`).join('')}
       </tr>`).join('')}</tbody></table></div></section>`;
   }).join('');
 }

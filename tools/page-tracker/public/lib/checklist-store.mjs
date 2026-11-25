@@ -1,4 +1,4 @@
-import { workflowFields } from '../workflow.mjs';
+import { workflowFields, workflowSchemaVersion } from '../workflow.mjs';
 
 const fields = workflowFields.map(([field]) => field);
 
@@ -43,7 +43,7 @@ export function createChecklistStore({ project, read, write, isConflict }) {
   }
 
   function publicState(state) {
-    return { revision: state.revision, updatedAt: state.updatedAt,
+    return { schemaVersion: workflowSchemaVersion, revision: state.revision, updatedAt: state.updatedAt,
       pages: Object.fromEntries(Object.keys(defaults).map(id => [id, state.pages[id]])) };
   }
 

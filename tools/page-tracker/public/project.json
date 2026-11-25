@@ -1,8 +1,8 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "id": "imprint-engine",
   "name": "Imprint Engine",
-  "updatedAt": "2026-11-25T07:08:55.868Z",
+  "updatedAt": "2026-11-25T07:28:01.591Z",
   "groups": [
     {
       "id": "homepage",
@@ -57,7 +57,8 @@
       "figmaFrame": "Website",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/homepage.webp"
     },
@@ -69,7 +70,8 @@
       "webflowUrl": "https://imprint-engine-v2.webflow.io/",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false
     },
     {
@@ -80,7 +82,8 @@
       "webflowUrl": "https://imprint-engine-v2.webflow.io/",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false
     },
     {
@@ -94,7 +97,8 @@
       "figmaFrame": "Retail",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509bc4.webp"
     },
@@ -109,7 +113,8 @@
       "figmaFrame": "Shop By Product / Strategy & Consulting",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509bc2.webp"
     },
@@ -122,7 +127,8 @@
       "status": "complete",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false
     },
     {
@@ -136,7 +142,8 @@
       "figmaFrame": "managed inventory",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509bad.webp"
     },
@@ -151,7 +158,8 @@
       "figmaFrame": "activation & events",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509bac.webp"
     },
@@ -166,7 +174,8 @@
       "figmaFrame": "employee recognition",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509bab.webp"
     },
@@ -181,7 +190,8 @@
       "figmaFrame": "direct mail",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509baa.webp"
     },
@@ -196,7 +206,8 @@
       "figmaFrame": "sales prospecting",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba9.webp"
     },
@@ -211,7 +222,8 @@
       "figmaFrame": "retail merchandising",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba8.webp"
     },
@@ -226,7 +238,8 @@
       "figmaFrame": "customer appreciation",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba7.webp"
     },
@@ -241,7 +254,8 @@
       "figmaFrame": "holiday Giftings",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba6.webp"
     },
@@ -256,7 +270,8 @@
       "figmaFrame": "New Hire Kits",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba5.webp"
     },
@@ -271,7 +286,8 @@
       "figmaFrame": "Online Company Store",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba4.webp"
     },
@@ -286,7 +302,8 @@
       "figmaFrame": "Corporate Events",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba3.webp"
     },
@@ -301,7 +318,8 @@
       "figmaFrame": "Promo Products",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba2.webp"
     },
@@ -316,7 +334,8 @@
       "figmaFrame": "Corporate Gifting",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba1.webp"
     },
@@ -331,7 +350,8 @@
       "figmaFrame": "Frame 2147236664",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509ba0.webp"
     },
@@ -346,7 +366,8 @@
       "figmaFrame": "professional services",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b9f.webp"
     },
@@ -361,7 +382,8 @@
       "figmaFrame": "construction & engineering",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b9e.webp"
     },
@@ -376,7 +398,8 @@
       "figmaFrame": "events & entertainment",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b9d.webp"
     },
@@ -391,7 +414,8 @@
       "figmaFrame": "Hospitality",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b9c.webp"
     },
@@ -406,7 +430,8 @@
       "figmaFrame": "Healthcare & Life sciences",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b9b.webp"
     },
@@ -421,7 +446,8 @@
       "figmaFrame": "Technology",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b9a.webp"
     },
@@ -436,7 +462,8 @@
       "figmaFrame": "Technology",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b99.webp"
     },
@@ -451,7 +478,8 @@
       "figmaFrame": "Frame 2147236659",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b87.webp"
     },
@@ -466,7 +494,8 @@
       "figmaFrame": "Procurement",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b86.webp"
     },
@@ -481,7 +510,8 @@
       "figmaFrame": "Sales",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b68.webp"
     },
@@ -496,7 +526,8 @@
       "figmaFrame": "Events",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b67.webp"
     },
@@ -511,7 +542,8 @@
       "figmaFrame": "Marketing",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b66.webp"
     },
@@ -526,7 +558,8 @@
       "figmaFrame": "People Manager",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b65.webp"
     },
@@ -541,7 +574,8 @@
       "figmaFrame": "Shop by Team",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b61.webp"
     },
@@ -556,7 +590,8 @@
       "figmaFrame": "Shop By Product / Videography",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b60.webp"
     },
@@ -571,7 +606,8 @@
       "figmaFrame": "Shop By Product / Photographyn",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b5f.webp"
     },
@@ -586,7 +622,8 @@
       "figmaFrame": "Shop By Product / Custom product design",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b5e.webp"
     },
@@ -601,7 +638,8 @@
       "figmaFrame": "Shop By Product / Brand Design",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b5d.webp"
     },
@@ -614,7 +652,8 @@
       "status": "complete",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false
     },
     {
@@ -628,7 +667,8 @@
       "figmaFrame": "Shop By Product / Packaging",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b5a.webp"
     },
@@ -643,7 +683,8 @@
       "figmaFrame": "Shop By Product / Print",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b59.webp"
     },
@@ -658,7 +699,8 @@
       "figmaFrame": "Shop By Product / Signage",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b58.webp"
     },
@@ -673,7 +715,8 @@
       "figmaFrame": "Shop By Product / Events",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b57.webp"
     },
@@ -688,7 +731,8 @@
       "figmaFrame": "Custom Products Page",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b56.webp"
     },
@@ -703,7 +747,8 @@
       "figmaFrame": "Shop By Product / Kits",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b55.webp"
     },
@@ -718,7 +763,8 @@
       "figmaFrame": "Shop By Product / Merchandise",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b54.webp"
     },
@@ -733,7 +779,8 @@
       "figmaFrame": "Shop By Product / Apparel",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b53.webp"
     },
@@ -748,7 +795,8 @@
       "figmaFrame": "Shop By Product",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/6abbde0cb7e6f39d52509b4e.webp"
     },
@@ -763,7 +811,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/company-0.webp"
     },
@@ -778,7 +827,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/company-1.webp"
     },
@@ -793,7 +843,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/company-2.webp"
     },
@@ -807,7 +858,8 @@
       "figmaFrame": "Company sitemap",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false
     },
     {
@@ -821,7 +873,8 @@
       "figmaFrame": "Careers",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/company-4.webp"
     },
@@ -836,7 +889,8 @@
       "figmaFrame": "Blog",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/company-5.webp"
     },
@@ -851,7 +905,8 @@
       "figmaFrame": "blog",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/company-6.webp"
     },
@@ -866,7 +921,8 @@
       "figmaFrame": "features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/company-7.webp"
     },
@@ -881,7 +937,8 @@
       "figmaFrame": "Support",
       "desktop": false,
       "mobile": false,
-      "missingContent": true,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/resources-support.webp"
     },
@@ -896,7 +953,8 @@
       "figmaFrame": "Image file guidelines existing copy",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/resources-image-file-guidelines.webp"
     },
@@ -911,7 +969,8 @@
       "figmaFrame": "Translate Digital to Print",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/resources-translate-digital-to-print.webp"
     },
@@ -926,7 +985,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/resources-iex-rebate-calculator.webp"
     },
@@ -941,7 +1001,8 @@
       "figmaFrame": "blog",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/customers-success-stories-single-story.webp"
     },
@@ -956,7 +1017,8 @@
       "figmaFrame": "Success Stories",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/customers-success-stories.webp"
     },
@@ -971,7 +1033,8 @@
       "figmaFrame": "Wall of Love",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/customers-wall-of-love.webp"
     },
@@ -986,7 +1049,8 @@
       "figmaFrame": "IEX",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-iex-overview-page.webp"
     },
@@ -1001,7 +1065,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-iex-gifting-marketplace.webp"
     },
@@ -1016,7 +1081,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-iex-stores.webp"
     },
@@ -1031,7 +1097,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-iex-portal.webp"
     },
@@ -1046,7 +1113,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-iex-rebate.webp"
     },
@@ -1061,7 +1129,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-security-compliance.webp"
     },
@@ -1076,7 +1145,8 @@
       "figmaFrame": "Features",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-plans-pricing.webp"
     },
@@ -1091,7 +1161,8 @@
       "figmaFrame": "Integrations",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-integrations.webp"
     },
@@ -1106,7 +1177,8 @@
       "figmaFrame": "Updates",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-updates.webp"
     },
@@ -1121,7 +1193,8 @@
       "figmaFrame": "Academy",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/pages-product-academy.webp"
     },
@@ -1136,7 +1209,8 @@
       "figmaFrame": "Frame 2147236658",
       "desktop": false,
       "mobile": false,
-      "missingContent": false,
+      "monti": false,
+      "scott": false,
       "complete": false,
       "previewUrl": "/designs/solutions-service-overview.webp"
     }

@@ -1,12 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import { get, put, BlobPreconditionFailedError } from '@vercel/blob';
 import { ChecklistError, createChecklistStore } from '../lib/checklist-store.mjs';
+import { workflowSchemaVersion } from '../workflow.mjs';
 
 let store;
 async function getStore() {
   if (store) return store;
   const project = JSON.parse(await readFile(new URL('../project.json', import.meta.url), 'utf8'));
-  const pathname = `checklists/${process.env.VERCEL_ENV === 'preview' ? 'preview-' : ''}imprint-engine-v1.json`;
+  // Michael requested an unchecked starting point for the five-column workflow.
+  // Keep v1 as a backup; later deployments continue using this same v2 document.
+  const pathname = `checklists/${process.env.VERCEL_ENV === 'preview' ? 'preview-' : ''}imprint-engine-v2.json`;
   // Credentials stay in the Function. Private reads bypass Blob's CDN cache.
   const options = { access: 'private', token: process.env.BLOB_READ_WRITE_TOKEN };
   store = createChecklistStore({
@@ -56,6 +59,9 @@ export default async function handler(req, res) {
       }
       if (Number(req.headers['content-length']) > 1024 || JSON.stringify(req.body || '').length > 1024) {
         throw new ChecklistError('Checkbox change is too large.', 413);
+      }
+      if (req.headers['x-tracker-schema'] !== String(workflowSchemaVersion)) {
+        throw new ChecklistError('The tracker columns changed. Refresh this page before editing.', 409);
       }
     }
     const checklist = await getStore();

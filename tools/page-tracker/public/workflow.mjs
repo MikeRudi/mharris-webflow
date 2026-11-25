@@ -1,16 +1,17 @@
+export const workflowSchemaVersion = 4;
+
 export const workflowFields = [
-  ['desktop', 'Desktop'],
-  ['mobile', 'Mobile'],
-  ['missingContent', 'Missing content'],
+  ['desktop', 'Dev Desktop'],
+  ['mobile', 'Dev Mobile'],
+  ['monti', 'Monti'],
+  ['scott', 'Scott'],
   ['complete', 'Complete'],
 ];
 
-// Existing approvals carry across; new checkboxes never infer approval.
+// Approvals are explicit checkbox values, never inferred from historical status.
 export function normalizePage(page) {
-  page.desktop ??= false;
-  page.mobile ??= false;
-  page.missingContent ??= page.awaitingContent ?? page.status === 'awaiting-content';
-  page.complete = Boolean(page.complete ?? page.status === 'complete') || page.clientsHands === true;
+  for (const [field] of workflowFields) page[field] ??= false;
+  delete page.missingContent;
   delete page.designReady;
   delete page.workingInWebflow;
   delete page.awaitingContent;
@@ -20,6 +21,6 @@ export function normalizePage(page) {
 
 export function normalizeProject(project) {
   project.pages.forEach(normalizePage);
-  project.schemaVersion = 3;
+  project.schemaVersion = workflowSchemaVersion;
   return project;
 }

@@ -17,26 +17,29 @@ Use **Typography** beside **Add page** for the project's saved class sizes, line
 heights, letter spacing and font weights. Imprint Engine's values were imported
 from its saved desktop typography text file and live in the project JSON's
 `typography` field. Heading sizes use a 1440px viewport and 16px root reference.
-Each page has four independent checkboxes: **Desktop**, **Mobile**, **Missing content**,
-and **Complete**. They appear in the table and page dialog and save automatically
+Each page has five independent checkboxes: **Dev Desktop**, **Dev Mobile**, **Monti**,
+**Scott**, and **Complete**. Design and Link sit immediately after Page / design. They appear in the table and page dialog and save automatically
 in the project JSON. Design previews and staging links remain beside them.
 All page groups appear in one full-width list, without a sidebar, filters or totals.
 Navigation, CMS collections and References and their records were removed from
 the local Imprint Engine tracker on 24 November 2026.
 Only Michael's explicit final confirmation authorizes checking Complete, Desktop or Mobile.
 Implementation, testing and publishing alone do not count as approval.
-The checkbox fields are `desktop`, `mobile`, `missingContent`, and `complete`.
+The checkbox fields are `desktop`, `mobile`, `monti`, `scott`, and `complete`.
 These are the current workflow values;
 the old `status` and `webflow` fields remain as historical metadata, including
 Removed entries. Do not use the old status fields for new updates.
-`workflow.mjs` migrates Awaiting content to Missing content and Client’s hands to
-Complete, preserving existing Complete approvals. It removes the obsolete checkbox
-fields. Schema version 3 prevents older browser windows from saving the old format.
+`workflow.mjs` defaults new checkbox values to false and removes obsolete fields.
+Schema version 4 prevents older browser windows from saving the old format.
+Michael requested resetting every checkbox on 25 November 2026. The previous
+local values are backed up in .codex-backups; shared v1 storage is retained, and
+the new workflow uses checklists/imprint-engine-v2.json from its first load onward.
 Imprint Engine's eight desktop to-dos were imported on 13 October 2026, initially unchecked,
 along with unchecked Mobile controls for every existing tracker entry.
 The plain-text snapshot is imprint-page-list.txt; it is not automatically regenerated after edits.
 
-The initial Imprint list is a working inventory. Only Homepage is approved complete.
+The initial Imprint list is a working inventory. The current checklist was reset
+to unchecked at Michael’s request; historical status fields are not approvals.
 Resources, Customers and Pages Product names were supplied by Michael on 13 October 2026.
 The reference Webflow API snapshot is preserved in data/reference/.
 This tool does not modify or publish Webflow.
@@ -48,7 +51,7 @@ Vercel project: `imprint-engine-tracker` (`prj_zPB8ACLEsqDCAW7bn5Z6uB4QTBRy`).
 Connected repository: `MikeRudi/mharris-webflow`, production branch `main`.
 
 The `public/` folder contains the shared tracker. Anyone with its link can change
-Desktop, Mobile, Missing content and Complete. Each click saves one checkbox
+Dev Desktop, Dev Mobile, Monti, Scott and Complete. Each click saves one checkbox
 through `/api/checklist` into a private Vercel Blob store. Other open trackers
 refresh every 15 seconds and when brought back into focus. Failed saves show an
 error and revert the optimistic checkbox; no browser-only save is treated as shared.
