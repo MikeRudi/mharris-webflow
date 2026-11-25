@@ -4045,8 +4045,8 @@ function mobileNavigation() {
   const menuControls = {
     openLabel: "Menu", closeLabel: "Close", focusOnOpen: true, closeIconAngle: 45,
     submenu: {
-      reveal: { fromXPercent: -100, duration: 0.35, ease: "power1.in" },
-      hide: { toXPercent: -100, duration: 0.3, ease: "power1.in" }
+      reveal: { fromXPercent: 100, duration: 0.35, ease: "power1.in" },
+      hide: { toXPercent: 100, duration: 0.3, ease: "power1.in" }
     }
   };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
