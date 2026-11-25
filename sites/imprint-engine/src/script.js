@@ -5556,7 +5556,7 @@ function accordionImageCards() {
     const $cards = $gallery.children("[accord-gallery-card]");
     if (!$gallery.length || !$single.length || !$cards.length) return;
     // This wrapper always uses Single Image; card images never supply the single layout.
-    const singleOverride = $single.attr("accord-use-single") === "true";
+    const singleOverride = String($single.attr("accord-use-single")).toLowerCase() === "true";
     const restore = rememberAttributes($gallery.add($single).add($cards), ["hidden"]);
     let count = 0;
     $cards.each(function (index) {
