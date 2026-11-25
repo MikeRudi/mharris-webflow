@@ -94,7 +94,7 @@ td { padding: 15px 16px; border-top: 1px solid var(--line); vertical-align: midd
 .page-table .status-column { width: 9%; padding-left: 6px; padding-right: 6px; text-align: center; }
 .page-table .design-column { width: 14%; }
 .page-table .link-column { width: 7%; }
-.page-name { border: 0; padding: 0; text-align: left; font-size: 24px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.page-name { border: 0; padding: 0; text-align: left; font-size: 18px; font-weight: 600; letter-spacing: 0; text-transform: uppercase; }
 a.page-name { text-decoration: none; }
 .page-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .page-sub { margin-top: 4px; overflow: hidden; font-size: 11px; font-weight: 400; white-space: nowrap; text-overflow: ellipsis; }
