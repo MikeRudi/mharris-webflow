@@ -5552,12 +5552,11 @@ function accordionImageCards() {
   $panels.each(function () {
     const $panel = $(this);
     const $gallery = $panel.children("[accord-gallery]");
-    const $single = $panel.children("[accord-gallery-single]");
+    const $single = $panel.children("[accord-gallery-override]");
     const $cards = $gallery.children("[accord-gallery-card]");
     if (!$gallery.length || !$single.length || !$cards.length) return;
-    const override = $panel.children("[accord-gallery-override]")[0];
-    // Webflow binds the separate override image to Use Single Image.
-    const singleOverride = Boolean(override && !override.classList.contains("w-condition-invisible") && !override.hidden);
+    // This wrapper always uses Single Image; card images never supply the single layout.
+    const singleOverride = $single.attr("accord-use-single") === "true";
     const restore = rememberAttributes($gallery.add($single).add($cards), ["hidden"]);
     let count = 0;
     $cards.each(function (index) {
@@ -5566,8 +5565,9 @@ function accordionImageCards() {
       this.hidden = !filled;
       if (filled) count += 1;
     });
-    $gallery.prop("hidden", singleOverride || count === 1);
-    $single.prop("hidden", singleOverride || count > 1);
+    const showSingle = singleOverride || count < 2;
+    $gallery.prop("hidden", showSingle);
+    $single.prop("hidden", !showSingle);
     cleanups.push(restore);
   });
   return () => cleanups.forEach((cleanup) => cleanup());
