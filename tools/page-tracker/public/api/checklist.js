@@ -12,7 +12,8 @@ async function getStore() {
   store = createChecklistStore({
     project,
     async read() {
-      const result = await get(pathname, { ...options, useCache: false });
+      // Compression produces a weak ETag, which cannot be used for conditional writes.
+      const result = await get(pathname, { ...options, useCache: false, headers: { 'accept-encoding': 'identity' } });
       if (!result) return null;
       return { state: await new Response(result.stream).json(), etag: result.blob.etag };
     },
