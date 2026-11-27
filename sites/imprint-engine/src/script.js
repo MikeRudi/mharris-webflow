@@ -4305,6 +4305,7 @@ function navTheme() {
     element,
     mode: $(element).is("[nav-light]") ? "nav-light" : "nav-dark",
   }));
+  const triggers = [];
 
   function setNavMode(mode) {
     if (currentMode === mode) return;
@@ -4316,9 +4317,14 @@ function navTheme() {
 
   function syncNavMode() {
     let mode = initialMode;
+    let latestStart = -Infinity;
+    const scroll = Math.max(0, window.scrollY);
 
+    // Positioned sections can appear in a different order from their DOM nodes.
     sections.forEach((section, index) => {
-      if (window.scrollY >= triggers[index].start) {
+      const start = triggers[index]?.start;
+      if (scroll >= start && start >= latestStart) {
+        latestStart = start;
         mode = section.mode;
       }
     });
@@ -4326,16 +4332,15 @@ function navTheme() {
     setNavMode(mode);
   }
 
-  const triggers = sections.map((section, index) =>
-    ScrollTrigger.create({
+  sections.forEach((section) => {
+    triggers.push(ScrollTrigger.create({
       trigger: section.element,
       start: navControls.start,
-      onEnter: () => setNavMode(section.mode),
-      onLeaveBack: () =>
-        setNavMode(index > 0 ? sections[index - 1].mode : initialMode),
+      onEnter: syncNavMode,
+      onLeaveBack: syncNavMode,
       invalidateOnRefresh: true,
-    })
-  );
+    }));
+  });
 
   ScrollTrigger.addEventListener("refresh", syncNavMode);
   syncNavMode();
